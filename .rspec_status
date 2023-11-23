@@ -1,0 +1,6 @@
+example_id                                                 | status | run_time        |
+---------------------------------------------------------- | ------ | --------------- |
+./spec/dna/engine/import/document_to_hash_spec.rb[1:1:1:1] | passed | 0.00053 seconds |
+./spec/dna/engine/import/document_to_hash_spec.rb[1:1:2:1] | passed | 0.0011 seconds  |
+./spec/dna/engine/import/document_to_hash_spec.rb[1:1:3:1] | passed | 0.00012 seconds |
+./spec/dna_spec.rb[1:1]                                    | passed | 0.00052 seconds |
