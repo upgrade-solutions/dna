@@ -1,0 +1,16 @@
+ArticlePublished:
+  Description: Article is marked as published
+  Version: 1.1
+  Properties:
+    Title:
+      Description: The title of a blog post
+      DataType: String
+      MaxLength: 30
+    Published: Boolean
+    DatePublished: Date
+AuthorAdded:
+  Description: Author is added to a blog post
+  Version: 1.0
+  Properties:
+    Name: String
+

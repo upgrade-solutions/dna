@@ -6,10 +6,10 @@ Gem::Specification.new do |spec|
   spec.name = "dna"
   spec.version = DNA::VERSION
   spec.authors = ["timkleier"]
-  spec.email = ["timkleier@gmail.com"]
+  spec.email = ["tim@upgradesolutions.io"]
 
   spec.summary = "The core library for the Declarative Notation for Applications (DNA) project"
-  spec.homepage = "http://timkleier.com"
+  spec.homepage = "https://dna.codes"
   spec.required_ruby_version = ">= 2.6.0"
 
   spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
