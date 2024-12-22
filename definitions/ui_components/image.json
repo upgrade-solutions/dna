@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "title": "Image",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Unique identifier for the image"
+    },
+    "src": {
+      "type": "string",
+      "description": "The source URL of the image"
+    },
+    "alt": {
+      "type": "string",
+      "description": "Alternative text for the image, used for accessibility and as fallback"
+    },
+    "width": {
+      "type": "string",
+      "description": "The width of the image, either in pixels or as a percentage"
+    },
+    "height": {
+      "type": "string",
+      "description": "The height of the image, either in pixels or as a percentage"
+    },
+    "loading": {
+      "type": "string",
+      "enum": ["eager", "lazy"],
+      "description": "Indicates whether the image should load eagerly or lazily"
+    },
+    "fit": {
+      "type": "string",
+      "enum": ["contain", "cover", "fill", "none", "scale-down"],
+      "description": "Specifies how the image should fit within its container"
+    },
+    "onClick": {
+      "type": "object",
+      "description": "Callback function triggered when the image is clicked"
+    },
+    "caption": {
+      "type": "string",
+      "description": "Optional caption text to display with the image"
+    }
+  }
+}

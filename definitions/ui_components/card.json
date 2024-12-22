@@ -1,0 +1,68 @@
+{
+  "type": "object",
+  "title": "Card",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Unique identifier for the card"
+    },
+    "title": {
+      "type": "string",
+      "description": "The title displayed at the top of the card"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "An optional subtitle or description under the title"
+    },
+    "content": {
+      "type": "string",
+      "description": "The main content of the card, can include text, images, or other components"
+    },
+    "footer": {
+      "type": "string",
+      "description": "Optional footer content displayed at the bottom of the card"
+    },
+    "image": {
+      "$ref": "./image.json"
+    },
+    "actions": {
+      "type": "array",
+      "description": "A list of action buttons or links for the card",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Text displayed on the action button"
+          },
+          "action_type": {
+            "type": "string",
+            "enum": ["button", "link"],
+            "description": "Specifies the type of action (button or link)"
+          }
+        }
+      }
+    },
+    "variant": {
+      "type": "string",
+      "enum": ["elevated", "outlined", "flat"],
+      "description": "Specifies the visual style of the card"
+    },
+    "hoverable": {
+      "type": "boolean",
+      "description": "If true, the card changes appearance when hovered"
+    },
+    "clickable": {
+      "type": "boolean",
+      "description": "If true, the card can be clicked to trigger an event"
+    },
+    "onClick": {
+      "type": "object",
+      "description": "Callback function triggered when the card is clicked"
+    },
+    "className": {
+      "type": "string",
+      "description": "Additional CSS class names for custom styling"
+    }
+  }
+}

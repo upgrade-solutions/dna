@@ -1,6 +1,0 @@
-Title:
-  Description: The title of a blog post
-  PropertyType: String
-  StringMaxLength: 30
-Published: Boolean
-DatePublished: Date

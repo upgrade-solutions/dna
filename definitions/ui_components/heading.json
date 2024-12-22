@@ -1,0 +1,36 @@
+{
+  "key": "Heading",
+  "properties": {
+    "level": {
+      "type": "number",
+      "enum": [1, 2, 3, 4, 5, 6],
+      "description": "Specifies the heading level, corresponding to h1 to h6"
+    },
+    "text": {
+      "type": "string",
+      "description": "The text content of the heading"
+    },
+    "align": {
+      "type": "string",
+      "enum": ["left", "center", "right", "justify"],
+      "description": "Specifies the text alignment"
+    },
+    "color": {
+      "type": "string",
+      "description": "The text color, can be a color name, hex, or CSS color value"
+    },
+    "weight": {
+      "type": "string",
+      "enum": ["light", "normal", "bold"],
+      "description": "The font weight of the heading text"
+    },
+    "className": {
+      "type": "string",
+      "description": "Optional CSS class for custom styling"
+    },
+    "onClick": {
+      "type": "object",
+      "description": "Callback function triggered when the heading is clicked"
+    }
+  }
+}

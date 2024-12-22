@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Layout",
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "type": "boolean",
+          "default": true
+        },
+        "height": {
+          "type": "string",
+          "default": "60px"
+        }
+      },
+      "required": ["visible", "height"]
+    },
+    "footer": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "type": "boolean",
+          "default": true
+        },
+        "height": {
+          "type": "string",
+          "default": "40px"
+        }
+      },
+      "required": ["visible", "height"]
+    },
+    "sidebar": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "type": "boolean",
+          "default": true
+        },
+        "width": {
+          "type": "string",
+          "default": "250px"
+        }
+      },
+      "required": ["visible", "width"]
+    },
+    "content": {
+      "type": "object",
+      "properties": {
+        "padding": {
+          "type": "string",
+          "default": "20px"
+        }
+      },
+      "required": ["padding"]
+    }
+  },
+  "required": ["header", "footer", "sidebar", "content"]
+}

@@ -1,0 +1,38 @@
+{
+  "key": "Input",
+  "properties": {
+    "value": {
+      "type": ["string", "number"],
+      "description": "The current value of the input field"
+    },
+    "placeholder": {
+      "type": "string",
+      "description": "Placeholder text displayed when input is empty"
+    },
+    "onChange": {
+      "type": "object",
+      "description": "Callback function for when the input value changes"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["text", "password", "email", "number"],
+      "description": "Specifies the type of input"
+    },
+    "disabled": {
+      "type": "boolean",
+      "description": "Indicates whether the input is disabled"
+    },
+    "error": {
+      "type": "boolean",
+      "description": "Indicates whether the input has an error state"
+    },
+    "helperText": {
+      "type": "string",
+      "description": "Additional text providing context or help for the input"
+    },
+    "label": {
+      "type": "string",
+      "description": "Label text displayed with the input"
+    }
+  }
+}
