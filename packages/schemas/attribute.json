@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/attribute.json",
+  "title": "Attribute Schema",
+  "description": "Defines an attribute — a key-value property that can be attached to resources, API endpoints, UI components, and other entities.",
+  "examples": [
+    {
+      "id": "annual-income",
+      "name": "Annual Income",
+      "key": "annualIncome",
+      "type": "Attribute",
+      "description": "Borrower's verified annual income",
+      "value": 75000,
+      "dataType": "number",
+      "required": true,
+      "validation": {
+        "minimum": 0,
+        "maximum": 10000000
+      },
+      "metadata": {
+        "displayName": "Annual Income ($)",
+        "category": "Financial Information",
+        "order": 1
+      }
+    },
+    {
+      "id": "employment-status",
+      "name": "Employment Status",
+      "key": "employmentStatus",
+      "type": "Attribute",
+      "description": "Current employment status of the borrower",
+      "value": "full-time",
+      "dataType": "string",
+      "required": true,
+      "validation": {
+        "enum": ["full-time", "part-time", "self-employed", "unemployed", "retired"]
+      },
+      "metadata": {
+        "displayName": "Employment Status",
+        "category": "Employment Information",
+        "order": 2
+      }
+    },
+    {
+      "id": "debt-to-income-ratio",
+      "name": "Debt-to-Income Ratio",
+      "key": "debtToIncomeRatio",
+      "type": "Attribute",
+      "description": "Calculated ratio of monthly debt payments to monthly income",
+      "value": 0.32,
+      "dataType": "number",
+      "readonly": true,
+      "validation": {
+        "minimum": 0,
+        "maximum": 1
+      },
+      "metadata": {
+        "displayName": "Debt-to-Income Ratio (%)",
+        "category": "Financial Metrics",
+        "order": 3,
+        "apiOnly": true
+      }
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "required": ["value"],
+      "properties": {
+        "type": {
+          "const": "Attribute"
+        },
+        "value": {
+          "description": "The value of the attribute. Can be of any type.",
+          "oneOf": [
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "boolean" },
+            { "type": "array" },
+            { "type": "object" },
+            { "type": "null" }
+          ]
+        },
+        "dataType": {
+          "type": "string",
+          "description": "Optional type hint for the attribute value (e.g., 'string', 'number', 'boolean', 'date', 'url').",
+          "examples": ["string", "number", "boolean", "date", "url", "email", "phone", "json"]
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Whether this attribute is required in the context where it's used.",
+          "default": false
+        },
+        "readonly": {
+          "type": "boolean",
+          "description": "Whether this attribute is read-only and cannot be modified.",
+          "default": false
+        },
+        "validation": {
+          "type": "object",
+          "description": "Optional validation rules for the attribute value.",
+          "properties": {
+            "pattern": {
+              "type": "string",
+              "description": "Regular expression pattern for string validation."
+            },
+            "minimum": {
+              "type": "number",
+              "description": "Minimum value for numeric attributes."
+            },
+            "maximum": {
+              "type": "number",
+              "description": "Maximum value for numeric attributes."
+            },
+            "minLength": {
+              "type": "integer",
+              "description": "Minimum length for string attributes."
+            },
+            "maxLength": {
+              "type": "integer",
+              "description": "Maximum length for string attributes."
+            },
+            "enum": {
+              "type": "array",
+              "description": "List of allowed values for the attribute."
+            }
+          },
+          "additionalProperties": false
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Additional metadata about the attribute for API/UI contexts.",
+          "properties": {
+            "displayName": {
+              "type": "string",
+              "description": "Human-readable display name for UI contexts."
+            },
+            "category": {
+              "type": "string",
+              "description": "Category or grouping for organizing attributes."
+            },
+            "order": {
+              "type": "integer",
+              "description": "Display order for UI contexts."
+            },
+            "hidden": {
+              "type": "boolean",
+              "description": "Whether this attribute should be hidden in UI contexts.",
+              "default": false
+            },
+            "apiOnly": {
+              "type": "boolean",
+              "description": "Whether this attribute is only used in API contexts.",
+              "default": false
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  ]
+}

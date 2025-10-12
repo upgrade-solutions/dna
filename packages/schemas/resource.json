@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/resource.json",
+  "title": "Resource Schema",
+  "description": "Defines a resource — a data entity or object acted upon within the DNA model.",
+  "examples": [
+    {
+      "id": "loan-app-12345",
+      "name": "Personal Loan Application",
+      "key": "personalLoanApplication",
+      "type": "Resource",
+      "description": "A loan application submitted by a borrower",
+      "actions": [
+        {
+          "id": "submit-application",
+          "name": "Submit Loan Application",
+          "key": "submitLoanApplication",
+          "type": "Action"
+        },
+        {
+          "id": "review-application",
+          "name": "Review Loan Application",
+          "key": "reviewLoanApplication",
+          "type": "Action"
+        },
+        {
+          "id": "approve-loan",
+          "name": "Approve Loan",
+          "key": "approveLoan",
+          "type": "Action"
+        }
+      ],
+      "attributes": [
+        {
+          "id": "loan-amount",
+          "name": "Loan Amount",
+          "key": "loanAmount",
+          "type": "Attribute",
+          "value": 25000,
+          "dataType": "number"
+        },
+        {
+          "id": "loan-purpose",
+          "name": "Loan Purpose",
+          "key": "loanPurpose",
+          "type": "Attribute",
+          "value": "debt consolidation",
+          "dataType": "string"
+        }
+      ]
+    },
+    {
+      "id": "credit-report-001",
+      "name": "Credit Report",
+      "key": "creditReport",
+      "type": "Resource",
+      "description": "Credit report containing borrower's credit history and score",
+      "actions": [
+        {
+          "id": "check-credit-score",
+          "name": "Check Credit Score",
+          "key": "checkCreditScore",
+          "type": "Action"
+        }
+      ],
+      "attributes": [
+        {
+          "id": "credit-score",
+          "name": "Credit Score",
+          "key": "creditScore",
+          "type": "Attribute",
+          "value": 720,
+          "dataType": "number"
+        }
+      ]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "properties": {
+        "type": {
+          "const": "Resource"
+        },
+        "attributes": {
+          "type": "array",
+          "description": "Resource-specific attributes.",
+          "items": {
+            "$ref": "https://dna.codes/schemas/attribute.json"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "description": "Resource-specific actions.",
+          "items": {
+            "$ref": "https://dna.codes/schemas/action.json"
+          }
+        }
+      }
+    }
+  ]
+}

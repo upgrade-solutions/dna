@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/workflow.json",
+  "title": "Workflow Schema",
+  "description": "Defines a workflow — a sequence of actions performed by actors on resources.",
+  "examples": [
+    {
+      "id": "loan-approval-workflow",
+      "name": "Loan Application Approval Process",
+      "key": "loanApprovalWorkflow",
+      "type": "Workflow",
+      "description": "Complete workflow for processing and approving a loan application",
+      "steps": [
+        {
+          "id": "step-1",
+          "name": "Submit Application",
+          "actor": "borrower-001",
+          "action": "submit-application",
+          "resource": "loan-app-12345"
+        },
+        {
+          "id": "step-2",
+          "name": "Initial Review",
+          "actor": "loan-officer-role",
+          "action": "review-application",
+          "resource": "loan-app-12345",
+          "conditions": ["application-complete"]
+        },
+        {
+          "id": "step-3",
+          "name": "Credit Check",
+          "actor": "credit-bureau-system",
+          "action": "check-credit-score",
+          "resource": "credit-report-001",
+          "parallel": true
+        },
+        {
+          "id": "step-4",
+          "name": "Income Verification",
+          "actor": "loan-officer-role",
+          "action": "verify-income",
+          "resource": "income-documents",
+          "parallel": true
+        },
+        {
+          "id": "step-5",
+          "name": "Automated Underwriting",
+          "actor": "underwriting-agent",
+          "action": "evaluate-risk",
+          "resource": "loan-app-12345",
+          "conditions": ["credit-check-complete", "income-verified"]
+        },
+        {
+          "id": "step-6",
+          "name": "Final Approval",
+          "actor": "loan-officer-role",
+          "action": "approve-loan",
+          "resource": "loan-app-12345",
+          "conditions": ["underwriting-approved"]
+        }
+      ],
+      "triggers": [
+        {
+          "type": "manual",
+          "condition": "borrower-submits-application"
+        },
+        {
+          "type": "scheduled",
+          "condition": "daily-batch-processing"
+        }
+      ],
+      "outputs": [
+        "loan-decision",
+        "approval-letter",
+        "loan-terms"
+      ]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "properties": {
+        "type": {
+          "const": "Workflow"
+        },
+        "steps": {
+          "type": "array",
+          "description": "Ordered list of workflow steps.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for the workflow step."
+              },
+              "name": {
+                "type": "string",
+                "description": "Human-readable name for the step."
+              },
+              "actor": {
+                "type": "string",
+                "description": "Reference to the actor performing this step."
+              },
+              "action": {
+                "type": "string",
+                "description": "Reference to the action being performed."
+              },
+              "resource": {
+                "type": "string",
+                "description": "Reference to the resource being acted upon."
+              },
+              "conditions": {
+                "type": "array",
+                "description": "Conditions that must be met for this step to execute.",
+                "items": { "type": "string" }
+              },
+              "parallel": {
+                "type": "boolean",
+                "description": "Whether this step can be executed in parallel with other steps.",
+                "default": false
+              }
+            },
+            "required": ["id", "name", "actor", "action", "resource"],
+            "additionalProperties": true
+          }
+        },
+        "triggers": {
+          "type": "array",
+          "description": "Events or conditions that can initiate this workflow.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Type of trigger (e.g., 'manual', 'scheduled', 'event')."
+              },
+              "condition": {
+                "type": "string",
+                "description": "Condition or event that activates the trigger."
+              }
+            },
+            "required": ["type"],
+            "additionalProperties": true
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "description": "Expected outputs or results of the workflow execution.",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  ]
+}

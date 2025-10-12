@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/base.json",
+  "title": "Base Schema",
+  "description": "A general base schema for defining any DNA entity, such as an Actor, Action, or Resource.",
+  "type": "object",
+  "required": ["id", "name", "key", "type"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the entity, typically a UUID or semantic key."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name for the entity."
+    },
+    "key": {
+      "type": "string",
+      "description": "Programmatic identifier for the entity, suitable for use in code, APIs, and configuration files.",
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$"
+    },
+    "type": {
+      "type": "string",
+      "description": "The classification or role of this entity (e.g., 'Actor', 'Action', or 'Resource')."
+    },
+    "description": {
+      "type": "string",
+      "description": "A detailed explanation of the purpose or behavior of this entity."
+    },
+    "examples": {
+      "type": "array",
+      "description": "Optional example representations of this resource.",
+      "items": { "type": "object" }
+    }
+  },
+  "additionalProperties": false
+}

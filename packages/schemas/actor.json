@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/actor.json",
+  "title": "Actor Schema",
+  "description": "Defines an actor — a user, role, system, or agent performing actions within the DNA model.",
+  "examples": [
+    {
+      "id": "borrower-001",
+      "name": "Sarah Johnson",
+      "key": "borrower",
+      "type": "Actor::User",
+      "description": "Individual applying for a personal loan"
+    },
+    {
+      "id": "loan-officer-role",
+      "name": "Loan Officer",
+      "key": "loanOfficer",
+      "type": "Actor::Role",
+      "description": "Bank employee responsible for reviewing and approving loan applications"
+    },
+    {
+      "id": "credit-bureau-system",
+      "name": "Credit Bureau API",
+      "key": "creditBureauApi",
+      "type": "Actor::System",
+      "description": "External system providing credit score and history data"
+    },
+    {
+      "id": "underwriting-agent",
+      "name": "Automated Underwriting Agent",
+      "key": "underwritingAgent",
+      "type": "Actor::Agent",
+      "description": "AI agent that evaluates loan applications based on predefined criteria"
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["Actor::User", "Actor::Role", "Actor::System", "Actor::Agent"],
+          "description": "The specific classification of the actor."
+        }
+      },
+      "required": ["type"]
+    }
+  ]
+}

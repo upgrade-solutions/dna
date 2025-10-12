@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/action.json",
+  "title": "Action Schema",
+  "description": "Defines an action — an operation performed by an actor on a resource.",
+  "examples": [
+    {
+      "id": "submit-application",
+      "name": "Submit Loan Application",
+      "key": "submitLoanApplication",
+      "type": "Action",
+      "description": "Borrower submits a completed loan application with required documentation"
+    },
+    {
+      "id": "verify-income",
+      "name": "Verify Income",
+      "key": "verifyIncome",
+      "type": "Action",
+      "description": "Loan officer verifies the borrower's income documentation"
+    },
+    {
+      "id": "check-credit-score",
+      "name": "Check Credit Score",
+      "key": "checkCreditScore",
+      "type": "Action",
+      "description": "System retrieves and analyzes borrower's credit score from credit bureau"
+    },
+    {
+      "id": "approve-loan",
+      "name": "Approve Loan",
+      "key": "approveLoan",
+      "type": "Action",
+      "description": "Loan officer or automated system approves the loan application"
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "properties": {
+        "type": {
+          "const": "Action"
+        }
+      }
+    }
+  ]
+}
