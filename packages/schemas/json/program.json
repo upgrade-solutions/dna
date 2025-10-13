@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/program.json",
+  "title": "Program Schema",
+  "description": "Defines a program — a strategic initiative that coordinates multiple related projects to achieve larger organizational goals.",
+  "examples": [
+    {
+      "id": "digital-transformation-program",
+      "name": "Digital Transformation Initiative",
+      "key": "digitalTransformation",
+      "type": "Program",
+      "description": "Comprehensive program to modernize lending processes through automation and digital channels",
+      "startDate": "2024-01-01",
+      "endDate": "2024-12-31",
+      "status": "active",
+      "budget": 2500000,
+      "projects": [
+        "borrower-portal-enhancement",
+        "automated-underwriting",
+        "risk-assessment-modernization"
+      ],
+      "objectives": [
+        "Reduce loan processing time by 50%",
+        "Improve borrower satisfaction scores",
+        "Increase automation rate to 80%"
+      ],
+      "stakeholders": [
+        {
+          "role": "program-manager",
+          "actor": "john-doe"
+        },
+        {
+          "role": "sponsor",
+          "actor": "cto-role"
+        }
+      ]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Program"
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Program start date"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Program end date"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["planning", "active", "on-hold", "completed", "cancelled"],
+          "description": "Current program status"
+        },
+        "budget": {
+          "type": "number",
+          "description": "Total program budget",
+          "minimum": 0
+        },
+        "projects": {
+          "type": "array",
+          "description": "Projects included in this program",
+          "items": {
+            "type": "string",
+            "description": "Project reference"
+          }
+        },
+        "objectives": {
+          "type": "array",
+          "description": "Strategic objectives this program aims to achieve",
+          "items": {
+            "type": "string"
+          }
+        },
+        "stakeholders": {
+          "type": "array",
+          "description": "Program stakeholders and their roles",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "description": "Stakeholder role in the program"
+              },
+              "actor": {
+                "type": "string",
+                "description": "Reference to the actor"
+              }
+            },
+            "required": ["role", "actor"]
+          }
+        }
+      },
+      "required": ["status", "projects"]
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/solution.json",
+  "title": "Solution Schema",
+  "description": "Defines a solution — a proposed implementation to address opportunities and drive outcomes.",
+  "examples": [
+    {
+      "id": "borrower-dashboard",
+      "name": "Borrower Self-Service Dashboard",
+      "key": "borrowerDashboard",
+      "type": "Solution",
+      "description": "Web-based dashboard allowing borrowers to track application status, upload documents, and manage their loan",
+      "category": "digital-platform",
+      "implementationType": "build",
+      "estimatedCost": 150000,
+      "estimatedDuration": "PT3M",
+      "complexity": "medium",
+      "targetOpportunities": ["improved-borrower-experience"],
+      "expectedOutcomes": ["increased-mrr-outcome", "reduced-churn-outcome"],
+      "affectedWorkflows": ["loan-application-workflow"],
+      "technicalRequirements": [
+        "React frontend application",
+        "REST API integration",
+        "Authentication system",
+        "Document upload capability"
+      ],
+      "dependencies": ["customer-identity-system", "document-storage-service"]
+    },
+    {
+      "id": "automated-verification",
+      "name": "Automated Document Verification",
+      "key": "automatedVerification",
+      "type": "Solution",
+      "description": "AI-powered system to automatically verify income and identity documents",
+      "category": "automation",
+      "implementationType": "build",
+      "estimatedCost": 200000,
+      "complexity": "high",
+      "targetOpportunities": ["improved-borrower-experience"]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Solution"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["digital-platform", "automation", "integration", "process-improvement", "infrastructure", "analytics"],
+          "description": "Category of solution"
+        },
+        "implementationType": {
+          "type": "string",
+          "enum": ["build", "buy", "configure", "integrate", "outsource"],
+          "description": "How this solution will be implemented"
+        },
+        "estimatedCost": {
+          "type": "number",
+          "description": "Estimated implementation cost",
+          "minimum": 0
+        },
+        "estimatedDuration": {
+          "type": "string",
+          "description": "Estimated time to implement (ISO 8601 duration format)",
+          "pattern": "^P(?:\\d+Y)?(?:\\d+M)?(?:\\d+D)?(?:T(?:\\d+H)?(?:\\d+M)?(?:\\d+(?:\\.\\d+)?S)?)?$"
+        },
+        "complexity": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "description": "Implementation complexity level"
+        },
+        "targetOpportunities": {
+          "type": "array",
+          "description": "Opportunities this solution addresses",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expectedOutcomes": {
+          "type": "array",
+          "description": "Outcomes this solution is expected to contribute to",
+          "items": {
+            "type": "string"
+          }
+        },
+        "affectedWorkflows": {
+          "type": "array",
+          "description": "Workflows that will be modified by this solution",
+          "items": {
+            "type": "string"
+          }
+        },
+        "technicalRequirements": {
+          "type": "array",
+          "description": "Technical requirements for implementation",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "description": "Systems or components this solution depends on",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["category", "implementationType"]
+    }
+  ]
+}

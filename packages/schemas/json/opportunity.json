@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/opportunity.json",
+  "title": "Opportunity Schema",
+  "description": "Defines an opportunity — a business improvement area that can drive measurable outcomes.",
+  "examples": [
+    {
+      "id": "improved-borrower-experience",
+      "name": "Improved Borrower Experience",
+      "key": "improvedBorrowerExperience",
+      "type": "Opportunity",
+      "description": "Streamline the loan application process to reduce friction and improve borrower satisfaction",
+      "category": "customer-experience",
+      "priority": "high",
+      "estimatedImpact": "high",
+      "targetOutcomes": ["increased-mrr-outcome", "reduced-churn-outcome"],
+      "proposedSolutions": ["borrower-dashboard", "automated-verification"],
+      "affectedWorkflows": ["loan-application-workflow", "borrower-onboarding-workflow"]
+    },
+    {
+      "id": "better-borrower-engagement",
+      "name": "Better Borrower Engagement",
+      "key": "betterBorrowerEngagement",
+      "type": "Opportunity",
+      "description": "Increase borrower engagement through personalized communication and self-service options",
+      "category": "engagement",
+      "priority": "medium",
+      "estimatedImpact": "medium",
+      "targetOutcomes": ["increased-mrr-outcome"]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Opportunity"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["customer-experience", "operational-efficiency", "cost-reduction", "revenue-growth", "compliance", "engagement", "automation"],
+          "description": "Category of business opportunity"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "Business priority level"
+        },
+        "estimatedImpact": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "description": "Estimated business impact if addressed"
+        },
+        "targetOutcomes": {
+          "type": "array",
+          "description": "Outcomes this opportunity aims to drive",
+          "items": {
+            "type": "string"
+          }
+        },
+        "proposedSolutions": {
+          "type": "array",
+          "description": "Potential solutions to address this opportunity",
+          "items": {
+            "type": "string"
+          }
+        },
+        "affectedWorkflows": {
+          "type": "array",
+          "description": "Workflows that would be impacted by addressing this opportunity",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["category", "priority", "estimatedImpact"]
+    }
+  ]
+}

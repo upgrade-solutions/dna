@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/step.json",
   "title": "Step Schema",
-  "description": "Defines a step — an atomic building block representing Actor > Action > Resource (the DNA base pairs).",
+  "description": "Defines a step — an atomic building block representing Actor > Operation. Supports dual syntax: explicit (actor + resource + action) or dot notation (actor + operation).",
   "examples": [
     {
       "id": "step-submit-application",
@@ -68,6 +68,23 @@
         "credit-score",
         "credit-history-summary"
       ]
+    },
+    {
+      "id": "step-fund-loan",
+      "name": "Fund Approved Loan",
+      "key": "fundApprovedLoan",
+      "type": "Step",
+      "description": "System automatically funds the approved loan by transferring money to borrower's account",
+      "actor": "funding-system",
+      "operation": "loan.fund",
+      "order": 4,
+      "conditions": ["loan-approved"],
+      "automated": true,
+      "timeout": "PT10M",
+      "outputs": [
+        "funding-confirmation",
+        "transaction-id"
+      ]
     }
   ],
   "allOf": [
@@ -84,11 +101,16 @@
         },
         "action": {
           "type": "string",
-          "description": "Reference to the action being performed"
+          "description": "Reference to the action being performed (used with explicit syntax)"
         },
         "resource": {
           "type": "string",
-          "description": "Reference to the resource being acted upon"
+          "description": "Reference to the resource being acted upon (used with explicit syntax)"
+        },
+        "operation": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+$",
+          "description": "Resource.action operation in dot notation (e.g., 'loan.apply', 'credit_report.check')"
         },
         "order": {
           "type": "integer",
@@ -247,7 +269,26 @@
           }
         }
       },
-      "required": ["actor", "action", "resource"]
+      "required": ["actor"],
+      "oneOf": [
+        {
+          "required": ["resource", "action"],
+          "not": {
+            "required": ["operation"]
+          },
+          "description": "Explicit syntax: requires both resource and action"
+        },
+        {
+          "required": ["operation"],
+          "not": {
+            "anyOf": [
+              {"required": ["resource"]},
+              {"required": ["action"]}
+            ]
+          },
+          "description": "Dot notation syntax: requires operation, excludes resource and action"
+        }
+      ]
     }
   ]
 }

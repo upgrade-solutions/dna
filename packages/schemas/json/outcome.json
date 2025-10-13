@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/outcome.json",
+  "title": "Outcome Schema",
+  "description": "Defines an outcome — a measurable business result achieved through programs, projects, or workflows.",
+  "examples": [
+    {
+      "id": "increased-mrr-outcome",
+      "name": "Increased Monthly Recurring Revenue",
+      "key": "increasedMRR",
+      "type": "Outcome",
+      "description": "25% increase in monthly recurring revenue from improved borrower retention",
+      "category": "financial",
+      "targetValue": 125000,
+      "currentValue": 100000,
+      "unit": "USD",
+      "measurementPeriod": "monthly",
+      "achievedDate": "2024-06-30",
+      "relatedOpportunities": ["improved-borrower-experience"],
+      "contributingMetrics": ["borrower-satisfaction-score", "loan-approval-rate"]
+    },
+    {
+      "id": "reduced-churn-outcome",
+      "name": "Reduced Customer Churn",
+      "key": "reducedChurn",
+      "type": "Outcome",
+      "description": "40% reduction in customer churn rate through improved onboarding",
+      "category": "customer",
+      "targetValue": 5,
+      "currentValue": 8.3,
+      "unit": "percent",
+      "measurementPeriod": "quarterly",
+      "relatedOpportunities": ["better-onboarding-experience"]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Outcome"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["financial", "customer", "operational", "compliance", "strategic"],
+          "description": "Category of business outcome"
+        },
+        "targetValue": {
+          "type": "number",
+          "description": "Target value for the outcome"
+        },
+        "currentValue": {
+          "type": "number",
+          "description": "Current achieved value"
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit of measurement (e.g., USD, percent, count)"
+        },
+        "measurementPeriod": {
+          "type": "string",
+          "enum": ["daily", "weekly", "monthly", "quarterly", "annually"],
+          "description": "How frequently this outcome is measured"
+        },
+        "achievedDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when the target was achieved (if applicable)"
+        },
+        "relatedOpportunities": {
+          "type": "array",
+          "description": "Opportunities that contribute to this outcome",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contributingMetrics": {
+          "type": "array",
+          "description": "Metrics that influence this outcome",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["category", "targetValue", "unit", "measurementPeriod"]
+    }
+  ]
+}

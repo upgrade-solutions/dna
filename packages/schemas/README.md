@@ -47,24 +47,32 @@ Each product contains multiple workflows that capture its business processes.
 
 Example: A "Loan Application Approval Process" workflow might include steps for application submission, credit checks, income verification, underwriting, and final approval.
 
-### Steps: The DNA Base Pairs (Actor > Action > Resource)
-**Steps** are the atomic building blocks of workflows—your DNA base pairs. Each step follows the pattern:
+### Steps: The DNA Base Pairs (Actor > Operation)
+**Steps** are the atomic building blocks of workflows—your DNA base pairs. Each step represents an Actor performing an Operation on a Resource.
 
-**Actor** → **Action** → **Resource**
+Steps support **dual syntax** for maximum flexibility:
+
+#### Explicit Syntax
+```yaml
+- key: apply_for_loan
+  actor: borrower
+  resource: loan
+  action: apply
+```
+
+#### Dot Notation Syntax
+```yaml
+- key: apply_for_loan
+  actor: borrower
+  operation: loan.apply
+```
 
 #### Actor
-Defines who or what performs the action. Actors can be:
+Defines who or what performs the operation. Actors can be:
 - **Users**: Individual people (e.g., borrowers, customers)
 - **Roles**: Organizational positions (e.g., loan officers, managers)
 - **Systems**: External or internal systems (e.g., credit bureau APIs, payment processors)
 - **Agents**: Automated processes or AI agents (e.g., underwriting algorithms, chatbots)
-
-#### Action
-Defines what operation is being performed. Actions are specific, measurable operations like:
-- Submit Loan Application
-- Verify Income
-- Check Credit Score
-- Approve Loan
 
 #### Resource
 Defines what data entity or object is being acted upon. Resources represent the business objects in your system:
@@ -73,9 +81,18 @@ Defines what data entity or object is being acted upon. Resources represent the 
 - Payment Records
 - Customer Profiles
 
-Resources can have:
+Resources contain:
 - **Attributes**: Key-value properties (loan amount, credit score, employment status)
-- **Associated Actions**: Operations that can be performed on the resource
+- **Actions**: Operations that can be performed on the resource (nested within the resource)
+
+#### Action
+Defines what operation is being performed on a specific resource. Actions are always contextual to their parent resource:
+- **Loan Resource**: `apply`, `approve`, `fund`, `service`
+- **Credit Report Resource**: `check`, `pull`, `verify`
+- **Payment Resource**: `process`, `refund`, `schedule`
+
+#### Operation
+A convenient reference combining Resource + Action using dot notation (e.g., `loan.apply`, `payment.process`). Operations resolve to the specific action within the specified resource's available actions.
 
 ### Attributes
 **Attributes** are key-value properties that can be attached to resources and other entities. They provide:
@@ -130,20 +147,24 @@ Example tasks within a "Borrower Onboarding Improvement" project might include:
 
 The two-layer architecture creates clear separation between business process definition and change management:
 
-### Product Layer (Business Process Definition)
+### Product Layer
+This represents business processes (internal products) and user flows (external products)
+
 ```
 Organization
 ├── Product A (e.g., Loan Origination System)
 │   ├── Workflow 1 (e.g., Loan Application)
-│   │   ├── Step 1: Borrower (Actor) → Submit Application (Action) → Loan Application (Resource)
-│   │   ├── Step 2: Loan Officer → Verify Income → Income Documents
-│   │   └── Step 3: System → Check Credit → Credit Report
+│   │   ├── Step 1: Borrower → loan.apply
+│   │   ├── Step 2: Loan Officer → income_docs.verify  
+│   │   └── Step 3: System → credit_report.check
 │   └── Workflow 2 (e.g., Loan Servicing)
 └── Product B (e.g., Payments)
     └── Workflow 3 (e.g., Payment Processing)
 ```
 
 ### Project Layer (Change Management)
+A simple framework for project management
+
 ```
 Programs (strategic coordination)
 ├── Program A: Digital Transformation Initiative
