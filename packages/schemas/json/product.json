@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/product.json",
+  "title": "Product Schema",
+  "description": "Defines a product — a long-lived structure representing a major business offering or system within an organization.",
+  "examples": [
+    {
+      "id": "loan-origination-system",
+      "name": "Loan Origination System",
+      "key": "loanOriginationSystem",
+      "type": "Product",
+      "description": "Comprehensive platform for managing the entire loan application and approval process",
+      "organization": "upgrade-solutions-inc",
+      "status": "active",
+      "version": "2.1.0",
+      "workflows": [
+        "loan-application-workflow",
+        "underwriting-workflow",
+        "loan-servicing-workflow"
+      ],
+      "owners": [
+        {
+          "role": "Product Manager",
+          "actor": "product-manager-loans"
+        },
+        {
+          "role": "Technical Lead",
+          "actor": "tech-lead-backend"
+        }
+      ],
+      "integrations": [
+        "credit-bureau-api",
+        "payment-processor",
+        "document-management-system"
+      ],
+      "metadata": {
+        "category": "Financial Services",
+        "businessUnit": "Lending",
+        "compliance": ["SOX", "PCI-DSS", "GDPR"],
+        "supportLevel": "enterprise",
+        "deploymentModel": "cloud"
+      }
+    },
+    {
+      "id": "payments-platform",
+      "name": "Payments Platform",
+      "key": "paymentsplatform",
+      "type": "Product",
+      "description": "Secure payment processing platform supporting multiple payment methods and currencies",
+      "organization": "upgrade-solutions-inc",
+      "status": "active",
+      "version": "3.0.2",
+      "workflows": [
+        "payment-processing-workflow",
+        "refund-workflow",
+        "fraud-detection-workflow"
+      ],
+      "owners": [
+        {
+          "role": "Product Manager",
+          "actor": "product-manager-payments"
+        }
+      ],
+      "integrations": [
+        "stripe-api",
+        "paypal-api",
+        "bank-networks"
+      ],
+      "metadata": {
+        "category": "Financial Services",
+        "businessUnit": "Payments",
+        "compliance": ["PCI-DSS", "SOX"],
+        "supportLevel": "mission-critical",
+        "deploymentModel": "hybrid"
+      }
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Product"
+        },
+        "organization": {
+          "type": "string",
+          "description": "Reference to the organization that owns this product"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["planning", "development", "active", "maintenance", "deprecated", "retired"],
+          "description": "Current lifecycle status of the product",
+          "default": "planning"
+        },
+        "version": {
+          "type": "string",
+          "description": "Current version of the product following semantic versioning",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[a-zA-Z0-9-]+)?$"
+        },
+        "workflows": {
+          "type": "array",
+          "description": "List of workflow keys contained within this product",
+          "items": {
+            "type": "string",
+            "description": "Reference to a workflow key"
+          }
+        },
+        "owners": {
+          "type": "array",
+          "description": "Product ownership and responsibility assignments",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "description": "Role or responsibility type",
+                "examples": ["Product Manager", "Technical Lead", "Business Owner", "Architect"]
+              },
+              "actor": {
+                "type": "string",
+                "description": "Reference to the actor fulfilling this role"
+              }
+            },
+            "required": ["role", "actor"]
+          }
+        },
+        "integrations": {
+          "type": "array",
+          "description": "External systems and services this product integrates with",
+          "items": {
+            "type": "string",
+            "description": "Reference to an external system or service"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Additional product metadata",
+          "properties": {
+            "category": {
+              "type": "string",
+              "description": "Product category or classification"
+            },
+            "businessUnit": {
+              "type": "string",
+              "description": "Business unit or division responsible for the product"
+            },
+            "compliance": {
+              "type": "array",
+              "description": "Compliance standards and regulations this product must adhere to",
+              "items": {
+                "type": "string",
+                "examples": ["SOX", "PCI-DSS", "GDPR", "HIPAA", "SOC2"]
+              }
+            },
+            "supportLevel": {
+              "type": "string",
+              "enum": ["basic", "standard", "premium", "enterprise", "mission-critical"],
+              "description": "Level of support provided for this product"
+            },
+            "deploymentModel": {
+              "type": "string",
+              "enum": ["on-premise", "cloud", "hybrid", "saas"],
+              "description": "Deployment model for the product"
+            },
+            "tags": {
+              "type": "array",
+              "description": "Searchable tags for product categorization",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "required": ["organization", "status"]
+    }
+  ]
+}

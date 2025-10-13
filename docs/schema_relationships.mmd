@@ -1,0 +1,33 @@
+graph TD
+    %% ORGANIZATION LEVEL
+    Org[🏢 Organization: Acme Real Estate Lending]
+
+    %% PRODUCTS
+    Org --> LOS[💻 Product: Loan Operating System]
+    Org --> PAY[🏦 Product: Banking / Payments]
+    Org --> INV[📊 Product: Investor Portal]
+
+    %% WORKFLOWS FOR LOS
+    LOS --> WF1[🔁 Workflow: Borrower Onboarding]
+    LOS --> WF2[🔁 Workflow: Loan Application]
+
+    %% WORKFLOWS FOR PAY
+    PAY --> WF3[🔁 Workflow: Account Setup]
+
+    %% WORKFLOWS FOR INV
+    INV --> WF4[🔁 Workflow: Investor Reporting]
+
+    %% STEPS UNDER WF1 (Borrower Onboarding)
+    WF1 --> Step1[Step 1: Borrower > Submit > Loan Application]
+    WF1 --> Step2[Step 2: System > Validate > Identity]
+    WF1 --> Step3[Step 3: System > Pull > Credit Report]
+    WF1 --> Step4[Step 4: Loan Officer > Approve > Loan]
+    WF1 --> Step5[Step 5: System > Create > Borrower Account]
+
+    %% PROJECT SLICE
+    Project[🚀 Project: Redesign Borrower Onboarding]
+    Project --> Focus[🎯 Targets: Workflow - Borrower Onboarding]
+    Focus --> Step2
+    Focus --> Step3
+
+    

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/organization.json",
+  "title": "Organization Schema",
+  "description": "Defines an organization — the top-level entity that owns multiple products and encompasses all business operations.",
+  "examples": [
+    {
+      "id": "upgrade-solutions-inc",
+      "name": "Upgrade Solutions Inc.",
+      "key": "upgradeSolutions",
+      "type": "Organization",
+      "description": "Financial technology company providing lending and payment solutions",
+      "domain": "finance",
+      "products": [
+        "loan-origination-system",
+        "payments-platform",
+        "customer-portal"
+      ],
+      "metadata": {
+        "industry": "Financial Services",
+        "founded": "2012",
+        "headquarters": "San Francisco, CA",
+        "size": "enterprise"
+      }
+    },
+    {
+      "id": "acme-corp",
+      "name": "ACME Corporation",
+      "key": "acmeCorp",
+      "type": "Organization",
+      "description": "Multi-industry conglomerate with diverse business operations",
+      "domain": "manufacturing",
+      "products": [
+        "supply-chain-management",
+        "quality-control-system",
+        "inventory-management"
+      ],
+      "metadata": {
+        "industry": "Manufacturing",
+        "founded": "1950",
+        "headquarters": "Detroit, MI",
+        "size": "large"
+      }
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Organization"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Primary business domain or industry sector of the organization",
+          "examples": ["finance", "healthcare", "manufacturing", "retail", "technology"]
+        },
+        "products": {
+          "type": "array",
+          "description": "List of product keys owned by this organization",
+          "items": {
+            "type": "string",
+            "description": "Reference to a product key"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Additional organizational metadata",
+          "properties": {
+            "industry": {
+              "type": "string",
+              "description": "Specific industry classification"
+            },
+            "founded": {
+              "type": "string",
+              "description": "Year or date the organization was founded"
+            },
+            "headquarters": {
+              "type": "string",
+              "description": "Primary headquarters location"
+            },
+            "size": {
+              "type": "string",
+              "enum": ["startup", "small", "medium", "large", "enterprise"],
+              "description": "Organization size classification"
+            },
+            "website": {
+              "type": "string",
+              "format": "uri",
+              "description": "Organization's primary website URL"
+            },
+            "contactEmail": {
+              "type": "string",
+              "format": "email",
+              "description": "Primary contact email address"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "required": ["domain"]
+    }
+  ]
+}

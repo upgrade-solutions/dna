@@ -83,45 +83,23 @@
         "type": {
           "const": "Workflow"
         },
+        "product": {
+          "type": "string",
+          "description": "Reference to the product that contains this workflow"
+        },
         "steps": {
           "type": "array",
-          "description": "Ordered list of workflow steps.",
+          "description": "Ordered list of workflow steps (references to Step entities).",
           "items": {
-            "type": "object",
-            "properties": {
-              "id": {
+            "oneOf": [
+              {
+                "$ref": "https://dna.codes/schemas/step.json"
+              },
+              {
                 "type": "string",
-                "description": "Unique identifier for the workflow step."
-              },
-              "name": {
-                "type": "string",
-                "description": "Human-readable name for the step."
-              },
-              "actor": {
-                "type": "string",
-                "description": "Reference to the actor performing this step."
-              },
-              "action": {
-                "type": "string",
-                "description": "Reference to the action being performed."
-              },
-              "resource": {
-                "type": "string",
-                "description": "Reference to the resource being acted upon."
-              },
-              "conditions": {
-                "type": "array",
-                "description": "Conditions that must be met for this step to execute.",
-                "items": { "type": "string" }
-              },
-              "parallel": {
-                "type": "boolean",
-                "description": "Whether this step can be executed in parallel with other steps.",
-                "default": false
+                "description": "Reference to a step by its key or ID"
               }
-            },
-            "required": ["id", "name", "actor", "action", "resource"],
-            "additionalProperties": true
+            ]
           }
         },
         "triggers": {
@@ -148,7 +126,8 @@
           "description": "Expected outputs or results of the workflow execution.",
           "items": { "type": "string" }
         }
-      }
+      },
+      "required": ["product"]
     }
   ]
 }

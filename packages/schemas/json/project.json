@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/project.json",
+  "title": "Project Schema",
+  "description": "Defines a project — a focused initiative that highlights and modifies a specific slice of a product's DNA graph.",
+  "examples": [
+    {
+      "id": "borrower-onboarding-improvement",
+      "name": "Borrower Onboarding Improvement",
+      "key": "borrowerOnboardingImprovement",
+      "type": "Project",
+      "description": "Streamline the borrower onboarding process by optimizing steps 2 & 3 of the loan application workflow",
+      "product": "loan-origination-system",
+      "targetWorkflows": [
+        {
+          "workflow": "loan-application-workflow",
+          "targetSteps": ["step-2", "step-3"],
+          "modifications": [
+            {
+              "type": "update",
+              "stepId": "step-2",
+              "changes": {
+                "action": "automated-income-verification",
+                "description": "Replace manual income verification with automated bank data integration"
+              }
+            },
+            {
+              "type": "add",
+              "afterStep": "step-3",
+              "newStep": {
+                "id": "step-3b",
+                "name": "Risk Assessment",
+                "actor": "risk-assessment-ai",
+                "action": "assess-risk",
+                "resource": "loan-application"
+              }
+            }
+          ]
+        }
+      ],
+      "status": "in-progress",
+      "priority": "high",
+      "timeline": {
+        "startDate": "2025-09-01",
+        "targetEndDate": "2025-12-15",
+        "milestones": [
+          {
+            "name": "Requirements Analysis Complete",
+            "date": "2025-09-30",
+            "status": "completed"
+          },
+          {
+            "name": "Development Phase Complete",
+            "date": "2025-11-30",
+            "status": "in-progress"
+          },
+          {
+            "name": "Testing and Validation Complete",
+            "date": "2025-12-10",
+            "status": "planned"
+          }
+        ]
+      },
+      "team": [
+        {
+          "role": "Project Manager",
+          "actor": "project-manager-onboarding"
+        },
+        {
+          "role": "Business Analyst",
+          "actor": "business-analyst-lending"
+        },
+        {
+          "role": "Developer",
+          "actor": "senior-developer-backend"
+        }
+      ],
+      "stakeholders": [
+        "product-manager-loans",
+        "compliance-officer",
+        "customer-experience-lead"
+      ],
+      "success_metrics": [
+        {
+          "metric": "Application Processing Time",
+          "baseline": "45 minutes",
+          "target": "25 minutes",
+          "measurement": "average time from submission to initial decision"
+        },
+        {
+          "metric": "Customer Satisfaction Score",
+          "baseline": "7.2",
+          "target": "8.5",
+          "measurement": "post-application survey rating (1-10 scale)"
+        }
+      ],
+      "risks": [
+        {
+          "description": "Integration with bank data providers may face regulatory delays",
+          "impact": "high",
+          "probability": "medium",
+          "mitigation": "Prepare fallback to existing manual process"
+        }
+      ]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Project"
+        },
+        "product": {
+          "type": "string",
+          "description": "Reference to the product this project modifies"
+        },
+        "targetWorkflows": {
+          "type": "array",
+          "description": "Workflows and specific steps targeted for modification",
+          "items": {
+            "type": "object",
+            "properties": {
+              "workflow": {
+                "type": "string",
+                "description": "Reference to the target workflow"
+              },
+              "targetSteps": {
+                "type": "array",
+                "description": "Specific step IDs within the workflow to be modified",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "modifications": {
+                "type": "array",
+                "description": "List of modifications to be applied",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["add", "update", "remove"],
+                      "description": "Type of modification to be performed"
+                    },
+                    "stepId": {
+                      "type": "string",
+                      "description": "ID of the step to modify (for update/remove operations)"
+                    },
+                    "afterStep": {
+                      "type": "string",
+                      "description": "Step ID after which to insert new step (for add operations)"
+                    },
+                    "beforeStep": {
+                      "type": "string",
+                      "description": "Step ID before which to insert new step (for add operations)"
+                    },
+                    "newStep": {
+                      "type": "object",
+                      "description": "New step definition (for add operations)",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "name": { "type": "string" },
+                        "actor": { "type": "string" },
+                        "action": { "type": "string" },
+                        "resource": { "type": "string" }
+                      },
+                      "required": ["id", "name", "actor", "action", "resource"]
+                    },
+                    "changes": {
+                      "type": "object",
+                      "description": "Changes to apply to existing step (for update operations)",
+                      "additionalProperties": true
+                    },
+                    "reason": {
+                      "type": "string",
+                      "description": "Justification for this modification"
+                    }
+                  },
+                  "required": ["type"]
+                }
+              }
+            },
+            "required": ["workflow", "modifications"]
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["planned", "in-progress", "testing", "completed", "on-hold", "cancelled"],
+          "description": "Current status of the project",
+          "default": "planned"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "Priority level of the project",
+          "default": "medium"
+        },
+        "timeline": {
+          "type": "object",
+          "description": "Project timeline and milestones",
+          "properties": {
+            "startDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Project start date"
+            },
+            "targetEndDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Target completion date"
+            },
+            "actualEndDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Actual completion date (when completed)"
+            },
+            "milestones": {
+              "type": "array",
+              "description": "Project milestones",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Milestone name"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Milestone target date"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["planned", "in-progress", "completed", "delayed"],
+                    "description": "Milestone status"
+                  }
+                },
+                "required": ["name", "date", "status"]
+              }
+            }
+          }
+        },
+        "team": {
+          "type": "array",
+          "description": "Project team members and their roles",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "description": "Team member's role in the project"
+              },
+              "actor": {
+                "type": "string",
+                "description": "Reference to the actor fulfilling this role"
+              }
+            },
+            "required": ["role", "actor"]
+          }
+        },
+        "stakeholders": {
+          "type": "array",
+          "description": "Project stakeholders (references to actors)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "success_metrics": {
+          "type": "array",
+          "description": "Metrics for measuring project success",
+          "items": {
+            "type": "object",
+            "properties": {
+              "metric": {
+                "type": "string",
+                "description": "Name of the success metric"
+              },
+              "baseline": {
+                "type": "string",
+                "description": "Current baseline value"
+              },
+              "target": {
+                "type": "string",
+                "description": "Target value to achieve"
+              },
+              "measurement": {
+                "type": "string",
+                "description": "How the metric is measured"
+              }
+            },
+            "required": ["metric", "target"]
+          }
+        },
+        "tasks": {
+          "type": "array",
+          "description": "Work items and tasks within this project",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "https://dna.codes/schemas/task.json"
+              },
+              {
+                "type": "string",
+                "description": "Reference to a task by its key or ID"
+              }
+            ]
+          }
+        },
+        "risks": {
+          "type": "array",
+          "description": "Project risks and mitigation strategies",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string",
+                "description": "Description of the risk"
+              },
+              "impact": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"],
+                "description": "Potential impact if risk occurs"
+              },
+              "probability": {
+                "type": "string",
+                "enum": ["low", "medium", "high"],
+                "description": "Probability of risk occurring"
+              },
+              "mitigation": {
+                "type": "string",
+                "description": "Mitigation strategy for the risk"
+              }
+            },
+            "required": ["description", "impact", "probability"]
+          }
+        }
+      },
+      "required": ["product", "targetWorkflows", "status"]
+    }
+  ]
+}

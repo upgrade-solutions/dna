@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/step.json",
+  "title": "Step Schema",
+  "description": "Defines a step — an atomic building block representing Actor > Action > Resource (the DNA base pairs).",
+  "examples": [
+    {
+      "id": "step-submit-application",
+      "name": "Submit Loan Application",
+      "key": "submitLoanApplication",
+      "type": "Step",
+      "description": "Borrower submits a completed loan application with required documentation",
+      "actor": "borrower-001",
+      "action": "submit-application",
+      "resource": "loan-app-12345",
+      "order": 1,
+      "conditions": [],
+      "parallel": false,
+      "timeout": "PT30M",
+      "retryPolicy": {
+        "maxAttempts": 3,
+        "backoffStrategy": "exponential"
+      },
+      "outputs": [
+        "application-submitted-event",
+        "application-id"
+      ]
+    },
+    {
+      "id": "step-verify-income",
+      "name": "Verify Income Documentation",
+      "key": "verifyIncomeDocumentation",
+      "type": "Step",
+      "description": "Loan officer verifies the authenticity and accuracy of borrower's income documentation",
+      "actor": "loan-officer-role",
+      "action": "verify-income",
+      "resource": "income-documents",
+      "order": 3,
+      "conditions": ["application-complete", "documents-uploaded"],
+      "parallel": true,
+      "timeout": "PT2H",
+      "estimatedDuration": "PT45M",
+      "outputs": [
+        "income-verification-result",
+        "verification-notes"
+      ]
+    },
+    {
+      "id": "step-automated-credit-check",
+      "name": "Automated Credit Score Check",
+      "key": "automatedCreditCheck",
+      "type": "Step",
+      "description": "System automatically retrieves and processes borrower's credit report from credit bureau",
+      "actor": "credit-bureau-system",
+      "action": "check-credit-score",
+      "resource": "credit-report-001",
+      "order": 2,
+      "conditions": ["application-submitted"],
+      "parallel": true,
+      "automated": true,
+      "timeout": "PT5M",
+      "retryPolicy": {
+        "maxAttempts": 5,
+        "backoffStrategy": "linear",
+        "retryDelay": "PT30S"
+      },
+      "outputs": [
+        "credit-score",
+        "credit-history-summary"
+      ]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Step"
+        },
+        "actor": {
+          "type": "string",
+          "description": "Reference to the actor performing this step"
+        },
+        "action": {
+          "type": "string",
+          "description": "Reference to the action being performed"
+        },
+        "resource": {
+          "type": "string",
+          "description": "Reference to the resource being acted upon"
+        },
+        "order": {
+          "type": "integer",
+          "description": "Execution order within the workflow (1-based)",
+          "minimum": 1
+        },
+        "conditions": {
+          "type": "array",
+          "description": "Prerequisites that must be met for this step to execute",
+          "items": {
+            "type": "string",
+            "description": "Condition identifier or expression"
+          }
+        },
+        "parallel": {
+          "type": "boolean",
+          "description": "Whether this step can execute in parallel with other steps",
+          "default": false
+        },
+        "automated": {
+          "type": "boolean",
+          "description": "Whether this step is fully automated (no human intervention required)",
+          "default": false
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Whether this step is optional in the workflow",
+          "default": false
+        },
+        "timeout": {
+          "type": "string",
+          "description": "Maximum time allowed for step execution (ISO 8601 duration format)",
+          "pattern": "^P(?:\\d+D)?(?:T(?:\\d+H)?(?:\\d+M)?(?:\\d+(?:\\.\\d+)?S)?)?$"
+        },
+        "estimatedDuration": {
+          "type": "string",
+          "description": "Expected duration for step completion (ISO 8601 duration format)",
+          "pattern": "^P(?:\\d+D)?(?:T(?:\\d+H)?(?:\\d+M)?(?:\\d+(?:\\.\\d+)?S)?)?$"
+        },
+        "retryPolicy": {
+          "type": "object",
+          "description": "Retry policy for failed step executions",
+          "properties": {
+            "maxAttempts": {
+              "type": "integer",
+              "description": "Maximum number of retry attempts",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 3
+            },
+            "backoffStrategy": {
+              "type": "string",
+              "enum": ["none", "linear", "exponential"],
+              "description": "Strategy for calculating retry delays",
+              "default": "exponential"
+            },
+            "retryDelay": {
+              "type": "string",
+              "description": "Initial delay between retry attempts (ISO 8601 duration format)",
+              "pattern": "^P(?:\\d+D)?(?:T(?:\\d+H)?(?:\\d+M)?(?:\\d+(?:\\.\\d+)?S)?)?$",
+              "default": "PT1M"
+            },
+            "retryableErrors": {
+              "type": "array",
+              "description": "Specific error types that should trigger a retry",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "inputs": {
+          "type": "array",
+          "description": "Required inputs for step execution",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Input parameter name"
+              },
+              "type": {
+                "type": "string",
+                "description": "Input data type",
+                "examples": ["string", "number", "boolean", "object", "array"]
+              },
+              "required": {
+                "type": "boolean",
+                "description": "Whether this input is required",
+                "default": true
+              },
+              "source": {
+                "type": "string",
+                "description": "Source of the input value (e.g., previous step output, user input)"
+              }
+            },
+            "required": ["name", "type"]
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "description": "Expected outputs produced by step execution",
+          "items": {
+            "type": "string",
+            "description": "Output identifier or key"
+          }
+        },
+        "notifications": {
+          "type": "array",
+          "description": "Notification rules for step events",
+          "items": {
+            "type": "object",
+            "properties": {
+              "event": {
+                "type": "string",
+                "enum": ["started", "completed", "failed", "timeout", "retry"],
+                "description": "Event that triggers the notification"
+              },
+              "recipients": {
+                "type": "array",
+                "description": "Notification recipients",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "method": {
+                "type": "string",
+                "enum": ["email", "sms", "webhook", "dashboard"],
+                "description": "Notification delivery method"
+              }
+            },
+            "required": ["event", "recipients", "method"]
+          }
+        },
+        "validation": {
+          "type": "object",
+          "description": "Validation rules for step execution",
+          "properties": {
+            "preConditions": {
+              "type": "array",
+              "description": "Validation rules that must pass before step execution",
+              "items": {
+                "type": "string",
+                "description": "Validation rule expression"
+              }
+            },
+            "postConditions": {
+              "type": "array",
+              "description": "Validation rules that must pass after step execution",
+              "items": {
+                "type": "string",
+                "description": "Validation rule expression"
+              }
+            }
+          }
+        }
+      },
+      "required": ["actor", "action", "resource"]
+    }
+  ]
+}
