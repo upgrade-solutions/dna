@@ -58,4 +58,15 @@
   }
 }
 
+/* Custom animations for sliding insertion */
+@layer components {
+  .workflow-step {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .workflow-step:hover {
+    @apply shadow-md;
+  }
+}
+
 

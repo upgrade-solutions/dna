@@ -1,0 +1,164 @@
+[
+  {
+    "id": "s1",
+    "actor": "Customer",
+    "action": "Submit",
+    "resource": "Registration Form",
+    "status": "Active",
+    "workflowId": "wf1",
+    "order": 1
+  },
+  {
+    "id": "s3",
+    "actor": "KYC Agent",
+    "action": "Review",
+    "resource": "Identity Documents",
+    "status": "Active",
+    "workflowId": "wf1",
+    "order": 2
+  },
+  {
+    "id": "s4",
+    "actor": "System",
+    "action": "Create",
+    "resource": "Customer Profile",
+    "status": "Active",
+    "workflowId": "wf1",
+    "order": 3
+  },
+  {
+    "id": "s5",
+    "actor": "Borrower",
+    "action": "Submit",
+    "resource": "Loan Application",
+    "status": "Active",
+    "workflowId": "wf2",
+    "order": 1
+  },
+  {
+    "id": "s6",
+    "actor": "System",
+    "action": "Check",
+    "resource": "Credit Score",
+    "status": "Active",
+    "workflowId": "wf2",
+    "order": 2
+  },
+  {
+    "id": "s7",
+    "actor": "Loan Officer",
+    "action": "Verify",
+    "resource": "Income Documents",
+    "status": "In Review",
+    "workflowId": "wf2",
+    "order": 3
+  },
+  {
+    "id": "s8",
+    "actor": "Risk System",
+    "action": "Assess",
+    "resource": "Risk Profile",
+    "status": "Planned",
+    "workflowId": "wf2",
+    "order": 4
+  },
+  {
+    "id": "s9",
+    "actor": "Underwriter",
+    "action": "Approve",
+    "resource": "Loan Request",
+    "status": "Active",
+    "workflowId": "wf2",
+    "order": 5
+  },
+  {
+    "id": "s10",
+    "actor": "Borrower",
+    "action": "Initiate",
+    "resource": "Payment",
+    "status": "Active",
+    "workflowId": "wf3",
+    "order": 1
+  },
+  {
+    "id": "s11",
+    "actor": "Payment Gateway",
+    "action": "Process",
+    "resource": "Transaction",
+    "status": "Active",
+    "workflowId": "wf3",
+    "order": 2
+  },
+  {
+    "id": "s12",
+    "actor": "System",
+    "action": "Update",
+    "resource": "Loan Balance",
+    "status": "Active",
+    "workflowId": "wf3",
+    "order": 3
+  },
+  {
+    "id": "s13",
+    "actor": "System",
+    "action": "Record",
+    "resource": "Transaction History",
+    "status": "Active",
+    "workflowId": "wf3",
+    "order": 4
+  },
+  {
+    "id": "s14",
+    "actor": "Analyst",
+    "action": "Query",
+    "resource": "Loan Data",
+    "status": "Active",
+    "workflowId": "wf4",
+    "order": 1
+  },
+  {
+    "id": "s15",
+    "actor": "System",
+    "action": "Generate",
+    "resource": "Report",
+    "status": "In Review",
+    "workflowId": "wf4",
+    "order": 2
+  },
+  {
+    "id": "s16",
+    "actor": "Manager",
+    "action": "Review",
+    "resource": "Analytics Dashboard",
+    "status": "Planned",
+    "workflowId": "wf4",
+    "order": 3
+  },
+  {
+    "id": "s17",
+    "actor": "System",
+    "action": "Identify",
+    "resource": "Overdue Accounts",
+    "status": "Planned",
+    "workflowId": "wf5",
+    "order": 1
+  },
+  {
+    "id": "s18",
+    "actor": "System",
+    "action": "Send",
+    "resource": "Reminder Notification",
+    "status": "Planned",
+    "workflowId": "wf5",
+    "order": 2
+  },
+  {
+    "id": "s19",
+    "actor": "Collections Agent",
+    "action": "Contact",
+    "resource": "Borrower",
+    "status": "Planned",
+    "workflowId": "wf5",
+    "order": 3
+  }
+]

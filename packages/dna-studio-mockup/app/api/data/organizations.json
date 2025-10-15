@@ -1,0 +1,17 @@
+[
+  {
+    "id": "org1",
+    "name": "Financial Services Division",
+    "description": "Consumer and commercial banking products"
+  },
+  {
+    "id": "org2",
+    "name": "Insurance Group",
+    "description": "Life, health, and property insurance products"
+  },
+  {
+    "id": "org3",
+    "name": "Investment Management",
+    "description": "Wealth management and trading platforms"
+  }
+]

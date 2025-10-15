@@ -1,0 +1,164 @@
+{
+  "resourceTypes": {
+    "Registration Form": {
+      "attributes": [
+        { "name": "email", "type": "String", "required": true },
+        { "name": "password", "type": "String", "required": true },
+        { "name": "firstName", "type": "String", "required": true },
+        { "name": "lastName", "type": "String", "required": true },
+        { "name": "phoneNumber", "type": "String", "required": true },
+        { "name": "dateOfBirth", "type": "Date", "required": true },
+        { "name": "address", "type": "Object", "required": true },
+        { "name": "marketingConsent", "type": "Boolean", "required": false }
+      ],
+      "validations": [
+        {
+          "field": "email",
+          "rules": ["Format: Email", "Max Length: 255", "Unique"],
+          "description": "Must be a valid email format and unique in the system"
+        },
+        {
+          "field": "password", 
+          "rules": ["Min Length: 8", "Max Length: 128", "Pattern: Complex"],
+          "description": "Must contain uppercase, lowercase, number, and special character"
+        },
+        {
+          "field": "firstName",
+          "rules": ["Min Length: 1", "Max Length: 50", "Pattern: Alpha"],
+          "description": "Only alphabetic characters and spaces allowed"
+        },
+        {
+          "field": "lastName",
+          "rules": ["Min Length: 1", "Max Length: 50", "Pattern: Alpha"], 
+          "description": "Only alphabetic characters and spaces allowed"
+        },
+        {
+          "field": "phoneNumber",
+          "rules": ["Format: E.164", "Length: 10-15"],
+          "description": "Must be a valid international phone number format"
+        },
+        {
+          "field": "dateOfBirth",
+          "rules": ["Min Age: 18", "Max Age: 120", "Format: ISO 8601"],
+          "description": "Customer must be at least 18 years old"
+        },
+        {
+          "field": "address",
+          "rules": ["Required Fields: street, city, state, zipCode", "Validation: US Address"],
+          "description": "Must be a valid US postal address"
+        }
+      ]
+    },
+    "Loan Application": {
+      "attributes": [
+        { "name": "loanAmount", "type": "Number", "required": true },
+        { "name": "loanPurpose", "type": "String", "required": true },
+        { "name": "employmentStatus", "type": "String", "required": true },
+        { "name": "annualIncome", "type": "Number", "required": true },
+        { "name": "employerName", "type": "String", "required": true },
+        { "name": "yearsEmployed", "type": "Number", "required": true },
+        { "name": "monthlyExpenses", "type": "Number", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "loanAmount",
+          "rules": ["Min: 1000", "Max: 500000", "Multiple of: 100"],
+          "description": "Loan amount must be between $1,000 and $500,000"
+        },
+        {
+          "field": "loanPurpose",
+          "rules": ["Min Length: 10", "Max Length: 500"],
+          "description": "Provide a clear description of loan purpose"
+        },
+        {
+          "field": "annualIncome",
+          "rules": ["Min: 0", "Max: 10000000"],
+          "description": "Annual income must be a positive number"
+        },
+        {
+          "field": "yearsEmployed",
+          "rules": ["Min: 0", "Max: 50"],
+          "description": "Years employed at current employer"
+        }
+      ]
+    },
+    "Income Documents": {
+      "attributes": [
+        { "name": "payStubs", "type": "File[]", "required": true },
+        { "name": "w2Forms", "type": "File[]", "required": true },
+        { "name": "taxReturns", "type": "File[]", "required": true },
+        { "name": "additionalNotes", "type": "String", "required": false },
+        { "name": "uploadedDate", "type": "DateTime", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "payStubs",
+          "rules": ["Min Files: 3", "Max Files: 6", "File Types: PDF, JPG, PNG", "Max Size: 10MB"],
+          "description": "Must upload at least 3 recent pay stubs"
+        },
+        {
+          "field": "w2Forms",
+          "rules": ["Min Files: 2", "Max Files: 2", "File Types: PDF", "Max Size: 10MB"],
+          "description": "Must upload W-2 forms for last 2 years"
+        },
+        {
+          "field": "taxReturns",
+          "rules": ["Min Files: 2", "Max Files: 2", "File Types: PDF", "Max Size: 10MB"],
+          "description": "Must upload complete tax returns for last 2 years"
+        }
+      ]
+    },
+    "Payment": {
+      "attributes": [
+        { "name": "paymentAmount", "type": "Number", "required": true },
+        { "name": "paymentMethod", "type": "String", "required": true },
+        { "name": "accountNumber", "type": "String", "required": true },
+        { "name": "routingNumber", "type": "String", "required": true },
+        { "name": "paymentDate", "type": "Date", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "paymentAmount",
+          "rules": ["Min: 0.01", "Max: 100000", "Decimal Places: 2"],
+          "description": "Payment amount must be positive and up to 2 decimal places"
+        },
+        {
+          "field": "accountNumber",
+          "rules": ["Length: 8-17", "Pattern: Numeric"],
+          "description": "Valid bank account number"
+        },
+        {
+          "field": "routingNumber",
+          "rules": ["Length: 9", "Pattern: Numeric", "Validation: ABA"],
+          "description": "Valid 9-digit ABA routing number"
+        }
+      ]
+    },
+    "Identity Documents": {
+      "attributes": [
+        { "name": "documentFile", "type": "File", "required": true },
+        { "name": "idType", "type": "String", "required": true },
+        { "name": "idNumber", "type": "String", "required": true },
+        { "name": "expirationDate", "type": "Date", "required": true },
+        { "name": "issuingAuthority", "type": "String", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "documentFile",
+          "rules": ["File Types: PDF, JPG, PNG", "Max Size: 10MB", "Min Resolution: 300 DPI"],
+          "description": "Clear, legible scan or photo of government-issued ID"
+        },
+        {
+          "field": "expirationDate",
+          "rules": ["Must be: Future Date", "Max Years: 10"],
+          "description": "ID must not be expired"
+        },
+        {
+          "field": "idNumber",
+          "rules": ["Min Length: 5", "Max Length: 20"],
+          "description": "Valid ID number format"
+        }
+      ]
+    }
+  }
+}

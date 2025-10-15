@@ -1,0 +1,30 @@
+[
+  {
+    "id": "1",
+    "name": "Customer Onboarding",
+    "status": "Deliver",
+    "workflowIds": ["wf1"],
+    "productId": "1"
+  },
+  {
+    "id": "2",
+    "name": "Loan Application",
+    "status": "Develop",
+    "workflowIds": ["wf2"],
+    "productId": "1"
+  },
+  {
+    "id": "3",
+    "name": "Payment Processing",
+    "status": "Design",
+    "workflowIds": ["wf3"],
+    "productId": "1"
+  },
+  {
+    "id": "4",
+    "name": "Reporting Dashboard",
+    "status": "Discover",
+    "workflowIds": ["wf4"],
+    "productId": "1"
+  }
+]

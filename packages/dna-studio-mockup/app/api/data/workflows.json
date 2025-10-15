@@ -1,0 +1,37 @@
+[
+  {
+    "id": "wf1",
+    "name": "Customer Onboarding",
+    "description": "New customer registration and verification",
+    "status": "Active",
+    "productId": "1"
+  },
+  {
+    "id": "wf2",
+    "name": "Loan Application",
+    "description": "Loan request submission and processing",
+    "status": "Active",
+    "productId": "1"
+  },
+  {
+    "id": "wf3",
+    "name": "Payment Processing",
+    "description": "Loan payment collection and reconciliation",
+    "status": "Active",
+    "productId": "1"
+  },
+  {
+    "id": "wf4",
+    "name": "Reporting & Analytics",
+    "description": "Business intelligence and reporting",
+    "status": "In Review",
+    "productId": "1"
+  },
+  {
+    "id": "wf5",
+    "name": "Collections",
+    "description": "Overdue payment management",
+    "status": "Planned",
+    "productId": "1"
+  }
+]
