@@ -49,7 +49,14 @@ export function BusinessModelViewer({
     insertingWorkflowId: null,
     animatingSteps: new Set()
   })
-  const previousStepIdsRef = useRef<Set<string>>(new Set())
+  // Use sessionStorage to persist step IDs across refreshes
+  const [previousStepIds, setPreviousStepIds] = useState<Set<string>>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('businessModelStepIds')
+      return stored ? new Set(JSON.parse(stored)) : new Set()
+    }
+    return new Set()
+  })
   const [newStepIds, setNewStepIds] = useState<Set<string>>(new Set())
   
   const { data, loading, error, refreshData, getStepsForWorkflow } = useBusinessModelData(refreshTrigger)
@@ -60,47 +67,35 @@ export function BusinessModelViewer({
 
   // Detect new steps and trigger slide animations
   useEffect(() => {
-    console.log('[BusinessModelViewer] 📊 useEffect triggered:', { 
-      mounted, 
-      stepsLength: data.steps.length,
-      previousCount: previousStepIdsRef.current.size
-    })
-    
-    if (!mounted) return
+    if (!mounted || !data.steps.length) return
 
     const currentStepIds = new Set(data.steps.map(step => step.id))
     
-    // On first load, just set the previous IDs without triggering animation
-    if (previousStepIdsRef.current.size === 0 && data.steps.length > 0) {
-      console.log('[BusinessModelViewer] 🏁 First load - setting initial step IDs')
-      previousStepIdsRef.current = currentStepIds
+    // On very first initialization, just set the previous IDs without triggering animation
+    if (previousStepIds.size === 0) {
+      console.log('[BusinessModelViewer] 🏁 Setting baseline step IDs:', Array.from(currentStepIds))
+      setPreviousStepIds(currentStepIds)
+      sessionStorage.setItem('businessModelStepIds', JSON.stringify(Array.from(currentStepIds)))
       return
     }
     
-    const newSteps = data.steps.filter(step => !previousStepIdsRef.current.has(step.id))
-    
-    console.log('[BusinessModelViewer] 🔍 Step comparison:', {
-      currentSteps: Array.from(currentStepIds),
-      previousSteps: Array.from(previousStepIdsRef.current),
-      newSteps: newSteps.map(s => s.id)
-    })
+    const newSteps = data.steps.filter(step => !previousStepIds.has(step.id))
     
     if (newSteps.length > 0) {
-      // New steps detected - trigger animations
       const newIds = new Set(newSteps.map(step => step.id))
+      console.log('[BusinessModelViewer] 🎬 ANIMATING NEW STEPS:', newSteps.map(s => `${s.actor} > ${s.action} > ${s.resource}`))
       setNewStepIds(newIds)
-      
-      console.log('[BusinessModelViewer] 🎬 Animating new steps:', newSteps.map(s => `${s.actor} > ${s.action} > ${s.resource}`))
       
       // Clear animation after transition duration
       setTimeout(() => {
-        console.log('[BusinessModelViewer] 🏁 Clearing animations')
         setNewStepIds(new Set())
-      }, 2500) // Slightly longer to ensure animation completes
+      }, 2500)
+      
+      // Update previous step IDs and persist to sessionStorage ONLY when new steps are found
+      setPreviousStepIds(currentStepIds)
+      sessionStorage.setItem('businessModelStepIds', JSON.stringify(Array.from(currentStepIds)))
     }
-    
-    previousStepIdsRef.current = currentStepIds
-  }, [data.steps, mounted])
+  }, [data.steps, mounted, refreshTrigger])
 
   const getStepAnimationClasses = (stepId: string, stepIndex: number, workflowId: string) => {
     const isAnimating = animationState.animatingSteps.has(stepId)
@@ -219,6 +214,49 @@ export function BusinessModelViewer({
           >
             <RefreshCw className="h-3 w-3" />
             Refresh
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => {
+              console.log('[BusinessModelViewer] 🗑️ Clearing sessionStorage baseline')
+              sessionStorage.removeItem('businessModelStepIds')
+              setPreviousStepIds(new Set())
+              window.location.reload()
+            }}
+            className="gap-1 bg-red-100 hover:bg-red-200"
+          >
+            Reset Baseline
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={async () => {
+              console.log('[BusinessModelViewer] 🧪 Adding test step manually')
+              try {
+                const response = await fetch('/api/data/steps/insert', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    workflowId: 'wf1',
+                    position: 4,
+                    step: {
+                      actor: 'Test Actor',
+                      action: 'Test Action', 
+                      resource: 'Test Resource'
+                    }
+                  })
+                })
+                if (response.ok) {
+                  setTimeout(() => refreshData(), 500)
+                }
+              } catch (error) {
+                console.error('Failed to add test step:', error)
+              }
+            }}
+            className="gap-1 bg-green-100 hover:bg-green-200"
+          >
+            Add Test Step
           </Button>
         </div>
       </CardHeader>

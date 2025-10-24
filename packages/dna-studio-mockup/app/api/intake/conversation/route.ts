@@ -479,6 +479,8 @@ async function applyBusinessModelChanges(changes: any[], requestId: string) {
             global.businessModelData.steps.push(newStep)
             hasChanges = true
             console.log(`[${requestId}] Created new step at order ${insertOrder}:`, `${newStep.actor} > ${newStep.action} > ${newStep.resource}`)
+            console.log(`[${requestId}] Global steps count after addition:`, global.businessModelData.steps.length)
+            console.log(`[${requestId}] Last 3 step IDs:`, global.businessModelData.steps.slice(-3).map(s => s.id))
           } else if (change.operation === 'update' && change.relatedExisting) {
             const stepIndex = global.businessModelData.steps.findIndex(s => s.id === change.relatedExisting)
             if (stepIndex >= 0) {

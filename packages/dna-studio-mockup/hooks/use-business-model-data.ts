@@ -54,11 +54,22 @@ export function useBusinessModelData(refreshTrigger?: number) {
       const newData = { workflows, steps }
       const newDataHash = JSON.stringify(newData)
       
+      console.log('[BusinessModelData] Fetch completed:', {
+        stepsCount: steps.length,
+        stepIds: steps.map((s: any) => s.id),
+        lastStep: steps[steps.length - 1],
+        newDataHash: newDataHash.slice(0, 100) + '...',
+        lastDataHash: lastDataHash.slice(0, 100) + '...',
+        willUpdate: newDataHash !== lastDataHash
+      })
+      
       // Only update if data actually changed
       if (newDataHash !== lastDataHash) {
         setData(newData)
         setLastDataHash(newDataHash)
         console.log('[BusinessModelData] Data updated with', steps.length, 'steps', 'workflows:', workflows.length)
+      } else {
+        console.log('[BusinessModelData] No changes detected, skipping update')
       }
       
       setError(null)

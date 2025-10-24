@@ -56,6 +56,12 @@ export async function GET() {
   try {
     await initializeBusinessModelData()
     
+    console.log('[Steps API] Returning steps:', {
+      count: global.businessModelData?.steps?.length || 0,
+      stepIds: global.businessModelData?.steps?.map((s: any) => s.id) || [],
+      lastStep: global.businessModelData?.steps?.[global.businessModelData.steps.length - 1]
+    })
+    
     return NextResponse.json(global.businessModelData?.steps || [], {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate',

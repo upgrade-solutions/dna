@@ -160,5 +160,113 @@
     "status": "Planned",
     "workflowId": "wf5",
     "order": 3
+  },
+  {
+    "id": "s20",
+    "actor": "System",
+    "action": "Import",
+    "resource": "Account",
+    "status": "Active",
+    "workflowId": "wf6",
+    "order": 1
+  },
+  {
+    "id": "s21",
+    "actor": "Account Manager",
+    "action": "Create",
+    "resource": "Account",
+    "status": "Active",
+    "workflowId": "wf6",
+    "order": 2
+  },
+  {
+    "id": "s22",
+    "actor": "Account Manager",
+    "action": "Add",
+    "resource": "Contacts",
+    "status": "Active",
+    "workflowId": "wf6",
+    "order": 3
+  },
+  {
+    "id": "s23",
+    "actor": "Legal Team",
+    "action": "Draft",
+    "resource": "Contract",
+    "status": "Active",
+    "workflowId": "wf8",
+    "order": 1
+  },
+  {
+    "id": "s24",
+    "actor": "Legal Team",
+    "action": "Manage",
+    "resource": "Revisions",
+    "status": "Active",
+    "workflowId": "wf8",
+    "order": 2
+  },
+  {
+    "id": "s25",
+    "actor": "Legal Team",
+    "action": "Finalize",
+    "resource": "Contract",
+    "status": "Active",
+    "workflowId": "wf8",
+    "order": 3
+  },
+  {
+    "id": "s26",
+    "actor": "Author",
+    "action": "Create",
+    "resource": "Account",
+    "status": "Active",
+    "workflowId": "wf9",
+    "order": 1
+  },
+  {
+    "id": "s27",
+    "actor": "System",
+    "action": "Create",
+    "resource": "Payee",
+    "status": "Active",
+    "workflowId": "wf9",
+    "order": 2
+  },
+  {
+    "id": "s28",
+    "actor": "Author",
+    "action": "Accept",
+    "resource": "T&Cs",
+    "status": "Active",
+    "workflowId": "wf9",
+    "order": 3
+  },
+  {
+    "id": "s29",
+    "actor": "Author",
+    "action": "Create",
+    "resource": "Project",
+    "status": "Active",
+    "workflowId": "wf10",
+    "order": 1
+  },
+  {
+    "id": "s30",
+    "actor": "Author",
+    "action": "Add",
+    "resource": "Assets",
+    "status": "Active",
+    "workflowId": "wf10",
+    "order": 2
+  },
+  {
+    "id": "s31",
+    "actor": "Author",
+    "action": "Submit for",
+    "resource": "Review",
+    "status": "Active",
+    "workflowId": "wf10",
+    "order": 3
   }
 ]

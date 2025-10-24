@@ -49,7 +49,7 @@ const BusinessModelViewer = dynamic(
 
 export default function ConversationDemo() {
   const [businessModelChanges, setBusinessModelChanges] = useState<BusinessModelChange[]>([])
-  const [manualInput, setManualInput] = useState('')
+  const [manualInput, setManualInput] = useState('In the customer onboarding flow we need to add a step after the customer submit the registration form to verify their email')
   const [sessionId] = useState(`demo-${Date.now()}`)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [mounted, setMounted] = useState(false)
@@ -213,7 +213,7 @@ if (!mounted) {
                 disabled={!manualInput.trim()}
                 className="w-full"
               >
-                Analyze Text
+                Submit
               </Button>
             </CardContent>
           </Card>

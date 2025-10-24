@@ -33,5 +33,47 @@
     "description": "Overdue payment management",
     "status": "Planned",
     "productId": "1"
+  },
+  {
+    "id": "wf6",
+    "name": "Account Setup",
+    "description": "Account import, creation, and contact management",
+    "status": "Active",
+    "productId": "3"
+  },
+  {
+    "id": "wf7",
+    "name": "Contact Management",
+    "description": "Managing publisher and distributor contacts",
+    "status": "Active",
+    "productId": "3"
+  },
+  {
+    "id": "wf8",
+    "name": "Contract Management",
+    "description": "Contract drafting, revision management, and finalization",
+    "status": "Active",
+    "productId": "3"
+  },
+  {
+    "id": "wf9",
+    "name": "Author Onboarding",
+    "description": "Author account creation, payee setup, and terms acceptance",
+    "status": "Active",
+    "productId": "4"
+  },
+  {
+    "id": "wf10",
+    "name": "Title Management",
+    "description": "Project creation, asset management, and review submission",
+    "status": "Active",
+    "productId": "4"
+  },
+  {
+    "id": "wf11",
+    "name": "Distribution Selection",
+    "description": "Selecting and configuring distribution channels",
+    "status": "Active",
+    "productId": "4"
   }
 ]
