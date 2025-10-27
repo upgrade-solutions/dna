@@ -17,34 +17,8 @@ import {
   Plus,
   ArrowRight,
   Zap,
-  Database,
-  FolderIcon,
-  UserIcon,
-  HandshakeIcon,
-  FileTextIcon,
-  BriefcaseIcon,
-  NetworkIcon
+  Database
 } from 'lucide-react'
-
-// Map workflow/product names to icons
-const iconMap: Record<string, JSX.Element> = {
-  "Case Development Platform": <FolderIcon className="w-6 h-6 text-primary" />,
-  "Client Acquisition System": <UserIcon className="w-6 h-6 text-primary" />,
-  "Legal Partnership Network": <HandshakeIcon className="w-6 h-6 text-primary" />,
-  "Case Investigation": <BriefcaseIcon className="w-6 h-6 text-primary" />,
-  "Evidence Gathering": <FileTextIcon className="w-6 h-6 text-primary" />,
-  "Legal Strategy Development": <NetworkIcon className="w-6 h-6 text-primary" />,
-  "Case Filing Preparation": <FileTextIcon className="w-6 h-6 text-primary" />,
-  "Victim Identification": <Users className="w-6 h-6 text-primary" />,
-  "Client Intake Process": <UserIcon className="w-6 h-6 text-primary" />,
-  "Claimant Management": <Users className="w-6 h-6 text-primary" />,
-  "Law Firm Partnership": <HandshakeIcon className="w-6 h-6 text-primary" />,
-  "Case Distribution": <NetworkIcon className="w-6 h-6 text-primary" />,
-};
-
-function getIconForName(name: string) {
-  return iconMap[name] || <FileTextIcon className="w-6 h-6 text-primary" />;
-}
 import { useBusinessModelData } from '@/hooks/use-business-model-data'
 import { cn } from '@/lib/utils'
 
@@ -298,7 +272,6 @@ export function BusinessModelViewer({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span>{getIconForName(workflow.name)}</span>
                     <div>
                       <h3 className="font-semibold text-lg">{workflow.name}</h3>
                       <p className="text-sm text-muted-foreground">{workflow.description}</p>
