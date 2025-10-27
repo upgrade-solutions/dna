@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,8 @@ import {
   Building2,
   ChevronDown,
   Plus,
+  Eye,
+  Settings,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
@@ -40,6 +43,8 @@ import {
   getOrganizations,
   getProducts,
   getStatusColors,
+  getLatestVersion,
+  getVersionStatusColor,
   type Organization,
   type Product,
   type Workflow,
@@ -153,6 +158,8 @@ export default function DNAStudio() {
       action: newStepForm.action,
       resource: newStepForm.resource,
       status: newStepForm.status,
+      workflowId: selectedWorkflowForNewStep,
+      order: (currentProduct?.workflows.find(w => w.id === selectedWorkflowForNewStep)?.steps.length || 0) + 1,
     }
 
     // Update products list with new step
@@ -315,6 +322,96 @@ export default function DNAStudio() {
             if (yearsDiff > 10) return "Expiration date seems invalid"
           }
           break
+
+        case "Intake Form":
+          // Contact Information
+          if (fieldName === "firstName" || fieldName === "lastName") {
+            if (!value) return `${fieldName === "firstName" ? "First" : "Last"} name is required`
+            if (value.length < 1 || value.length > 50) return "Must be between 1 and 50 characters"
+            if (!/^[a-zA-Z\s'-]+$/.test(value)) return "Only alphabetic characters, spaces, apostrophes, and hyphens allowed"
+          }
+          if (fieldName === "email") {
+            if (!value) return "Email is required"
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            if (!emailRegex.test(value)) return "Must be a valid email format"
+            if (value.length > 255) return "Email must be less than 255 characters"
+          }
+          if (fieldName === "phone") {
+            if (!value) return "Phone number is required"
+            const phoneRegex = /^\+?[1-9]\d{9,14}$/
+            if (!phoneRegex.test(value.replace(/[\s()-]/g, ""))) {
+              return "Must be a valid phone number"
+            }
+          }
+          if (fieldName === "address") {
+            if (!value) return "Address is required"
+            if (value.length < 10) return "Please provide a complete address"
+            if (value.length > 200) return "Address must be less than 200 characters"
+          }
+          if (fieldName === "dateOfBirth") {
+            if (!value) return "Date of birth is required"
+            const birthDate = new Date(value)
+            const today = new Date()
+            const age = today.getFullYear() - birthDate.getFullYear()
+            if (age < 0) return "Invalid date of birth"
+            if (age > 120) return "Invalid date of birth"
+          }
+          // Exposure Information
+          if (fieldName === "productName") {
+            if (!value) return "Product/substance name is required"
+            if (value.length < 2) return "Please provide the product name"
+            if (value.length > 100) return "Product name must be less than 100 characters"
+          }
+          if (fieldName === "exposureStartDate") {
+            if (!value) return "Exposure start date is required"
+            const expDate = new Date(value)
+            const today = new Date()
+            if (expDate > today) return "Exposure start date cannot be in the future"
+          }
+          if (fieldName === "exposureEndDate") {
+            if (value) {
+              const endDate = new Date(value)
+              const startDate = new Date(formData.exposureStartDate)
+              const today = new Date()
+              if (endDate > today) return "Exposure end date cannot be in the future"
+              if (startDate && endDate < startDate) return "End date must be after start date"
+            }
+          }
+          if (fieldName === "exposureFrequency") {
+            if (!value) return "Exposure frequency is required"
+          }
+          if (fieldName === "exposureCircumstances") {
+            if (!value) return "Exposure circumstances are required"
+            if (value.length < 20) return "Please provide at least 20 characters describing the circumstances"
+            if (value.length > 2000) return "Description must be less than 2000 characters"
+          }
+          // Health Information
+          if (fieldName === "currentConditions") {
+            if (!value) return "Current conditions are required"
+            if (value.length < 10) return "Please provide at least 10 characters describing your conditions"
+            if (value.length > 1000) return "Description must be less than 1000 characters"
+          }
+          if (fieldName === "treatingPhysician") {
+            if (!value) return "Treating physician is required"
+            if (value.length < 5) return "Please provide physician name and practice"
+            if (value.length > 100) return "Physician information must be less than 100 characters"
+          }
+          if (fieldName === "diagnosisDate") {
+            if (value) {
+              const diagDate = new Date(value)
+              const today = new Date()
+              if (diagDate > today) return "Diagnosis date cannot be in the future"
+            }
+          }
+          // Required fields
+          if (fieldName === "urgencyLevel") {
+            if (!value) return "Urgency level is required"
+          }
+          // Consent validations
+          if (fieldName === "consentContact" || fieldName === "consentMedicalRecords" || fieldName === "consentRepresentation") {
+            if (!value) return "This consent is required to proceed"
+          }
+          break
       }
       return ""
     }
@@ -343,10 +440,41 @@ export default function DNAStudio() {
       e.preventDefault()
       // Validate all fields
       const errors: Record<string, string> = {}
+      
+      // Special validation for Intake Form
+      if (resource === "Intake Form") {
+        // Required fields for intake form
+        const requiredFields = [
+          "firstName", "lastName", "email", "phone", "address", "dateOfBirth",
+          "productName", "exposureStartDate", "exposureFrequency", "exposureCircumstances",
+          "currentConditions", "treatingPhysician", "urgencyLevel"
+        ]
+        
+        requiredFields.forEach((fieldName) => {
+          if (!formData[fieldName]) {
+            const error = validateField(fieldName, formData[fieldName], resource)
+            if (error) errors[fieldName] = error
+          }
+        })
+        
+        // Check consent agreements
+        if (!formData.consentContact) {
+          errors.consentContact = "This consent is required to proceed"
+        }
+        if (!formData.consentMedicalRecords) {
+          errors.consentMedicalRecords = "This consent is required to proceed"
+        }
+        if (!formData.consentRepresentation) {
+          errors.consentRepresentation = "This consent is required to proceed"
+        }
+      }
+      
+      // Validate all existing form data
       Object.keys(formData).forEach((fieldName) => {
         const error = validateField(fieldName, formData[fieldName], resource)
         if (error) errors[fieldName] = error
       })
+      
       setFormErrors(errors)
 
       if (Object.keys(errors).length === 0) {
@@ -829,6 +957,369 @@ export default function DNAStudio() {
             ],
           }
 
+        case "Intake Form":
+          return {
+            formFields: (
+              <form onSubmit={(e) => handleSubmit(e, resource)} className="space-y-8">
+                {/* Contact Information Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">Contact Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name *</Label>
+                      <Input
+                        id="firstName"
+                        type="text"
+                        placeholder="John"
+                        value={formData.firstName || ""}
+                        onChange={(e) => handleFieldChange("firstName", e.target.value)}
+                        onBlur={() => handleFieldBlur("firstName", resource)}
+                        className={formErrors.firstName ? "border-red-500" : ""}
+                      />
+                      {formErrors.firstName && <p className="text-red-500 text-sm">{formErrors.firstName}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Input
+                        id="lastName"
+                        type="text"
+                        placeholder="Doe"
+                        value={formData.lastName || ""}
+                        onChange={(e) => handleFieldChange("lastName", e.target.value)}
+                        onBlur={() => handleFieldBlur("lastName", resource)}
+                        className={formErrors.lastName ? "border-red-500" : ""}
+                      />
+                      {formErrors.lastName && <p className="text-red-500 text-sm">{formErrors.lastName}</p>}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="john.doe@example.com"
+                      value={formData.email || ""}
+                      onChange={(e) => handleFieldChange("email", e.target.value)}
+                      onBlur={() => handleFieldBlur("email", resource)}
+                      className={formErrors.email ? "border-red-500" : ""}
+                    />
+                    {formErrors.email && <p className="text-red-500 text-sm">{formErrors.email}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                      value={formData.phone || ""}
+                      onChange={(e) => handleFieldChange("phone", e.target.value)}
+                      onBlur={() => handleFieldBlur("phone", resource)}
+                      className={formErrors.phone ? "border-red-500" : ""}
+                    />
+                    {formErrors.phone && <p className="text-red-500 text-sm">{formErrors.phone}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Full Address *</Label>
+                    <Input
+                      id="address"
+                      type="text"
+                      placeholder="123 Main St, City, State, ZIP"
+                      value={formData.address || ""}
+                      onChange={(e) => handleFieldChange("address", e.target.value)}
+                      onBlur={() => handleFieldBlur("address", resource)}
+                      className={formErrors.address ? "border-red-500" : ""}
+                    />
+                    {formErrors.address && <p className="text-red-500 text-sm">{formErrors.address}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                    <Input
+                      id="dateOfBirth"
+                      type="date"
+                      value={formData.dateOfBirth || ""}
+                      onChange={(e) => handleFieldChange("dateOfBirth", e.target.value)}
+                      onBlur={() => handleFieldBlur("dateOfBirth", resource)}
+                      className={formErrors.dateOfBirth ? "border-red-500" : ""}
+                    />
+                    {formErrors.dateOfBirth && <p className="text-red-500 text-sm">{formErrors.dateOfBirth}</p>}
+                  </div>
+                </div>
+
+                {/* Exposure Information Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">Exposure Information</h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="productName">Product/Substance Name *</Label>
+                    <Input
+                      id="productName"
+                      type="text"
+                      placeholder="Name of product or substance you were exposed to"
+                      value={formData.productName || ""}
+                      onChange={(e) => handleFieldChange("productName", e.target.value)}
+                      onBlur={() => handleFieldBlur("productName", resource)}
+                      className={formErrors.productName ? "border-red-500" : ""}
+                    />
+                    {formErrors.productName && <p className="text-red-500 text-sm">{formErrors.productName}</p>}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="exposureStartDate">Exposure Start Date *</Label>
+                      <Input
+                        id="exposureStartDate"
+                        type="date"
+                        value={formData.exposureStartDate || ""}
+                        onChange={(e) => handleFieldChange("exposureStartDate", e.target.value)}
+                        onBlur={() => handleFieldBlur("exposureStartDate", resource)}
+                        className={formErrors.exposureStartDate ? "border-red-500" : ""}
+                      />
+                      {formErrors.exposureStartDate && <p className="text-red-500 text-sm">{formErrors.exposureStartDate}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="exposureEndDate">Exposure End Date</Label>
+                      <Input
+                        id="exposureEndDate"
+                        type="date"
+                        value={formData.exposureEndDate || ""}
+                        onChange={(e) => handleFieldChange("exposureEndDate", e.target.value)}
+                        onBlur={() => handleFieldBlur("exposureEndDate", resource)}
+                        className={formErrors.exposureEndDate ? "border-red-500" : ""}
+                      />
+                      {formErrors.exposureEndDate && <p className="text-red-500 text-sm">{formErrors.exposureEndDate}</p>}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="exposureFrequency">Frequency of Exposure *</Label>
+                    <select
+                      id="exposureFrequency"
+                      value={formData.exposureFrequency || ""}
+                      onChange={(e) => handleFieldChange("exposureFrequency", e.target.value)}
+                      onBlur={() => handleFieldBlur("exposureFrequency", resource)}
+                      className={`w-full p-2 border rounded ${formErrors.exposureFrequency ? "border-red-500" : "border-gray-300"}`}
+                    >
+                      <option value="">Select frequency</option>
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="occasionally">Occasionally</option>
+                      <option value="single_incident">Single Incident</option>
+                    </select>
+                    {formErrors.exposureFrequency && <p className="text-red-500 text-sm">{formErrors.exposureFrequency}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="exposureCircumstances">Circumstances of Exposure *</Label>
+                    <textarea
+                      id="exposureCircumstances"
+                      placeholder="Describe how, when, and where you were exposed to the product/substance"
+                      value={formData.exposureCircumstances || ""}
+                      onChange={(e) => handleFieldChange("exposureCircumstances", e.target.value)}
+                      onBlur={() => handleFieldBlur("exposureCircumstances", resource)}
+                      className={`w-full p-2 border rounded min-h-24 ${formErrors.exposureCircumstances ? "border-red-500" : "border-gray-300"}`}
+                    />
+                    {formErrors.exposureCircumstances && <p className="text-red-500 text-sm">{formErrors.exposureCircumstances}</p>}
+                  </div>
+                </div>
+
+                {/* Health Information Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">Health Information</h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="currentConditions">Current Health Conditions *</Label>
+                    <textarea
+                      id="currentConditions"
+                      placeholder="List any current health conditions you believe are related to your exposure"
+                      value={formData.currentConditions || ""}
+                      onChange={(e) => handleFieldChange("currentConditions", e.target.value)}
+                      onBlur={() => handleFieldBlur("currentConditions", resource)}
+                      className={`w-full p-2 border rounded min-h-24 ${formErrors.currentConditions ? "border-red-500" : "border-gray-300"}`}
+                    />
+                    {formErrors.currentConditions && <p className="text-red-500 text-sm">{formErrors.currentConditions}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="diagnosisDate">Date of Initial Diagnosis</Label>
+                    <Input
+                      id="diagnosisDate"
+                      type="date"
+                      value={formData.diagnosisDate || ""}
+                      onChange={(e) => handleFieldChange("diagnosisDate", e.target.value)}
+                      onBlur={() => handleFieldBlur("diagnosisDate", resource)}
+                      className={formErrors.diagnosisDate ? "border-red-500" : ""}
+                    />
+                    {formErrors.diagnosisDate && <p className="text-red-500 text-sm">{formErrors.diagnosisDate}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="treatingPhysician">Primary Treating Physician *</Label>
+                    <Input
+                      id="treatingPhysician"
+                      type="text"
+                      placeholder="Dr. Name, Practice/Hospital"
+                      value={formData.treatingPhysician || ""}
+                      onChange={(e) => handleFieldChange("treatingPhysician", e.target.value)}
+                      onBlur={() => handleFieldBlur("treatingPhysician", resource)}
+                      className={formErrors.treatingPhysician ? "border-red-500" : ""}
+                    />
+                    {formErrors.treatingPhysician && <p className="text-red-500 text-sm">{formErrors.treatingPhysician}</p>}
+                  </div>
+                </div>
+
+                {/* Legal Representation Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">Legal Representation</h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="hasAttorney">Do you currently have an attorney?</Label>
+                    <select
+                      id="hasAttorney"
+                      value={formData.hasAttorney || ""}
+                      onChange={(e) => handleFieldChange("hasAttorney", e.target.value)}
+                      onBlur={() => handleFieldBlur("hasAttorney", resource)}
+                      className="w-full p-2 border rounded border-gray-300"
+                    >
+                      <option value="">Select an option</option>
+                      <option value="yes">Yes</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+                  {formData.hasAttorney === "yes" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="attorneyInfo">Attorney Information</Label>
+                      <Input
+                        id="attorneyInfo"
+                        type="text"
+                        placeholder="Attorney name and firm"
+                        value={formData.attorneyInfo || ""}
+                        onChange={(e) => handleFieldChange("attorneyInfo", e.target.value)}
+                        className="border-gray-300"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Additional Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">Additional Information</h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="referralSource">How did you hear about us?</Label>
+                    <select
+                      id="referralSource"
+                      value={formData.referralSource || ""}
+                      onChange={(e) => handleFieldChange("referralSource", e.target.value)}
+                      className="w-full p-2 border rounded border-gray-300"
+                    >
+                      <option value="">Select source</option>
+                      <option value="internet_search">Internet Search</option>
+                      <option value="advertisement">Advertisement</option>
+                      <option value="referral">Referral</option>
+                      <option value="social_media">Social Media</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="urgencyLevel">Urgency Level *</Label>
+                    <select
+                      id="urgencyLevel"
+                      value={formData.urgencyLevel || ""}
+                      onChange={(e) => handleFieldChange("urgencyLevel", e.target.value)}
+                      onBlur={() => handleFieldBlur("urgencyLevel", resource)}
+                      className={`w-full p-2 border rounded ${formErrors.urgencyLevel ? "border-red-500" : "border-gray-300"}`}
+                    >
+                      <option value="">Select urgency</option>
+                      <option value="Low">Low - No immediate health concerns</option>
+                      <option value="Medium">Medium - Some health issues</option>
+                      <option value="High">High - Significant health problems</option>
+                      <option value="Critical">Critical - Severe/life-threatening conditions</option>
+                    </select>
+                    {formErrors.urgencyLevel && <p className="text-red-500 text-sm">{formErrors.urgencyLevel}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="additionalInfo">Additional Information</Label>
+                    <textarea
+                      id="additionalInfo"
+                      placeholder="Any additional information you'd like to share about your case"
+                      value={formData.additionalInfo || ""}
+                      onChange={(e) => handleFieldChange("additionalInfo", e.target.value)}
+                      className="w-full p-2 border rounded border-gray-300 min-h-24"
+                    />
+                  </div>
+                </div>
+
+                {/* Consent Agreements */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">Consent and Authorization</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-2">
+                      <Checkbox 
+                        id="consentContact"
+                        checked={formData.consentContact || false}
+                        onCheckedChange={(checked) => handleFieldChange("consentContact", checked)}
+                      />
+                      <Label htmlFor="consentContact" className="text-sm leading-5">
+                        I consent to be contacted by phone, email, or mail regarding my potential case. *
+                      </Label>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <Checkbox 
+                        id="consentMedicalRecords"
+                        checked={formData.consentMedicalRecords || false}
+                        onCheckedChange={(checked) => handleFieldChange("consentMedicalRecords", checked)}
+                      />
+                      <Label htmlFor="consentMedicalRecords" className="text-sm leading-5">
+                        I authorize the release of my medical records for case evaluation purposes. *
+                      </Label>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <Checkbox 
+                        id="consentRepresentation"
+                        checked={formData.consentRepresentation || false}
+                        onCheckedChange={(checked) => handleFieldChange("consentRepresentation", checked)}
+                      />
+                      <Label htmlFor="consentRepresentation" className="text-sm leading-5">
+                        I understand this intake does not establish an attorney-client relationship and I may be referred to partner law firms. *
+                      </Label>
+                    </div>
+                  </div>
+                  {(formErrors.consentContact || formErrors.consentMedicalRecords || formErrors.consentRepresentation) && (
+                    <p className="text-red-500 text-sm">All consent agreements are required to proceed.</p>
+                  )}
+                </div>
+
+                <Button type="submit" className="w-full" size="lg">
+                  Submit Intake Form
+                </Button>
+              </form>
+            ),
+            attributes: [
+              { name: "contactInformation", type: "Object", required: true },
+              { name: "exposureInformation", type: "Object", required: true },
+              { name: "healthInformation", type: "Object", required: true },
+              { name: "legalRepresentation", type: "Object", required: false },
+              { name: "consentAgreements", type: "Object", required: true },
+              { name: "referralSource", type: "String", required: false },
+              { name: "urgencyLevel", type: "String", required: true },
+              { name: "submissionDate", type: "DateTime", required: true },
+            ],
+            validations: [
+              {
+                field: "contactInformation",
+                rules: ["Required Fields: name, email, phone, address"],
+                description: "Complete contact details for client communication",
+              },
+              {
+                field: "exposureInformation",
+                rules: ["Required Fields: product, startDate, endDate, frequency, circumstances"],
+                description: "Detailed exposure history to harmful product/substance",
+              },
+              {
+                field: "healthInformation",
+                rules: ["Required Fields: currentConditions, diagnosisDate, treatingPhysician"],
+                description: "Current health status and medical history",
+              },
+              {
+                field: "urgencyLevel",
+                rules: ["Values: Low, Medium, High, Critical"],
+                description: "Priority level for case processing",
+              },
+            ],
+          }
+
         default:
           return {
             formFields: (
@@ -897,13 +1388,12 @@ export default function DNAStudio() {
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-3xl font-bold">Step Detail</h1>
-                {step.status && (
+                {/* {step.status && (
                   <Badge variant="outline" className={`${workflowStatusColors[step.status]}`}>
                     {step.status}
                   </Badge>
-                )}
+                )} */}
               </div>
-              <p className="text-muted-foreground">From workflow: {workflow.name}</p>
             </div>
 
             {/* DNA Base Pair Visualization */}
@@ -954,129 +1444,131 @@ export default function DNAStudio() {
                 <h3 className="font-semibold mb-4">Step Information</h3>
                 <div className="space-y-3">
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Step ID</div>
-                    <div className="text-sm font-mono text-foreground">{step.id}</div>
+                    <div className="text-xs text-muted-foreground mb-1">Organization</div>
+                    <div className="text-sm text-foreground">{selectedOrganization.name}</div>
                   </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground mb-1">Workflow</div>
-                    <div className="text-sm text-foreground">{workflow.name}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground mb-1">Status</div>
-                    <Badge
-                      variant="outline"
-                      className={`text-xs ${step.status ? workflowStatusColors[step.status] : ""}`}
-                    >
-                      {step.status || "Active"}
-                    </Badge>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6 bg-card border-border">
-                <h3 className="font-semibold mb-4">Context</h3>
-                <div className="space-y-3">
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Product</div>
                     <div className="text-sm text-foreground">{selectedProduct?.name}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Organization</div>
-                    <div className="text-sm text-foreground">{selectedOrganization.name}</div>
+                    <div className="text-xs text-muted-foreground mb-1">Workflow</div>
+                    <div className="text-sm text-foreground">{workflow.name}</div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-card border-border">
+                <h3 className="font-semibold mb-4">Project Information</h3>
+                <div className="space-y-3">
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">Project</div>
+                    <div className="text-sm text-foreground">{selectedProject?.name || "All Workflows"}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Workflow Status</div>
-                    <Badge variant="outline" className={`text-xs ${workflowStatusColors[workflow.status]}`}>
-                      {workflow.status}
-                    </Badge>
+                    <div className="text-xs text-muted-foreground mb-1">Version</div>
+                    {(() => {
+                      if (selectedProject) {
+                        const latestVersion = getLatestVersion(selectedProject.versionHistory)
+                        const versionToShow = latestVersion || (selectedProject.version ? { version: selectedProject.version, status: 'Active' as const } : null)
+                        
+                        return versionToShow ? (
+                          <Badge variant="outline" className={`text-xs ${getVersionStatusColor(versionToShow.status)}`}>
+                            v{versionToShow.version}
+                          </Badge>
+                        ) : (
+                          <div className="text-sm font-mono text-foreground">1.0.0</div>
+                        )
+                      } else {
+                        return <div className="text-sm font-mono text-foreground">1.0.0</div>
+                      }
+                    })()}
                   </div>
                 </div>
               </Card>
             </div>
 
-            {/* Sample Form Preview */}
+            {/* Form Section */}
             <Card className="mt-6 p-6 bg-card border-border">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-semibold">Form Preview</h3>
+                <h3 className="font-semibold">Form</h3>
                 <Badge variant="outline" className="text-xs">
                   {step.actor} View
                 </Badge>
               </div>
 
-              <div className="space-y-6 max-w-md">{resourceData.formFields}</div>
-            </Card>
-
-            {/* Step Attributes */}
-            <Card className="mt-6 p-6 bg-card border-border">
-              <h3 className="font-semibold mb-4">Attributes</h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4 text-xs font-medium text-muted-foreground border-b border-border pb-2">
-                  <div>Field Name</div>
-                  <div>Type</div>
-                  <div>Required</div>
-                </div>
-
-                {resourceData.attributes.map((attr, index) => (
-                  <div
-                    key={index}
-                    className={`grid grid-cols-3 gap-4 items-center py-2 ${
-                      index < resourceData.attributes.length - 1 ? "border-b border-border/50" : ""
-                    }`}
-                  >
-                    <div className="font-mono text-sm text-foreground">{attr.name}</div>
-                    <div className="text-sm text-muted-foreground">{attr.type}</div>
-                    <div className="flex items-center gap-2">
-                      <Circle
-                        className={`h-2 w-2 ${
-                          attr.required ? "fill-emerald-400 text-emerald-400" : "fill-gray-400 text-gray-400"
-                        }`}
-                      />
-                      <span className={`text-sm ${attr.required ? "text-emerald-400" : "text-muted-foreground"}`}>
-                        {attr.required ? "Yes" : "No"}
-                      </span>
+              <Tabs defaultValue="preview" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="preview" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    <Eye className="h-4 w-4" />
+                    Preview
+                  </TabsTrigger>
+                  <TabsTrigger value="configuration" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    <Settings className="h-4 w-4" />
+                    Configuration
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="preview" className="mt-6">
+                  <div className="space-y-6 max-w-md">{resourceData.formFields}</div>
+                </TabsContent>
+                
+                <TabsContent value="configuration" className="mt-6">
+                  <div className="space-y-4">
+                    <div className="grid gap-4 text-xs font-medium text-muted-foreground border-b border-border pb-2" style={{gridTemplateColumns: "160px 80px 80px 1fr 1fr"}}>
+                      <div>Field Name</div>
+                      <div>Type</div>
+                      <div>Required</div>
+                      <div>Validation Rules</div>
+                      <div>Description</div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
 
-            {/* Validations */}
-            <Card className="mt-6 p-6 bg-card border-border">
-              <h3 className="font-semibold mb-4">Validations</h3>
-              <div className="space-y-4">
-                {resourceData.validations.map((validation, index) => (
-                  <div
-                    key={index}
-                    className={index < resourceData.validations.length - 1 ? "border-b border-border pb-4" : ""}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="font-mono text-sm text-foreground min-w-[140px]">{validation.field}</div>
-                      <div className="flex-1">
-                        <div className="flex flex-wrap gap-2">
-                          {validation.rules.map((rule, ruleIndex) => {
-                            const colors = [
-                              "bg-blue-500/10 text-blue-400 border-blue-500/30",
-                              "bg-amber-500/10 text-amber-400 border-amber-500/30",
-                              "bg-purple-500/10 text-purple-400 border-purple-500/30",
-                              "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
-                            ]
-                            return (
-                              <Badge
-                                key={ruleIndex}
-                                variant="outline"
-                                className={`text-xs ${colors[ruleIndex % colors.length]}`}
-                              >
-                                {rule}
-                              </Badge>
-                            )
-                          })}
+                    {resourceData.attributes.map((attr, index) => {
+                      const validation = resourceData.validations.find(v => v.field === attr.name)
+                      return (
+                        <div
+                          key={index}
+                          className={`grid gap-4 items-start py-3 ${
+                            index < resourceData.attributes.length - 1 ? "border-b border-border/50" : ""
+                          }`}
+                          style={{gridTemplateColumns: "160px 80px 80px 1fr 1fr"}}
+                        >
+                          <div className="font-mono text-sm text-foreground break-words">{attr.name}</div>
+                          <div className="text-sm text-muted-foreground">{attr.type}</div>
+                          <div className="flex items-center gap-2">
+                            <Circle
+                              className={`h-2 w-2 flex-shrink-0 ${
+                                attr.required ? "fill-emerald-400 text-emerald-400" : "fill-gray-400 text-gray-400"
+                              }`}
+                            />
+                            <span className={`text-sm ${attr.required ? "text-emerald-400" : "text-muted-foreground"}`}>
+                              {attr.required ? "Yes" : "No"}
+                            </span>
+                          </div>
+                          <div className="space-y-2">
+                            {validation?.rules && validation.rules.length > 0 ? (
+                              <>
+                                <ul className="space-y-1">
+                                  {validation.rules.map((rule, ruleIndex) => (
+                                    <li key={ruleIndex} className="text-xs text-muted-foreground">
+                                      • {rule}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">No rules</span>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground break-words">
+                            {validation?.description || "No validation description"}
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-2">{validation.description}</p>
-                      </div>
-                    </div>
+                      )
+                    })}
                   </div>
-                ))}
-              </div>
+                </TabsContent>
+              </Tabs>
             </Card>
           </div>
         </main>
@@ -1144,7 +1636,7 @@ export default function DNAStudio() {
             <div className="mb-8">
               <h1 className="text-3xl font-bold mb-2">Products</h1>
               <p className="text-muted-foreground">
-                {selectedOrganization.description} • Select a product to view its DNA graph and projects
+                {selectedOrganization.description}
               </p>
             </div>
 
@@ -1164,9 +1656,16 @@ export default function DNAStudio() {
                         <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
                           {product.name}
                         </h3>
-                        <Badge variant="outline" className={`text-xs mt-1 ${productStatusColors[product.status]}`}>
-                          {product.status}
-                        </Badge>
+                        {(() => {
+                          const latestVersion = getLatestVersion(product.versionHistory)
+                          const versionToShow = latestVersion || (product.version ? { version: product.version, status: 'Active' as const } : null)
+                          
+                          return versionToShow && (
+                            <Badge variant="outline" className={`text-xs mt-1 ${getVersionStatusColor(versionToShow.status)}`}>
+                              v{versionToShow.version}
+                            </Badge>
+                          )
+                        })()}
                       </div>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -1230,8 +1729,57 @@ export default function DNAStudio() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Processes</h1>
-            <p className="text-muted-foreground">Workflows and steps defining the complete product</p>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">{currentProduct.name}</h1>
+                <p className="text-muted-foreground">{currentProduct.description}</p>
+              </div>
+              {(() => {
+                const latestVersion = getLatestVersion(currentProduct.versionHistory)
+                const versionToShow = latestVersion || (currentProduct.version ? { version: currentProduct.version, status: 'Active' as const } : null)
+                
+                return versionToShow && (
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-xs text-muted-foreground mb-1">Version</div>
+                      <Badge variant="outline" className={`text-sm font-mono px-3 py-1 ${getVersionStatusColor(versionToShow.status)}`}>
+                        v{versionToShow.version}
+                      </Badge>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+            
+            {/* Version History Card */}
+            {currentProduct.versionHistory && currentProduct.versionHistory.length > 0 && (
+              <Card className="p-4 bg-card border-border mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-sm">Version History</h3>
+                  <Badge variant="outline" className="text-xs">
+                    {currentProduct.versionHistory.length} releases
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  {currentProduct.versionHistory.slice(-3).reverse().map((version, index) => (
+                    <div key={version.version} className="flex items-center justify-between py-2 px-3 rounded-md bg-muted/30">
+                      <div className="flex items-center gap-3">
+                        <Badge variant="outline" className={`text-xs font-mono ${getVersionStatusColor(version.status)}`}>
+                          v{version.version}
+                        </Badge>
+                        <span className="text-sm text-foreground">{version.description}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{version.releaseDate || ''}</span>
+                    </div>
+                  ))}
+                  {currentProduct.versionHistory.length > 3 && (
+                    <div className="text-xs text-muted-foreground text-center py-1">
+                      + {currentProduct.versionHistory.length - 3} more versions
+                    </div>
+                  )}
+                </div>
+              </Card>
+            )}
           </div>
 
           <div className="space-y-6">
@@ -1243,11 +1791,16 @@ export default function DNAStudio() {
                   {/* Workflow Header */}
                   <div className="flex items-start justify-between mb-6">
                     <div>
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="mb-2">
                         <h3 className="text-xl font-semibold text-foreground">{workflow.name}</h3>
-                        <Badge variant="outline" className={`text-xs ${workflowStatusColors[workflow.status]}`}>
-                          {workflow.status}
-                        </Badge>
+                        {(() => {
+                          const latestVersion = getLatestVersion(workflow.versionHistory)
+                          return latestVersion && (
+                            <Badge variant="outline" className={`text-xs mt-1 ${getVersionStatusColor(latestVersion.status)}`}>
+                              v{latestVersion.version}
+                            </Badge>
+                          )
+                        })()}
                       </div>
                       <p className="text-sm text-muted-foreground">{workflow.description}</p>
                     </div>
@@ -1300,11 +1853,14 @@ export default function DNAStudio() {
                             </div>
                           </div>
 
-                          {step.status && (
-                            <Badge variant="outline" className={`text-xs ${workflowStatusColors[step.status]} ml-2`}>
-                              {step.status}
-                            </Badge>
-                          )}
+                          {(() => {
+                            const latestVersion = getLatestVersion(step.versionHistory)
+                            return latestVersion && (
+                              <Badge variant="outline" className={`text-xs ml-2 ${getVersionStatusColor(latestVersion.status)}`}>
+                                v{latestVersion.version}
+                              </Badge>
+                            )
+                          })()}
 
                           <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                         </button>

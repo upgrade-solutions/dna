@@ -1,0 +1,1170 @@
+{
+  "organization": {
+    "id": "org3",
+    "name": "Perfected Claims",
+    "description": "Mass tort case management and client acquisition service provider for law firms fighting corporate harm"
+  },
+  "products": [
+    {
+      "id": "5",
+      "name": "Case Development Platform",
+      "description": "Mass tort case identification, evidence gathering, and legal partner coordination",
+      "version": "1.0.0",
+      "versionHistory": [
+        {
+          "version": "0.9.0",
+          "status": "Deprecated",
+          "releaseDate": "2024-02-01",
+          "description": "Beta release with basic case investigation workflows",
+          "changes": ["Manual case research", "Basic evidence collection", "Simple legal partner coordination"]
+        },
+        {
+          "version": "1.0.0",
+          "status": "Active",
+          "releaseDate": "2024-04-15",
+          "description": "Full platform launch with automated investigation tools",
+          "changes": ["AI-powered document analysis", "Automated harm pattern detection", "Integrated expert witness coordination", "Advanced legal strategy development"]
+        },
+        {
+          "version": "1.1.0",
+          "status": "In Review",
+          "description": "Enhanced evidence gathering with blockchain verification",
+          "changes": [
+            "Blockchain-based evidence authentication",
+            "Real-time collaboration tools for legal teams",
+            "Machine learning case outcome prediction",
+            "Automated regulatory compliance checking"
+          ]
+        }
+      ],
+      "projectCount": 3,
+      "workflowCount": 4,
+      "status": "Active",
+      "organizationId": "org3"
+    },
+    {
+      "id": "6",
+      "name": "Client Acquisition System",
+      "description": "Victim identification, outreach, intake, and client management for mass torts",
+      "version": "2.1.0",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "releaseDate": "2023-12-10",
+          "description": "Initial client acquisition platform with basic outreach",
+          "changes": ["Manual victim identification", "Basic intake forms", "Simple client management"]
+        },
+        {
+          "version": "2.0.0",
+          "status": "Deprecated",
+          "releaseDate": "2024-03-05",
+          "description": "Advanced outreach automation and AI-powered victim identification",
+          "changes": ["AI-powered victim identification", "Automated outreach campaigns", "Enhanced intake processing"]
+        },
+        {
+          "version": "2.1.0",
+          "status": "Active",
+          "releaseDate": "2024-05-20",
+          "description": "HIPAA-compliant medical record processing and enhanced client communication",
+          "changes": ["HIPAA-compliant medical record handling", "Multi-channel client communication", "Automated eligibility assessment", "Real-time case status updates"]
+        },
+        {
+          "version": "2.2.0",
+          "status": "Planned",
+          "description": "Predictive analytics for client qualification and mobile-first experience",
+          "changes": [
+            "Predictive client qualification scoring",
+            "Mobile-first intake experience",
+            "Integration with health data providers",
+            "Advanced consent management"
+          ]
+        }
+      ],
+      "projectCount": 4,
+      "workflowCount": 3,
+      "status": "Active",
+      "organizationId": "org3"
+    },
+    {
+      "id": "7",
+      "name": "Legal Partnership Network",
+      "description": "Law firm partnership management and case distribution coordination",
+      "version": "1.2.0",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "releaseDate": "2024-01-20",
+          "description": "Basic law firm partnership management",
+          "changes": ["Manual firm recruitment", "Simple case distribution", "Basic performance tracking"]
+        },
+        {
+          "version": "1.1.0",
+          "status": "Deprecated",
+          "releaseDate": "2024-04-01",
+          "description": "Automated case matching and performance analytics",
+          "changes": ["Automated firm-case matching", "Performance analytics dashboard", "Fee structure optimization"]
+        },
+        {
+          "version": "1.2.0",
+          "status": "Active",
+          "releaseDate": "2024-06-10",
+          "description": "AI-powered case distribution and real-time collaboration tools",
+          "changes": ["AI-powered case distribution algorithm", "Real-time collaboration platform", "Integrated billing and fee management", "Advanced partner performance metrics"]
+        },
+        {
+          "version": "1.3.0",
+          "status": "In Review",
+          "description": "Blockchain-based smart contracts and global partner network",
+          "changes": [
+            "Smart contract automation for fee distribution",
+            "Global law firm network expansion",
+            "Reputation-based partner scoring",
+            "Cross-border case coordination"
+          ]
+        }
+      ],
+      "projectCount": 2,
+      "workflowCount": 2,
+      "status": "Active",
+      "organizationId": "org3"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "wf12",
+      "name": "Case Investigation",
+      "description": "Identifying corporate harm patterns and building evidence for mass tort cases",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Manual investigation and research process"
+        },
+        {
+          "version": "2.0.0",
+          "status": "Active",
+          "description": "AI-powered document analysis and automated harm pattern detection"
+        },
+        {
+          "version": "2.1.0",
+          "status": "In Review",
+          "description": "Enhanced with blockchain evidence verification and regulatory compliance automation",
+          "changes": [
+            "Blockchain-based evidence chain of custody",
+            "Automated regulatory filing compliance",
+            "Real-time collaboration with expert witnesses",
+            "Predictive case outcome modeling"
+          ]
+        }
+      ],
+      "productId": "5"
+    },
+    {
+      "id": "wf13",
+      "name": "Evidence Gathering",
+      "description": "Collecting documents, expert testimony, and witness statements",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Manual document collection and witness interviews"
+        },
+        {
+          "version": "1.1.0",
+          "status": "Active",
+          "description": "Automated document processing with OCR and expert witness coordination platform"
+        },
+        {
+          "version": "1.2.0",
+          "status": "Planned",
+          "description": "AI-powered evidence analysis and automated witness statement processing",
+          "changes": [
+            "Natural language processing for document analysis",
+            "Automated witness statement transcription",
+            "Evidence quality scoring algorithm",
+            "Cross-referencing with legal precedents"
+          ]
+        }
+      ],
+      "productId": "5"
+    },
+    {
+      "id": "wf14",
+      "name": "Legal Strategy Development",
+      "description": "Working with legal partners to develop case strategy and approach",
+      "status": "In Review",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Active",
+          "description": "Basic strategy development with partner law firms"
+        },
+        {
+          "version": "2.0.0",
+          "status": "In Review",
+          "description": "AI-assisted strategy development with predictive analytics and collaborative planning tools",
+          "changes": [
+            "Predictive case outcome analytics",
+            "Collaborative strategy development platform",
+            "Automated legal research integration",
+            "Risk assessment and mitigation planning",
+            "Timeline optimization algorithms"
+          ]
+        }
+      ],
+      "productId": "5"
+    },
+    {
+      "id": "wf15",
+      "name": "Case Filing Preparation",
+      "description": "Preparing legal documents and coordinating case filing with partner firms",
+      "status": "Active",
+      "productId": "5"
+    },
+    {
+      "id": "wf16",
+      "name": "Victim Identification",
+      "description": "Community outreach and identification of affected individuals",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Manual community outreach and victim identification"
+        },
+        {
+          "version": "2.0.0",
+          "status": "Active",
+          "description": "AI-powered victim identification with automated outreach campaigns and social media monitoring"
+        },
+        {
+          "version": "2.1.0",
+          "status": "Planned",
+          "description": "Predictive modeling for victim identification and ethical outreach optimization",
+          "changes": [
+            "Predictive victim identification modeling",
+            "Ethical outreach compliance monitoring",
+            "Multi-language outreach capabilities",
+            "Community partnership integration"
+          ]
+        }
+      ],
+      "productId": "6"
+    },
+    {
+      "id": "wf17",
+      "name": "Client Intake Process",
+      "description": "Screening, documentation, and onboarding of potential claimants",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Basic intake forms and manual screening"
+        },
+        {
+          "version": "2.0.0",
+          "status": "Active",
+          "description": "HIPAA-compliant digital intake with automated eligibility assessment"
+        },
+        {
+          "version": "2.1.0",
+          "status": "In Review",
+          "description": "Mobile-first intake experience with AI-powered medical record analysis",
+          "changes": [
+            "Mobile-optimized intake interface",
+            "AI-powered medical record analysis",
+            "Real-time eligibility scoring",
+            "Automated document verification",
+            "Multi-language support"
+          ]
+        }
+      ],
+      "productId": "6"
+    },
+    {
+      "id": "wf18",
+      "name": "Claimant Management",
+      "description": "Ongoing communication and case status updates for clients",
+      "status": "Active",
+      "productId": "6"
+    },
+    {
+      "id": "wf19",
+      "name": "Law Firm Partnership",
+      "description": "Recruiting and managing relationships with experienced mass tort law firms",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Manual firm recruitment and basic partnership management"
+        },
+        {
+          "version": "1.1.0",
+          "status": "Active",
+          "description": "Automated firm performance tracking and reputation-based partner scoring"
+        },
+        {
+          "version": "1.2.0",
+          "status": "Planned",
+          "description": "Global network expansion with blockchain-based smart contracts",
+          "changes": [
+            "Global law firm network integration",
+            "Smart contract-based fee arrangements",
+            "Automated performance benchmarking",
+            "Cross-border regulatory compliance"
+          ]
+        }
+      ],
+      "productId": "7"
+    },
+    {
+      "id": "wf20",
+      "name": "Case Distribution",
+      "description": "Matching cases with appropriate legal partners based on expertise and capacity",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Manual case assignment based on basic criteria"
+        },
+        {
+          "version": "2.0.0",
+          "status": "Active",
+          "description": "AI-powered case distribution algorithm with real-time capacity management"
+        },
+        {
+          "version": "2.1.0",
+          "status": "In Review",
+          "description": "Predictive matching with outcome optimization and workload balancing",
+          "changes": [
+            "Predictive case outcome optimization",
+            "Dynamic workload balancing",
+            "Expertise-based matching refinement",
+            "Real-time performance feedback integration"
+          ]
+        }
+      ],
+      "productId": "7"
+    }
+  ],
+  "steps": [
+    {
+      "id": "s32",
+      "actor": "Investigator",
+      "action": "Analyze",
+      "resource": "Corporate Documents",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Manual document analysis process"
+        },
+        {
+          "version": "2.0.0",
+          "status": "Active",
+          "description": "AI-powered document analysis with OCR and pattern recognition"
+        }
+      ],
+      "workflowId": "wf12",
+      "order": 1
+    },
+    {
+      "id": "s33",
+      "actor": "Research Team",
+      "action": "Identify",
+      "resource": "Harm Patterns",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Active",
+          "description": "Pattern identification using machine learning algorithms"
+        },
+        {
+          "version": "1.1.0",
+          "status": "In Review",
+          "description": "Enhanced pattern detection with cross-case correlation analysis",
+          "changes": [
+            "Cross-case pattern correlation",
+            "Automated similarity scoring",
+            "Regulatory precedent matching"
+          ]
+        }
+      ],
+      "workflowId": "wf12",
+      "order": 2
+    },
+    {
+      "id": "s34",
+      "actor": "Legal Analyst",
+      "action": "Assess",
+      "resource": "Case Viability",
+      "status": "Active",
+      "workflowId": "wf12",
+      "order": 3
+    },
+    {
+      "id": "s35",
+      "actor": "Document Specialist",
+      "action": "Collect",
+      "resource": "Evidence Files",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Manual evidence collection and filing"
+        },
+        {
+          "version": "1.1.0",
+          "status": "Active",
+          "description": "Automated evidence collection with blockchain verification"
+        },
+        {
+          "version": "1.2.0",
+          "status": "Planned",
+          "description": "AI-powered evidence quality assessment and automated categorization",
+          "changes": [
+            "Automated evidence quality scoring",
+            "Smart categorization system",
+            "Chain of custody automation"
+          ]
+        }
+      ],
+      "workflowId": "wf13",
+      "order": 1
+    },
+    {
+      "id": "s36",
+      "actor": "Expert Coordinator",
+      "action": "Secure",
+      "resource": "Expert Testimony",
+      "status": "Active",
+      "workflowId": "wf13",
+      "order": 2
+    },
+    {
+      "id": "s37",
+      "actor": "Investigator",
+      "action": "Interview",
+      "resource": "Witnesses",
+      "status": "In Review",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Active",
+          "description": "Traditional witness interview process"
+        },
+        {
+          "version": "2.0.0",
+          "status": "In Review",
+          "description": "Video-enabled remote interviews with automated transcription",
+          "changes": [
+            "Remote video interview capability",
+            "Real-time transcription and translation",
+            "Automated witness credibility assessment"
+          ]
+        }
+      ],
+      "workflowId": "wf13",
+      "order": 3
+    },
+    {
+      "id": "s38",
+      "actor": "Legal Partner",
+      "action": "Develop",
+      "resource": "Case Strategy",
+      "status": "In Review",
+      "workflowId": "wf14",
+      "order": 1
+    },
+    {
+      "id": "s39",
+      "actor": "Strategy Team",
+      "action": "Plan",
+      "resource": "Legal Approach",
+      "status": "In Review",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "In Review",
+          "description": "Collaborative strategy planning with predictive analytics integration"
+        }
+      ],
+      "workflowId": "wf14",
+      "order": 2
+    },
+    {
+      "id": "s40",
+      "actor": "Legal Team",
+      "action": "Review",
+      "resource": "Strategy Document",
+      "status": "In Review",
+      "workflowId": "wf14",
+      "order": 3
+    },
+    {
+      "id": "s41",
+      "actor": "Legal Assistant",
+      "action": "Prepare",
+      "resource": "Filing Documents",
+      "status": "Active",
+      "workflowId": "wf15",
+      "order": 1
+    },
+    {
+      "id": "s42",
+      "actor": "Partner Attorney",
+      "action": "Review",
+      "resource": "Legal Filings",
+      "status": "Active",
+      "workflowId": "wf15",
+      "order": 2
+    },
+    {
+      "id": "s43",
+      "actor": "Legal Partner",
+      "action": "File",
+      "resource": "Case Documents",
+      "status": "Active",
+      "workflowId": "wf15",
+      "order": 3
+    },
+    {
+      "id": "s44",
+      "actor": "Community Outreach Team",
+      "action": "Identify",
+      "resource": "Affected Communities",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Manual community identification through traditional media"
+        },
+        {
+          "version": "2.0.0",
+          "status": "Active",
+          "description": "AI-powered community identification using social media and health data analysis"
+        }
+      ],
+      "workflowId": "wf16",
+      "order": 1
+    },
+    {
+      "id": "s45",
+      "actor": "Outreach Coordinator",
+      "action": "Contact",
+      "resource": "Potential Victims",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "2.0.0",
+          "status": "Active",
+          "description": "Multi-channel ethical outreach with compliance monitoring"
+        },
+        {
+          "version": "2.1.0",
+          "status": "Planned",
+          "description": "Predictive outreach optimization with ethical AI guidelines",
+          "changes": [
+            "Predictive optimal contact timing",
+            "Multi-language automated outreach",
+            "Ethical compliance real-time monitoring"
+          ]
+        }
+      ],
+      "workflowId": "wf16",
+      "order": 2
+    },
+    {
+      "id": "s46",
+      "actor": "Intake Specialist",
+      "action": "Document",
+      "resource": "Victim Information",
+      "status": "Active",
+      "workflowId": "wf16",
+      "order": 3
+    },
+    {
+      "id": "s47",
+      "actor": "Claimant",
+      "action": "Submit",
+      "resource": "Intake Form",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Basic paper-based intake forms"
+        },
+        {
+          "version": "2.0.0",
+          "status": "Active",
+          "description": "Digital HIPAA-compliant intake with smart form technology"
+        },
+        {
+          "version": "2.1.0",
+          "status": "In Review",
+          "description": "Mobile-first intake with AI-assisted form completion",
+          "changes": [
+            "Mobile-optimized interface",
+            "AI-assisted form pre-filling",
+            "Real-time validation and help"
+          ]
+        }
+      ],
+      "workflowId": "wf17",
+      "order": 1
+    },
+    {
+      "id": "s48",
+      "actor": "Intake Specialist",
+      "action": "Review",
+      "resource": "Medical Records",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "2.0.0",
+          "status": "Active",
+          "description": "HIPAA-compliant digital medical record review with OCR processing"
+        },
+        {
+          "version": "2.1.0",
+          "status": "In Review",
+          "description": "AI-powered medical record analysis with automated relevance scoring",
+          "changes": [
+            "Automated medical condition extraction",
+            "Relevance scoring algorithm",
+            "Cross-reference with case criteria"
+          ]
+        }
+      ],
+      "workflowId": "wf17",
+      "order": 2
+    },
+    {
+      "id": "s49",
+      "actor": "Case Manager",
+      "action": "Evaluate",
+      "resource": "Claim Eligibility",
+      "status": "Active",
+      "workflowId": "wf17",
+      "order": 3
+    },
+    {
+      "id": "s50",
+      "actor": "System",
+      "action": "Create",
+      "resource": "Client Profile",
+      "status": "Active",
+      "workflowId": "wf17",
+      "order": 4
+    },
+    {
+      "id": "s51",
+      "actor": "Case Manager",
+      "action": "Update",
+      "resource": "Case Status",
+      "status": "Active",
+      "workflowId": "wf18",
+      "order": 1
+    },
+    {
+      "id": "s52",
+      "actor": "System",
+      "action": "Send",
+      "resource": "Status Notifications",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "2.1.0",
+          "status": "Active",
+          "description": "Multi-channel notifications with personalized messaging"
+        }
+      ],
+      "workflowId": "wf18",
+      "order": 2
+    },
+    {
+      "id": "s53",
+      "actor": "Client Services",
+      "action": "Respond to",
+      "resource": "Client Inquiries",
+      "status": "Active",
+      "workflowId": "wf18",
+      "order": 3
+    },
+    {
+      "id": "s54",
+      "actor": "Partnership Manager",
+      "action": "Recruit",
+      "resource": "Law Firms",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Manual law firm recruitment and vetting"
+        },
+        {
+          "version": "1.1.0",
+          "status": "Active",
+          "description": "Automated firm performance tracking and reputation-based scoring"
+        }
+      ],
+      "workflowId": "wf19",
+      "order": 1
+    },
+    {
+      "id": "s55",
+      "actor": "Legal Team",
+      "action": "Evaluate",
+      "resource": "Firm Credentials",
+      "status": "Active",
+      "workflowId": "wf19",
+      "order": 2
+    },
+    {
+      "id": "s56",
+      "actor": "Partnership Manager",
+      "action": "Execute",
+      "resource": "Partnership Agreement",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.2.0",
+          "status": "Planned",
+          "description": "Smart contract-based partnership agreements with automated fee distribution",
+          "changes": [
+            "Blockchain-based smart contracts",
+            "Automated fee calculation and distribution",
+            "Performance-based contract terms"
+          ]
+        }
+      ],
+      "workflowId": "wf19",
+      "order": 3
+    },
+    {
+      "id": "s57",
+      "actor": "Case Coordinator",
+      "action": "Match",
+      "resource": "Cases to Firms",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Manual case assignment based on basic criteria"
+        },
+        {
+          "version": "2.0.0",
+          "status": "Active",
+          "description": "AI-powered case distribution with expertise and capacity matching"
+        },
+        {
+          "version": "2.1.0",
+          "status": "In Review",
+          "description": "Predictive outcome optimization with dynamic workload balancing",
+          "changes": [
+            "Predictive case success probability",
+            "Dynamic workload balancing",
+            "Real-time capacity monitoring"
+          ]
+        }
+      ],
+      "workflowId": "wf20",
+      "order": 1
+    },
+    {
+      "id": "s58",
+      "actor": "System",
+      "action": "Transfer",
+      "resource": "Case Files",
+      "status": "Active",
+      "workflowId": "wf20",
+      "order": 2
+    },
+    {
+      "id": "s59",
+      "actor": "Partnership Manager",
+      "action": "Monitor",
+      "resource": "Case Progress",
+      "status": "Active",
+      "workflowId": "wf20",
+      "order": 3
+    }
+  ],
+  "projects": [
+    {
+      "id": "8",
+      "name": "Case Investigation Platform",
+      "status": "Deliver",
+      "version": "2.0.0",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "releaseDate": "2024-02-01",
+          "description": "Initial case investigation tool with manual research capabilities"
+        },
+        {
+          "version": "1.5.0",
+          "releaseDate": "2024-04-15",
+          "description": "Added automated document analysis and harm pattern detection"
+        },
+        {
+          "version": "2.0.0",
+          "releaseDate": "2024-06-20",
+          "description": "Full AI integration with blockchain evidence verification and legal strategy development"
+        }
+      ],
+      "workflowIds": ["wf12", "wf13"],
+      "productId": "5"
+    },
+    {
+      "id": "9",
+      "name": "Legal Strategy Collaboration Suite",
+      "status": "Develop",
+      "version": "1.1.0",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "releaseDate": "2024-03-10",
+          "description": "Basic strategy development platform for legal partners"
+        },
+        {
+          "version": "1.1.0",
+          "releaseDate": "2024-05-25",
+          "description": "Added predictive analytics and collaborative planning tools"
+        }
+      ],
+      "workflowIds": ["wf14", "wf15"],
+      "productId": "5"
+    },
+    {
+      "id": "10",
+      "name": "Client Acquisition Engine",
+      "status": "Deliver",
+      "version": "2.1.0",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "releaseDate": "2023-12-10",
+          "description": "Basic victim identification and outreach system"
+        },
+        {
+          "version": "2.0.0",
+          "releaseDate": "2024-03-05",
+          "description": "AI-powered victim identification with automated outreach campaigns"
+        },
+        {
+          "version": "2.1.0",
+          "releaseDate": "2024-05-20",
+          "description": "HIPAA-compliant medical record processing and enhanced client communication"
+        }
+      ],
+      "workflowIds": ["wf16", "wf17"],
+      "productId": "6"
+    },
+    {
+      "id": "11",
+      "name": "Client Management Portal",
+      "status": "Design",
+      "version": "1.0.0",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "releaseDate": "2024-05-30",
+          "description": "Multi-channel client communication and status management system"
+        }
+      ],
+      "workflowIds": ["wf18"],
+      "productId": "6"
+    },
+    {
+      "id": "12",
+      "name": "Partnership Network Platform",
+      "status": "Develop",
+      "version": "1.2.0",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "releaseDate": "2024-01-20",
+          "description": "Basic law firm partnership management system"
+        },
+        {
+          "version": "1.1.0",
+          "releaseDate": "2024-04-01",
+          "description": "Automated case matching and performance analytics"
+        },
+        {
+          "version": "1.2.0",
+          "releaseDate": "2024-06-10",
+          "description": "AI-powered case distribution with real-time collaboration tools"
+        }
+      ],
+      "workflowIds": ["wf19"],
+      "productId": "7"
+    },
+    {
+      "id": "13",
+      "name": "Smart Case Distribution System",
+      "status": "Develop",
+      "version": "2.0.0",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "releaseDate": "2024-02-15",
+          "description": "Manual case assignment with basic matching criteria"
+        },
+        {
+          "version": "2.0.0",
+          "releaseDate": "2024-06-10",
+          "description": "AI-powered case distribution with expertise and capacity optimization"
+        }
+      ],
+      "workflowIds": ["wf20"],
+      "productId": "7"
+    },
+    {
+      "id": "14",
+      "name": "Predictive Analytics Dashboard",
+      "status": "Discover",
+      "workflowIds": ["wf12", "wf14", "wf16", "wf20"],
+      "productId": "5"
+    },
+    {
+      "id": "15",
+      "name": "Blockchain Evidence Verification",
+      "status": "Design",
+      "workflowIds": ["wf13"],
+      "productId": "5"
+    },
+    {
+      "id": "16",
+      "name": "Mobile Client Intake App",
+      "status": "Discover",
+      "workflowIds": ["wf17"],
+      "productId": "6"
+    }
+  ],
+  "resourceSchemas": {
+    "Case": {
+      "attributes": [
+        { "name": "caseTitle", "type": "String", "required": true },
+        { "name": "caseType", "type": "String", "required": true },
+        { "name": "defendantCorporation", "type": "String", "required": true },
+        { "name": "harmDescription", "type": "String", "required": true },
+        { "name": "caseStatus", "type": "String", "required": true },
+        { "name": "filingDate", "type": "Date", "required": false },
+        { "name": "estimatedVictims", "type": "Number", "required": false },
+        { "name": "settlementAmount", "type": "Number", "required": false },
+        { "name": "primaryAttorney", "type": "String", "required": false },
+        { "name": "legalPartnerFirm", "type": "String", "required": false }
+      ],
+      "validations": [
+        {
+          "field": "caseTitle",
+          "rules": ["Min Length: 5", "Max Length: 200"],
+          "description": "Clear, descriptive case title"
+        },
+        {
+          "field": "caseType",
+          "rules": ["Values: Product Liability, Environmental, Pharmaceutical, Medical Device, Workplace Safety, Consumer Protection"],
+          "description": "Must be a recognized mass tort category"
+        },
+        {
+          "field": "caseStatus",
+          "rules": ["Values: Investigation, Evidence Gathering, Filed, Discovery, Settlement Negotiations, Resolved, Dismissed"],
+          "description": "Current status of the case"
+        },
+        {
+          "field": "harmDescription",
+          "rules": ["Min Length: 50", "Max Length: 2000"],
+          "description": "Detailed description of the harm caused"
+        }
+      ]
+    },
+    "Client": {
+      "attributes": [
+        { "name": "firstName", "type": "String", "required": true },
+        { "name": "lastName", "type": "String", "required": true },
+        { "name": "email", "type": "String", "required": true },
+        { "name": "phoneNumber", "type": "String", "required": true },
+        { "name": "dateOfBirth", "type": "Date", "required": true },
+        { "name": "address", "type": "Object", "required": true },
+        { "name": "caseIds", "type": "String[]", "required": false },
+        { "name": "representativeType", "type": "String", "required": true },
+        { "name": "medicalRecordsProvided", "type": "Boolean", "required": false },
+        { "name": "consentToContact", "type": "Boolean", "required": true },
+        { "name": "intakeDate", "type": "DateTime", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "email",
+          "rules": ["Format: Email", "Max Length: 255"],
+          "description": "Valid email address for client communication"
+        },
+        {
+          "field": "phoneNumber",
+          "rules": ["Format: E.164", "Length: 10-15"],
+          "description": "Valid phone number for client contact"
+        },
+        {
+          "field": "representativeType",
+          "rules": ["Values: Self, Representative"],
+          "description": "Whether filing for themselves or someone else"
+        },
+        {
+          "field": "dateOfBirth",
+          "rules": ["Max Age: 120", "Format: ISO 8601"],
+          "description": "Valid birth date for age verification"
+        }
+      ]
+    },
+    "Claimant": {
+      "attributes": [
+        { "name": "clientId", "type": "String", "required": true },
+        { "name": "caseId", "type": "String", "required": true },
+        { "name": "exposureDetails", "type": "Object", "required": true },
+        { "name": "healthConditions", "type": "String[]", "required": true },
+        { "name": "diagnosisDate", "type": "Date", "required": false },
+        { "name": "treatmentHistory", "type": "String", "required": false },
+        { "name": "economicDamages", "type": "Object", "required": false },
+        { "name": "eligibilityStatus", "type": "String", "required": true },
+        { "name": "documentationScore", "type": "Number", "required": false },
+        { "name": "assignedLawFirm", "type": "String", "required": false }
+      ],
+      "validations": [
+        {
+          "field": "exposureDetails",
+          "rules": ["Required Fields: product, duration, frequency, dateRange"],
+          "description": "Detailed information about exposure to harmful product/substance"
+        },
+        {
+          "field": "healthConditions",
+          "rules": ["Min Items: 1", "Max Items: 20"],
+          "description": "List of health conditions related to the exposure"
+        },
+        {
+          "field": "eligibilityStatus",
+          "rules": ["Values: Pending Review, Eligible, Ineligible, Needs Documentation, Approved"],
+          "description": "Current status of claimant eligibility"
+        },
+        {
+          "field": "documentationScore",
+          "rules": ["Min: 0", "Max: 100"],
+          "description": "Score based on completeness and quality of documentation"
+        }
+      ]
+    },
+    "Evidence Files": {
+      "attributes": [
+        { "name": "fileType", "type": "String", "required": true },
+        { "name": "fileName", "type": "String", "required": true },
+        { "name": "fileSize", "type": "Number", "required": true },
+        { "name": "caseId", "type": "String", "required": true },
+        { "name": "uploadedBy", "type": "String", "required": true },
+        { "name": "uploadDate", "type": "DateTime", "required": true },
+        { "name": "evidenceType", "type": "String", "required": true },
+        { "name": "confidentialityLevel", "type": "String", "required": true },
+        { "name": "verificationStatus", "type": "String", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "fileType",
+          "rules": ["Values: PDF, DOCX, JPG, PNG, MP4, MP3"],
+          "description": "Supported file formats for evidence"
+        },
+        {
+          "field": "evidenceType",
+          "rules": ["Values: Medical Records, Corporate Documents, Expert Report, Witness Statement, Product Documentation, Test Results"],
+          "description": "Category of evidence being submitted"
+        },
+        {
+          "field": "confidentialityLevel",
+          "rules": ["Values: Public, Confidential, Attorney Eyes Only, Highly Confidential"],
+          "description": "Level of confidentiality required"
+        },
+        {
+          "field": "fileSize",
+          "rules": ["Max: 50MB"],
+          "description": "Maximum file size limit"
+        }
+      ]
+    },
+    "Medical Records": {
+      "attributes": [
+        { "name": "patientName", "type": "String", "required": true },
+        { "name": "medicalProvider", "type": "String", "required": true },
+        { "name": "recordType", "type": "String", "required": true },
+        { "name": "treatmentDate", "type": "Date", "required": true },
+        { "name": "diagnosis", "type": "String", "required": true },
+        { "name": "symptoms", "type": "String[]", "required": false },
+        { "name": "treatmentPlan", "type": "String", "required": false },
+        { "name": "medications", "type": "String[]", "required": false },
+        { "name": "relatedToCase", "type": "Boolean", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "recordType",
+          "rules": ["Values: Diagnosis Report, Treatment Summary, Lab Results, Imaging Study, Surgical Report, Pathology Report"],
+          "description": "Type of medical record being submitted"
+        },
+        {
+          "field": "patientName",
+          "rules": ["Min Length: 2", "Max Length: 100"],
+          "description": "Full legal name of the patient"
+        },
+        {
+          "field": "diagnosis",
+          "rules": ["Min Length: 5", "Max Length: 500"],
+          "description": "Medical diagnosis related to the case"
+        }
+      ]
+    },
+    "Intake Form": {
+      "attributes": [
+        { "name": "contactInformation", "type": "Object", "required": true },
+        { "name": "exposureInformation", "type": "Object", "required": true },
+        { "name": "healthInformation", "type": "Object", "required": true },
+        { "name": "legalRepresentation", "type": "Object", "required": false },
+        { "name": "consentAgreements", "type": "Object", "required": true },
+        { "name": "referralSource", "type": "String", "required": false },
+        { "name": "urgencyLevel", "type": "String", "required": true },
+        { "name": "submissionDate", "type": "DateTime", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "contactInformation",
+          "rules": ["Required Fields: name, email, phone, address"],
+          "description": "Complete contact details for client communication"
+        },
+        {
+          "field": "exposureInformation",
+          "rules": ["Required Fields: product, startDate, endDate, frequency, circumstances"],
+          "description": "Detailed exposure history to harmful product/substance"
+        },
+        {
+          "field": "healthInformation",
+          "rules": ["Required Fields: currentConditions, diagnosisDate, treatingPhysician"],
+          "description": "Current health status and medical history"
+        },
+        {
+          "field": "urgencyLevel",
+          "rules": ["Values: Low, Medium, High, Critical"],
+          "description": "Priority level for case processing"
+        }
+      ]
+    }
+  }
+}

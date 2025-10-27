@@ -50,22 +50,31 @@ export function UIBlueprint() {
     ctx.lineWidth = 2
     ctx.setLineDash([5, 5])
 
+    // Layout calculations
+    const margin = 40
+    const sidebarWidth = 200
+    const gapBetween = 20
+    const totalMargins = margin * 2
+    const contentWidth = rect.width - totalMargins - sidebarWidth - gapBetween
+    const headerWidth = rect.width - totalMargins
+
     // Header component
-    ctx.strokeRect(40, 40, rect.width - 80, 60)
+    ctx.strokeRect(margin, 40, headerWidth, 60)
     ctx.fillStyle = "#3b82f6"
     ctx.font = "12px monospace"
-    ctx.fillText("HEADER", 50, 30)
-    ctx.fillText("h: 60px", rect.width - 120, 30)
+    ctx.fillText("HEADER", margin + 10, 60)
+    ctx.fillText("h: 60px", margin + headerWidth - 60, 60)
 
     // Sidebar
-    ctx.strokeRect(40, 120, 200, rect.height - 200)
-    ctx.fillText("SIDEBAR", 50, 110)
-    ctx.fillText("w: 200px", 50, rect.height - 70)
+    ctx.strokeRect(margin, 120, sidebarWidth, rect.height - 200)
+    ctx.fillText("SIDEBAR", margin + 10, 140)
+    ctx.fillText(`w: ${sidebarWidth}px`, margin + sidebarWidth - 70, 140)
 
     // Main content area
-    ctx.strokeRect(260, 120, rect.width - 320, rect.height - 200)
-    ctx.fillText("CONTENT", 270, 110)
-    ctx.fillText(`w: ${Math.round(rect.width - 320)}px`, rect.width - 180, 110)
+    const contentX = margin + sidebarWidth + gapBetween
+    ctx.strokeRect(contentX, 120, contentWidth, rect.height - 200)
+    ctx.fillText("CONTENT", contentX + 10, 140)
+    ctx.fillText(`w: ${Math.round(contentWidth)}px`, contentX + contentWidth - 70, 140)
 
     // Dimension lines
     ctx.setLineDash([])
@@ -73,34 +82,35 @@ export function UIBlueprint() {
     ctx.lineWidth = 1
 
     // Horizontal dimension
+    const dimensionY = rect.height - 60
     ctx.beginPath()
-    ctx.moveTo(40, rect.height - 30)
-    ctx.lineTo(rect.width - 40, rect.height - 30)
+    ctx.moveTo(margin, dimensionY)
+    ctx.lineTo(rect.width - margin, dimensionY)
     ctx.stroke()
 
     // Arrows
     ctx.beginPath()
-    ctx.moveTo(40, rect.height - 30)
-    ctx.lineTo(50, rect.height - 35)
-    ctx.lineTo(50, rect.height - 25)
+    ctx.moveTo(margin, dimensionY)
+    ctx.lineTo(margin + 10, dimensionY - 5)
+    ctx.lineTo(margin + 10, dimensionY + 5)
     ctx.closePath()
     ctx.fill()
 
     ctx.beginPath()
-    ctx.moveTo(rect.width - 40, rect.height - 30)
-    ctx.lineTo(rect.width - 50, rect.height - 35)
-    ctx.lineTo(rect.width - 50, rect.height - 25)
+    ctx.moveTo(rect.width - margin, dimensionY)
+    ctx.lineTo(rect.width - margin - 10, dimensionY - 5)
+    ctx.lineTo(rect.width - margin - 10, dimensionY + 5)
     ctx.closePath()
     ctx.fill()
 
-    ctx.fillText(`${Math.round(rect.width - 80)}px`, rect.width / 2 - 30, rect.height - 15)
+    ctx.fillText(`${Math.round(headerWidth)}px`, rect.width / 2 - 30, dimensionY + 15)
 
     // Annotations
     ctx.fillStyle = "#06b6d4"
     ctx.font = "10px monospace"
-    ctx.fillText("• Responsive Grid", 270, 140)
-    ctx.fillText("• Flexbox Layout", 270, 160)
-    ctx.fillText("• Mobile-First", 270, 180)
+    ctx.fillText("• Responsive Grid", contentX + 10, 160)
+    ctx.fillText("• Flexbox Layout", contentX + 10, 180)
+    ctx.fillText("• Mobile-First", contentX + 10, 200)
   }, [])
 
   return (

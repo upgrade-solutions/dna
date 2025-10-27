@@ -1,0 +1,596 @@
+{
+  "organization": {
+    "id": "org1",
+    "name": "Financial Services Division",
+    "description": "Consumer and commercial banking products"
+  },
+  "products": [
+    {
+      "id": "1",
+      "name": "Loan Platform",
+      "description": "End-to-end loan origination and servicing platform",
+      "version": "1.1.0",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "releaseDate": "2024-01-15",
+          "description": "Initial release with core loan processing workflows",
+          "changes": ["Customer onboarding", "Basic loan application", "Payment processing"]
+        },
+        {
+          "version": "1.1.0",
+          "status": "Active",
+          "releaseDate": "2024-03-20", 
+          "description": "Enhanced risk assessment and reporting capabilities",
+          "changes": ["Automated risk profiling", "Advanced analytics dashboard", "Collections workflow planning"]
+        },
+        {
+          "version": "1.2.0",
+          "status": "In Review",
+          "description": "Advanced ML-based fraud detection and automated underwriting",
+          "changes": [
+            "Machine learning fraud detection",
+            "Automated underwriting engine",
+            "Enhanced mobile experience",
+            "Real-time notifications"
+          ]
+        }
+      ],
+      "projectCount": 4,
+      "workflowCount": 5,
+      "status": "Active",
+      "organizationId": "org1"
+    },
+    {
+      "id": "2",
+      "name": "Banking Core",
+      "description": "Core banking system with account management",
+      "version": "2.0.1",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "releaseDate": "2023-06-01",
+          "description": "Initial core banking system release",
+          "changes": ["Basic account management", "Transaction processing", "Customer profiles"]
+        },
+        {
+          "version": "2.0.0",
+          "status": "Deprecated",
+          "releaseDate": "2024-01-10",
+          "description": "Major architecture overhaul with microservices",
+          "changes": ["Microservices architecture", "Enhanced security", "Real-time processing"]
+        },
+        {
+          "version": "2.0.1",
+          "status": "Active",
+          "releaseDate": "2024-02-05",
+          "description": "Bug fixes and performance improvements", 
+          "changes": ["Performance optimizations", "Security patches", "UI improvements"]
+        },
+        {
+          "version": "2.1.0",
+          "status": "Planned",
+          "description": "Enhanced API capabilities and blockchain integration",
+          "changes": [
+            "GraphQL API support",
+            "Blockchain transaction verification",
+            "Enhanced audit trails",
+            "Multi-currency support"
+          ]
+        }
+      ],
+      "projectCount": 6,
+      "workflowCount": 12,
+      "status": "Active",
+      "organizationId": "org1"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "wf1",
+      "name": "Customer Onboarding",
+      "description": "New customer registration and verification",
+      "status": "Active",
+      "productId": "1"
+    },
+    {
+      "id": "wf2",
+      "name": "Loan Application",
+      "description": "Loan request submission and processing",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Basic loan application workflow"
+        },
+        {
+          "version": "1.1.0",
+          "status": "Active",
+          "description": "Enhanced with automated risk assessment"
+        },
+        {
+          "version": "1.2.0",
+          "status": "In Review",
+          "description": "Adding ML-based fraud detection and automated approval",
+          "changes": [
+            "Machine learning fraud detection",
+            "Automated approval for low-risk applications",
+            "Enhanced document OCR processing"
+          ]
+        }
+      ],
+      "productId": "1"
+    },
+    {
+      "id": "wf3",
+      "name": "Payment Processing",
+      "description": "Loan payment collection and reconciliation",
+      "status": "Active",
+      "productId": "1"
+    },
+    {
+      "id": "wf4",
+      "name": "Reporting & Analytics",
+      "description": "Business intelligence and reporting",
+      "status": "In Review",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Active",
+          "description": "Basic reporting functionality"
+        },
+        {
+          "version": "2.0.0",
+          "status": "In Review",
+          "description": "Complete analytics overhaul with real-time dashboards",
+          "changes": [
+            "Real-time dashboard updates",
+            "Advanced data visualization",
+            "Predictive analytics",
+            "Custom report builder",
+            "API-based data exports"
+          ]
+        }
+      ],
+      "productId": "1"
+    },
+    {
+      "id": "wf5",
+      "name": "Collections",
+      "description": "Overdue payment management",
+      "status": "Planned",
+      "productId": "1"
+    }
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "actor": "Customer",
+      "action": "Submit",
+      "resource": "Registration Form",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Deprecated",
+          "description": "Basic form submission"
+        },
+        {
+          "version": "1.1.0",
+          "status": "Active",
+          "description": "Enhanced validation and user experience"
+        }
+      ],
+      "workflowId": "wf1",
+      "order": 1
+    },
+    {
+      "id": "s3",
+      "actor": "KYC Agent",
+      "action": "Review",
+      "resource": "Identity Documents",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "status": "Active",
+          "description": "Manual document review process"
+        },
+        {
+          "version": "2.0.0",
+          "status": "In Review",
+          "description": "AI-assisted document verification with OCR",
+          "changes": [
+            "Automated document scanning",
+            "Real-time fraud detection",
+            "Enhanced accuracy validation"
+          ]
+        }
+      ],
+      "workflowId": "wf1",
+      "order": 2
+    },
+    {
+      "id": "s4",
+      "actor": "System",
+      "action": "Create",
+      "resource": "Customer Profile",
+      "status": "Active",
+      "workflowId": "wf1",
+      "order": 3
+    },
+    {
+      "id": "s5",
+      "actor": "Borrower",
+      "action": "Submit",
+      "resource": "Loan Application",
+      "status": "Active",
+      "versionHistory": [
+        {
+          "version": "1.2.0",
+          "status": "Planned",
+          "description": "Streamlined application with smart pre-fill",
+          "changes": [
+            "Smart form pre-filling",
+            "Progressive disclosure",
+            "Mobile-first design"
+          ]
+        }
+      ],
+      "workflowId": "wf2",
+      "order": 1
+    },
+    {
+      "id": "s6",
+      "actor": "System",
+      "action": "Check",
+      "resource": "Credit Score",
+      "status": "Active",
+      "workflowId": "wf2",
+      "order": 2
+    },
+    {
+      "id": "s7",
+      "actor": "Loan Officer",
+      "action": "Verify",
+      "resource": "Income Documents",
+      "status": "In Review",
+      "workflowId": "wf2",
+      "order": 3
+    },
+    {
+      "id": "s8",
+      "actor": "Risk System",
+      "action": "Assess",
+      "resource": "Risk Profile",
+      "status": "Planned",
+      "workflowId": "wf2",
+      "order": 4
+    },
+    {
+      "id": "s9",
+      "actor": "Underwriter",
+      "action": "Approve",
+      "resource": "Loan Request",
+      "status": "Active",
+      "workflowId": "wf2",
+      "order": 5
+    },
+    {
+      "id": "s10",
+      "actor": "Borrower",
+      "action": "Initiate",
+      "resource": "Payment",
+      "status": "Active",
+      "workflowId": "wf3",
+      "order": 1
+    },
+    {
+      "id": "s11",
+      "actor": "Payment Gateway",
+      "action": "Process",
+      "resource": "Transaction",
+      "status": "Active",
+      "workflowId": "wf3",
+      "order": 2
+    },
+    {
+      "id": "s12",
+      "actor": "System",
+      "action": "Update",
+      "resource": "Loan Balance",
+      "status": "Active",
+      "workflowId": "wf3",
+      "order": 3
+    },
+    {
+      "id": "s13",
+      "actor": "System",
+      "action": "Record",
+      "resource": "Transaction History",
+      "status": "Active",
+      "workflowId": "wf3",
+      "order": 4
+    },
+    {
+      "id": "s14",
+      "actor": "Analyst",
+      "action": "Query",
+      "resource": "Loan Data",
+      "status": "Active",
+      "workflowId": "wf4",
+      "order": 1
+    },
+    {
+      "id": "s15",
+      "actor": "System",
+      "action": "Generate",
+      "resource": "Report",
+      "status": "In Review",
+      "workflowId": "wf4",
+      "order": 2
+    },
+    {
+      "id": "s16",
+      "actor": "Manager",
+      "action": "Review",
+      "resource": "Analytics Dashboard",
+      "status": "Planned",
+      "workflowId": "wf4",
+      "order": 3
+    },
+    {
+      "id": "s17",
+      "actor": "System",
+      "action": "Identify",
+      "resource": "Overdue Accounts",
+      "status": "Planned",
+      "workflowId": "wf5",
+      "order": 1
+    },
+    {
+      "id": "s18",
+      "actor": "System",
+      "action": "Send",
+      "resource": "Reminder Notification",
+      "status": "Planned",
+      "workflowId": "wf5",
+      "order": 2
+    },
+    {
+      "id": "s19",
+      "actor": "Collections Agent",
+      "action": "Contact",
+      "resource": "Borrower",
+      "status": "Planned",
+      "workflowId": "wf5",
+      "order": 3
+    }
+  ],
+  "projects": [
+    {
+      "id": "1",
+      "name": "Customer Onboarding",
+      "status": "Deliver",
+      "version": "1.0.2",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "releaseDate": "2024-01-15",
+          "description": "Initial onboarding implementation"
+        },
+        {
+          "version": "1.0.1", 
+          "releaseDate": "2024-02-10",
+          "description": "Enhanced KYC validation"
+        },
+        {
+          "version": "1.0.2",
+          "releaseDate": "2024-03-01",
+          "description": "Improved user experience and mobile optimization"
+        }
+      ],
+      "workflowIds": ["wf1"],
+      "productId": "1"
+    },
+    {
+      "id": "2",
+      "name": "Loan Application", 
+      "status": "Develop",
+      "version": "1.1.0",
+      "versionHistory": [
+        {
+          "version": "1.0.0",
+          "releaseDate": "2024-01-20",
+          "description": "Basic loan application workflow"
+        },
+        {
+          "version": "1.1.0",
+          "releaseDate": "2024-03-20",
+          "description": "Added automated risk assessment and enhanced document verification"
+        }
+      ],
+      "workflowIds": ["wf2"],
+      "productId": "1"
+    },
+    {
+      "id": "3",
+      "name": "Payment Processing",
+      "status": "Design",
+      "workflowIds": ["wf3"],
+      "productId": "1"
+    },
+    {
+      "id": "4",
+      "name": "Reporting Dashboard",
+      "status": "Discover",
+      "workflowIds": ["wf4"],
+      "productId": "1"
+    }
+  ],
+  "resourceSchemas": {
+    "Registration Form": {
+      "attributes": [
+        { "name": "email", "type": "String", "required": true },
+        { "name": "password", "type": "String", "required": true },
+        { "name": "firstName", "type": "String", "required": true },
+        { "name": "lastName", "type": "String", "required": true },
+        { "name": "phoneNumber", "type": "String", "required": true },
+        { "name": "dateOfBirth", "type": "Date", "required": true },
+        { "name": "address", "type": "Object", "required": true },
+        { "name": "marketingConsent", "type": "Boolean", "required": false }
+      ],
+      "validations": [
+        {
+          "field": "email",
+          "rules": ["Format: Email", "Max Length: 255", "Unique"],
+          "description": "Must be a valid email format and unique in the system"
+        },
+        {
+          "field": "password", 
+          "rules": ["Min Length: 8", "Max Length: 128", "Pattern: Complex"],
+          "description": "Must contain uppercase, lowercase, number, and special character"
+        },
+        {
+          "field": "firstName",
+          "rules": ["Min Length: 1", "Max Length: 50", "Pattern: Alpha"],
+          "description": "Only alphabetic characters and spaces allowed"
+        },
+        {
+          "field": "lastName",
+          "rules": ["Min Length: 1", "Max Length: 50", "Pattern: Alpha"], 
+          "description": "Only alphabetic characters and spaces allowed"
+        },
+        {
+          "field": "phoneNumber",
+          "rules": ["Format: E.164", "Length: 10-15"],
+          "description": "Must be a valid international phone number format"
+        },
+        {
+          "field": "dateOfBirth",
+          "rules": ["Min Age: 18", "Max Age: 120", "Format: ISO 8601"],
+          "description": "Customer must be at least 18 years old"
+        },
+        {
+          "field": "address",
+          "rules": ["Required Fields: street, city, state, zipCode", "Validation: US Address"],
+          "description": "Must be a valid US postal address"
+        }
+      ]
+    },
+    "Loan Application": {
+      "attributes": [
+        { "name": "loanAmount", "type": "Number", "required": true },
+        { "name": "loanPurpose", "type": "String", "required": true },
+        { "name": "employmentStatus", "type": "String", "required": true },
+        { "name": "annualIncome", "type": "Number", "required": true },
+        { "name": "employerName", "type": "String", "required": true },
+        { "name": "yearsEmployed", "type": "Number", "required": true },
+        { "name": "monthlyExpenses", "type": "Number", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "loanAmount",
+          "rules": ["Min: 1000", "Max: 500000", "Multiple of: 100"],
+          "description": "Loan amount must be between $1,000 and $500,000"
+        },
+        {
+          "field": "loanPurpose",
+          "rules": ["Min Length: 10", "Max Length: 500"],
+          "description": "Provide a clear description of loan purpose"
+        },
+        {
+          "field": "annualIncome",
+          "rules": ["Min: 0", "Max: 10000000"],
+          "description": "Annual income must be a positive number"
+        },
+        {
+          "field": "yearsEmployed",
+          "rules": ["Min: 0", "Max: 50"],
+          "description": "Years employed at current employer"
+        }
+      ]
+    },
+    "Income Documents": {
+      "attributes": [
+        { "name": "payStubs", "type": "File[]", "required": true },
+        { "name": "w2Forms", "type": "File[]", "required": true },
+        { "name": "taxReturns", "type": "File[]", "required": true },
+        { "name": "additionalNotes", "type": "String", "required": false },
+        { "name": "uploadedDate", "type": "DateTime", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "payStubs",
+          "rules": ["Min Files: 3", "Max Files: 6", "File Types: PDF, JPG, PNG", "Max Size: 10MB"],
+          "description": "Must upload at least 3 recent pay stubs"
+        },
+        {
+          "field": "w2Forms",
+          "rules": ["Min Files: 2", "Max Files: 2", "File Types: PDF", "Max Size: 10MB"],
+          "description": "Must upload W-2 forms for last 2 years"
+        },
+        {
+          "field": "taxReturns",
+          "rules": ["Min Files: 2", "Max Files: 2", "File Types: PDF", "Max Size: 10MB"],
+          "description": "Must upload complete tax returns for last 2 years"
+        }
+      ]
+    },
+    "Payment": {
+      "attributes": [
+        { "name": "paymentAmount", "type": "Number", "required": true },
+        { "name": "paymentMethod", "type": "String", "required": true },
+        { "name": "accountNumber", "type": "String", "required": true },
+        { "name": "routingNumber", "type": "String", "required": true },
+        { "name": "paymentDate", "type": "Date", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "paymentAmount",
+          "rules": ["Min: 0.01", "Max: 100000", "Decimal Places: 2"],
+          "description": "Payment amount must be positive and up to 2 decimal places"
+        },
+        {
+          "field": "accountNumber",
+          "rules": ["Length: 8-17", "Pattern: Numeric"],
+          "description": "Valid bank account number"
+        },
+        {
+          "field": "routingNumber",
+          "rules": ["Length: 9", "Pattern: Numeric", "Validation: ABA"],
+          "description": "Valid 9-digit ABA routing number"
+        }
+      ]
+    },
+    "Identity Documents": {
+      "attributes": [
+        { "name": "documentFile", "type": "File", "required": true },
+        { "name": "idType", "type": "String", "required": true },
+        { "name": "idNumber", "type": "String", "required": true },
+        { "name": "expirationDate", "type": "Date", "required": true },
+        { "name": "issuingAuthority", "type": "String", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "documentFile",
+          "rules": ["File Types: PDF, JPG, PNG", "Max Size: 10MB", "Min Resolution: 300 DPI"],
+          "description": "Clear, legible scan or photo of government-issued ID"
+        },
+        {
+          "field": "expirationDate",
+          "rules": ["Must be: Future Date", "Max Years: 10"],
+          "description": "ID must not be expired"
+        },
+        {
+          "field": "idNumber",
+          "rules": ["Min Length: 5", "Max Length: 20"],
+          "description": "Valid ID number format"
+        }
+      ]
+    }
+  }
+}

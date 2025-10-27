@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
+import { getAllSteps, getAllWorkflows } from '../shared/data-loader'
 
 // Import the shared business model data from the conversation API
 // In a real app, this would be in a shared module or database
@@ -15,22 +14,17 @@ declare global {
   } | null
 }
 
-// Initialize business model data from files on first request
+// Initialize business model data from organization files
 async function initializeBusinessModelData() {
   if (global.businessModelData) return global.businessModelData
   
   try {
-    const workflowsPath = path.join(process.cwd(), 'app/api/data/workflows.json')
-    const stepsPath = path.join(process.cwd(), 'app/api/data/steps.json')
-    
-    const [workflowsData, stepsData] = await Promise.all([
-      fs.promises.readFile(workflowsPath, 'utf8'),
-      fs.promises.readFile(stepsPath, 'utf8')
-    ])
+    const workflows = await getAllWorkflows()
+    const steps = await getAllSteps()
     
     global.businessModelData = {
-      workflows: JSON.parse(workflowsData),
-      steps: JSON.parse(stepsData),
+      workflows,
+      steps,
       actors: [],
       resources: [],
       actions: [],

@@ -60,13 +60,6 @@ export function UIBlueprintSection() {
                 </div>
               </div>
             </div>
-
-            <div className="pt-4 border-t border-border">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="w-3 h-3 rounded-full bg-blue-500 animate-pulse" />
-                <span className="font-mono">Specification DNA Active</span>
-              </div>
-            </div>
           </div>
 
           <div className="relative">

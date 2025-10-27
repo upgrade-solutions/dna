@@ -19,4 +19,247 @@ import {
   Info
 } from 'lucide-react'
 import { ConversationVoiceCapture } from '@/components/conversation-voice-capture'
-import { BusinessModelChange } from '@/hooks/use-conversation-capture'\n\nexport default function ConversationDemo() {\n  const [businessModelChanges, setBusinessModelChanges] = useState<BusinessModelChange[]>([])\n  const [manualInput, setManualInput] = useState('')\n  const [sessionId] = useState(`demo-${Date.now()}`)\n\n  const handleBusinessModelChange = (changes: BusinessModelChange[]) => {\n    setBusinessModelChanges(prev => [...prev, ...changes])\n  }\n\n  const sendManualInput = async () => {\n    if (!manualInput.trim()) return\n\n    try {\n      const response = await fetch('/api/intake/conversation', {\n        method: 'POST',\n        headers: {\n          'Content-Type': 'application/json',\n        },\n        body: JSON.stringify({\n          sessionId,\n          transcriptChunk: manualInput,\n          chunkIndex: Date.now(),\n          forceAnalysis: true\n        })\n      })\n\n      if (response.ok) {\n        const result = await response.json()\n        if (result.businessModelChanges) {\n          handleBusinessModelChange(result.businessModelChanges)\n        }\n        setManualInput('')\n      }\n    } catch (error) {\n      console.error('Error sending manual input:', error)\n    }\n  }\n\n  const getChangeTypeIcon = (type: string) => {\n    switch (type) {\n      case 'workflow': return <GitBranch className=\"h-4 w-4\" />\n      case 'step': return <ListTodo className=\"h-4 w-4\" />\n      case 'actor': return <Users className=\"h-4 w-4\" />\n      case 'resource': return <FileAudio className=\"h-4 w-4\" />\n      case 'action': return <Zap className=\"h-4 w-4\" />\n      default: return <CheckCircle className=\"h-4 w-4\" />\n    }\n  }\n\n  const getOperationColor = (operation: string) => {\n    switch (operation) {\n      case 'create': return 'bg-green-100 text-green-800 border-green-300'\n      case 'update': return 'bg-blue-100 text-blue-800 border-blue-300'\n      case 'delete': return 'bg-red-100 text-red-800 border-red-300'\n      default: return 'bg-gray-100 text-gray-800 border-gray-300'\n    }\n  }\n\n  return (\n    <div className=\"container mx-auto p-6 space-y-6\">\n      <div className=\"text-center mb-8\">\n        <h1 className=\"text-3xl font-bold mb-2 flex items-center justify-center gap-2\">\n          <Database className=\"h-8 w-8 text-blue-500\" />\n          Business Model Conversation Demo\n        </h1>\n        <p className=\"text-muted-foreground max-w-2xl mx-auto\">\n          Speak or type to describe workflow changes. The AI will analyze your conversation and \n          suggest modifications to your business model using the Actor > Action > Resource pattern.\n        </p>\n      </div>\n\n      <div className=\"grid grid-cols-1 lg:grid-cols-2 gap-6\">\n        {/* Voice Capture */}\n        <div className=\"space-y-4\">\n          <Card>\n            <CardHeader>\n              <CardTitle className=\"flex items-center gap-2\">\n                <MessageSquare className=\"h-5 w-5\" />\n                Voice Input\n              </CardTitle>\n              <CardDescription>\n                Use voice capture to naturally describe workflow changes\n              </CardDescription>\n            </CardHeader>\n            <CardContent>\n              <ConversationVoiceCapture \n                onBusinessModelChange={handleBusinessModelChange}\n                sessionId={sessionId}\n              />\n            </CardContent>\n          </Card>\n\n          {/* Manual Text Input */}\n          <Card>\n            <CardHeader>\n              <CardTitle className=\"flex items-center gap-2\">\n                <Brain className=\"h-5 w-5\" />\n                Manual Input\n              </CardTitle>\n              <CardDescription>\n                Type workflow descriptions for immediate analysis\n              </CardDescription>\n            </CardHeader>\n            <CardContent className=\"space-y-4\">\n              <Textarea\n                placeholder=\"Describe a workflow change... e.g., 'The loan officer should verify income documents before the system checks credit score'\"\n                value={manualInput}\n                onChange={(e) => setManualInput(e.target.value)}\n                rows={3}\n              />\n              <Button \n                onClick={sendManualInput}\n                disabled={!manualInput.trim()}\n                className=\"w-full\"\n              >\n                Analyze Text\n              </Button>\n            </CardContent>\n          </Card>\n        </div>\n\n        {/* Business Model Changes */}\n        <div className=\"space-y-4\">\n          <Card>\n            <CardHeader>\n              <CardTitle className=\"flex items-center gap-2\">\n                <Database className=\"h-5 w-5\" />\n                Business Model Changes\n                <Badge variant=\"secondary\">{businessModelChanges.length}</Badge>\n              </CardTitle>\n              <CardDescription>\n                AI-suggested modifications to your Actor > Action > Resource model\n              </CardDescription>\n            </CardHeader>\n            <CardContent>\n              {businessModelChanges.length === 0 ? (\n                <Alert>\n                  <Info className=\"h-4 w-4\" />\n                  <AlertDescription>\n                    No changes detected yet. Start speaking or typing to see business model suggestions.\n                  </AlertDescription>\n                </Alert>\n              ) : (\n                <div className=\"space-y-3 max-h-96 overflow-y-auto\">\n                  {businessModelChanges.map((change, index) => (\n                    <div key={index} className=\"p-4 border rounded-lg space-y-2\">\n                      <div className=\"flex items-center justify-between\">\n                        <div className=\"flex items-center gap-2\">\n                          {getChangeTypeIcon(change.changeType)}\n                          <span className=\"font-medium capitalize\">\n                            {change.operation} {change.changeType}\n                          </span>\n                        </div>\n                        <div className=\"flex items-center gap-2\">\n                          <Badge className={getOperationColor(change.operation)}>\n                            {change.operation}\n                          </Badge>\n                          <Badge variant=\"outline\">\n                            {Math.round(change.confidence * 100)}%\n                          </Badge>\n                        </div>\n                      </div>\n                      \n                      <p className=\"text-sm text-muted-foreground\">\n                        {change.reasoning}\n                      </p>\n                      \n                      {change.data && (\n                        <div className=\"bg-muted p-3 rounded text-sm\">\n                          {change.changeType === 'step' ? (\n                            <div className=\"font-mono\">\n                              <span className=\"text-blue-600\">{change.data.actor}</span>\n                              {' > '}\n                              <span className=\"text-green-600\">{change.data.action}</span>\n                              {' > '}\n                              <span className=\"text-purple-600\">{change.data.resource}</span>\n                            </div>\n                          ) : change.changeType === 'workflow' ? (\n                            <div>\n                              <div className=\"font-medium\">{change.data.name}</div>\n                              <div className=\"text-xs text-muted-foreground\">{change.data.description}</div>\n                            </div>\n                          ) : (\n                            <div className=\"font-mono text-xs\">\n                              {JSON.stringify(change.data, null, 2)}\n                            </div>\n                          )}\n                        </div>\n                      )}\n                      \n                      <div className=\"text-xs text-muted-foreground\">\n                        {new Date(change.timestamp).toLocaleTimeString()}\n                      </div>\n                    </div>\n                  ))}\n                </div>\n              )}\n            </CardContent>\n          </Card>\n        </div>\n      </div>\n\n      {/* Example Inputs */}\n      <Card>\n        <CardHeader>\n          <CardTitle>Example Inputs to Try</CardTitle>\n          <CardDescription>\n            Copy and paste these examples to see how the AI interprets workflow changes\n          </CardDescription>\n        </CardHeader>\n        <CardContent>\n          <div className=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n            <div className=\"space-y-2\">\n              <h4 className=\"font-medium\">New Workflow Step:</h4>\n              <p className=\"text-sm bg-muted p-3 rounded\">\n                \"After the customer submits their application, the system should automatically send a confirmation email to the customer.\"\n              </p>\n            </div>\n            <div className=\"space-y-2\">\n              <h4 className=\"font-medium\">Process Change:</h4>\n              <p className=\"text-sm bg-muted p-3 rounded\">\n                \"The risk assessment should happen before the loan officer reviews the application, not after.\"\n              </p>\n            </div>\n            <div className=\"space-y-2\">\n              <h4 className=\"font-medium\">New Actor:</h4>\n              <p className=\"text-sm bg-muted p-3 rounded\">\n                \"We need a compliance officer to review all high-value loan applications before approval.\"\n              </p>\n            </div>\n            <div className=\"space-y-2\">\n              <h4 className=\"font-medium\">Resource Addition:</h4>\n              <p className=\"text-sm bg-muted p-3 rounded\">\n                \"The underwriter needs access to the customer's tax documents when making approval decisions.\"\n              </p>\n            </div>\n          </div>\n        </CardContent>\n      </Card>\n    </div>\n  )\n}"
+import { BusinessModelChange } from '@/hooks/use-conversation-capture'
+
+export default function ConversationDemo() {
+  const [businessModelChanges, setBusinessModelChanges] = useState<BusinessModelChange[]>([])
+  const [manualInput, setManualInput] = useState('')
+  const [sessionId] = useState(`demo-${Date.now()}`)
+
+  const handleBusinessModelChange = (changes: BusinessModelChange[]) => {
+    setBusinessModelChanges(prev => [...prev, ...changes])
+  }
+
+  const sendManualInput = async () => {
+    if (!manualInput.trim()) return
+
+    try {
+      const response = await fetch('/api/intake/conversation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          transcriptChunk: manualInput,
+          chunkIndex: Date.now(),
+          forceAnalysis: true
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.businessModelChanges) {
+          handleBusinessModelChange(result.businessModelChanges)
+        }
+        setManualInput('')
+      }
+    } catch (error) {
+      console.error('Error sending manual input:', error)
+    }
+  }
+
+  const getChangeTypeIcon = (type: string) => {
+    switch (type) {
+      case 'workflow': return <GitBranch className="h-4 w-4" />
+      case 'step': return <ListTodo className="h-4 w-4" />
+      case 'actor': return <Users className="h-4 w-4" />
+      case 'resource': return <FileAudio className="h-4 w-4" />
+      case 'action': return <Zap className="h-4 w-4" />
+      default: return <CheckCircle className="h-4 w-4" />
+    }
+  }
+
+  const getOperationColor = (operation: string) => {
+    switch (operation) {
+      case 'create': return 'bg-green-100 text-green-800 border-green-300'
+      case 'update': return 'bg-blue-100 text-blue-800 border-blue-300'
+      case 'delete': return 'bg-red-100 text-red-800 border-red-300'
+      default: return 'bg-gray-100 text-gray-800 border-gray-300'
+    }
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2">
+          <Database className="h-8 w-8 text-blue-500" />
+          Business Model Conversation Demo
+        </h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          Speak or type to describe workflow changes. The AI will analyze your conversation and 
+          suggest modifications to your business model using the Actor &gt; Action &gt; Resource pattern.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Voice Capture */}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Voice Input
+              </CardTitle>
+              <CardDescription>
+                Use voice capture to naturally describe workflow changes
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ConversationVoiceCapture 
+                onBusinessModelChange={handleBusinessModelChange}
+                sessionId={sessionId}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Manual Text Input */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Manual Input
+              </CardTitle>
+              <CardDescription>
+                Type workflow descriptions for immediate analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Textarea
+                placeholder="Describe a workflow change... e.g., 'The loan officer should verify income documents before the system checks credit score'"
+                value={manualInput}
+                onChange={(e) => setManualInput(e.target.value)}
+                rows={3}
+              />
+              <Button 
+                onClick={sendManualInput}
+                disabled={!manualInput.trim()}
+                className="w-full"
+              >
+                Analyze Text
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Business Model Changes */}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Business Model Changes
+                <Badge variant="secondary">{businessModelChanges.length}</Badge>
+              </CardTitle>
+              <CardDescription>
+                AI-suggested modifications to your Actor &gt; Action &gt; Resource model
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {businessModelChanges.length === 0 ? (
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    No changes detected yet. Start speaking or typing to see business model suggestions.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {businessModelChanges.map((change, index) => (
+                    <div key={index} className="p-4 border rounded-lg space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {getChangeTypeIcon(change.changeType)}
+                          <span className="font-medium capitalize">
+                            {change.operation} {change.changeType}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getOperationColor(change.operation)}>
+                            {change.operation}
+                          </Badge>
+                          <Badge variant="outline">
+                            {Math.round(change.confidence * 100)}%
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-muted-foreground">
+                        {change.reasoning}
+                      </p>
+                      
+                      {change.data && (
+                        <div className="bg-muted p-3 rounded text-sm">
+                          {change.changeType === 'step' ? (
+                            <div className="font-mono">
+                              <span className="text-blue-600">{change.data.actor}</span>
+                              {' > '}
+                              <span className="text-green-600">{change.data.action}</span>
+                              {' > '}
+                              <span className="text-purple-600">{change.data.resource}</span>
+                            </div>
+                          ) : change.changeType === 'workflow' ? (
+                            <div>
+                              <div className="font-medium">{change.data.name}</div>
+                              <div className="text-xs text-muted-foreground">{change.data.description}</div>
+                            </div>
+                          ) : (
+                            <div className="font-mono text-xs">
+                              {JSON.stringify(change.data, null, 2)}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(change.timestamp).toLocaleTimeString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Example Inputs */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Example Inputs to Try</CardTitle>
+          <CardDescription>
+            Copy and paste these examples to see how the AI interprets workflow changes
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <h4 className="font-medium">New Workflow Step:</h4>
+              <p className="text-sm bg-muted p-3 rounded">
+                "After the customer submits their application, the system should automatically send a confirmation email to the customer."
+              </p>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-medium">Process Change:</h4>
+              <p className="text-sm bg-muted p-3 rounded">
+                "The risk assessment should happen before the loan officer reviews the application, not after."
+              </p>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-medium">New Actor:</h4>
+              <p className="text-sm bg-muted p-3 rounded">
+                "We need a compliance officer to review all high-value loan applications before approval."
+              </p>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-medium">Resource Addition:</h4>
+              <p className="text-sm bg-muted p-3 rounded">
+                "The underwriter needs access to the customer's tax documents when making approval decisions."
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

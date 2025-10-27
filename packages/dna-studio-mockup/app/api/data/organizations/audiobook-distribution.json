@@ -1,0 +1,270 @@
+{
+  "organization": {
+    "id": "org2",
+    "name": "Audiobook Distribution",
+    "description": "Digital audiobook publishing and distribution platform"
+  },
+  "products": [
+    {
+      "id": "3",
+      "name": "Account Management",
+      "description": "Publisher and distributor account lifecycle management",
+      "projectCount": 0,
+      "workflowCount": 3,
+      "status": "Active",
+      "organizationId": "org2"
+    },
+    {
+      "id": "4",
+      "name": "Content Operations",
+      "description": "Author onboarding and content distribution management",
+      "projectCount": 0,
+      "workflowCount": 3,
+      "status": "Active",
+      "organizationId": "org2"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "wf6",
+      "name": "Account Setup",
+      "description": "Account import, creation, and contact management",
+      "status": "Active",
+      "productId": "3"
+    },
+    {
+      "id": "wf7",
+      "name": "Contact Management",
+      "description": "Managing publisher and distributor contacts",
+      "status": "Active",
+      "productId": "3"
+    },
+    {
+      "id": "wf8",
+      "name": "Contract Management",
+      "description": "Contract drafting, revision management, and finalization",
+      "status": "Active",
+      "productId": "3"
+    },
+    {
+      "id": "wf9",
+      "name": "Author Onboarding",
+      "description": "Author account creation, payee setup, and terms acceptance",
+      "status": "Active",
+      "productId": "4"
+    },
+    {
+      "id": "wf10",
+      "name": "Title Management",
+      "description": "Project creation, asset management, and review submission",
+      "status": "Active",
+      "productId": "4"
+    },
+    {
+      "id": "wf11",
+      "name": "Distribution Selection",
+      "description": "Selecting and configuring distribution channels",
+      "status": "Active",
+      "productId": "4"
+    }
+  ],
+  "steps": [
+    {
+      "id": "s20",
+      "actor": "System",
+      "action": "Import",
+      "resource": "Account",
+      "status": "Active",
+      "workflowId": "wf6",
+      "order": 1
+    },
+    {
+      "id": "s21",
+      "actor": "Account Manager",
+      "action": "Create",
+      "resource": "Account",
+      "status": "Active",
+      "workflowId": "wf6",
+      "order": 2
+    },
+    {
+      "id": "s22",
+      "actor": "Account Manager",
+      "action": "Add",
+      "resource": "Contacts",
+      "status": "Active",
+      "workflowId": "wf6",
+      "order": 3
+    },
+    {
+      "id": "s23",
+      "actor": "Legal Team",
+      "action": "Draft",
+      "resource": "Contract",
+      "status": "Active",
+      "workflowId": "wf8",
+      "order": 1
+    },
+    {
+      "id": "s24",
+      "actor": "Legal Team",
+      "action": "Manage",
+      "resource": "Revisions",
+      "status": "Active",
+      "workflowId": "wf8",
+      "order": 2
+    },
+    {
+      "id": "s25",
+      "actor": "Legal Team",
+      "action": "Finalize",
+      "resource": "Contract",
+      "status": "Active",
+      "workflowId": "wf8",
+      "order": 3
+    },
+    {
+      "id": "s26",
+      "actor": "Author",
+      "action": "Create",
+      "resource": "Account",
+      "status": "Active",
+      "workflowId": "wf9",
+      "order": 1
+    },
+    {
+      "id": "s27",
+      "actor": "System",
+      "action": "Create",
+      "resource": "Payee",
+      "status": "Active",
+      "workflowId": "wf9",
+      "order": 2
+    },
+    {
+      "id": "s28",
+      "actor": "Author",
+      "action": "Accept",
+      "resource": "T&Cs",
+      "status": "Active",
+      "workflowId": "wf9",
+      "order": 3
+    },
+    {
+      "id": "s29",
+      "actor": "Author",
+      "action": "Create",
+      "resource": "Project",
+      "status": "Active",
+      "workflowId": "wf10",
+      "order": 1
+    },
+    {
+      "id": "s30",
+      "actor": "Author",
+      "action": "Add",
+      "resource": "Assets",
+      "status": "Active",
+      "workflowId": "wf10",
+      "order": 2
+    },
+    {
+      "id": "s31",
+      "actor": "Author",
+      "action": "Submit for",
+      "resource": "Review",
+      "status": "Active",
+      "workflowId": "wf10",
+      "order": 3
+    }
+  ],
+  "projects": [],
+  "resourceSchemas": {
+    "Account": {
+      "attributes": [
+        { "name": "companyName", "type": "String", "required": true },
+        { "name": "accountType", "type": "String", "required": true },
+        { "name": "taxId", "type": "String", "required": true },
+        { "name": "businessAddress", "type": "Object", "required": true },
+        { "name": "billingAddress", "type": "Object", "required": false },
+        { "name": "primaryContact", "type": "Object", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "companyName",
+          "rules": ["Min Length: 2", "Max Length: 200"],
+          "description": "Valid company or publisher name"
+        },
+        {
+          "field": "accountType",
+          "rules": ["Values: Publisher, Distributor, Author"],
+          "description": "Account must be one of the valid types"
+        },
+        {
+          "field": "taxId",
+          "rules": ["Format: EIN or SSN", "Length: 9-11"],
+          "description": "Valid tax identification number"
+        }
+      ]
+    },
+    "Contract": {
+      "attributes": [
+        { "name": "contractType", "type": "String", "required": true },
+        { "name": "parties", "type": "Object[]", "required": true },
+        { "name": "terms", "type": "Object", "required": true },
+        { "name": "effectiveDate", "type": "Date", "required": true },
+        { "name": "expirationDate", "type": "Date", "required": false },
+        { "name": "status", "type": "String", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "contractType",
+          "rules": ["Values: Distribution, Publishing, Author"],
+          "description": "Must be a valid contract type"
+        },
+        {
+          "field": "effectiveDate",
+          "rules": ["Format: ISO 8601", "Must be: Future or Present"],
+          "description": "Contract effective date"
+        }
+      ]
+    },
+    "Project": {
+      "attributes": [
+        { "name": "title", "type": "String", "required": true },
+        { "name": "description", "type": "String", "required": false },
+        { "name": "authorId", "type": "String", "required": true },
+        { "name": "genre", "type": "String", "required": true },
+        { "name": "targetAudience", "type": "String", "required": true },
+        { "name": "estimatedLength", "type": "Number", "required": false }
+      ],
+      "validations": [
+        {
+          "field": "title",
+          "rules": ["Min Length: 1", "Max Length: 500"],
+          "description": "Project title"
+        },
+        {
+          "field": "genre",
+          "rules": ["Values: Fiction, Non-Fiction, Biography, Self-Help, Business, etc."],
+          "description": "Content genre classification"
+        }
+      ]
+    },
+    "T&Cs": {
+      "attributes": [
+        { "name": "version", "type": "String", "required": true },
+        { "name": "acceptanceDate", "type": "DateTime", "required": true },
+        { "name": "ipAddress", "type": "String", "required": true },
+        { "name": "userAgent", "type": "String", "required": true }
+      ],
+      "validations": [
+        {
+          "field": "version",
+          "rules": ["Format: Semantic Version"],
+          "description": "Terms and conditions version"
+        }
+      ]
+    }
+  }
+}

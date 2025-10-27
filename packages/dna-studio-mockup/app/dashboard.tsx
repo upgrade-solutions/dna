@@ -16,7 +16,27 @@ import {
   FileCode,
   Database,
   Code,
+  FolderIcon,
+  UserIcon,
+  HandshakeIcon,
+  BriefcaseIcon,
+  Banknote,
+  Shield,
+  BarChart3,
 } from "lucide-react"
+// Product name to icon mapping
+const productIconMap: Record<string, JSX.Element> = {
+  "Loan Platform": <FolderIcon className="w-8 h-8 text-primary" />,
+  "Banking Core": <Banknote className="w-8 h-8 text-primary" />,
+  "Insurance Platform": <Shield className="w-8 h-8 text-primary" />,
+  "Claims Portal": <BriefcaseIcon className="w-8 h-8 text-primary" />,
+  "Investment Portal": <BarChart3 className="w-8 h-8 text-primary" />,
+  "Portfolio Analytics": <BarChart3 className="w-8 h-8 text-primary" />,
+};
+
+function getProductIcon(name: string) {
+  return productIconMap[name] || <FolderIcon className="w-8 h-8 text-primary" />;
+}
 
 const organizations = [
   {
@@ -74,6 +94,26 @@ export default function Dashboard() {
       {/* Process Flow View */}
       <main className="flex-1 overflow-y-auto p-8">
         <div className="max-w-6xl mx-auto">
+          {/* Product Cards with icons */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {products.map((product) => (
+              <Card key={product.id} className="p-6 bg-card border-border">
+                <div className="flex items-center gap-4 mb-2">
+                  <div className="flex-shrink-0">
+                    {getProductIcon(product.name)}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg flex items-center gap-2">{product.name}
+                      <Badge variant="secondary" className="ml-2">v1.0.0</Badge>
+                    </h3>
+                    <span className="text-xs text-muted-foreground">{product.workflowCount} Workflows</span>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">{product.description || "End-to-end platform."}</p>
+                {/* Add more product details here if needed */}
+              </Card>
+            ))}
+          </div>
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">DNA Studio Process</h1>
             <p className="text-muted-foreground">
