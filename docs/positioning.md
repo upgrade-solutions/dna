@@ -6,3 +6,13 @@
 | **🎨 Design**   | Simulate workflows, create designs & docs              | Lucidchart, XState visualizers, Figma, manual docs                   | Static diagrams, time-consuming validation, outdated docs          | Creates a **living digital twin** of your business — simulate workflows, validate permissions, and generate documentation automatically |
 | **🛠️ Develop**  | Build applications                       | Traditional coding, Low-code platforms, spec-driven development          | Repetitive scaffolding, code buries logic, agents lack context  | **Build production-ready applications and AI agents** directly from DNA with built-in rules, state management, and permissions           |
 | **🚀 Deliver**  | Deploy, release, and govern workflows with access control, versioning, and auditability             | CI/CD pipelines, manual releases, policy engines, Git workflows | Service fragmentation, poor traceability & auditability           | **Safe, governed deployment** of workflows and applications — full audit trail, versioning, and traceability embedded in the DNA    |
+
+## Key Phrases
+### Product Architect
+* Living blueprints for business applications
+* A product that models products
+
+### DNA
+* Bizops as code
+* Product Definition Language (PDL), Product Architecture Language (PAL)
+* The language of digital architecture
