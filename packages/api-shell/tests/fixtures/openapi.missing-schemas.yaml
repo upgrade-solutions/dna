@@ -1,0 +1,39 @@
+openapi: 3.1.1
+info:
+  title: Registration API Missing Schemas
+  version: 1.0.0
+paths:
+  /auth/register/step1:
+    post:
+      summary: Email verification
+      responses:
+        '200':
+          description: Success
+      x-handler:
+        type: script
+  /auth/register/step2:
+    post:
+      summary: Profile
+      responses:
+        '200':
+          description: Success
+      x-handler:
+        type: script
+  /auth/register/step3:
+    post:
+      summary: Credentials
+      responses:
+        '200':
+          description: Success
+      x-handler:
+        type: script
+  /auth/register/step4:
+    post:
+      summary: Confirmation
+      responses:
+        '200':
+          description: Success
+      x-handler:
+        type: script
+components:
+  schemas: {}

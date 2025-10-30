@@ -1,0 +1,22 @@
+openapi: 3.1.1
+info:
+  title: Incomplete Registration API
+  version: 1.0.0
+paths:
+  /auth/register/step1:
+    post:
+      summary: Email verification
+      responses:
+        '200':
+          description: Success
+      x-handler:
+        type: script
+components:
+  schemas:
+    register_email:
+      type: object
+      properties:
+        email:
+          type: string
+      required:
+        - email

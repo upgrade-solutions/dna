@@ -1,0 +1,124 @@
+openapi: 3.1.1
+info:
+  title: Test Registration API
+  version: 1.0.0
+paths:
+  /auth/register/step1:
+    post:
+      summary: Email verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterEmailRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+      x-handler:
+        type: passthrough
+  /auth/register/step2:
+    post:
+      summary: Profile information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterProfileRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+      x-handler:
+        type: passthrough
+  /auth/register/step3:
+    post:
+      summary: Credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterCredentialsRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+      x-handler:
+        type: passthrough
+  /auth/register/step4:
+    post:
+      summary: Confirmation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterConfirmRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+      x-handler:
+        type: passthrough
+components:
+  schemas:
+    RegisterEmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email
+    RegisterProfileRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        organization:
+          type: string
+        role:
+          type: string
+      required:
+        - sessionId
+    RegisterCredentialsRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        password:
+          type: string
+        enableMfa:
+          type: boolean
+      required:
+        - sessionId
+        - password
+    RegisterConfirmRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        confirmCode:
+          type: string
+      required:
+        - sessionId
+        - confirmCode

@@ -1,0 +1,819 @@
+openapi: 3.1.1
+info:
+  title: Product Architect API
+  description: |
+    A runtime-configurable API server built with Deno and TypeScript.
+    Defines routes, handlers, and validation through this OpenAPI specification.
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User registration and authentication flows
+  - name: Users
+    description: User management endpoints
+
+# Access Control Policies (reusable)
+x-policies:
+  public:
+    description: Open endpoint - no access control required
+    roles: []
+    rules: []
+  authenticated:
+    description: Any authenticated user
+    roles: []
+    rules:
+      - subject.id != null
+  admin-only:
+    description: Admin users only
+    roles: ["admin"]
+  manager-or-admin:
+    description: Manager or admin users
+    roles: ["manager", "admin"]
+  owner-or-admin:
+    description: Resource owner or admin
+    roles: ["admin"]
+    rules:
+      - subject.role == "user" and subject.id == resource.ownerId
+  self-service-or-admin:
+    description: Users can access their own data or admins can access any data
+    roles: ["admin"]
+    rules:
+      - subject.id == resource.id
+
+# Feature Flags (reusable)
+x-flags:
+  advanced-user-features:
+    description: Advanced user management features (admin only)
+    enabled: true
+    allowedRoles: ["admin"]
+    allowedUsers: []
+    environments: ["production", "staging", "development"]
+    rolloutPercentage: 100
+  
+  experimental-api:
+    description: Experimental API endpoints (beta testing)
+    enabled: true
+    allowedRoles: []
+    allowedUsers: []
+    environments: ["staging", "development"]
+    rolloutPercentage: 50
+
+paths:
+  /auth/register/step1:
+    post:
+      summary: Step 1 - Verify Email
+      description: Verify email and check availability. Create registration session.
+      operationId: registerStep1
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterEmailRequest'
+            examples:
+              success:
+                summary: Valid email verification request
+                value:
+                  email: user@example.com
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterStep1Response'
+              examples:
+                success:
+                  summary: Email verified successfully
+                  value:
+                    success: true
+                    sessionId: sess_abc123xyz
+                    message: Email verified successfully
+                    nextStep: profile
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidEmail:
+                  summary: Invalid email format
+                  value:
+                    error: ValidationError
+                    message: Invalid email format
+      x-handler:
+        type: passthrough
+      x-access-control:
+        $ref: '#/components/x-policies/public'
+
+  /auth/register/step2:
+    post:
+      summary: Step 2 - Collect Profile
+      description: Collect user profile information (name, organization, role)
+      operationId: registerStep2
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterProfileRequest'
+            examples:
+              success:
+                summary: Complete profile information
+                value:
+                  sessionId: sess_abc123xyz
+                  firstName: John
+                  lastName: Doe
+                  organization: Acme Corp
+                  role: Manager
+      responses:
+        '200':
+          description: Profile information accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterStep2Response'
+              examples:
+                success:
+                  summary: Profile accepted
+                  value:
+                    success: true
+                    message: Profile information accepted
+                    nextStep: credentials
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-handler:
+        type: passthrough
+
+  /auth/register/step3:
+    post:
+      summary: Step 3 - Set Credentials
+      description: Set password and configure security questions
+      operationId: registerStep3
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterCredentialsRequest'
+            examples:
+              withMfa:
+                summary: Credentials with MFA enabled
+                value:
+                  sessionId: sess_abc123xyz
+                  password: SecureP@ssw0rd123
+                  enableMfa: true
+                  securityQuestions:
+                    - question: What is your pet's name?
+                      answer: Fluffy
+                    - question: What city were you born in?
+                      answer: Portland
+              withoutMfa:
+                summary: Credentials without MFA
+                value:
+                  sessionId: sess_abc123xyz
+                  password: SecureP@ssw0rd123
+                  enableMfa: false
+      responses:
+        '200':
+          description: Credentials accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterStep3Response'
+              examples:
+                success:
+                  summary: Credentials accepted
+                  value:
+                    success: true
+                    message: Credentials set successfully
+                    nextStep: confirmation
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-handler:
+        type: passthrough
+
+  /auth/register/step4:
+    post:
+      summary: Step 4 - Confirm Registration
+      description: Confirm all steps completed and create user account
+      operationId: registerStep4
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterConfirmRequest'
+            examples:
+              success:
+                summary: Confirmation with code
+                value:
+                  sessionId: sess_abc123xyz
+                  confirmCode: "123456"
+      responses:
+        '200':
+          description: Registration confirmed and account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterStep4Response'
+              examples:
+                success:
+                  summary: Account created successfully
+                  value:
+                    success: true
+                    userId: user_xyz789
+                    message: Account created successfully. You can now login.
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-handler:
+        type: passthrough
+
+  /auth/register/status/{sessionId}:
+    get:
+      summary: Get Registration Status
+      description: Query current registration progress and session metadata
+      operationId: getRegistrationStatus
+      tags:
+        - Authentication
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Registration session ID
+          schema:
+            type: string
+          example: sess_abc123xyz
+      responses:
+        '200':
+          description: Registration session status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationStatus'
+              examples:
+                inProgress:
+                  summary: Registration in progress (Step 2)
+                  value:
+                    sessionId: sess_abc123xyz
+                    currentStep: 2
+                    completedSteps: [1]
+                    userEmail: user@example.com
+                    createdAt: "2025-10-30T14:30:00Z"
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                notFound:
+                  summary: Session not found
+                  value:
+                    error: NotFoundError
+                    message: Registration session not found
+      x-handler:
+        type: query
+        source: db
+        resource: registration_sessions
+        where:
+          session_id: ':sessionId'
+        select:
+          - session_id
+          - current_step
+          - completed_steps
+          - user_email
+          - created_at
+
+  /users:
+    get:
+      summary: List Users
+      description: List all users (admin only)
+      operationId: listUsers
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+              examples:
+                success:
+                  summary: Multiple users returned
+                  value:
+                    - id: user_abc123
+                      name: John Doe
+                      email: john@example.com
+                      createdAt: "2025-10-20T10:00:00Z"
+                      updatedAt: "2025-10-25T15:30:00Z"
+                    - id: user_def456
+                      name: Jane Smith
+                      email: jane@example.com
+                      createdAt: "2025-10-15T09:15:00Z"
+                      updatedAt: "2025-10-22T12:00:00Z"
+        '403':
+          description: Forbidden - admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                forbidden:
+                  summary: Admin access required
+                  value:
+                    error: ForbiddenError
+                    message: Admin access required
+      x-handler:
+        type: query
+        source: db
+        resource: users
+        select:
+          - id
+          - name
+          - email
+      x-auth:
+        role: admin
+      x-access-control:
+        description: Only administrators can list all users
+        roles: ["admin"]
+        rules: []
+      x-feature-flags:
+        - $ref: '#/components/x-flags/advanced-user-features'
+
+    post:
+      summary: Create User
+      description: Create a new user
+      operationId: createUser
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+            examples:
+              success:
+                summary: Create new user
+                value:
+                  name: Alice Johnson
+                  email: alice@example.com
+                  password: SecurePassword123!
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                success:
+                  summary: User created with auto-generated ID
+                  value:
+                    id: user_ghi789
+                    name: Alice Johnson
+                    email: alice@example.com
+                    createdAt: "2025-10-30T16:45:00Z"
+                    updatedAt: "2025-10-30T16:45:00Z"
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                duplicate:
+                  summary: Email already exists
+                  value:
+                    error: ValidationError
+                    message: Email already in use
+      x-handler:
+        type: crud
+        resource: users
+        operation: create
+      x-access-control:
+        description: Public endpoint for user registration
+        roles: []
+        rules: []
+
+  /users/{id}:
+    get:
+      summary: Get User
+      description: Get user details by ID
+      operationId: getUser
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+          example: user_abc123
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                success:
+                  summary: User details retrieved
+                  value:
+                    id: user_abc123
+                    name: John Doe
+                    email: john@example.com
+                    createdAt: "2025-10-20T10:00:00Z"
+                    updatedAt: "2025-10-25T15:30:00Z"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                notFound:
+                  summary: User not found
+                  value:
+                    error: NotFoundError
+                    message: User not found
+      x-handler:
+        type: crud
+        resource: users
+        operation: read
+      x-access-control:
+        description: Users can view their own profile or admins can view any profile
+        roles: ["admin"]
+        rules:
+          - subject.id == resource.id
+
+    put:
+      summary: Update User
+      description: Update user details
+      operationId: updateUser
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+          example: user_abc123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+            examples:
+              success:
+                summary: Update user information
+                value:
+                  name: John Doe Updated
+                  email: john.doe.new@example.com
+                  password: NewSecurePassword456!
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                success:
+                  summary: User updated
+                  value:
+                    id: user_abc123
+                    name: John Doe Updated
+                    email: john.doe.new@example.com
+                    createdAt: "2025-10-20T10:00:00Z"
+                    updatedAt: "2025-10-30T17:00:00Z"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-handler:
+        type: crud
+        resource: users
+        operation: update
+      x-access-control:
+        description: Users can update their own profile or admins can update any profile
+        roles: ["admin"]
+        rules:
+          - subject.id == resource.id
+
+    delete:
+      summary: Delete User
+      description: Delete a user
+      operationId: deleteUser
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+          example: user_abc123
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                notFound:
+                  summary: User not found
+                  value:
+                    error: NotFoundError
+                    message: User not found
+      x-handler:
+        type: crud
+        resource: users
+        operation: delete
+      x-access-control:
+        description: Only administrators can delete users
+        roles: ["admin"]
+        rules: []
+
+components:
+  schemas:
+    # Response schemas
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        api:
+          type: string
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - status
+        - api
+        - version
+        - timestamp
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        messages:
+          type: array
+          items:
+            type: string
+      required:
+        - error
+
+    # Registration flow schemas
+    RegisterEmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+      required:
+        - email
+
+    RegisterStep1Response:
+      type: object
+      properties:
+        success:
+          type: boolean
+        sessionId:
+          type: string
+          description: Registration session ID
+        message:
+          type: string
+        nextStep:
+          type: string
+      required:
+        - success
+        - sessionId
+
+    RegisterProfileRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        firstName:
+          type: string
+          description: User first name
+        lastName:
+          type: string
+          description: User last name
+        organization:
+          type: string
+          description: User organization
+        role:
+          type: string
+          description: User role within organization
+      required:
+        - sessionId
+        - firstName
+        - lastName
+        - organization
+
+    RegisterStep2Response:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        nextStep:
+          type: string
+      required:
+        - success
+
+    RegisterCredentialsRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        password:
+          type: string
+          minLength: 8
+          description: User password (minimum 8 characters)
+        securityQuestions:
+          type: array
+          items:
+            type: object
+            properties:
+              question:
+                type: string
+              answer:
+                type: string
+          description: Security questions and answers
+        enableMfa:
+          type: boolean
+          description: Enable multi-factor authentication
+      required:
+        - sessionId
+        - password
+
+    RegisterStep3Response:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        nextStep:
+          type: string
+      required:
+        - success
+
+    RegisterConfirmRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: Registration session ID
+        confirmCode:
+          type: string
+          description: Confirmation code sent to email
+      required:
+        - sessionId
+        - confirmCode
+
+    RegisterStep4Response:
+      type: object
+      properties:
+        success:
+          type: boolean
+        userId:
+          type: string
+        message:
+          type: string
+      required:
+        - success
+
+    RegistrationStatus:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        currentStep:
+          type: integer
+        completedSteps:
+          type: array
+          items:
+            type: integer
+        userEmail:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    # User schemas
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+
+    UserCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: User name
+        email:
+          type: string
+          format: email
+          description: User email
+        password:
+          type: string
+          minLength: 8
+          description: User password
+      required:
+        - name
+        - email
+        - password
+
+    # Metadata schemas
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Bearer token authentication
+
+security:
+  - bearerAuth: []

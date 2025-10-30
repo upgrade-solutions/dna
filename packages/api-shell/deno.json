@@ -1,0 +1,19 @@
+{
+  "name": "api-shell",
+  "version": "1.0.0",
+  "description": "Configuration-Driven API Shell (Deno + TypeScript)",
+  "imports": {
+    "oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
+    "std/": "https://deno.land/std@0.208.0/",
+    "yaml": "https://deno.land/std@0.208.0/yaml/mod.ts"
+  },
+  "nodeModules": "node_modules",
+  "tasks": {
+    "start": "deno run --allow-net --allow-read --allow-env --allow-hrtime mod.ts",
+    "dev": "WATCH_CONFIG=true deno run --allow-all --watch mod.ts",
+    "test": "deno test --allow-net --allow-read --allow-env tests/",
+    "check": "deno check mod.ts",
+    "fmt": "deno fmt",
+    "lint": "deno lint"
+  }
+}
