@@ -24,26 +24,67 @@ tags:
 
 # Access Control Policies (reusable)
 x-policies:
+  # Public/Unauthenticated
   public:
     description: Open endpoint - no access control required
     roles: []
     rules: []
+  
   authenticated:
     description: Any authenticated user
     roles: []
     rules:
       - subject.id != null
-  admin-only:
-    description: Admin users only
+
+  # Registration flow policies
+  auth:register:
+    description: Can initiate registration flow
+    roles: []
+    rules: []
+  
+  # User resource policies (organized by resource:action)
+  user:read:
+    description: Can read user profile (own or admin access to any)
     roles: ["admin"]
+    rules:
+      - subject.id == resource.id
+  
+  user:create:
+    description: Can create new user (public registration)
+    roles: []
+    rules: []
+  
+  user:update:
+    description: Can update user profile (own or admin access to any)
+    roles: ["admin"]
+    rules:
+      - subject.id == resource.id
+  
+  user:delete:
+    description: Can delete user account (admin only)
+    roles: ["admin"]
+    rules: []
+  
+  user:list:
+    description: Can list all users (admin only)
+    roles: ["admin"]
+    rules: []
+  
+  # Manager/Admin policies
   manager-or-admin:
     description: Manager or admin users
     roles: ["manager", "admin"]
+  
+  admin-only:
+    description: Admin users only
+    roles: ["admin"]
+  
   owner-or-admin:
     description: Resource owner or admin
     roles: ["admin"]
     rules:
       - subject.role == "user" and subject.id == resource.ownerId
+  
   self-service-or-admin:
     description: Users can access their own data or admins can access any data
     roles: ["admin"]
@@ -76,6 +117,7 @@ paths:
       operationId: registerStep1
       tags:
         - Authentication
+      x-resource-action: "auth:register"
       requestBody:
         required: true
         content:
@@ -126,6 +168,7 @@ paths:
       operationId: registerStep2
       tags:
         - Authentication
+      x-resource-action: "auth:register"
       requestBody:
         required: true
         content:
@@ -171,6 +214,7 @@ paths:
       operationId: registerStep3
       tags:
         - Authentication
+      x-resource-action: "auth:register"
       requestBody:
         required: true
         content:
@@ -225,6 +269,7 @@ paths:
       operationId: registerStep4
       tags:
         - Authentication
+      x-resource-action: "auth:register"
       requestBody:
         required: true
         content:
@@ -267,6 +312,7 @@ paths:
       operationId: getRegistrationStatus
       tags:
         - Authentication
+      x-resource-action: "auth:status"
       parameters:
         - name: sessionId
           in: path
@@ -323,6 +369,7 @@ paths:
       operationId: listUsers
       tags:
         - Users
+      x-resource-action: "user:list"
       security:
         - bearerAuth: []
       responses:
@@ -383,6 +430,7 @@ paths:
       operationId: createUser
       tags:
         - Users
+      x-resource-action: "user:create"
       requestBody:
         required: true
         content:
@@ -440,6 +488,7 @@ paths:
       operationId: getUser
       tags:
         - Users
+      x-resource-action: "user:read"
       security:
         - bearerAuth: []
       parameters:
@@ -494,6 +543,7 @@ paths:
       operationId: updateUser
       tags:
         - Users
+      x-resource-action: "user:update"
       security:
         - bearerAuth: []
       parameters:
@@ -555,6 +605,7 @@ paths:
       operationId: deleteUser
       tags:
         - Users
+      x-resource-action: "user:delete"
       security:
         - bearerAuth: []
       parameters:

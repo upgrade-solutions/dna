@@ -4,3 +4,5 @@ export type { AuthContext } from "./auth-manager.ts";
 export { AuthManager, createAuthManager } from "./auth-manager.ts";
 export { HandlerRegistry, createHandlerRegistry } from "./handler-registry.ts";
 export { AccessControlEvaluator, RuleEvaluator, createAccessControlEvaluator } from "./access-control-manager.ts";
+export type { ResourceActionMapping } from "./resource-action-manager.ts";
+export { ResourceActionRegistry, createResourceActionRegistry } from "./resource-action-manager.ts";

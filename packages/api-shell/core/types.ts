@@ -6,6 +6,7 @@ export interface ExecutionContext {
   body: unknown;
   user?: unknown;
   env: Record<string, string>;
+  resourceAction?: ResourceActionContext;
   respond: (data: unknown, status?: number) => Response;
 }
 
@@ -105,6 +106,7 @@ export interface OpenAPIOperation {
   deprecated?: boolean;
   "x-handler"?: HandlerConfig;
   "x-auth"?: AuthRule;
+  "x-resource-action"?: string; // e.g., "user:read", "document:delete"
   "x-access-control"?: AccessControlPolicy;
   "x-feature-flags"?: FeatureFlag[];
   [key: string]: unknown;
@@ -232,6 +234,60 @@ export interface ParsedRule {
   ast?: unknown; // Abstract syntax tree if using a parser
 }
 
+/**
+ * Resource-Action context with class-level and instance-level granularity
+ * Dual-level design distinguishes between:
+ * - CLASS-LEVEL: What capability is being exercised (e.g., "user:read")
+ * - INSTANCE-LEVEL: What specific target is affected (e.g., user ID 123, optional scope)
+ */
+export interface ResourceActionContext {
+  // CLASS-LEVEL: Used for policy/capability checks
+  resource: string; // e.g., "user", "document", "report"
+  action: string; // e.g., "read", "update", "delete", "create"
+  canonical: string; // Canonical form: "user:read"
+
+  // INSTANCE-LEVEL: Enriched at runtime from route params/context
+  targetId?: string; // Target resource ID (e.g., user ID from {id} param)
+  targetScope?: string; // Optional scope qualifier (e.g., "department", "team", "field")
+
+  // COMPUTED: Full qualified form for audit trails and instance-specific logic
+  qualifiedForm(): string;
+}
+
+/**
+ * Implementation of ResourceActionContext with computed qualified form
+ */
+export class ResourceActionImpl implements ResourceActionContext {
+  resource: string;
+  action: string;
+  canonical: string;
+  targetId?: string;
+  targetScope?: string;
+
+  constructor(
+    resource: string,
+    action: string,
+    targetId?: string,
+    targetScope?: string
+  ) {
+    this.resource = resource;
+    this.action = action;
+    this.canonical = `${resource}:${action}`;
+    this.targetId = targetId;
+    this.targetScope = targetScope;
+  }
+
+  qualifiedForm(): string {
+    if (this.targetId) {
+      if (this.targetScope) {
+        return `${this.resource}:${this.targetId}:${this.targetScope}:${this.action}`;
+      }
+      return `${this.resource}:${this.targetId}:${this.action}`;
+    }
+    return this.canonical;
+  }
+}
+
 // Feature Flags (x-feature-flags) Extension Types
 /**
  * Feature flag configuration for toggling features
@@ -270,3 +326,258 @@ export interface FeatureFlagResult {
   reason?: string;
   matchedRule?: string;
 }
+
+// ============================================================================
+// COMPOSABLE BLOCKS SYSTEM
+// ============================================================================
+
+/**
+ * Block Input Definition
+ * Describes what data a block expects as input
+ */
+export interface BlockInput {
+  name: string;
+  type: string; // "string", "number", "boolean", "object", "array"
+  required?: boolean;
+  default?: unknown;
+  description?: string;
+  source?: "param" | "previous" | "literal" | "env"; // Where the input comes from
+}
+
+/**
+ * Block Output Definition
+ * Describes what data a block produces
+ */
+export interface BlockOutput {
+  name: string;
+  type: string;
+  description?: string;
+  schema?: Record<string, unknown>; // JSON Schema for complex types
+}
+
+/**
+ * Block Configuration
+ * Base configuration for any block type
+ */
+export interface BlockConfig {
+  [key: string]: unknown;
+}
+
+/**
+ * Block Definition
+ * Reusable blueprint for a block type (Database, HTTP, File, etc.)
+ */
+export interface BlockDefinition {
+  id: string; // Unique identifier
+  type: string; // "database", "http", "file", "transform", "condition", etc.
+  description?: string;
+  config: BlockConfig; // Provider-specific configuration
+  inputs: BlockInput[]; // Expected inputs
+  outputs: BlockOutput[]; // Produced outputs
+  functions?: string[]; // Available functions (e.g., ["select", "insert"])
+  timeout?: number; // Execution timeout in ms
+}
+
+/**
+ * Block Instance
+ * Configured instance of a block ready for execution
+ */
+export interface BlockInstance {
+  id: string; // Instance ID (unique in chain)
+  blockType: string; // Type reference (e.g., "database", "http")
+  ref?: string; // Reference to block definition (e.g., "#/components/x-blocks/mainDb")
+  config: Record<string, unknown>; // Instance configuration
+  inputs: Record<string, unknown>; // Input mapping and values
+  errorHandler?: "fail" | "skip" | "retry" | "fallback";
+  retryPolicy?: {
+    maxAttempts: number;
+    backoff: "none" | "linear" | "exponential";
+    retryDelay?: string; // ISO 8601 duration
+  };
+  timeout?: number; // Override timeout for this instance
+  fallback?: unknown; // Fallback value if block fails
+  parallel?: boolean; // Run in parallel with other blocks
+  outputs?: Record<string, string>; // Output mapping (e.g., { "result": "$" })
+}
+
+/**
+ * Block Chain
+ * Ordered sequence of blocks to be executed
+ */
+export interface BlockChain {
+  id: string;
+  blocks: BlockInstance[];
+  errorHandling?: {
+    strategy: "fail-fast" | "continue";
+    defaultFallback?: unknown;
+  };
+  timeout?: number; // Total chain timeout
+}
+
+/**
+ * Block Execution Context
+ * Runtime context provided to each block during execution
+ */
+export interface BlockExecutionContext {
+  // Direct inputs to this block
+  inputs: Record<string, unknown>;
+
+  // Contextual information
+  env: Record<string, string>; // Environment variables
+  user?: unknown; // Authenticated user
+  params: Record<string, string>; // URL parameters
+  requestBody?: unknown; // Original request body
+
+  // Previous block outputs in the chain
+  blockOutputs: Record<string, Record<string, unknown>>; // { blockId: { outputName: value } }
+
+  // Block metadata
+  blockId: string; // Current block ID
+  blockType: string; // Current block type
+  chainId: string; // Parent chain ID
+
+  // Execution metadata
+  currentBlockIndex: number;
+  totalBlocks: number;
+  executedAt: Date;
+}
+
+/**
+ * Block Execution Result
+ * Output from executing a single block
+ */
+export interface BlockExecutionResult {
+  blockId: string;
+  blockType: string;
+  success: boolean;
+  outputs: Record<string, unknown>;
+  error?: Error;
+  duration: number; // ms
+  timestamp: Date;
+}
+
+/**
+ * Block Chain Execution Result
+ * Aggregated result from executing all blocks in a chain
+ */
+export interface BlockChainExecutionResult {
+  chainId: string;
+  success: boolean;
+  results: BlockExecutionResult[];
+  outputs: Record<string, unknown>; // Aggregated outputs from all blocks
+  error?: Error;
+  totalDuration: number; // ms
+  timestamp: Date;
+}
+
+/**
+ * Block Registry Entry
+ * Stores block definitions for reuse
+ */
+export interface BlockRegistryEntry {
+  definition: BlockDefinition;
+  handler: BlockHandler;
+}
+
+/**
+ * Block Handler Function
+ * Function that executes a block
+ */
+export type BlockHandler = (
+  ctx: BlockExecutionContext,
+  config: BlockConfig
+) => Promise<Record<string, unknown>>;
+
+/**
+ * Block Instance Configuration in OpenAPI
+ * Can use $ref to reference block definitions or inline config
+ */
+export interface BlockInstanceConfig {
+  id: string;
+  ref?: string; // e.g., "#/components/x-blocks/database"
+  type?: string; // Alternative to ref, inline type
+  config?: Record<string, unknown>;
+  inputs?: Record<string, unknown>;
+  outputs?: Record<string, string>; // Output extraction mappings
+  errorHandler?: string;
+  parallel?: boolean;
+}
+
+/**
+ * OpenAPI Components Extension for Blocks
+ * Added to components section
+ */
+export interface OpenAPIComponentsBlocks {
+  "x-blocks"?: Record<string, BlockDefinition>;
+  "x-block-chains"?: Record<string, BlockChain>;
+}
+
+/**
+ * Handler Configuration for Blocks
+ * Used in x-handler extension to execute a block chain
+ */
+export interface BlocksHandlerConfig extends HandlerConfig {
+  type: "blocks";
+  chain: string; // Chain ID to execute
+  chainDefinition?: BlockChain; // Inline chain definition
+  responseKey?: string; // Which block output to return (e.g., "blocks.transformStep.result")
+}
+
+/**
+ * Utility: Extract nested value from object using dot notation
+ * e.g., "blocks.getUserData.user" or "rows[0].id"
+ */
+export function extractValue(
+  data: Record<string, unknown>,
+  path: string
+): unknown {
+  const parts = path.split(".");
+  let current: unknown = data;
+
+  for (const part of parts) {
+    if (typeof current !== "object" || current === null) {
+      return undefined;
+    }
+
+    // Handle array index syntax: "items[0]"
+    const arrayMatch = part.match(/^(\w+)\[(\d+)\]$/);
+    if (arrayMatch) {
+      const [, key, index] = arrayMatch;
+      const array = (current as Record<string, unknown>)[key];
+      if (Array.isArray(array)) {
+        current = array[parseInt(index)];
+      } else {
+        return undefined;
+      }
+    } else {
+      current = (current as Record<string, unknown>)[part];
+    }
+  }
+
+  return current;
+}
+
+/**
+ * Utility: Set nested value in object using dot notation
+ * e.g., "user.profile.name"
+ */
+export function setValue(
+  data: Record<string, unknown>,
+  path: string,
+  value: unknown
+): void {
+  const parts = path.split(".");
+  let current: unknown = data;
+
+  for (let i = 0; i < parts.length - 1; i++) {
+    const part = parts[i];
+    if (!(part in (current as Record<string, unknown>))) {
+      (current as Record<string, unknown>)[part] = {};
+    }
+    current = (current as Record<string, unknown>)[part];
+  }
+
+  const lastPart = parts[parts.length - 1];
+  (current as Record<string, unknown>)[lastPart] = value;
+}
+

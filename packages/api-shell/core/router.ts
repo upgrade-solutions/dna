@@ -10,7 +10,7 @@ import {
   AccessControlPolicy,
   AccessControlContext,
 } from "./types.ts";
-import { HandlerRegistry, AuthManager } from "./managers/index.ts";
+import { HandlerRegistry, AuthManager, ResourceActionRegistry, createResourceActionRegistry } from "./managers/index.ts";
 import { SchemaValidator } from "./validator.ts";
 import { ConfigLoader } from "./loader.ts";
 import {
@@ -25,6 +25,7 @@ export class DynamicRouter {
   private validator: SchemaValidator;
   private configLoader: ConfigLoader;
   private accessControl: AccessControlEvaluator;
+  private resourceActionRegistry: ResourceActionRegistry;
   private schemaCache: Map<string, Record<string, unknown>> = new Map();
 
   constructor(
@@ -33,7 +34,8 @@ export class DynamicRouter {
     auth: AuthManager,
     validator: SchemaValidator,
     configLoader: ConfigLoader,
-    accessControl?: AccessControlEvaluator
+    accessControl?: AccessControlEvaluator,
+    resourceActionRegistry?: ResourceActionRegistry
   ) {
     this.router = router;
     this.handlers = handlers;
@@ -42,6 +44,7 @@ export class DynamicRouter {
     this.configLoader = configLoader;
     const spec = configLoader.getOpenAPISpec();
     this.accessControl = accessControl || createAccessControlEvaluator(spec || undefined);
+    this.resourceActionRegistry = resourceActionRegistry || createResourceActionRegistry(spec || undefined);
   }
 
   async registerRoutes(routes: RouteConfig[]): Promise<void> {
@@ -61,6 +64,21 @@ export class DynamicRouter {
           ctx as any,
           route
         );
+
+        // Extract and inject resource:action into execution context
+        const resourceActionStr = this.getResourceActionString(route);
+        if (resourceActionStr) {
+          const [resource, action] = resourceActionStr.split(":");
+          if (resource && action) {
+            // Extract instance ID from execution context params (e.g., {id})
+            const targetId = (executionCtx.params as Record<string, unknown>).id as string | undefined;
+            executionCtx.resourceAction = this.resourceActionRegistry.createResourceAction(
+              resource,
+              action,
+              targetId
+            );
+          }
+        }
 
         // Get access control policy from OpenAPI if available
         const policy = this.getAccessControlPolicy(route);
@@ -243,6 +261,15 @@ export class DynamicRouter {
   }
 
   /**
+   * Get resource:action string from route handler config
+   * Returns format like "user:read" or "document:delete"
+   */
+  private getResourceActionString(route: RouteConfig): string | undefined {
+    const handler = route.handler as Record<string, unknown>;
+    return handler["x-resource-action"] as string | undefined;
+  }
+
+  /**
    * Build AccessControlContext from ExecutionContext
    * Extracts subject (user), resource, and environment information
    */
@@ -264,7 +291,7 @@ export class DynamicRouter {
         permissions: user.permissions as string[] | undefined,
       },
       resource: {
-        id: ((ctx.params as Record<string, unknown>).id as string) || "",
+        id: ((ctx.resourceAction?.targetId) as string | undefined) || "",
         ownerId: user.ownerId as string | undefined,
       },
       environment: {

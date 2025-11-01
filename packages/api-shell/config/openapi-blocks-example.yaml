@@ -1,0 +1,403 @@
+openapi: 3.1.1
+info:
+  title: Composable Blocks Example API
+  version: 1.0.0
+  description: |
+    Example API demonstrating composable blocks for data enrichment,
+    multi-step workflows, and integration patterns.
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+
+paths:
+  /users/{userId}/profile:
+    get:
+      summary: Get enriched user profile with permissions and audit log
+      description: |
+        Fetches user profile from database, enriches with permissions
+        and audit log from multiple sources (database and HTTP API).
+        Demonstrates parallel block execution.
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The user ID to fetch
+          schema:
+            type: string
+            example: "user-123"
+      responses:
+        '200':
+          description: Enriched user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrichedUserProfile'
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+      x-handler:
+        type: blocks
+        chain:
+          # Step 1: Fetch user from database
+          - id: getUser
+            type: database
+            config:
+              function: select
+              table: users
+            inputs:
+              where: { id: "${params.userId}" }
+              limit: 1
+            timeout: 5000
+
+          # Step 2: Fetch permissions (parallel)
+          - id: getPermissions
+            type: database
+            config:
+              function: select
+              table: user_permissions
+            inputs:
+              where: { userId: "${params.userId}" }
+            parallel: true
+            errorHandler: fallback
+            fallback: []
+
+          # Step 3: Fetch audit log (parallel)
+          - id: getAuditLog
+            type: http
+            config:
+              baseUrl: http://audit-service:3001
+              timeout: 10000
+            inputs:
+              method: GET
+              path: "/audit/users/${params.userId}"
+            parallel: true
+            errorHandler: fallback
+            fallback: { events: [] }
+
+          # Step 4: Enrich and format response
+          - id: enrichProfile
+            type: database
+            config:
+              function: query
+            inputs:
+              query: |
+                SELECT
+                  u.*,
+                  COALESCE(p.permissions, '[]'::json) as permissions,
+                  NOW() as enriched_at
+                FROM users u
+                LEFT JOIN user_permissions p ON u.id = p.user_id
+                WHERE u.id = $1
+              params: ["${params.userId}"]
+
+        responseKey: blocks.enrichProfile.rows[0]
+
+  /users:
+    post:
+      summary: Create a new user with onboarding workflow
+      description: |
+        Creates a user and sends welcome email in parallel using
+        composable blocks. Demonstrates sequential and parallel execution.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid request
+      x-handler:
+        type: blocks
+        chain:
+          # Step 1: Validate user doesn't already exist
+          - id: checkUserExists
+            type: database
+            config:
+              function: select
+              table: users
+            inputs:
+              where: { email: "${body.email}" }
+              limit: 1
+            timeout: 5000
+
+          # Step 2: Insert new user
+          - id: insertUser
+            type: database
+            config:
+              function: insert
+              table: users
+            inputs:
+              data:
+                email: "${body.email}"
+                name: "${body.name}"
+                created_at: "${ new Date().toISOString() }"
+            timeout: 5000
+
+          # Step 3: Create default permissions (parallel with email)
+          - id: createPermissions
+            type: database
+            config:
+              function: insert
+              table: user_permissions
+            inputs:
+              data:
+                userId: "${blocks.insertUser.id}"
+                permissions: '["user:read", "user:update"]'
+            parallel: true
+            errorHandler: fallback
+
+          # Step 4: Send welcome email (parallel)
+          - id: sendWelcomeEmail
+            type: http
+            config:
+              baseUrl: http://mail-service:3002
+              headers:
+                Content-Type: application/json
+              timeout: 10000
+            inputs:
+              method: POST
+              path: /send
+              data:
+                to: "${body.email}"
+                subject: "Welcome!"
+                template: "welcome"
+                variables:
+                  name: "${body.name}"
+                  userId: "${blocks.insertUser.id}"
+            parallel: true
+            errorHandler: skip
+
+          # Step 5: Return created user
+          - id: fetchCreatedUser
+            type: database
+            config:
+              function: select
+              table: users
+            inputs:
+              where: { id: "${blocks.insertUser.id}" }
+              limit: 1
+
+        responseKey: blocks.fetchCreatedUser.rows[0]
+
+  /users/{userId}/report:
+    post:
+      summary: Generate user report with aggregated data
+      description: |
+        Generates a comprehensive user report by aggregating data from
+        multiple sources in parallel, then combining results.
+      tags:
+        - Reports
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportRequest'
+      responses:
+        '200':
+          description: Generated report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserReport'
+      x-handler:
+        type: blocks
+        chain:
+          # Parallel data collection
+          - id: getUserStats
+            type: database
+            config:
+              function: select
+              table: user_stats
+            inputs:
+              where: { userId: "${params.userId}" }
+            parallel: true
+            errorHandler: fallback
+            fallback: { totalLogins: 0, lastLogin: null }
+
+          - id: getActivityLog
+            type: database
+            config:
+              function: query
+            inputs:
+              query: >
+                SELECT DATE_TRUNC('day', created_at) as date, COUNT(*) as count
+                FROM activity_log
+                WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days'
+                GROUP BY DATE_TRUNC('day', created_at)
+              params: ["${params.userId}"]
+            parallel: true
+            errorHandler: fallback
+            fallback: []
+
+          - id: getMetadata
+            type: http
+            config:
+              baseUrl: http://metadata-service:3003
+              timeout: 5000
+            inputs:
+              method: GET
+              path: "/users/${params.userId}/metadata"
+            parallel: true
+            errorHandler: fallback
+            fallback: {}
+
+          # Generate report from aggregated data
+          - id: generateReport
+            type: database
+            config:
+              function: insert
+              table: reports
+            inputs:
+              data:
+                userId: "${params.userId}"
+                type: "${body.reportType}"
+                stats: "${blocks.getUserStats}"
+                activity: "${blocks.getActivityLog.rows}"
+                metadata: "${blocks.getMetadata.data}"
+                generatedAt: "${ new Date().toISOString() }"
+                filters: "${body.filters}"
+
+        responseKey: blocks.generateReport
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User email address
+        name:
+          type: string
+          description: Full name
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+      required:
+        - id
+        - email
+        - name
+        - created_at
+
+    EnrichedUserProfile:
+      type: object
+      description: User profile with enriched data
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+          description: List of user permissions
+        auditLog:
+          type: object
+          properties:
+            events:
+              type: array
+              items:
+                type: object
+        enriched_at:
+          type: string
+          format: date-time
+
+    CreateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+      required:
+        - email
+        - name
+
+    ReportRequest:
+      type: object
+      properties:
+        reportType:
+          type: string
+          enum: [daily, weekly, monthly]
+        filters:
+          type: object
+          description: Optional filters for report generation
+      required:
+        - reportType
+
+    UserReport:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        type:
+          type: string
+        stats:
+          type: object
+        activity:
+          type: array
+        metadata:
+          type: object
+        generatedAt:
+          type: string
+          format: date-time
+
+  x-blocks:
+    mainDatabase:
+      id: main-db
+      type: database
+      description: Primary PostgreSQL database
+      config:
+        provider: postgres
+        connectionString: ${DB_CONNECTION_URL}
+
+    auditService:
+      id: audit-api
+      type: http
+      description: Audit log HTTP service
+      config:
+        baseUrl: http://audit-service:3001
+        timeout: 10000
+
+    mailService:
+      id: mail-api
+      type: http
+      description: Email delivery service
+      config:
+        baseUrl: http://mail-service:3002
+        timeout: 15000
