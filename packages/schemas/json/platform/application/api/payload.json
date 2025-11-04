@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/api/payload.json",
+  "title": "Payload Schema",
+  "description": "Defines a payload — a structured data object containing attributes exchanged via API endpoints.",
+  "examples": [
+    {
+      "id": "submit-loan-payload",
+      "name": "Submit Loan Request",
+      "key": "submitLoanRequest",
+      "type": "Payload",
+      "description": "Request payload for submitting a loan application",
+      "attributes": [
+        {
+          "id": "loan-amount-attr",
+          "name": "Loan Amount",
+          "key": "loanAmount",
+          "type": "Attribute",
+          "dataType": "number",
+          "required": true
+        },
+        {
+          "id": "loan-purpose-attr",
+          "name": "Loan Purpose",
+          "key": "loanPurpose",
+          "type": "Attribute",
+          "dataType": "string",
+          "required": true,
+          "validation": {
+            "enum": ["home", "auto", "debt-consolidation", "personal", "other"]
+          }
+        },
+        {
+          "id": "annual-income-attr",
+          "name": "Annual Income",
+          "key": "annualIncome",
+          "type": "Attribute",
+          "dataType": "number",
+          "required": true,
+          "validation": {
+            "minimum": 0,
+            "maximum": 10000000
+          }
+        }
+      ]
+    },
+    {
+      "id": "submit-loan-response",
+      "name": "Submit Loan Response",
+      "key": "submitLoanResponse",
+      "type": "Payload",
+      "description": "Response payload after submitting a loan application",
+      "attributes": [
+        {
+          "id": "application-id-attr",
+          "name": "Application ID",
+          "key": "applicationId",
+          "type": "Attribute",
+          "dataType": "string",
+          "required": true
+        },
+        {
+          "id": "status-attr",
+          "name": "Status",
+          "key": "status",
+          "type": "Attribute",
+          "dataType": "string",
+          "required": true,
+          "validation": {
+            "enum": ["submitted", "pending_review", "approved", "rejected"]
+          }
+        },
+        {
+          "id": "created-at-attr",
+          "name": "Created At",
+          "key": "createdAt",
+          "type": "Attribute",
+          "dataType": "string",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Payload"
+        },
+        "attributes": {
+          "type": "array",
+          "description": "Attributes contained in this payload.",
+          "items": {
+            "$ref": "https://dna.codes/schemas/attribute.json"
+          }
+        }
+      }
+    }
+  ]
+}

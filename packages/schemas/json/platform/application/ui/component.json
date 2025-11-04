@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/ui/component.json",
+  "title": "Component Schema",
+  "description": "Defines a component — a reusable UI element that handles actions and manages state.",
+  "examples": [
+    {
+      "id": "application-form-component",
+      "name": "Application Form",
+      "key": "applicationForm",
+      "type": "Component",
+      "description": "Form component for submitting loan application data",
+      "fields": [
+        {
+          "id": "loan-amount-field",
+          "name": "Loan Amount",
+          "key": "loanAmount",
+          "type": "Field",
+          "dataType": "number",
+          "required": true
+        },
+        {
+          "id": "loan-purpose-field",
+          "name": "Loan Purpose",
+          "key": "loanPurpose",
+          "type": "Field",
+          "dataType": "string",
+          "required": true
+        }
+      ],
+      "handlers": [
+        {
+          "id": "form-submit-handler",
+          "name": "On Submit",
+          "key": "onSubmit",
+          "type": "EventHandler",
+          "action": "submitLoanApplication",
+          "validation": true
+        },
+        {
+          "id": "form-cancel-handler",
+          "name": "On Cancel",
+          "key": "onCancel",
+          "type": "EventHandler",
+          "action": "cancelSubmission"
+        }
+      ]
+    },
+    {
+      "id": "status-indicator-component",
+      "name": "Status Indicator",
+      "key": "statusIndicator",
+      "type": "Component",
+      "description": "Component for displaying application status with visual indicators",
+      "fields": [
+        {
+          "id": "status-field",
+          "name": "Status",
+          "key": "status",
+          "type": "Field",
+          "dataType": "string",
+          "required": true,
+          "validation": {
+            "enum": ["pending", "approved", "rejected", "expired"]
+          }
+        }
+      ],
+      "handlers": [
+        {
+          "id": "status-change-handler",
+          "name": "On Status Change",
+          "key": "onStatusChange",
+          "type": "EventHandler",
+          "action": "updateStatusDisplay"
+        }
+      ]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Component"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Input fields or data properties of the component.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "key": { "type": "string" },
+              "type": { "type": "string" },
+              "dataType": { "type": "string" },
+              "required": { "type": "boolean" },
+              "validation": { "type": "object" }
+            },
+            "required": ["id", "name", "key", "type", "dataType"]
+          }
+        },
+        "handlers": {
+          "type": "array",
+          "description": "Event handlers and action handlers for the component.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "key": { "type": "string" },
+              "type": { "type": "string" },
+              "action": { "type": "string", "description": "The action key to execute." },
+              "validation": { "type": "boolean" },
+              "description": { "type": "string" }
+            },
+            "required": ["id", "name", "key", "type", "action"]
+          }
+        }
+      }
+    }
+  ]
+}

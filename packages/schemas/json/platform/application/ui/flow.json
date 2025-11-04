@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/ui/flow.json",
+  "title": "Flow Schema",
+  "description": "Defines a flow — a sequence of UI actions, pages, and component interactions.",
+  "examples": [
+    {
+      "id": "application-submission-flow",
+      "name": "Application Submission Flow",
+      "key": "applicationSubmissionFlow",
+      "type": "Flow",
+      "description": "Step-by-step flow for submitting a loan application",
+      "startStep": "application-intro-step",
+      "steps": [
+        {
+          "id": "application-intro-step",
+          "name": "Application Introduction",
+          "key": "applicationIntro",
+          "type": "Step",
+          "pageId": "loan-intro-page",
+          "nextStep": "borrower-info-step"
+        },
+        {
+          "id": "borrower-info-step",
+          "name": "Borrower Information",
+          "key": "borrowerInfo",
+          "type": "Step",
+          "pageId": "borrower-info-page",
+          "componentId": "borrower-form-component",
+          "action": "collectBorrowerInfo",
+          "nextStep": "loan-details-step"
+        },
+        {
+          "id": "loan-details-step",
+          "name": "Loan Details",
+          "key": "loanDetails",
+          "type": "Step",
+          "pageId": "loan-details-page",
+          "componentId": "loan-form-component",
+          "action": "collectLoanDetails",
+          "nextStep": "review-step"
+        },
+        {
+          "id": "review-step",
+          "name": "Review & Submit",
+          "key": "review",
+          "type": "Step",
+          "pageId": "review-page",
+          "componentId": "review-component",
+          "action": "submitApplication",
+          "nextStep": "confirmation-step"
+        },
+        {
+          "id": "confirmation-step",
+          "name": "Confirmation",
+          "key": "confirmation",
+          "type": "Step",
+          "pageId": "confirmation-page",
+          "isEnd": true
+        }
+      ],
+      "transitions": [
+        {
+          "from": "application-intro-step",
+          "to": "borrower-info-step",
+          "trigger": "nextClicked",
+          "condition": null
+        },
+        {
+          "from": "borrower-info-step",
+          "to": "loan-details-step",
+          "trigger": "formSubmitted",
+          "condition": "formValid"
+        },
+        {
+          "from": "loan-details-step",
+          "to": "review-step",
+          "trigger": "formSubmitted",
+          "condition": "formValid"
+        },
+        {
+          "from": "review-step",
+          "to": "confirmation-step",
+          "trigger": "submitClicked",
+          "condition": "allDataValid"
+        }
+      ]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "required": ["startStep", "steps"],
+      "properties": {
+        "type": {
+          "const": "Flow"
+        },
+        "startStep": {
+          "type": "string",
+          "description": "ID of the first step in the flow."
+        },
+        "steps": {
+          "type": "array",
+          "description": "Sequence of steps in the flow.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "key": { "type": "string" },
+              "type": { "type": "string" },
+              "pageId": { "type": "string", "description": "ID of the page displayed in this step." },
+              "componentId": { "type": "string", "description": "ID of the component used in this step." },
+              "action": { "type": "string", "description": "Action executed in this step." },
+              "nextStep": { "type": "string", "description": "ID of the next step." },
+              "isEnd": { "type": "boolean", "description": "Whether this is the final step." }
+            },
+            "required": ["id", "name", "key", "type"]
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "description": "Transitions between steps defining flow logic.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": { "type": "string", "description": "ID of the source step." },
+              "to": { "type": "string", "description": "ID of the destination step." },
+              "trigger": { "type": "string", "description": "Event or user action that triggers the transition." },
+              "condition": { "type": ["string", "null"], "description": "Optional condition that must be met." }
+            },
+            "required": ["from", "to", "trigger"]
+          }
+        }
+      }
+    }
+  ]
+}

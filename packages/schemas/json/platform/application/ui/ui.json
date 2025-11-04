@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/ui/ui.json",
+  "title": "UI Layer Schema",
+  "description": "Defines the user interface layer of an application containing pages, components, and flows.",
+  "examples": [
+    {
+      "id": "loan-ui-layer",
+      "name": "Loan UI Layer",
+      "key": "loanUiLayer",
+      "type": "UI",
+      "description": "User interface for loan application management",
+      "pages": [
+        {
+          "id": "loan-dashboard-page",
+          "name": "Loan Dashboard",
+          "key": "loanDashboard",
+          "type": "Page"
+        }
+      ],
+      "components": [
+        {
+          "id": "application-form-component",
+          "name": "Application Form",
+          "key": "applicationForm",
+          "type": "Component"
+        }
+      ],
+      "flows": [
+        {
+          "id": "application-submission-flow",
+          "name": "Application Submission Flow",
+          "key": "applicationSubmissionFlow",
+          "type": "Flow"
+        }
+      ]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "UI"
+        },
+        "pages": {
+          "type": "array",
+          "description": "Pages in the UI layer (resource views).",
+          "items": {
+            "$ref": "https://dna.codes/schemas/application/ui/page.json"
+          }
+        },
+        "components": {
+          "type": "array",
+          "description": "Components in the UI layer (action handlers).",
+          "items": {
+            "$ref": "https://dna.codes/schemas/application/ui/component.json"
+          }
+        },
+        "flows": {
+          "type": "array",
+          "description": "Flows in the UI layer (sequences of actions).",
+          "items": {
+            "$ref": "https://dna.codes/schemas/application/ui/flow.json"
+          }
+        }
+      }
+    }
+  ]
+}

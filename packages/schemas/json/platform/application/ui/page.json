@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/ui/page.json",
+  "title": "Page Schema",
+  "description": "Defines a page — a UI view that displays a resource and its attributes.",
+  "examples": [
+    {
+      "id": "loan-dashboard-page",
+      "name": "Loan Dashboard",
+      "key": "loanDashboard",
+      "type": "Page",
+      "description": "Main dashboard for viewing loan application status and details",
+      "resourceId": "loan-app-12345",
+      "resourceName": "Personal Loan Application",
+      "layout": {
+        "id": "loan-dashboard-layout",
+        "name": "Loan Dashboard Layout",
+        "key": "loanDashboardLayout",
+        "type": "Layout",
+        "structure": "grid",
+        "gridColumns": 12,
+        "containers": [
+          {
+            "id": "application-details-container",
+            "name": "Application Details",
+            "key": "applicationDetails",
+            "type": "Container",
+            "position": {
+              "row": 1,
+              "column": 1,
+              "columnSpan": 12,
+              "rowSpan": 1
+            },
+            "padding": "16px",
+            "components": [
+              {
+                "componentId": "app-details-component",
+                "componentName": "Application Details Component",
+                "order": 1
+              }
+            ]
+          },
+          {
+            "id": "borrower-info-container",
+            "name": "Borrower Information",
+            "key": "borrowerInfo",
+            "type": "Container",
+            "position": {
+              "row": 2,
+              "column": 1,
+              "columnSpan": 12,
+              "rowSpan": 1
+            },
+            "padding": "16px",
+            "components": [
+              {
+                "componentId": "borrower-info-component",
+                "componentName": "Borrower Info Component",
+                "order": 1
+              }
+            ]
+          }
+        ]
+      },
+      "sections": [
+        {
+          "id": "application-details-section",
+          "containerId": "application-details-container",
+          "type": "Section",
+          "attributes": ["loanAmount", "loanPurpose", "status"]
+        },
+        {
+          "id": "borrower-info-section",
+          "containerId": "borrower-info-container",
+          "type": "Section",
+          "attributes": ["annualIncome", "employmentStatus", "creditScore"]
+        }
+      ],
+      "actions": [
+        {
+          "id": "submit-application",
+          "name": "Submit Application",
+          "key": "submitApplication",
+          "type": "PageAction"
+        },
+        {
+          "id": "edit-application",
+          "name": "Edit Application",
+          "key": "editApplication",
+          "type": "PageAction"
+        }
+      ]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Page"
+        },
+        "resourceId": {
+          "type": "string",
+          "description": "ID of the resource being displayed."
+        },
+        "resourceName": {
+          "type": "string",
+          "description": "Name of the resource being displayed."
+        },
+        "layout": {
+          "type": "object",
+          "description": "Layout definition for this page.",
+          "$ref": "https://dna.codes/schemas/application/ui/layout.json"
+        },
+        "sections": {
+          "type": "array",
+          "description": "Sections that map to layout containers, defining attribute groupings and overrides.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "containerId": {
+                "type": "string",
+                "description": "References a container ID from the layout."
+              },
+              "type": { "type": "string", "const": "Section" },
+              "attributes": {
+                "type": "array",
+                "description": "Attribute keys displayed in this section.",
+                "items": { "type": "string" }
+              }
+            },
+            "required": ["id", "containerId", "type"]
+          }
+        },
+        "actions": {
+          "type": "array",
+          "description": "Actions available on this page.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "key": { "type": "string" },
+              "type": { "type": "string" },
+              "description": { "type": "string" }
+            },
+            "required": ["id", "name", "key", "type"]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/application/ui/layout.json",
+  "title": "Layout Schema",
+  "description": "Defines a layout — the structural and spatial organization of UI components within a page or container.",
+  "examples": [
+    {
+      "id": "loan-dashboard-layout",
+      "name": "Loan Dashboard Layout",
+      "key": "loanDashboardLayout",
+      "type": "Layout",
+      "description": "Two-column layout for loan dashboard with sidebar and main content",
+      "structure": "grid",
+      "gridColumns": 12,
+      "containers": [
+        {
+          "id": "header-container",
+          "name": "Header",
+          "key": "header",
+          "type": "Container",
+          "position": {
+            "row": 1,
+            "column": 1,
+            "columnSpan": 12,
+            "rowSpan": 1
+          },
+          "height": "auto",
+          "components": [
+            {
+              "componentId": "app-header-component",
+              "componentName": "App Header",
+              "order": 1
+            }
+          ]
+        },
+        {
+          "id": "sidebar-container",
+          "name": "Sidebar",
+          "key": "sidebar",
+          "type": "Container",
+          "position": {
+            "row": 2,
+            "column": 1,
+            "columnSpan": 3,
+            "rowSpan": 2
+          },
+          "width": "250px",
+          "components": [
+            {
+              "componentId": "navigation-component",
+              "componentName": "Navigation",
+              "order": 1
+            },
+            {
+              "componentId": "user-profile-component",
+              "componentName": "User Profile",
+              "order": 2
+            }
+          ]
+        },
+        {
+          "id": "main-content-container",
+          "name": "Main Content",
+          "key": "mainContent",
+          "type": "Container",
+          "position": {
+            "row": 2,
+            "column": 4,
+            "columnSpan": 9,
+            "rowSpan": 2
+          },
+          "padding": "24px",
+          "components": [
+            {
+              "componentId": "application-details-component",
+              "componentName": "Application Details",
+              "order": 1
+            },
+            {
+              "componentId": "loan-status-component",
+              "componentName": "Loan Status",
+              "order": 2
+            },
+            {
+              "componentId": "action-buttons-component",
+              "componentName": "Action Buttons",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "id": "footer-container",
+          "name": "Footer",
+          "key": "footer",
+          "type": "Container",
+          "position": {
+            "row": 4,
+            "column": 1,
+            "columnSpan": 12,
+            "rowSpan": 1
+          },
+          "height": "60px",
+          "components": [
+            {
+              "componentId": "footer-component",
+              "componentName": "Footer",
+              "order": 1
+            }
+          ]
+        }
+      ],
+      "responsive": {
+        "breakpoints": [
+          {
+            "name": "mobile",
+            "maxWidth": 640,
+            "adjustments": {
+              "gridColumns": 4,
+              "hideContainers": ["sidebar"],
+              "containerUpdates": {
+                "mainContent": {
+                  "columnSpan": 4
+                }
+              }
+            }
+          },
+          {
+            "name": "tablet",
+            "minWidth": 641,
+            "maxWidth": 1024,
+            "adjustments": {
+              "gridColumns": 8,
+              "containerUpdates": {
+                "sidebar": {
+                  "columnSpan": 2
+                },
+                "mainContent": {
+                  "columnSpan": 6
+                }
+              }
+            }
+          }
+        ]
+      },
+      "spacing": {
+        "gap": "16px",
+        "padding": "16px"
+      },
+      "theme": {
+        "backgroundColor": "#f5f5f5",
+        "borderRadius": "8px"
+      }
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "required": ["structure"],
+      "properties": {
+        "type": {
+          "const": "Layout"
+        },
+        "structure": {
+          "type": "string",
+          "enum": ["grid", "flexbox", "absolute", "stack"],
+          "description": "Layout system used (grid, flexbox, absolute positioning, or stacked)."
+        },
+        "gridColumns": {
+          "type": "integer",
+          "description": "Total number of columns in grid layout.",
+          "default": 12
+        },
+        "containers": {
+          "type": "array",
+          "description": "Named containers (sections) within the layout, each containing components and attributes.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "key": { "type": "string" },
+              "type": { "type": "string", "const": "Container" },
+              "description": { "type": "string" },
+              "position": {
+                "type": "object",
+                "description": "Position within the layout.",
+                "properties": {
+                  "row": { "type": "integer" },
+                  "column": { "type": "integer" },
+                  "columnSpan": { "type": "integer" },
+                  "rowSpan": { "type": "integer" }
+                },
+                "required": ["row", "column"]
+              },
+              "width": { "type": "string" },
+              "height": { "type": "string" },
+              "padding": { "type": "string" },
+              "components": {
+                "type": "array",
+                "description": "Components displayed in this container.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "componentId": { "type": "string" },
+                    "componentName": { "type": "string" },
+                    "order": { "type": "integer" }
+                  },
+                  "required": ["componentId", "order"]
+                }
+              },
+              "attributes": {
+                "type": "array",
+                "description": "Attribute keys displayed in this section/container.",
+                "items": { "type": "string" }
+              }
+            },
+            "required": ["id", "name", "key", "type", "position"]
+          }
+        },
+        "responsive": {
+          "type": "object",
+          "description": "Responsive design breakpoints and adjustments.",
+          "properties": {
+            "breakpoints": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "minWidth": { "type": "integer" },
+                  "maxWidth": { "type": "integer" },
+                  "adjustments": {
+                    "type": "object",
+                    "description": "Layout adjustments for this breakpoint."
+                  }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "spacing": {
+          "type": "object",
+          "description": "Default spacing/spacing between containers.",
+          "properties": {
+            "gap": { "type": "string" },
+            "padding": { "type": "string" },
+            "margin": { "type": "string" }
+          }
+        },
+        "theme": {
+          "type": "object",
+          "description": "Styling properties for the layout.",
+          "properties": {
+            "backgroundColor": { "type": "string" },
+            "borderColor": { "type": "string" },
+            "borderRadius": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      }
+    }
+  ]
+}
