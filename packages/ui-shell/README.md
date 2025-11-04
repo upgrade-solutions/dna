@@ -49,13 +49,13 @@ ui-shell/
 ### Prerequisites
 
 - Node.js 18+ (or compatible Node version)
-- pnpm (or npm/yarn)
+- npm (or npm/yarn)
 
 ### Installation
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Set up environment variables
 cp .env.example .env.local
@@ -66,16 +66,16 @@ cp .env.example .env.local
 
 ```bash
 # Development server (with hot reload)
-pnpm dev
+npm dev
 
 # Production build
-pnpm build
+npm build
 
 # Start production server
-pnpm start
+npm start
 
 # Lint code
-pnpm lint
+npm lint
 ```
 
 The application will be available at `http://localhost:3000`.
@@ -294,7 +294,7 @@ const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
 ### Building for Production
 
 ```bash
-pnpm build
+npm build
 ```
 
 ### Deploying to Vercel
@@ -376,20 +376,20 @@ export function usePageConfig(slug: string) {
 
 ```bash
 # Run tests
-pnpm test
+npm test
 
 # Run tests in watch mode
-pnpm test:watch
+npm test:watch
 ```
 
 ## Troubleshooting
 
 ### Hot Reload Not Working
 - Clear `.next` folder: `rm -rf .next`
-- Restart dev server: `pnpm dev`
+- Restart dev server: `npm dev`
 
 ### Build Errors
-- Clear node_modules: `rm -rf node_modules && pnpm install`
+- Clear node_modules: `rm -rf node_modules && npm install`
 - Check Node version: `node --version` (should be 18+)
 
 ### Theme Not Applying
@@ -400,7 +400,7 @@ pnpm test:watch
 
 1. Create a feature branch: `git checkout -b feature/your-feature`
 2. Make your changes
-3. Run linting: `pnpm lint`
+3. Run linting: `npm lint`
 4. Commit with clear messages
 5. Push to GitHub and create a Pull Request
 
@@ -408,9 +408,97 @@ pnpm test:watch
 
 This project is part of the DNA architecture suite.
 
+## DNA Schema Renderers
+
+The UI Shell includes a comprehensive system for dynamically rendering UI components, forms, pages, and multi-step workflows based on DNA schema definitions.
+
+### Quick Start
+- **Start Here**: [Quick Reference Guide](./docs/schema-renderer/INDEX.md) - 2 min overview
+- **View Demo**: Visit `http://localhost:3000/schema-demo` after running `npm dev`
+
+### Documentation
+
+| Document | Purpose | Read Time |
+|----------|---------|-----------|
+| [Index](./docs/schema-renderer/INDEX.md) | Navigation & overview | 2 min |
+| [Quick Reference](./components/schema/QUICK_REFERENCE.md) | At-a-glance lookup | 3 min |
+| [Architecture](./docs/schema-renderer/ARCHITECTURE.md) | System design & data flow | 5 min |
+| [README](./components/schema/README.md) | Complete guide with examples | 10 min |
+| [Migration Guide](./docs/schema-renderer/MIGRATION_GUIDE.md) | How to use ui.json schemas | 5 min |
+| [Testing Guide](./docs/schema-renderer/TESTING_GUIDE.md) | Unit & integration tests | 10 min |
+| [Summary](./docs/schema-renderer/SUMMARY.md) | Project overview | 5 min |
+
+### Key Features
+
+- **Dynamic Field Rendering** - Automatically renders appropriate input types (text, email, number, checkbox, select)
+- **Form Validation** - Field-level and component-level validation with error handling
+- **Multi-Step Flows** - Build complex workflows with step navigation and progress tracking
+- **Layout Systems** - Grid, flexbox, and stack layouts
+- **Schema Resolvers** - Find and resolve schema definitions by ID
+- **Type Safe** - Full TypeScript support for all components and utilities
+
+### Core Components
+
+```tsx
+import {
+  FlowRenderer,      // Multi-step workflows
+  PageRenderer,      // Individual pages
+  ComponentRenderer, // Forms with validation
+  FieldRenderer,     // Individual input fields
+  LayoutRenderer,    // Layout containers
+} from '@/components/schema'
+```
+
+### Example: Display a Multi-Step Flow
+
+```tsx
+import { FlowRenderer } from '@/components/schema'
+import { loanSchema } from '@/schemas/loan-schema'
+
+export function ApplicationFlow() {
+  return (
+    <FlowRenderer
+      schema={loanSchema}
+      flow={loanSchema.flows[0]}
+      onFlowComplete={(data) => submitApplication(data)}
+      onStepChange={(stepId) => trackStep(stepId)}
+    />
+  )
+}
+```
+
+### File Structure
+
+```
+components/schema/           # All schema renderer code
+├── types.ts                # Type definitions
+├── resolvers.ts            # Schema resolution utilities
+├── validators.ts           # Validation logic
+├── field-renderer.tsx      # Field components
+├── component-renderer.tsx  # Form components
+├── layout-renderer.tsx     # Layout containers
+├── page-renderer.tsx       # Page rendering
+├── flow-renderer.tsx       # Multi-step flows
+├── index.ts               # Central exports
+├── README.md              # Complete documentation
+└── QUICK_REFERENCE.md     # Quick lookup guide
+
+docs/schema-renderer/        # Documentation
+├── INDEX.md               # Navigation guide
+├── ARCHITECTURE.md        # System design
+├── MIGRATION_GUIDE.md     # Schema migration
+├── TESTING_GUIDE.md       # Testing examples
+└── SUMMARY.md             # Project summary
+
+app/schema-demo/           # Demo application
+├── page.tsx              # Demo page
+└── sample-schema.ts      # Sample loan schema
+```
+
 ## Additional Resources
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [React Documentation](https://react.dev)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [DNA Schema Renderer Docs](./docs/schema-renderer/)
