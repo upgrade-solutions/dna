@@ -17,6 +17,9 @@ import { handleScript } from "./core/handlers/script.ts";
 import { handleFormula } from "./core/handlers/formula.ts";
 import { handlePassthrough } from "./core/handlers/passthrough.ts";
 
+// Import route builders
+import { createSchemasRouter } from "./core/routes/schemas.ts";
+
 // Configuration
 const configPath =
   Deno.env.get("CONFIG_PATH") || "./config/openapi.yaml";
@@ -149,6 +152,11 @@ async function main() {
   app.use(dynamicRouter.getRouter().routes());
   app.use(dynamicRouter.getRouter().allowedMethods());
 
+  // DNA Schemas endpoint
+  const schemasRouter = createSchemasRouter();
+  app.use(schemasRouter.routes());
+  app.use(schemasRouter.allowedMethods());
+
   // Health check endpoint
   const healthRouter = new Router();
   // deno-lint-ignore no-explicit-any
@@ -271,7 +279,8 @@ async function main() {
   console.log(`   URL: http://${hostname}:${port}`);
   console.log(`   Health: http://${hostname}:${port}/health`);
   console.log(`   📚 Docs: http://${hostname}:${port}/docs`);
-  console.log(`   OpenAPI: http://${hostname}:${port}/openapi.json\n`);
+  console.log(`   OpenAPI: http://${hostname}:${port}/openapi.json`);
+  console.log(`   🧬 Schemas: http://${hostname}:${port}/api/schemas\n`);
 
   try {
     await app.listen({ hostname, port });

@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/api/endpoint.json",
+  "title": "Endpoint Schema",
+  "description": "Defines an endpoint — an HTTP action on a resource exposed by the API.",
+  "examples": [
+    {
+      "name": "Submit Loan Application",
+      "key": "submitLoanApplication",
+      "type": "Endpoint",
+      "description": "Submit a new loan application",
+      "path": "/applications",
+      "method": "POST",
+      "resourceId": "loan-app-12345",
+      "resourceName": "Personal Loan Application",
+      "actionId": "submit-application",
+      "actionName": "Submit Loan Application",
+      "requestPayload": {
+        "name": "Submit Loan Request",
+        "key": "submitLoanRequest",
+        "type": "Payload"
+      },
+      "responsePayload": {
+        "name": "Submit Loan Response",
+        "key": "submitLoanResponse",
+        "type": "Payload"
+      },
+      "authentication": {
+        "required": true,
+        "type": "Bearer"
+      },
+      "rateLimit": {
+        "requestsPerMinute": 60
+      }
+    },
+    {
+      "name": "Get Loan Application",
+      "key": "getLoanApplication",
+      "type": "Endpoint",
+      "description": "Retrieve details of a loan application by ID",
+      "path": "/applications/{id}",
+      "method": "GET",
+      "resourceId": "loan-app-12345",
+      "resourceName": "Personal Loan Application",
+      "responsePayload": {
+        "name": "Get Loan Response",
+        "key": "getLoanResponse",
+        "type": "Payload"
+      },
+      "authentication": {
+        "required": true,
+        "type": "Bearer"
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Loan application ID"
+        }
+      ]
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "required": ["path", "method"],
+      "properties": {
+        "type": {
+          "const": "Endpoint"
+        },
+        "path": {
+          "type": "string",
+          "description": "API endpoint path (relative to base URL)."
+        },
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+          "description": "HTTP method for the endpoint."
+        },
+        "resourceId": {
+          "type": "string",
+          "description": "ID of the resource this endpoint operates on."
+        },
+        "resourceName": {
+          "type": "string",
+          "description": "Name of the resource this endpoint operates on."
+        },
+        "actionId": {
+          "type": "string",
+          "description": "ID of the action performed by this endpoint."
+        },
+        "actionName": {
+          "type": "string",
+          "description": "Name of the action performed by this endpoint."
+        },
+        "requestPayload": {
+          "type": "object",
+          "description": "Payload schema for request body.",
+          "$ref": "https://dna.codes/schemas/application/api/payload.json"
+        },
+        "responsePayload": {
+          "type": "object",
+          "description": "Payload schema for response body.",
+          "$ref": "https://dna.codes/schemas/application/api/payload.json"
+        },
+        "authentication": {
+          "type": "object",
+          "description": "Authentication requirements for this endpoint.",
+          "properties": {
+            "required": { "type": "boolean" },
+            "type": { "type": "string", "enum": ["Bearer", "Basic", "ApiKey", "OAuth2"] }
+          }
+        },
+        "pathParameters": {
+          "type": "array",
+          "description": "Path parameters for this endpoint.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "required": { "type": "boolean" },
+              "description": { "type": "string" }
+            },
+            "required": ["name", "type"]
+          }
+        },
+        "queryParameters": {
+          "type": "array",
+          "description": "Query parameters for this endpoint.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "required": { "type": "boolean" },
+              "description": { "type": "string" }
+            },
+            "required": ["name", "type"]
+          }
+        },
+        "rateLimit": {
+          "type": "object",
+          "description": "Rate limiting configuration.",
+          "properties": {
+            "requestsPerMinute": { "type": "integer" },
+            "requestsPerHour": { "type": "integer" },
+            "requestsPerDay": { "type": "integer" }
+          }
+        }
+      }
+    }
+  ]
+}

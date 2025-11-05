@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/application.json",
+  "title": "Application Schema",
+  "description": "Defines an application — a containerized system with UI and API layers within a platform.",
+  "examples": [
+    {
+      "name": "Loan Application System",
+      "key": "loanApplicationApp",
+      "type": "Application",
+      "description": "Application handling loan processing workflows",
+      "ui": {
+        "name": "Loan UI Layer",
+        "key": "loanUiLayer",
+        "type": "UI"
+      },
+      "api": {
+        "name": "Loan API Layer",
+        "key": "loanApiLayer",
+        "type": "API"
+      }
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Application"
+        },
+        "ui": {
+          "type": "object",
+          "description": "UI layer of the application.",
+          "$ref": "https://dna.codes/schemas/application/ui/ui.json"
+        },
+        "api": {
+          "type": "object",
+          "description": "API layer of the application.",
+          "$ref": "https://dna.codes/schemas/application/api/api.json"
+        }
+      }
+    }
+  ]
+}
