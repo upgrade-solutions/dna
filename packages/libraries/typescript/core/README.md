@@ -4,7 +4,7 @@ DNA Core Library - Runtime utilities for working with DNA schemas in TypeScript/
 
 ## Overview
 
-`@dna/core` provides a modular interface for loading and validating DNA schemas. It's built with Deno and can be used in any TypeScript/Deno project.
+`@dna/core` provides pre-loaded DNA schemas and validation utilities. It's built with Deno and can be used in any TypeScript/Deno project.
 
 ## Installation
 
@@ -19,45 +19,41 @@ DNA Core Library - Runtime utilities for working with DNA schemas in TypeScript/
 
 ## Usage
 
-### Loading Schemas
+### Accessing Schemas
 
 ```typescript
-import { loadSchema, loadSchemas } from "@dna/core/schemas/loader";
+import { schemas } from "@dna/core/schemas";
 
-// Load a single schema
-const taskSchema = await loadSchema("task");
-
-// Load from a specific category
-const taskSchema = await loadSchema("task", "core");
-
-// Load multiple schemas at once
-const schemas = await loadSchemas(["task", "actor", "operation"]);
-
-// Get schema metadata
-const { title, description } = await loadSchema("task");
+// Access pre-loaded schemas
+const taskSchema = schemas.task;
+const actionSchema = schemas.action;
+const apiSchema = schemas.api;
 ```
 
 ### Validating Data
 
 ```typescript
-import { validateSchema, assertValid } from "@dna/core/schemas/validator";
-import { loadSchema } from "@dna/core/schemas/loader";
+import { validateSchema, assertValid } from "@dna/core/schemas";
+import { schemas } from "@dna/core/schemas";
 
-const schema = await loadSchema("task");
 const data = { /* your data */ };
 
 // Validate and get detailed errors
-const result = validateSchema(data, schema);
+const result = validateSchema(data, schemas.task);
 if (!result.valid) {
   console.error("Validation failed:", result.errors);
 }
 
 // Assert validation - throws on failure
 try {
-  assertValid(data, schema, "task data");
+  assertValid(data, schemas.task, "task data");
 } catch (error) {
   console.error(error.message);
 }
+
+// Validate against any schema (not just DNA schemas)
+const customSchema = { type: "object", properties: { ... } };
+validateSchema(data, customSchema);
 ```
 
 ## Module Structure
@@ -70,70 +66,73 @@ import * from "@dna/core";
 ```
 
 ### `@dna/core/schemas`
-Main schemas module. Re-exports loader and validator functions.
+Main schemas module with pre-loaded DNA schemas and validator.
 
 ```typescript
 import {
-  loadSchema,
-  loadSchemas,
+  schemas,
   validateSchema,
   assertValid,
+  type SchemaName,
 } from "@dna/core/schemas";
 ```
 
-### `@dna/core/schemas/loader`
-Schema loading utilities.
-
-```typescript
-import {
-  loadSchema,
-  loadSchemas,
-  getSchemaMetadata,
-} from "@dna/core/schemas/loader";
-```
-
-**Functions:**
-- `loadSchema(schemaName, category?)` - Load a single schema
-- `loadSchemas(schemaNames, category?)` - Load multiple schemas
-- `getSchemaMetadata(schemaName, category?)` - Get title and description
+**Exports:**
+- `schemas` - Object containing all pre-loaded DNA schemas
+- `SchemaName` - TypeScript type for schema names
+- `validateSchema(value, schema)` - Validate and return detailed errors
+- `assertValid(value, schema, context?)` - Validate and throw on failure
 
 ### `@dna/core/schemas/validator`
-Schema validation utilities.
+Schema validation utilities (also exported from main schemas module).
 
 ```typescript
 import {
   validateSchema,
   assertValid,
 } from "@dna/core/schemas/validator";
+
+export interface ValidationError {
+  path: string;
+  message: string;
+  value?: unknown;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  errors: ValidationError[];
+}
 ```
 
-**Functions:**
-- `validateSchema(value, schema)` - Validate and return detailed errors
-- `assertValid(value, schema, context?)` - Validate and throw on failure
+## Available Schemas
 
-**Types:**
-- `ValidationError` - Individual validation error
-- `ValidationResult` - Result of validation with errors array
+Pre-loaded schemas organized by category:
 
-## Schema Categories
+**Core**
+- `schemas.action` - Action definition
+- `schemas.actor` - Actor definition
+- `schemas.attribute` - Attribute definition
+- `schemas.operation` - Operation definition
+- `schemas.resource` - Resource definition
+- `schemas.task` - Task definition
 
-By default, schemas are loaded from the `core` category:
+**Platform**
+- `schemas.platform` - Platform definition
+- `schemas.application` - Application definition
+- `schemas.api` - API definition
+- `schemas.endpoint` - API endpoint
+- `schemas.payload` - API payload
+- `schemas.authContext` - Authentication context
+- `schemas.ui` - UI definition
+- `schemas.component` - UI component
+- `schemas.flow` - UI flow
+- `schemas.layout` - UI layout
+- `schemas.page` - UI page
 
-```typescript
-await loadSchema("task");           // loads core/task.json
-await loadSchema("task", "core");   // explicit
-```
-
-Other available categories can be found in `/packages/schemas/`:
-- `core` - Core DNA entities
-- `platform` - Platform-specific schemas
-- `product` - Product schemas
-- `project` - Project schemas
-- `value` - Value schemas
-
-```typescript
-await loadSchema("some-schema", "platform");
-```
+**Value**
+- `schemas.metric` - Metric definition
+- `schemas.opportunity` - Opportunity definition
+- `schemas.outcome` - Outcome definition
 
 ## Development
 
@@ -149,9 +148,15 @@ deno run --watch --allow-read mod.ts
 
 ### Testing
 
-Tests should be run from the root workspace.
+```bash
+deno task test
+```
+
+## Schema Files
+
+Raw JSON schema definitions are located in:
+- `./schemas/json/` - Pre-loaded schema files bundled with this library
 
 ## Related
 
-- **Engine**: [`@dna/engine`](../engine/) - Build-time utilities for generating docs and types
-- **Schemas**: [`/packages/schemas/`](/packages/schemas/) - Raw JSON schema definitions
+- **API Shell**: [`packages/api-shell/`](../../api-shell/) - REST API framework using DNA schemas

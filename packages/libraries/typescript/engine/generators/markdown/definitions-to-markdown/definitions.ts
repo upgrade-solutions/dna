@@ -1,6 +1,6 @@
 import { ensureDir } from "https://deno.land/std@0.208.0/fs/mod.ts";
-import { dirname, join } from "https://deno.land/std@0.208.0/path/mod.ts";
-import { SchemaRegistry } from "./schema-registry.ts";
+import { join } from "https://deno.land/std@0.208.0/path/mod.ts";
+import { SchemaRegistry } from "../../../schema-registry.ts";
 
 export interface MarkdownGeneratorOptions {
   outputDir?: string;
@@ -9,7 +9,7 @@ export interface MarkdownGeneratorOptions {
 }
 
 /**
- * Generates markdown documentation from JSON schemas
+ * Generates markdown documentation from JSON schemas (definitions)
  */
 export class MarkdownGenerator {
   private registry: SchemaRegistry;
@@ -19,7 +19,7 @@ export class MarkdownGenerator {
   constructor(options: MarkdownGeneratorOptions = {}) {
     this.registry = new SchemaRegistry(options.schemasDir);
     this.outputDir = options.outputDir ||
-      join(import.meta.url.replace("file://", ""), "../../../../docs/schemas");
+      join(import.meta.url.replace("file://", ""), "../../../../../docs/schemas");
     this.includeExamples = options.includeExamples !== false;
   }
 
@@ -30,7 +30,7 @@ export class MarkdownGenerator {
     schemaName: string,
     category: string = "core",
   ): Promise<string> {
-    const schema = await this.registry.loadSchema(schemaName, category);
+    const schema = await this.registry.loadDefinition(schemaName, category);
 
     let md = "";
 

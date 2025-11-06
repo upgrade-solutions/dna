@@ -1,4 +1,4 @@
-import { MarkdownGenerator } from "./markdown-generator.ts";
+import { MarkdownGenerator } from "./generators/markdown/mod.ts";
 
 const command = Deno.args[0];
 
