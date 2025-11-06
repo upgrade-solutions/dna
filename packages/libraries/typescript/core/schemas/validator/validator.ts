@@ -1,6 +1,8 @@
+import Ajv, { type SchemaObject, type ErrorObject } from "ajv";
+
 /**
  * JSON Schema validator for DNA schemas
- * Provides validation against loaded schemas
+ * Uses AJV for robust JSON Schema validation
  */
 
 export interface ValidationError {
@@ -14,6 +16,12 @@ export interface ValidationResult {
   errors: ValidationError[];
 }
 
+// Create a single AJV instance
+const ajv = new Ajv({
+  strict: false,
+  verbose: true,
+});
+
 /**
  * Validate a value against a JSON schema
  * @param value - The value to validate
@@ -24,67 +32,74 @@ export function validateSchema(
   value: unknown,
   schema: Record<string, unknown>,
 ): ValidationResult {
-  const errors: ValidationError[] = [];
+  try {
+    const validate = ajv.compile(schema as SchemaObject);
+    const isValid = validate(value);
 
-  // Check required fields
-  if (schema.required && Array.isArray(schema.required)) {
-    const required = schema.required as string[];
-    if (typeof value === "object" && value !== null) {
-      const obj = value as Record<string, unknown>;
-      for (const field of required) {
-        if (!(field in obj)) {
-          errors.push({
-            path: field,
-            message: `Required field "${field}" is missing`,
-          });
-        }
-      }
+    if (isValid) {
+      return {
+        valid: true,
+        errors: [],
+      };
     }
+
+    // Convert AJV errors to our ValidationError format
+    const errors: ValidationError[] = (validate.errors || []).map(
+      (error: ErrorObject) => {
+        const path = error.instancePath || error.schemaPath || "$";
+        const message = formatAjvError(error);
+
+        return {
+          path,
+          message,
+          value: error.data,
+        };
+      },
+    );
+
+    return {
+      valid: false,
+      errors,
+    };
+  } catch (error) {
+    return {
+      valid: false,
+      errors: [
+        {
+          path: "$",
+          message: `Schema compilation error: ${error instanceof Error ? error.message : "Unknown error"}`,
+        },
+      ],
+    };
   }
+}
 
-  // Check type
-  if (schema.type) {
-    const actualType = Array.isArray(value)
-      ? "array"
-      : value === null
-        ? "null"
-        : typeof value;
-    const expectedType = schema.type as string;
-
-    if (actualType !== expectedType) {
-      errors.push({
-        path: "$",
-        message: `Expected type "${expectedType}" but got "${actualType}"`,
-        value,
-      });
-    }
+/**
+ * Format an AJV error message
+ */
+function formatAjvError(error: ErrorObject): string {
+  switch (error.keyword) {
+    case "required":
+      return `Missing required property "${(error.params as { missingProperty?: string }).missingProperty}"`;
+    case "type":
+      return `Must be of type "${(error.params as { type?: string }).type}"`;
+    case "enum":
+      return `Must be one of: ${((error.params as { allowedValues?: unknown[] }).allowedValues || []).join(", ")}`;
+    case "additionalProperties":
+      return `Property "${error.instancePath.split("/").pop()}" is not allowed`;
+    case "pattern":
+      return `Must match pattern "${(error.params as { pattern?: string }).pattern}"`;
+    case "minimum":
+      return `Must be >= ${(error.params as { limit?: number }).limit}`;
+    case "maximum":
+      return `Must be <= ${(error.params as { limit?: number }).limit}`;
+    case "minLength":
+      return `Must be at least ${(error.params as { limit?: number }).limit} characters`;
+    case "maxLength":
+      return `Must be at most ${(error.params as { limit?: number }).limit} characters`;
+    default:
+      return error.message || `Validation error at ${error.instancePath}`;
   }
-
-  // Check additionalProperties
-  if (
-    schema.additionalProperties === false &&
-    typeof value === "object" &&
-    value !== null
-  ) {
-    const properties = schema.properties as Record<string, unknown> || {};
-    const obj = value as Record<string, unknown>;
-    const allowedProps = Object.keys(properties);
-
-    for (const prop of Object.keys(obj)) {
-      if (!allowedProps.includes(prop)) {
-        errors.push({
-          path: prop,
-          message: `Property "${prop}" is not allowed`,
-          value: obj[prop],
-        });
-      }
-    }
-  }
-
-  return {
-    valid: errors.length === 0,
-    errors,
-  };
 }
 
 /**

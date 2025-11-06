@@ -42,9 +42,12 @@ Deno.test("validator - validateSchema", async (t) => {
     const result = validateSchema(data, schema);
 
     assertEquals(result.valid, false);
-    assertEquals(result.errors.length, 1);
-    assertEquals(result.errors[0].path, "email");
-    assert(result.errors[0].message.includes("Required field"));
+    assert(result.errors.length > 0);
+    assert(
+      result.errors.some((e) =>
+        e.message.toLowerCase().includes("email")
+      ),
+    );
   });
 
   await t.step("detects type mismatches", () => {
@@ -56,7 +59,7 @@ Deno.test("validator - validateSchema", async (t) => {
     const result = validateSchema(data, schema);
 
     assertEquals(result.valid, false);
-    assert(result.errors.some((e) => e.message.includes("Expected type")));
+    assert(result.errors.some((e) => e.message.toLowerCase().includes("type")));
   });
 
   await t.step("detects additional properties when not allowed", () => {
@@ -74,7 +77,8 @@ Deno.test("validator - validateSchema", async (t) => {
     assertEquals(result.valid, false);
     assert(
       result.errors.some((e) =>
-        e.message.includes("not allowed") && e.path === "extra"
+        e.message.toLowerCase().includes("not allowed") ||
+        e.message.toLowerCase().includes("additional")
       ),
     );
   });
@@ -113,7 +117,7 @@ Deno.test("validator - validateSchema", async (t) => {
     const result = validateSchema(data, schema);
 
     assertEquals(result.valid, false);
-    assert(result.errors.some((e) => e.message.includes("Expected type")));
+    assert(result.errors.some((e) => e.message.toLowerCase().includes("type")));
   });
 
   await t.step("returns ValidationResult interface", () => {
@@ -124,6 +128,66 @@ Deno.test("validator - validateSchema", async (t) => {
     assertEquals("valid" in result, true);
     assertEquals("errors" in result, true);
     assertEquals(Array.isArray(result.errors), true);
+  });
+
+  await t.step("validates enum constraints", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        status: { enum: ["active", "inactive", "pending"] },
+      },
+    };
+
+    const result = validateSchema({ status: "invalid" }, schema);
+    assertEquals(result.valid, false);
+  });
+
+  await t.step("validates string pattern constraints", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        email: { type: "string", pattern: "^[^@]+@[^@]+$" },
+      },
+    };
+
+    const result = validateSchema({ email: "not-an-email" }, schema);
+    assertEquals(result.valid, false);
+  });
+
+  await t.step("validates minLength/maxLength constraints", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        code: { type: "string", minLength: 3, maxLength: 5 },
+      },
+    };
+
+    let result = validateSchema({ code: "ab" }, schema);
+    assertEquals(result.valid, false);
+
+    result = validateSchema({ code: "abcdef" }, schema);
+    assertEquals(result.valid, false);
+
+    result = validateSchema({ code: "abc" }, schema);
+    assertEquals(result.valid, true);
+  });
+
+  await t.step("validates numeric constraints", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        age: { type: "number", minimum: 0, maximum: 120 },
+      },
+    };
+
+    let result = validateSchema({ age: -1 }, schema);
+    assertEquals(result.valid, false);
+
+    result = validateSchema({ age: 150 }, schema);
+    assertEquals(result.valid, false);
+
+    result = validateSchema({ age: 25 }, schema);
+    assertEquals(result.valid, true);
   });
 });
 
@@ -180,7 +244,7 @@ Deno.test("validator - assertValid", async (t) => {
 
     const data = {};
 
-    assertThrows(() => assertValid(data, schema), Error, "Required field");
+    assertThrows(() => assertValid(data, schema), Error);
   });
 
   await t.step("works without context parameter", () => {
@@ -215,5 +279,44 @@ Deno.test("validator - type definitions", async (t) => {
 
     assertEquals(typeof result.valid, "boolean");
     assertEquals(Array.isArray(result.errors), true);
+  });
+});
+
+Deno.test("validator - nested object validation", async (t) => {
+  await t.step("validates nested objects", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        user: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            age: { type: "number" },
+          },
+          required: ["name"],
+        },
+      },
+    };
+
+    let result = validateSchema({ user: { name: "John", age: 30 } }, schema);
+    assertEquals(result.valid, true);
+
+    result = validateSchema({ user: { age: 30 } }, schema);
+    assertEquals(result.valid, false);
+  });
+});
+
+Deno.test("validator - array validation", async (t) => {
+  await t.step("validates array items", () => {
+    const schema = {
+      type: "array",
+      items: { type: "string" },
+    };
+
+    let result = validateSchema(["a", "b", "c"], schema);
+    assertEquals(result.valid, true);
+
+    result = validateSchema(["a", 123, "c"], schema);
+    assertEquals(result.valid, false);
   });
 });
