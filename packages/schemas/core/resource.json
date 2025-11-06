@@ -5,8 +5,8 @@
   "description": "Defines a resource — a data entity or object acted upon within the DNA model.",
   "examples": [
     {
-      "name": "Personal Loan Application",
-      "key": "personalLoanApplication",
+      "name": "Loan Application",
+      "key": "LoanApplication",
       "type": "Resource",
       "description": "A loan application submitted by a borrower",
       "actions": [

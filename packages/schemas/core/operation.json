@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/operation.json",
+  "title": "Operation Schema",
+  "description": "Defines an operation — a reusable specification for how work gets done, combining a resource, an action, capabilities (allowed actors), and lifecycle states. Operations are the blueprint for task instances.",
+  "examples": [
+    {
+      "name": "Close Loan",
+      "key": "loanClose",
+      "type": "Operation",
+      "description": "Mark a loan as closed, updating account status and finalizing records",
+      "operation": {
+        "resource": "Loan",
+        "action": "close"
+      },
+      "capabilities": {
+        "allowedActors": ["borrower", "loanOfficer"],
+        "conditions": [
+          "resource.status == 'active'"
+        ]
+      },
+      "lifecycle": {
+        "initialState": "pending",
+        "states": [
+          "pending",
+          "in_progress",
+          "completed",
+          "failed",
+          "cancelled"
+        ]
+      }
+    },
+    {
+      "name": "Submit Loan Application",
+      "key": "submitLoanApplication",
+      "type": "Operation",
+      "description": "Borrower submits a completed loan application with required documentation",
+      "operation": {
+        "resource": "LoanApplication",
+        "action": "submit"
+      },
+      "capabilities": {
+        "allowedActors": ["borrower"],
+        "conditions": []
+      },
+      "lifecycle": {
+        "initialState": "pending",
+        "states": [
+          "pending",
+          "in_progress",
+          "completed",
+          "failed"
+        ]
+      }
+    },
+    {
+      "name": "Approve Loan Application",
+      "key": "approveLoanApplication",
+      "type": "Operation",
+      "description": "Loan officer or automated system approves a loan application after verification",
+      "operation": {
+        "resource": "loanApplication",
+        "action": "approve"
+      },
+      "capabilities": {
+        "allowedActors": ["loanOfficer", "underwritingAgent"],
+        "conditions": [
+          "resource.status == 'under_review'",
+          "resource.verificationComplete == true"
+        ]
+      },
+      "lifecycle": {
+        "initialState": "pending",
+        "states": [
+          "pending",
+          "in_progress",
+          "completed",
+          "failed"
+        ]
+      }
+    }
+  ],
+  "allOf": [
+    { "$ref": "https://dna.codes/schemas/base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "Operation",
+          "description": "Identifies this as an operation definition."
+        },
+        "operation": {
+          "type": "object",
+          "description": "The operation specification (what work is being defined).",
+          "required": ["resource", "action"],
+          "properties": {
+            "resource": {
+              "type": "string",
+              "description": "The resource type being acted upon (e.g., 'Loan', 'Document', 'User')."
+            },
+            "action": {
+              "type": "string",
+              "description": "The action being performed on the resource (e.g., 'close', 'approve', 'delete')."
+            }
+          },
+          "additionalProperties": false
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Defines who can perform this operation and under what conditions.",
+          "required": ["allowedActors"],
+          "properties": {
+            "allowedActors": {
+              "type": "array",
+              "description": "List of actor types permitted to perform this operation (e.g., 'borrower', 'loanOfficer', 'agent').",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "conditions": {
+              "type": "array",
+              "description": "Optional conditions that must be true for the operation to be executable (e.g., pre-conditions on resource state).",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "lifecycle": {
+          "type": "object",
+          "description": "Defines the state machine for task instances based on this operation.",
+          "required": ["initialState", "states"],
+          "properties": {
+            "initialState": {
+              "type": "string",
+              "description": "The state a new task instance enters upon creation."
+            },
+            "states": {
+              "type": "array",
+              "description": "All possible states a task instance can transition through.",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 2
+            },
+            "transitions": {
+              "type": "object",
+              "description": "Optional explicit state transitions (if not provided, all states are assumed to be reachable from any other state).",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["type", "operation", "capabilities", "lifecycle"]
+    }
+  ]
+}

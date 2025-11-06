@@ -1,0 +1,20 @@
+import { MarkdownGenerator } from "./markdown-generator.ts";
+
+const command = Deno.args[0];
+
+if (!command) {
+  console.error("Usage: dna-engine <command>");
+  console.error("Commands:");
+  console.error("  generate-docs   Generate markdown documentation from schemas");
+  Deno.exit(1);
+}
+
+if (command === "generate-docs") {
+  console.log("Generating markdown documentation from schemas...");
+  const generator = new MarkdownGenerator();
+  await generator.generateAllMarkdown();
+  console.log("Done!");
+} else {
+  console.error(`Unknown command: ${command}`);
+  Deno.exit(1);
+}

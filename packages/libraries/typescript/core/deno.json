@@ -1,0 +1,11 @@
+{
+  "name": "@dna/core",
+  "version": "0.1.0",
+  "exports": "./mod.ts",
+  "tasks": {
+    "dev": "deno run --watch --allow-read mod.ts",
+    "check": "deno check mod.ts",
+    "test": "deno test --allow-read schemas/**/*.test.ts",
+    "test:watch": "deno test --watch --allow-read schemas/**/*.test.ts"
+  }
+}
