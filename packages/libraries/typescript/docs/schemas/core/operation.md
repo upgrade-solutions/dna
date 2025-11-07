@@ -1,6 +1,6 @@
 # Operation
 
-A reusable specification for how work gets done, combining a resource, an action, capabilities, and lifecycle states.
+A reusable specification for how work gets done, combining a resource, an action, and capabilities. State transitions are tracked at runtime through Task instances.
 
 ## Properties
 
@@ -9,7 +9,6 @@ A reusable specification for how work gets done, combining a resource, an action
 | `type` | `string` | - | ✓ | Identifies this as an operation definition. |
 | `operation` | `object` | - | ✓ | The operation specification (what work is being defined). |
 | `capabilities` | `object` | - | ✓ | Defines who can perform this operation and under what conditions. |
-| `lifecycle` | `object` | - | ✓ | Defines the state machine for task instances based on this operation. |
 
 ## Relationships
 
@@ -39,16 +38,6 @@ A reusable specification for how work gets done, combining a resource, an action
     "conditions": [
       "resource.status == 'active'"
     ]
-  },
-  "lifecycle": {
-    "initialState": "pending",
-    "states": [
-      "pending",
-      "in_progress",
-      "completed",
-      "failed",
-      "cancelled"
-    ]
   }
 }
 ```
@@ -70,15 +59,6 @@ A reusable specification for how work gets done, combining a resource, an action
       "borrower"
     ],
     "conditions": []
-  },
-  "lifecycle": {
-    "initialState": "pending",
-    "states": [
-      "pending",
-      "in_progress",
-      "completed",
-      "failed"
-    ]
   }
 }
 ```
@@ -103,15 +83,6 @@ A reusable specification for how work gets done, combining a resource, an action
     "conditions": [
       "resource.status == 'under_review'",
       "resource.verificationComplete == true"
-    ]
-  },
-  "lifecycle": {
-    "initialState": "pending",
-    "states": [
-      "pending",
-      "in_progress",
-      "completed",
-      "failed"
     ]
   }
 }

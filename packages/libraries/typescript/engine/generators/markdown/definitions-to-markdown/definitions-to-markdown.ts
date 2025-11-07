@@ -313,7 +313,10 @@ export class DefinitionsToMarkdown implements MarkdownGenerator {
     // Create output directory
     await ensureDir(categoryOutputDir);
 
-    for (const schemaName of schemaNames) {
+    // Sort schemas alphabetically
+    const sortedSchemaNames = schemaNames.sort();
+
+    for (const schemaName of sortedSchemaNames) {
       const markdown = await this.generateSchemaMarkdown(schemaName, category);
       const outputPath = join(categoryOutputDir, `${schemaName}.md`);
 
@@ -357,7 +360,14 @@ export class DefinitionsToMarkdown implements MarkdownGenerator {
     for (const [category, categorySchemas] of Object.entries(byCategory)) {
       md += `## ${category.charAt(0).toUpperCase() + category.slice(1)}\n\n`;
 
-      for (const schema of categorySchemas) {
+      // Sort schemas alphabetically by title
+      const sortedSchemas = categorySchemas.sort((a, b) => {
+        const titleA = (a.title || a.name).toLowerCase();
+        const titleB = (b.title || b.name).toLowerCase();
+        return titleA.localeCompare(titleB);
+      });
+
+      for (const schema of sortedSchemas) {
         md += `- [${schema.title || schema.name}](./${category}/${schema.name}.md)`;
         if (schema.description) {
           md += ` - ${schema.description}`;

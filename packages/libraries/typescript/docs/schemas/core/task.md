@@ -1,16 +1,16 @@
 # Task
 
-A runtime instance representing a specific unit of work being performed by an actor on a resource, with state tracking and lifecycle management.
+A runtime instance representing a specific unit of work being performed by an actor on a resource. Tracks actual state transitions through an audit trail, providing the source of truth for task lifecycle.
 
 ## Properties
 
 | Property | Type | Constraints | Required | Description |
 |----------|------|-------------|----------|-------------|
 | `type` | `string` | - | ✓ | Identifies this as a task instance. |
-| `operation` | `operation` | - | ✓ | Reference to the operation (key) that defines this task's resource, action, capabilities, and lifecycle. |
+| `operation` | `operation` | - | ✓ | Reference to the operation (key) that defines this task's resource, action, and capabilities. |
 | `actor` | `actor` | - | ✓ | The specific actor performing this task. Must be one of the allowed actors defined in the referenced operation's capabilities. |
 | `resource` | `resource` | - | ✓ | The specific resource being acted upon in this task. |
-| `state` | `string` | enum: `pending`, `in_progress`, `completed`, `failed`, `cancelled` | ✓ | Current state of the task instance. Must be one of the states defined in the referenced operation's lifecycle. |
+| `state` | `string` | enum: `pending`, `in_progress`, `completed`, `failed`, `cancelled` | ✓ | Current state of the task instance, as tracked through stateHistory. |
 | `createdAt` | `string (date-time)` | - | ✓ | ISO 8601 timestamp when this task instance was created. |
 | `stateHistory` | `state-transition[]` | - | ✓ | Complete audit trail of all state transitions for this task instance. |
 | `context` | `object` | - |  | Optional execution context containing parameters, configuration, or state specific to this task instance. |
@@ -21,7 +21,7 @@ A runtime instance representing a specific unit of work being performed by an ac
 | Field | References | Description |
 |-------|------------|-------------|
 | `inherits` | `base` | Inherits from base |
-| `operation` | `operation` | Reference to the operation (key) that defines this task's resource, action, capabilities, and lifecycle. |
+| `operation` | `operation` | Reference to the operation (key) that defines this task's resource, action, and capabilities. |
 | `actor` | `actor` | The specific actor performing this task. Must be one of the allowed actors defined in the referenced operation's capabilities. |
 | `resource` | `resource` | The specific resource being acted upon in this task. |
 

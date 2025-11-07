@@ -297,7 +297,7 @@
           "items": {
             "oneOf": [
               {
-                "$ref": "https://dna.codes/schemas/task.json"
+                "$ref": "https://dna.codes/schemas/work-item.json"
               },
               {
                 "type": "string",

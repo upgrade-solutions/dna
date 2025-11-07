@@ -1,2 +1,2 @@
-export { DefinitionsToMarkdown } from "./definitions.ts";
-export type { DefinitionsToMarkdownOptions } from "./definitions.ts";
+export { DefinitionsToMarkdown } from "./definitions-to-markdown.ts";
+export type { DefinitionsToMarkdownOptions } from "./definitions-to-markdown.ts";

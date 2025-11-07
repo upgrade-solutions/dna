@@ -1,6 +1,6 @@
 import { assertEquals, assertStringIncludes } from "https://deno.land/std@0.208.0/assert/mod.ts";
-import { DefinitionsToMarkdown } from "./definitions.ts";
-import type { DefinitionsToMarkdownOptions } from "./definitions.ts";
+import { DefinitionsToMarkdown } from "./definitions-to-markdown.ts";
+import type { DefinitionsToMarkdownOptions } from "./definitions-to-markdown.ts";
 import type { SchemaDefinition } from "../../../schema-registry.ts";
 
 // Helper function to mock registry loadDefinition

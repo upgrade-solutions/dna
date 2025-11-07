@@ -6,6 +6,7 @@
     "dev": "deno run --watch --allow-read --allow-write mod.ts",
     "check": "deno check mod.ts",
     "generate:docs": "deno run --allow-read --allow-write ./cli.ts generate-docs",
+    "generate:diagrams": "deno run --allow-read --allow-write ./cli.ts generate-diagrams",
     "test": "deno test --allow-read --allow-write generators/"
   }
 }
