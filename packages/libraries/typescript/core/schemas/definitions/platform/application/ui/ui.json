@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/ui/ui.json",
-  "title": "UI Layer Schema",
-  "description": "Defines the user interface layer of an application containing pages, components, and flows.",
+  "title": "UI Layer",
+  "description": "The user interface layer of an application containing pages, components, and flows.",
   "examples": [
     {
       "name": "Loan UI Layer",

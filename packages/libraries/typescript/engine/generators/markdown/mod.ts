@@ -1,2 +1,9 @@
-export { MarkdownGenerator } from "./definitions-to-markdown/mod.ts";
-export type { MarkdownGeneratorOptions } from "./definitions-to-markdown/mod.ts";
+/**
+ * Base interface and types for markdown generators
+ */
+
+export interface MarkdownGenerator {
+  generateSchemaMarkdown(schemaName: string, category: string): Promise<string>;
+  generateCategoryMarkdown(category: string): Promise<void>;
+  generateAllMarkdown(): Promise<void>;
+}

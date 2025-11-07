@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/api/endpoint.json",
-  "title": "Endpoint Schema",
-  "description": "Defines an endpoint — an HTTP action on a resource exposed by the API.",
+  "title": "Endpoint",
+  "description": "An HTTP action on a resource exposed by the API.",
   "examples": [
     {
       "name": "Submit Loan Application",

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/actor.json",
-  "title": "Actor Schema",
-  "description": "Defines an actor — a user, role, system, or agent performing actions within the DNA model.",
+  "title": "Actor",
+  "description": "A user, role, system, or agent performing actions within the DNA model.",
   "examples": [
     {
       "name": "Sarah Johnson",

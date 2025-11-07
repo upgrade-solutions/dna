@@ -1,6 +1,28 @@
-# Project Schema
+# Project
 
-Defines a project — a focused initiative that highlights and modifies a specific slice of a product's DNA graph.
+A focused initiative that highlights and modifies a specific slice of a product's DNA graph.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `product` | `string` | - | ✓ | Reference to the product this project modifies |
+| `targetWorkflows` | `object[]` | - | ✓ | Workflows and specific steps targeted for modification |
+| `status` | `string` | enum: `planned`, `in-progress`, `testing`, `completed`, `on-hold`, `cancelled` | ✓ | Current status of the project |
+| `priority` | `string` | enum: `low`, `medium`, `high`, `critical` |  | Priority level of the project |
+| `timeline` | `object` | - |  | Project timeline and milestones |
+| `team` | `object[]` | - |  | Project team members and their roles |
+| `stakeholders` | `string[]` | - |  | Project stakeholders (references to actors) |
+| `success_metrics` | `object[]` | - |  | Metrics for measuring project success |
+| `tasks` | `array` | - |  | Work items and tasks within this project |
+| `risks` | `object[]` | - |  | Project risks and mitigation strategies |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

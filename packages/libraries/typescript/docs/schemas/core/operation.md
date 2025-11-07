@@ -1,6 +1,21 @@
-# Operation Schema
+# Operation
 
-Defines an operation — a reusable specification for how work gets done, combining a resource, an action, capabilities (allowed actors), and lifecycle states. Operations are the blueprint for task instances.
+A reusable specification for how work gets done, combining a resource, an action, capabilities, and lifecycle states.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `string` | - | ✓ | Identifies this as an operation definition. |
+| `operation` | `object` | - | ✓ | The operation specification (what work is being defined). |
+| `capabilities` | `object` | - | ✓ | Defines who can perform this operation and under what conditions. |
+| `lifecycle` | `object` | - | ✓ | Defines the state machine for task instances based on this operation. |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

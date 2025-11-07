@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/resource.json",
-  "title": "Resource Schema",
-  "description": "Defines a resource — a data entity or object acted upon within the DNA model.",
+  "title": "Resource",
+  "description": "A data entity or object acted upon within the DNA model.",
   "examples": [
     {
       "name": "Loan Application",

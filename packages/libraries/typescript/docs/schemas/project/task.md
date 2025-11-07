@@ -1,6 +1,35 @@
-# Task Schema
+# Task
 
-Defines a task — a specific work item within a project that contributes to achieving the project's objectives.
+A specific work item within a project that contributes to achieving the project's objectives.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `project` | `string` | - | ✓ | Reference to the project this task belongs to |
+| `category` | `string` | enum: `analysis`, `design`, `development`, `testing`, `documentation`, `research`, `review`, `deployment`, `maintenance` | ✓ | Category of work this task represents |
+| `status` | `string` | enum: `planned`, `in-progress`, `blocked`, `review`, `completed`, `cancelled` | ✓ | Current status of the task |
+| `priority` | `string` | enum: `low`, `medium`, `high`, `critical` |  | Priority level of the task |
+| `assignee` | `string` | - | ✓ | Reference to the actor assigned to this task |
+| `estimatedHours` | `number` | min: 0 |  | Estimated effort in hours to complete the task |
+| `actualHours` | `number` | min: 0 |  | Actual hours spent on the task |
+| `timeline` | `object` | - |  | Task timeline and dates |
+| `dependencies` | `string[]` | - |  | Other tasks that must be completed before this task can start |
+| `subtasks` | `array` | - |  | Smaller work items within this task |
+| `deliverables` | `string[]` | - |  | Expected outputs or artifacts from this task |
+| `acceptance_criteria` | `string[]` | - |  | Criteria that must be met for the task to be considered complete |
+| `tags` | `string[]` | - |  | Labels for categorizing and searching tasks |
+| `notes` | `object[]` | - |  | Progress notes and updates |
+| `risks` | `object[]` | - |  | Task-specific risks and mitigation strategies |
+| `blockers` | `object[]` | - |  | Current blockers preventing task progress |
+| `effort_tracking` | `object` | - |  | Detailed effort tracking information |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

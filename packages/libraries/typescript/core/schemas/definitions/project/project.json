@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/project.json",
-  "title": "Project Schema",
-  "description": "Defines a project — a focused initiative that highlights and modifies a specific slice of a product's DNA graph.",
+  "title": "Project",
+  "description": "A focused initiative that highlights and modifies a specific slice of a product's DNA graph.",
   "examples": [
     {
       "name": "Borrower Onboarding Improvement",

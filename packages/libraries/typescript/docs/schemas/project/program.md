@@ -1,6 +1,25 @@
-# Program Schema
+# Program
 
-Defines a program — a strategic initiative that coordinates multiple related projects to achieve larger organizational goals.
+A strategic initiative that coordinates multiple related projects to achieve larger organizational goals.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `startDate` | `string (date)` | - |  | Program start date |
+| `endDate` | `string (date)` | - |  | Program end date |
+| `status` | `string` | enum: `planning`, `active`, `on-hold`, `completed`, `cancelled` | ✓ | Current program status |
+| `budget` | `number` | min: 0 |  | Total program budget |
+| `projects` | `string[]` | - | ✓ | Projects included in this program |
+| `objectives` | `string[]` | - |  | Strategic objectives this program aims to achieve |
+| `stakeholders` | `object[]` | - |  | Program stakeholders and their roles |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

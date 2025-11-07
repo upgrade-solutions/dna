@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dna.codes/schemas/state-transition.json",
+  "title": "State Transition",
+  "description": "A record of a single state transition in an entity's lifecycle.",
+  "type": "object",
+  "properties": {
+    "state": {
+      "type": "string",
+      "pattern": "^[a-z][a-z_]*$",
+      "description": "The state the entity was in during this period."
+    },
+    "enteredAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this state was entered."
+    },
+    "exitedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this state was exited. Omitted for the current state."
+    },
+    "actor": {
+      "type": "string",
+      "description": "Optional identifier of the actor who triggered this state transition."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Optional reason or context for the state transition."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional additional context or data associated with this state period.",
+      "additionalProperties": true
+    }
+  },
+  "required": ["state", "enteredAt"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "state": "pending",
+      "enteredAt": "2025-11-04T14:30:00Z",
+      "exitedAt": "2025-11-04T15:00:00Z"
+    },
+    {
+      "state": "in_progress",
+      "enteredAt": "2025-11-04T15:00:00Z",
+      "exitedAt": "2025-11-04T15:45:00Z",
+      "actor": "loanOfficer-234"
+    },
+    {
+      "state": "completed",
+      "enteredAt": "2025-11-04T15:45:00Z"
+    }
+  ]
+}

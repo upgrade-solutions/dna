@@ -1,6 +1,21 @@
-# Organization Schema
+# Organization
 
-Defines an organization — the top-level entity that owns multiple products and encompasses all business operations.
+The top-level entity that owns multiple products and encompasses all business operations.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `domain` | `string` | - | ✓ | Primary business domain or industry sector of the organization |
+| `products` | `string[]` | - |  | List of product keys owned by this organization |
+| `metadata` | `object` | - |  | Additional organizational metadata |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

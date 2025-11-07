@@ -1,6 +1,25 @@
-# Product Schema
+# Product
 
-Defines a product — a long-lived structure representing a major business offering or system within an organization.
+A long-lived structure representing a major business offering or system within an organization.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `organization` | `string` | - | ✓ | Reference to the organization that owns this product |
+| `status` | `string` | enum: `planning`, `development`, `active`, `maintenance`, `deprecated`, `retired` | ✓ | Current lifecycle status of the product |
+| `version` | `string` | pattern: `^\d+\.\d+\.\d+(?:-[a-zA-Z0-9-]+)?$` |  | Current version of the product following semantic versioning |
+| `workflows` | `string[]` | - |  | List of workflow keys contained within this product |
+| `owners` | `object[]` | - |  | Product ownership and responsibility assignments |
+| `integrations` | `string[]` | - |  | External systems and services this product integrates with |
+| `metadata` | `object` | - |  | Additional product metadata |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

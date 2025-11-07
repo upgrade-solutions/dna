@@ -1,6 +1,24 @@
-# Attribute Schema
+# Attribute
 
-Defines an attribute — a key-value property that can be attached to resources, API endpoints, UI components, and other entities.
+A key-value property that can be attached to resources, API endpoints, UI components, and other entities.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `value` | `any` | - | ✓ | The value of the attribute. Can be of any type. |
+| `dataType` | `string` | - |  | Optional type hint for the attribute value (e.g., 'string', 'number', 'boolean', 'date', 'url'). |
+| `required` | `boolean` | - |  | Whether this attribute is required in the context where it's used. |
+| `readonly` | `boolean` | - |  | Whether this attribute is read-only and cannot be modified. |
+| `validation` | `object` | - |  | Optional validation rules for the attribute value. |
+| `metadata` | `object` | - |  | Additional metadata about the attribute for API/UI contexts. |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

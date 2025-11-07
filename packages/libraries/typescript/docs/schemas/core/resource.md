@@ -1,6 +1,20 @@
-# Resource Schema
+# Resource
 
-Defines a resource — a data entity or object acted upon within the DNA model.
+A data entity or object acted upon within the DNA model.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `attributes` | `attribute[]` | - |  | Resource-specific attributes. |
+| `actions` | `action[]` | - |  | Resource-specific actions. |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

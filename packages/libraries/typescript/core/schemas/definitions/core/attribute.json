@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/attribute.json",
-  "title": "Attribute Schema",
-  "description": "Defines an attribute — a key-value property that can be attached to resources, API endpoints, UI components, and other entities.",
+  "title": "Attribute",
+  "description": "A key-value property that can be attached to resources, API endpoints, UI components, and other entities.",
   "examples": [
     {
       "name": "Annual Income",

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/task.json",
-  "title": "Task Schema",
-  "description": "Defines a task — a specific work item within a project that contributes to achieving the project's objectives.",
+  "title": "Task",
+  "description": "A specific work item within a project that contributes to achieving the project's objectives.",
   "examples": [
     {
       "name": "Analyze Current Income Verification Process",

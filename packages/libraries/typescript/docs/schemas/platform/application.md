@@ -1,6 +1,22 @@
-# Application Schema
+# Application
 
-Defines an application — a containerized system with UI and API layers within a platform.
+A containerized system with UI and API layers within a platform.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `ui` | `ui` | - |  | UI layer of the application. |
+| `api` | `api` | - |  | API layer of the application. |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
+| `ui` | `ui` | UI layer of the application. |
+| `api` | `api` | API layer of the application. |
 
 ## Examples
 

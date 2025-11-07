@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/platform.json",
-  "title": "Platform Schema",
-  "description": "Defines a platform — the container for applications with UI and API layers.",
+  "title": "Platform",
+  "description": "A container for applications with UI and API layers.",
   "examples": [
     {
       "name": "Digital Banking Platform",

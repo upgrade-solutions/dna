@@ -1,6 +1,18 @@
-# Action Schema
+# Action
 
-Defines an action — an operation performed by an actor on a resource.
+An operation performed by an actor on a resource.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

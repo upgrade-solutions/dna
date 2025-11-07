@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/opportunity.json",
-  "title": "Opportunity Schema",
-  "description": "Defines an opportunity — a business improvement area that can drive measurable outcomes.",
+  "title": "Opportunity",
+  "description": "A business improvement area that can drive measurable outcomes.",
   "examples": [
     {
       "name": "Improved Borrower Experience",

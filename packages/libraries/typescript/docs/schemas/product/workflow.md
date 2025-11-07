@@ -1,6 +1,22 @@
-# Workflow Schema
+# Workflow
 
-Defines a workflow — a sequence of actions performed by actors on resources.
+A sequence of actions performed by actors on resources.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `product` | `string` | - | ✓ | Reference to the product that contains this workflow |
+| `steps` | `array` | - |  | Ordered list of workflow steps (references to Step entities). |
+| `triggers` | `object[]` | - |  | Events or conditions that can initiate this workflow. |
+| `outputs` | `string[]` | - |  | Expected outputs or results of the workflow execution. |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

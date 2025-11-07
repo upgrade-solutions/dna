@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/api/payload.json",
-  "title": "Payload Schema",
-  "description": "Defines a payload — a structured data object containing attributes exchanged via API endpoints.",
+  "title": "Payload",
+  "description": "A structured data object containing attributes exchanged via API endpoints.",
   "examples": [
     {
       "name": "Submit Loan Request",

@@ -1,6 +1,29 @@
-# Metric Schema
+# Metric
 
-Defines a metric — a quantifiable performance indicator that measures progress toward outcomes.
+A quantifiable performance indicator that measures progress toward outcomes.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `category` | `string` | enum: `financial`, `customer`, `operational`, `quality`, `efficiency`, `compliance` | ✓ | Category of the metric |
+| `dataType` | `string` | enum: `number`, `percentage`, `currency`, `duration`, `count` | ✓ | Type of data this metric represents |
+| `unit` | `string` | - | ✓ | Unit of measurement (e.g., USD, percent, minutes, count) |
+| `scale` | `string` | - |  | Scale or range for the metric (e.g., '1-10', '0-100%') |
+| `currentValue` | `number` | - |  | Current measured value |
+| `targetValue` | `number` | - |  | Target value to achieve |
+| `targetImprovement` | `string` | - |  | Expected improvement (e.g., '20%', '+15 points') |
+| `measurementFrequency` | `string` | enum: `real-time`, `hourly`, `daily`, `weekly`, `monthly`, `quarterly` | ✓ | How frequently this metric is measured |
+| `dataSource` | `string` | - |  | Source system or process that provides this metric data |
+| `relatedOutcomes` | `string[]` | - |  | Outcomes this metric contributes to measuring |
+| `trendDirection` | `string` | enum: `increasing`, `decreasing`, `stable`, `volatile` |  | Current trend direction of the metric |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

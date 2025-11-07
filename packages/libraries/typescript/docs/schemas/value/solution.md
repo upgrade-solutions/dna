@@ -1,6 +1,28 @@
-# Solution Schema
+# Solution
 
-Defines a solution — a proposed implementation to address opportunities and drive outcomes.
+A proposed implementation to address opportunities and drive outcomes.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `category` | `string` | enum: `digital-platform`, `automation`, `integration`, `process-improvement`, `infrastructure`, `analytics` | ✓ | Category of solution |
+| `implementationType` | `string` | enum: `build`, `buy`, `configure`, `integrate`, `outsource` | ✓ | How this solution will be implemented |
+| `estimatedCost` | `number` | min: 0 |  | Estimated implementation cost |
+| `estimatedDuration` | `string` | pattern: `^P(?:\d+Y)?(?:\d+M)?(?:\d+D)?(?:T(?:\d+H)?(?:\d+M)?(?:\d+(?:\.\d+)?S)?)?$` |  | Estimated time to implement (ISO 8601 duration format) |
+| `complexity` | `string` | enum: `low`, `medium`, `high` |  | Implementation complexity level |
+| `targetOpportunities` | `string[]` | - |  | Opportunities this solution addresses |
+| `expectedOutcomes` | `string[]` | - |  | Outcomes this solution is expected to contribute to |
+| `affectedWorkflows` | `string[]` | - |  | Workflows that will be modified by this solution |
+| `technicalRequirements` | `string[]` | - |  | Technical requirements for implementation |
+| `dependencies` | `string[]` | - |  | Systems or components this solution depends on |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

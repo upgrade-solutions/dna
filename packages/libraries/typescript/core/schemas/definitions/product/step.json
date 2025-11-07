@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/step.json",
-  "title": "Step Schema",
-  "description": "Defines a step — an atomic building block representing Actor > Operation. Supports dual syntax: explicit (actor + resource + action) or dot notation (actor + operation).",
+  "title": "Step",
+  "description": "An atomic building block representing Actor > Operation, supporting explicit and dot notation syntax.",
   "examples": [
     {
       "name": "Submit Loan Application",

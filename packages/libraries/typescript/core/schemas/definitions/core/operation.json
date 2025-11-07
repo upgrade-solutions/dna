@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/operation.json",
-  "title": "Operation Schema",
-  "description": "Defines an operation — a reusable specification for how work gets done, combining a resource, an action, capabilities (allowed actors), and lifecycle states. Operations are the blueprint for task instances.",
+  "title": "Operation",
+  "description": "A reusable specification for how work gets done, combining a resource, an action, capabilities, and lifecycle states.",
   "examples": [
     {
       "name": "Close Loan",
@@ -96,11 +96,12 @@
           "required": ["resource", "action"],
           "properties": {
             "resource": {
-              "type": "string",
+              "$ref": "https://dna.codes/schemas/resource.json",
               "description": "The resource type being acted upon (e.g., 'Loan', 'Document', 'User')."
             },
             "action": {
               "type": "string",
+              "pattern": "^[a-z][a-zA-Z0-9]*$",
               "description": "The action being performed on the resource (e.g., 'close', 'approve', 'delete')."
             }
           },
@@ -115,6 +116,7 @@
               "type": "array",
               "description": "List of actor types permitted to perform this operation (e.g., 'borrower', 'loanOfficer', 'agent').",
               "items": {
+                "$ref": "https://dna.codes/schemas/actor.json",
                 "type": "string"
               },
               "minItems": 1
@@ -123,8 +125,10 @@
               "type": "array",
               "description": "Optional conditions that must be true for the operation to be executable (e.g., pre-conditions on resource state).",
               "items": {
-                "type": "string"
-              }
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9._\\s==!<>]*$"
+              },
+              "minItems": 0
             }
           },
           "additionalProperties": false
@@ -136,13 +140,15 @@
           "properties": {
             "initialState": {
               "type": "string",
+              "pattern": "^[a-z][a-z_]*$",
               "description": "The state a new task instance enters upon creation."
             },
             "states": {
               "type": "array",
               "description": "All possible states a task instance can transition through.",
               "items": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^[a-z][a-z_]*$"
               },
               "minItems": 2
             },
@@ -152,7 +158,8 @@
               "additionalProperties": {
                 "type": "array",
                 "items": {
-                  "type": "string"
+                  "type": "string",
+                  "pattern": "^[a-z][a-z_]*$"
                 }
               }
             }

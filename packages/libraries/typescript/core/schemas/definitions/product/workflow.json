@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/workflow.json",
-  "title": "Workflow Schema",
-  "description": "Defines a workflow — a sequence of actions performed by actors on resources.",
+  "title": "Workflow",
+  "description": "A sequence of actions performed by actors on resources.",
   "examples": [
     {
       "name": "Loan Application Approval Process",

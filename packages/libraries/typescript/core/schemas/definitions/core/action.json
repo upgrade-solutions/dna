@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/action.json",
-  "title": "Action Schema",
-  "description": "Defines an action — an operation performed by an actor on a resource.",
+  "title": "Action",
+  "description": "An operation performed by an actor on a resource.",
   "examples": [
     {
       "name": "Submit Loan Application",

@@ -1,6 +1,18 @@
-# Actor Schema
+# Actor
 
-Defines an actor — a user, role, system, or agent performing actions within the DNA model.
+A user, role, system, or agent performing actions within the DNA model.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `string` | enum: `Actor::User`, `Actor::Role`, `Actor::System`, `Actor::Agent` | ✓ | The specific classification of the actor. |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

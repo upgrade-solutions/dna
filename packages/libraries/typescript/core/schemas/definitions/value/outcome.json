@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/outcome.json",
-  "title": "Outcome Schema",
-  "description": "Defines an outcome — a measurable business result achieved through programs, projects, or workflows.",
+  "title": "Outcome",
+  "description": "A measurable business result achieved through programs, projects, or workflows.",
   "examples": [
     {
       "name": "Increased Monthly Recurring Revenue",

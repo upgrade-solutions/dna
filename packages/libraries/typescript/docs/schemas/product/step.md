@@ -1,6 +1,34 @@
-# Step Schema
+# Step
 
-Defines a step — an atomic building block representing Actor > Operation. Supports dual syntax: explicit (actor + resource + action) or dot notation (actor + operation).
+An atomic building block representing Actor > Operation, supporting explicit and dot notation syntax.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `actor` | `string` | - | ✓ | Reference to the actor performing this step |
+| `action` | `string` | - |  | Reference to the action being performed (used with explicit syntax) |
+| `resource` | `string` | - |  | Reference to the resource being acted upon (used with explicit syntax) |
+| `operation` | `string` | pattern: `^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$` |  | Resource.action operation in dot notation (e.g., 'loan.apply', 'credit_report.check') |
+| `order` | `integer` | min: 1 |  | Execution order within the workflow (1-based) |
+| `conditions` | `string[]` | - |  | Prerequisites that must be met for this step to execute |
+| `parallel` | `boolean` | - |  | Whether this step can execute in parallel with other steps |
+| `automated` | `boolean` | - |  | Whether this step is fully automated (no human intervention required) |
+| `optional` | `boolean` | - |  | Whether this step is optional in the workflow |
+| `timeout` | `string` | pattern: `^P(?:\d+D)?(?:T(?:\d+H)?(?:\d+M)?(?:\d+(?:\.\d+)?S)?)?$` |  | Maximum time allowed for step execution (ISO 8601 duration format) |
+| `estimatedDuration` | `string` | pattern: `^P(?:\d+D)?(?:T(?:\d+H)?(?:\d+M)?(?:\d+(?:\.\d+)?S)?)?$` |  | Expected duration for step completion (ISO 8601 duration format) |
+| `retryPolicy` | `object` | - |  | Retry policy for failed step executions |
+| `inputs` | `object[]` | - |  | Required inputs for step execution |
+| `outputs` | `string[]` | - |  | Expected outputs produced by step execution |
+| `notifications` | `object[]` | - |  | Notification rules for step events |
+| `validation` | `object` | - |  | Validation rules for step execution |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

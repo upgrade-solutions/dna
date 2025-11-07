@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/product.json",
-  "title": "Product Schema",
-  "description": "Defines a product — a long-lived structure representing a major business offering or system within an organization.",
+  "title": "Product",
+  "description": "A long-lived structure representing a major business offering or system within an organization.",
   "examples": [
     {
       "name": "Loan Origination System",

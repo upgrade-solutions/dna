@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/program.json",
-  "title": "Program Schema",
-  "description": "Defines a program — a strategic initiative that coordinates multiple related projects to achieve larger organizational goals.",
+  "title": "Program",
+  "description": "A strategic initiative that coordinates multiple related projects to achieve larger organizational goals.",
   "examples": [
     {
       "name": "Digital Transformation Initiative",

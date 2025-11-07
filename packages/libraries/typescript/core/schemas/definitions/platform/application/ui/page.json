@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/ui/page.json",
-  "title": "Page Schema",
-  "description": "Defines a page — a UI view that displays a resource and its attributes.",
+  "title": "Page",
+  "description": "A UI view that displays a resource and its attributes.",
   "examples": [
     {
       "name": "Loan Dashboard",

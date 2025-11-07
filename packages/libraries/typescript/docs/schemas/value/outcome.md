@@ -1,6 +1,26 @@
-# Outcome Schema
+# Outcome
 
-Defines an outcome — a measurable business result achieved through programs, projects, or workflows.
+A measurable business result achieved through programs, projects, or workflows.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `category` | `string` | enum: `financial`, `customer`, `operational`, `compliance`, `strategic` | ✓ | Category of business outcome |
+| `targetValue` | `number` | - | ✓ | Target value for the outcome |
+| `currentValue` | `number` | - |  | Current achieved value |
+| `unit` | `string` | - | ✓ | Unit of measurement (e.g., USD, percent, count) |
+| `measurementPeriod` | `string` | enum: `daily`, `weekly`, `monthly`, `quarterly`, `annually` | ✓ | How frequently this outcome is measured |
+| `achievedDate` | `string (date)` | - |  | Date when the target was achieved (if applicable) |
+| `relatedOpportunities` | `string[]` | - |  | Opportunities that contribute to this outcome |
+| `contributingMetrics` | `string[]` | - |  | Metrics that influence this outcome |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

@@ -1,6 +1,20 @@
-# Platform Schema
+# Platform
 
-Defines a platform — the container for applications with UI and API layers.
+A container for applications with UI and API layers.
+
+## Properties
+
+| Property | Type | Constraints | Required | Description |
+|----------|------|-------------|----------|-------------|
+| `type` | `any` | - |  |  |
+| `version` | `string` | - |  | Platform version following semantic versioning. |
+| `applications` | `application[]` | - |  | Applications that are part of this platform. |
+
+## Relationships
+
+| Field | References | Description |
+|-------|------------|-------------|
+| `inherits` | `base` | Inherits from base |
 
 ## Examples
 

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/base.json",
-  "title": "Base Schema",
-  "description": "A general base schema for defining any DNA entity, such as an Actor, Action, or Resource.",
+  "title": "Base",
+  "description": "A general schema for defining any DNA entity.",
   "type": "object",
   "required": ["name", "key", "type"],
   "properties": {
