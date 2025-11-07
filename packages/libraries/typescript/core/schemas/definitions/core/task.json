@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/task.json",
   "title": "Task",
-  "description": "A runtime instance representing a specific unit of work being performed by an actor on a resource, with state tracking and lifecycle management.",
+  "description": "A runtime instance representing a specific unit of work being performed by an actor on a resource. Tracks actual state transitions through an audit trail, providing the source of truth for task lifecycle.",
   "examples": [
     {
       "id": "task-456",
@@ -113,7 +113,7 @@
         },
         "operation": {
           "$ref": "https://dna.codes/schemas/operation.json",
-          "description": "Reference to the operation (key) that defines this task's resource, action, capabilities, and lifecycle."
+          "description": "Reference to the operation (key) that defines this task's resource, action, and capabilities."
         },
         "actor": {
           "$ref": "https://dna.codes/schemas/actor.json",
@@ -126,7 +126,7 @@
         "state": {
           "type": "string",
           "enum": ["pending", "in_progress", "completed", "failed", "cancelled"],
-          "description": "Current state of the task instance. Must be one of the states defined in the referenced operation's lifecycle."
+          "description": "Current state of the task instance, as tracked through stateHistory."
         },
         "createdAt": {
           "type": "string",
