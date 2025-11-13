@@ -1,11 +1,11 @@
 import { EntityRelationships } from "./entity-relationships"
 
-interface SemanticsBlueprintSectionProps {
+interface SignalBlueprintSectionProps {
   title?: string
   subtitle?: string
 }
 
-export function SemanticsBlueprintSection({ title, subtitle }: SemanticsBlueprintSectionProps) {
+export function SignalBlueprintSection({ title, subtitle }: SignalBlueprintSectionProps) {
   const isCompact = !!title
   return (
     <section className={`relative overflow-hidden ${isCompact ? 'py-0 px-0' : 'py-24 px-6'}`}>
@@ -90,7 +90,7 @@ export function SemanticsBlueprintSection({ title, subtitle }: SemanticsBlueprin
               <EntityRelationships />
             </div>
             <div className="absolute -top-4 -right-4 bg-cyan-500 text-slate-950 px-4 py-2 rounded-lg font-mono text-sm font-semibold shadow-lg">
-              RELATIONSHIPS
+              KNOWLEDGE GRAPH
             </div>
           </div>
         </div>

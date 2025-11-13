@@ -1,11 +1,11 @@
 import { UIBlueprint } from "./ui-blueprint"
 
-interface UIBlueprintSectionProps {
+interface MetricsBlueprintSectionProps {
   title?: string
   subtitle?: string
 }
 
-export function UIBlueprintSection({ title, subtitle }: UIBlueprintSectionProps) {
+export function MetricsBlueprintSection({ title, subtitle }: MetricsBlueprintSectionProps) {
   const isCompact = !!title
   return (
     <section className={`relative overflow-hidden ${isCompact ? 'py-0 px-0' : 'py-24 px-6'}`}>
@@ -71,7 +71,7 @@ export function UIBlueprintSection({ title, subtitle }: UIBlueprintSectionProps)
               <UIBlueprint />
             </div>
             <div className="absolute -top-4 -right-4 bg-cyan-500 text-slate-950 px-4 py-2 rounded-lg font-mono text-sm font-semibold shadow-lg">
-              LIVE BLUEPRINT
+              METRICS
             </div>
           </div>
         </div>

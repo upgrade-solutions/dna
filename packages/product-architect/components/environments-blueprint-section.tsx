@@ -1,11 +1,11 @@
 import { APIBlueprint } from "./api-blueprint"
 
-interface APIBlueprintSectionProps {
+interface EnvironmentsBlueprintSectionProps {
   title?: string
   subtitle?: string
 }
 
-export function APIBlueprintSection({ title, subtitle }: APIBlueprintSectionProps) {
+export function EnvironmentsBlueprintSection({ title, subtitle }: EnvironmentsBlueprintSectionProps) {
   const isCompact = !!title
   return (
     <section className={`relative overflow-hidden ${isCompact ? 'py-0 px-0' : 'py-24 px-4'}`}>

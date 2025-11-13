@@ -1,11 +1,11 @@
 import { EntityRelationships } from "./entity-relationships"
 
-interface SemanticsBlueprintSectionProps {
+interface RelationshipsBlueprintSectionProps {
   title?: string
   subtitle?: string
 }
 
-export function SemanticsBlueprintSection({ title, subtitle }: SemanticsBlueprintSectionProps) {
+export function RelationshipsBlueprintSection({ title, subtitle }: RelationshipsBlueprintSectionProps) {
   const isCompact = !!title
   return (
     <section className={`relative overflow-hidden ${isCompact ? 'py-0 px-0' : 'py-24 px-6'}`}>

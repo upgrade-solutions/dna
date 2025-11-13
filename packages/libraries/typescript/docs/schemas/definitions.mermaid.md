@@ -1,9 +1,5 @@
 ```mermaid
 graph LR
-  subgraph platformmanagement["platform-management"]
-    platform["platform"]
-    application["application"]
-  end
   subgraph core["core"]
     statetransition["state-transition"]
     action["action"]
@@ -18,20 +14,22 @@ graph LR
     program["program"]
     workitem["work-item"]
   end
-  subgraph value["value"]
+  subgraph motivational["motivational"]
     outcome["outcome"]
     opportunity["opportunity"]
     metric["metric"]
     solution["solution"]
   end
-  subgraph productmanagement["product-management"]
-    workflow["workflow"]
+  subgraph operational["operational"]
+    domain["domain"]
     step["step"]
     organization["organization"]
-    product["product"]
+    process["process"]
   end
-  base --> platform
-  base --> application
+  subgraph technical["technical"]
+    platform["platform"]
+    application["application"]
+  end
   base --> action
   base --> attribute
   base --> task
@@ -45,8 +43,10 @@ graph LR
   base --> opportunity
   base --> metric
   base --> solution
-  base --> workflow
+  base --> domain
   base --> step
   base --> organization
-  base --> product
+  base --> process
+  base --> platform
+  base --> application
 ```
