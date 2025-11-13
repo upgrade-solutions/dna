@@ -110,3 +110,14 @@ Mirrors the lifecycle of architecture and living systems.
 | **Signal** | Model event flows, publishers, subscribers, and triggers. | Implement event buses, listeners, and notification systems. | Monitor live events, alerts, telemetry, and feedback loops. |
 | **Style** | Define visual, interaction, and thematic rules. | Implement style guides, component libraries, and consistent UX. | Adapt and personalize live presentation and behavior. |
 
+## Prompt for Product Architect Home Page
+We're going to create a new section on the page, to be like photoshop layers on a canvas, and if one is turned off, it's functionality is no longer visible. 
+
+The context of the canvas and elements is a UI form with form fields and a submit button. As part of the form, it should have an "agree to terms" checkbox and the submit button should be disabled until it's checked.
+
+Here are the layers:
+* Structure - this is the base layer and will always be visible. It should show a container with a form, form fields, and a submit button
+* Schema - when this layer is on, it adds in form labels, the submit button text, etc.
+* State - when this layer is on, it shows controls for form fields that are disabled or in error state, and the button states as well
+* Signal - when this layer is on, it shows how changes to one component can send events that other components can subscribe to (e.g. the submit button subscribing to the agree checkbox event)
+* Style - when this layer is on, it adds the right styles and fonts according to a theme.

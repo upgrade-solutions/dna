@@ -20,6 +20,8 @@ import { SchemaBlueprintSection } from "@/components/schema/schema-blueprint-sec
 import { StateBlueprintSection } from "@/components/state/state-blueprint-section"
 import { SignalBlueprintSection } from "@/components/signal/signal-blueprint-section"
 import { StyleBlueprintSection } from "@/components/style/style-blueprint-section"
+import { UILayersBlueprintSection } from "@/components/ui-layers/ui-layers-blueprint-section"
+import { APILayersBlueprintSection } from "@/components/api-layers/api-layers-blueprint-section"
 import { Footer } from "@/components/layout/footer"
 
 // Framework Layers: shared across all phases
@@ -101,6 +103,7 @@ const getDetailInfo = (itemId: string | null, phase: string | null) => {
 export default function Home() {
   const [selectedPhase, setSelectedPhase] = useState<string | null>('design')
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
+  const [selectedDesign, setSelectedDesign] = useState<'ui' | 'api'>('ui')
 
   const handleItemClick = (item: string) => {
     setSelectedItem(item)
@@ -162,6 +165,47 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-background">
       <Hero />
+
+      {/* Design > Build > Run Layers Demo Section */}
+      <section className="py-24 bg-background border-t border-border">
+                <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
+            Layered Designs
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
+            See how functionality emerges layer by layer: from structure through schema, state, signal, and style. Toggle layers like Photoshop to see each dimension.
+          </p>
+        </div>
+        {/* UI/API Toggle */}
+        <div className="container mx-auto px-4 mb-6">
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => setSelectedDesign('ui')}
+              className={`px-8 py-3 rounded-lg font-semibold text-lg transition-all ${
+                selectedDesign === 'ui'
+                  ? 'bg-blue-500 text-white shadow-lg'
+                  : 'bg-muted text-foreground hover:bg-muted/80'
+              }`}
+            >
+              UI
+            </button>
+            <button
+              onClick={() => setSelectedDesign('api')}
+              className={`px-8 py-3 rounded-lg font-semibold text-lg transition-all ${
+                selectedDesign === 'api'
+                  ? 'bg-purple-500 text-white shadow-lg'
+                  : 'bg-muted text-foreground hover:bg-muted/80'
+              }`}
+            >
+              API
+            </button>
+          </div>
+        </div>
+
+        {/* Display selected design */}
+        {selectedDesign === 'ui' && <UILayersBlueprintSection />}
+        {selectedDesign === 'api' && <APILayersBlueprintSection />}
+      </section>
       
       {/* Design/Build/Run Toggle Section */}
       <section className="sticky mt-20 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-6">

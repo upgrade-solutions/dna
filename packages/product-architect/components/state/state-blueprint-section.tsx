@@ -1,4 +1,5 @@
-import { ArchitectureBlueprint } from "./architecture-blueprint"
+import { StateMachineBlueprint } from "./state-machine-blueprint"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 
 interface StateBlueprintSectionProps {
   title?: string
@@ -18,72 +19,148 @@ export function StateBlueprintSection({ title, subtitle }: StateBlueprintSection
             {title || "State"}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            {subtitle || "Manage application state across distributed systems with consistent patterns, reactive updates, and predictable state transitions"}
+            {subtitle || "Manage state transitions, lifecycle hooks, and dynamic behavior across your application with predictable state machines and reactive patterns"}
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 items-start">
-          {/* Blueprint visualization */}
-          <div className="relative">
-            <div className="aspect-[4/3] bg-[#0a0f1a] rounded-lg border border-purple-500/20 overflow-hidden shadow-2xl shadow-purple-500/10">
-              <ArchitectureBlueprint />
-            </div>
+        <div className="space-y-8">
+          {/* State Machine Examples */}
+          <Tabs defaultValue="dataFetch" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="dataFetch">Data Fetch</TabsTrigger>
+              <TabsTrigger value="formSubmission">Form Submission</TabsTrigger>
+              <TabsTrigger value="userSession">User Session</TabsTrigger>
+            </TabsList>
 
-            {/* Technical labels */}
-            <div className="absolute -top-3 -left-3 bg-purple-500 text-white text-xs font-mono px-2 py-1 rounded">
-              ARCH-001
-            </div>
-            <div className="absolute -bottom-3 -right-3 bg-blue-500 text-white text-xs font-mono px-2 py-1 rounded">
-              Kubernetes
-            </div>
-          </div>
+            <TabsContent value="dataFetch" className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-8 items-start">
+                <div className="relative">
+                  <div className="aspect-[4/3] bg-[#0a0f1a] rounded-lg border border-purple-500/20 overflow-hidden shadow-2xl shadow-purple-500/10">
+                    <StateMachineBlueprint example="dataFetch" />
+                  </div>
+                  <div className="absolute -top-3 -left-3 bg-purple-500 text-white text-xs font-mono px-2 py-1 rounded">
+                    STATE-001
+                  </div>
+                </div>
 
-          {/* Specification details */}
-          <div className="space-y-6">
-            <div className="bg-card border border-border rounded-lg p-6">
-              <h3 className="text-sm font-mono text-purple-400 mb-3">SYSTEM ARCHITECTURE</h3>
-              <div className="space-y-3 font-mono text-sm">
-                <div className="flex items-start gap-3">
-                  <span className="text-muted-foreground">Services:</span>
-                  <span className="text-foreground">Microservice definitions</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-muted-foreground">Network:</span>
-                  <span className="text-foreground">Load balancers and routing</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-muted-foreground">Storage:</span>
-                  <span className="text-foreground">Databases and caching layers</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-muted-foreground">Scale:</span>
-                  <span className="text-foreground">Auto-scaling and replication</span>
+                <div className="space-y-4">
+                  <div className="bg-card border border-border rounded-lg p-6">
+                    <h3 className="text-sm font-mono text-blue-400 mb-3">LIFECYCLE HOOKS</h3>
+                    <div className="space-y-2 text-sm font-mono">
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground min-w-24">onEnter:</span>
+                        <span className="text-foreground">Initialize fetch request</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground min-w-24">onExit:</span>
+                        <span className="text-foreground">Clear timeout, abort request</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground min-w-24">retry:</span>
+                        <span className="text-foreground">Exponential backoff logic</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-card border border-border rounded-lg p-6">
+                    <h3 className="text-sm font-mono text-cyan-400 mb-3">STATE SCHEMA</h3>
+                    <code className="text-xs text-muted-foreground block space-y-1">
+                      <div>data: T | null</div>
+                      <div>error: Error | null</div>
+                      <div>loading: boolean</div>
+                      <div>attempts: number</div>
+                    </code>
+                  </div>
                 </div>
               </div>
-            </div>
+            </TabsContent>
 
-            <div className="bg-card border border-border rounded-lg p-6">
-              <h3 className="text-sm font-mono text-blue-400 mb-3">AUTO-GENERATED</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                  Infrastructure as Code (IaC)
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                  Container orchestration configs
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                  Service mesh definitions
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                  Monitoring and observability
-                </li>
-              </ul>
-            </div>
-          </div>
+            <TabsContent value="formSubmission" className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-8 items-start">
+                <div className="relative">
+                  <div className="aspect-[4/3] bg-[#0a0f1a] rounded-lg border border-purple-500/20 overflow-hidden shadow-2xl shadow-purple-500/10">
+                    <StateMachineBlueprint example="formSubmission" />
+                  </div>
+                  <div className="absolute -top-3 -left-3 bg-purple-500 text-white text-xs font-mono px-2 py-1 rounded">
+                    STATE-002
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-card border border-border rounded-lg p-6">
+                    <h3 className="text-sm font-mono text-blue-400 mb-3">VALIDATION HOOKS</h3>
+                    <div className="space-y-2 text-sm font-mono">
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground min-w-24">onChange:</span>
+                        <span className="text-foreground">Mark dirty, clear errors</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground min-w-24">onBlur:</span>
+                        <span className="text-foreground">Validate field</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground min-w-24">submit:</span>
+                        <span className="text-foreground">Validate all, submit</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-card border border-border rounded-lg p-6">
+                    <h3 className="text-sm font-mono text-cyan-400 mb-3">VALIDATION SCHEMA</h3>
+                    <code className="text-xs text-muted-foreground block space-y-1">
+                      <div>values: Record&lt;string, any&gt;</div>
+                      <div>errors: Record&lt;string, string&gt;</div>
+                      <div>touched: Set&lt;string&gt;</div>
+                      <div>isDirty: boolean</div>
+                    </code>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="userSession" className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-8 items-start">
+                <div className="relative">
+                  <div className="aspect-[4/3] bg-[#0a0f1a] rounded-lg border border-purple-500/20 overflow-hidden shadow-2xl shadow-purple-500/10">
+                    <StateMachineBlueprint example="userSession" />
+                  </div>
+                  <div className="absolute -top-3 -left-3 bg-purple-500 text-white text-xs font-mono px-2 py-1 rounded">
+                    STATE-003
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-card border border-border rounded-lg p-6">
+                    <h3 className="text-sm font-mono text-blue-400 mb-3">SESSION HOOKS</h3>
+                    <div className="space-y-2 text-sm font-mono">
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground min-w-24">login:</span>
+                        <span className="text-foreground">Authenticate user</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground min-w-24">tokenExpiring:</span>
+                        <span className="text-foreground">Refresh token</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-muted-foreground min-w-24">logout:</span>
+                        <span className="text-foreground">Clear session data</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-card border border-border rounded-lg p-6">
+                    <h3 className="text-sm font-mono text-cyan-400 mb-3">SESSION SCHEMA</h3>
+                    <code className="text-xs text-muted-foreground block space-y-1">
+                      <div>user: User | null</div>
+                      <div>token: string | null</div>
+                      <div>expiresAt: Date | null</div>
+                      <div>refreshToken: string | null</div>
+                    </code>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </section>
