@@ -1,11 +1,11 @@
 import { ArchitectureBlueprint } from "./architecture-blueprint"
 
-interface StructureBlueprintSectionProps {
+interface StateBlueprintSectionProps {
   title?: string
   subtitle?: string
 }
 
-export function StructureBlueprintSection({ title, subtitle }: StructureBlueprintSectionProps) {
+export function StateBlueprintSection({ title, subtitle }: StateBlueprintSectionProps) {
   const isCompact = !!title
   return (
     <section className={`relative overflow-hidden ${isCompact ? 'py-0 px-0' : 'py-24 px-6'}`}>
@@ -13,18 +13,14 @@ export function StructureBlueprintSection({ title, subtitle }: StructureBlueprin
       <div className="absolute inset-0 bg-gradient-to-b from-background via-purple-950/5 to-background" />
 
       <div className="max-w-7xl mx-auto relative">
-        {title && (
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
-              {title}
-            </h2>
-            {subtitle && (
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-                {subtitle}
-              </p>
-            )}
-          </div>
-        )}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
+            {title || "State"}
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
+            {subtitle || "Manage application state across distributed systems with consistent patterns, reactive updates, and predictable state transitions"}
+          </p>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-8 items-start">
           {/* Blueprint visualization */}

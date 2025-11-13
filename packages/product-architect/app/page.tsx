@@ -13,14 +13,14 @@ import {
   Hammer,
   Play
 } from "lucide-react"
-import { Hero } from "@/components/hero"
-import { SystemBlueprintSection } from "@/components/system-blueprint-section"
-import { StructureBlueprintSection } from "@/components/structure-blueprint-section"
-import { SchemaBlueprintSection } from "@/components/schema-blueprint-section"
-import { StateBlueprintSection } from "@/components/state-blueprint-section"
-import { SignalBlueprintSection } from "@/components/signal-blueprint-section"
-import { StyleBlueprintSection } from "@/components/style-blueprint-section"
-import { Footer } from "@/components/footer"
+import { Hero } from "@/components/layout/hero"
+import { SystemBlueprintSection } from "@/components/system/system-blueprint-section"
+import { StructureBlueprintSection } from "@/components/structure/structure-blueprint-section"
+import { SchemaBlueprintSection } from "@/components/schema/schema-blueprint-section"
+import { StateBlueprintSection } from "@/components/state/state-blueprint-section"
+import { SignalBlueprintSection } from "@/components/signal/signal-blueprint-section"
+import { StyleBlueprintSection } from "@/components/style/style-blueprint-section"
+import { Footer } from "@/components/layout/footer"
 
 // Framework Layers: shared across all phases
 const FRAMEWORK_LAYERS = [

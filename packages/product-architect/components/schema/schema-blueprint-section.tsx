@@ -13,18 +13,14 @@ export function SchemaBlueprintSection({ title, subtitle }: SchemaBlueprintSecti
       <div className="absolute inset-0 bg-gradient-to-b from-background via-cyan-950/5 to-background" />
 
       <div className="max-w-7xl mx-auto relative">
-        {title && (
-          <div className="text-center mb-8">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
-              {title}
-            </h2>
-            {subtitle && (
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-                {subtitle}
-              </p>
-            )}
-          </div>
-        )}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
+            {title || "Schema"}
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
+            {subtitle || "Define your data models with type-safe schemas, generate migrations, and create fully normalized database architectures with optimal indexing strategies"}
+          </p>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-8 items-start">
           {/* Blueprint visualization */}

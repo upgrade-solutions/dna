@@ -1,11 +1,11 @@
-import { ArchitectureBlueprint } from "./architecture-blueprint"
+import { ArchitectureBlueprint } from "../state/architecture-blueprint"
 
-interface StateBlueprintSectionProps {
+interface MutationsBlueprintSectionProps {
   title?: string
   subtitle?: string
 }
 
-export function StateBlueprintSection({ title, subtitle }: StateBlueprintSectionProps) {
+export function MutationsBlueprintSection({ title, subtitle }: MutationsBlueprintSectionProps) {
   const isCompact = !!title
   return (
     <section className={`relative overflow-hidden ${isCompact ? 'py-0 px-0' : 'py-24 px-6'}`}>

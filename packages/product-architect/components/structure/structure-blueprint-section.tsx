@@ -1,29 +1,25 @@
 import { StructureBlueprint } from "./structure-blueprint"
 
-interface SystemBlueprintSectionProps {
+interface StructureBlueprintSectionProps {
   title?: string
   subtitle?: string
 }
 
-export function SystemBlueprintSection({ title, subtitle }: SystemBlueprintSectionProps) {
+export function StructureBlueprintSection({ title, subtitle }: StructureBlueprintSectionProps) {
   const isCompact = !!title
   return (
     <section className={`relative overflow-hidden ${isCompact ? 'py-0 px-0' : 'py-24 px-6'}`}>
       <div className="absolute inset-0 bg-gradient-to-b from-background via-emerald-950/10 to-background" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {title && (
-          <div className="text-center mb-8">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
-              {title}
-            </h2>
-            {subtitle && (
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-                {subtitle}
-              </p>
-            )}
-          </div>
-        )}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
+            {title || "Structure"}
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
+            {subtitle || "Model your product DNA as interconnected Actors, Actions, Resources, and Events, creating a unified semantic foundation for your entire system"}
+          </p>
+        </div>
 
         {/* Main Structure Visualization */}
         <div className="grid md:grid-cols-2 gap-8 items-center">

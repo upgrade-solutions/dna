@@ -2,18 +2,13 @@ import { StyleBlueprint } from "./style-blueprint"
 
 export function StyleBlueprintSection() {
   return (
-    <section className="relative py-24 px-6 overflow-hidden">
+    <section className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-purple-950/10 to-background" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">
-          <div className="inline-block mb-4">
-            <span className="text-xs font-mono text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
-              STYLE SYSTEM
-            </span>
-          </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
-            Brands Create <span className="text-purple-400">Systems</span>
+            Style
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
             Transform your brand identity into comprehensive design systems with automated tokens, 

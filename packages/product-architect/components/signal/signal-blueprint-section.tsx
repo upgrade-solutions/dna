@@ -1,29 +1,25 @@
 import { EntityRelationships } from "./entity-relationships"
 
-interface SemanticsBlueprintSectionProps {
+interface SignalBlueprintSectionProps {
   title?: string
   subtitle?: string
 }
 
-export function SemanticsBlueprintSection({ title, subtitle }: SemanticsBlueprintSectionProps) {
+export function SignalBlueprintSection({ title, subtitle }: SignalBlueprintSectionProps) {
   const isCompact = !!title
   return (
     <section className={`relative overflow-hidden ${isCompact ? 'py-0 px-0' : 'py-24 px-6'}`}>
       <div className="absolute inset-0 bg-gradient-to-b from-background via-cyan-950/10 to-background" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {title && (
-          <div className="text-center mb-8">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
-              {title}
-            </h2>
-            {subtitle && (
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-                {subtitle}
-              </p>
-            )}
-          </div>
-        )}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
+            {title || "Signal"}
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
+            {subtitle || "Establish event-driven architecture with semantic signals that trace data flows, dependency paths, and propagate changes across your interconnected system"}
+          </p>
+        </div>
 
         {/* Entity Relationships Visualization */}
         <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -90,7 +86,7 @@ export function SemanticsBlueprintSection({ title, subtitle }: SemanticsBlueprin
               <EntityRelationships />
             </div>
             <div className="absolute -top-4 -right-4 bg-cyan-500 text-slate-950 px-4 py-2 rounded-lg font-mono text-sm font-semibold shadow-lg">
-              RELATIONSHIPS
+              KNOWLEDGE GRAPH
             </div>
           </div>
         </div>

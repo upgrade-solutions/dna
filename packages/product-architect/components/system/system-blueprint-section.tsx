@@ -1,11 +1,11 @@
-import { ArchitectureBlueprint } from "./architecture-blueprint"
+import { ArchitectureBlueprint } from "../state/architecture-blueprint"
 
-interface OperationsBlueprintSectionProps {
+interface SystemBlueprintSectionProps {
   title?: string
   subtitle?: string
 }
 
-export function OperationsBlueprintSection({ title, subtitle }: OperationsBlueprintSectionProps) {
+export function SystemBlueprintSection({ title, subtitle }: SystemBlueprintSectionProps) {
   const isCompact = !!title
   return (
     <section className={`relative overflow-hidden ${isCompact ? 'py-0 px-0' : 'py-24 px-6'}`}>
@@ -13,18 +13,14 @@ export function OperationsBlueprintSection({ title, subtitle }: OperationsBluepr
       <div className="absolute inset-0 bg-gradient-to-b from-background via-purple-950/5 to-background" />
 
       <div className="max-w-7xl mx-auto relative">
-        {title && (
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
-              {title}
-            </h2>
-            {subtitle && (
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-                {subtitle}
-              </p>
-            )}
-          </div>
-        )}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
+            {title || "System"}
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
+            {subtitle || "Design resilient infrastructure with microservices, load balancing, and auto-scaling capabilities for your distributed systems"}
+          </p>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-8 items-start">
           {/* Blueprint visualization */}
