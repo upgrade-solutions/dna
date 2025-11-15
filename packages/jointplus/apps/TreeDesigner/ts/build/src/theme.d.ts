@@ -1,0 +1,9 @@
+export declare const MAX_LEVEL = 4;
+export declare const EL_WIDTH = 30;
+export declare const EL_HEIGHT = 30;
+export declare const LABEL_MARGIN = 5;
+export declare const STROKE_WIDTH = 1;
+export declare const LINE_HEIGHT = 16;
+export declare const BOUNDARY_PADDING = 10;
+export declare const PARENT_GAP = 30;
+export declare const SIBLING_GAP = 30;
