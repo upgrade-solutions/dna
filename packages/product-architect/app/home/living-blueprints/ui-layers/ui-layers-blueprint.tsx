@@ -3,9 +3,9 @@
 import { useState } from "react"
 import { SchemaDrivenForm } from "./schema-driven-form"
 import { DesignMode } from "./design-mode"
-import { BuildMode } from "./build-mode"
+import { BuildMode, type VersionStatus } from "./build-mode"
 import { RunModeSidebar, RunModeOverlay, createRunModeData, type RunLayer } from "./run-mode"
-import { formVersions } from "./form-versions"
+import { formVersions as initialFormVersions } from "./form-versions"
 
 type Mode = "design" | "build" | "run"
 
@@ -28,9 +28,16 @@ export function UILayersBlueprint() {
   })
   const [selectedVersion, setSelectedVersion] = useState<string>("v1.2.1")
   const [selectedRunLayer, setSelectedRunLayer] = useState<RunLayer>("featureFlags")
+  const [formVersions, setFormVersions] = useState(initialFormVersions)
 
   const currentSchema = formVersions.find((v) => v.version === selectedVersion)?.schema || formVersions[0].schema
   const runModeData = createRunModeData()
+
+  const handleStatusChange = (version: string, newStatus: VersionStatus) => {
+    setFormVersions((prev) =>
+      prev.map((v) => (v.version === version ? { ...v, status: newStatus } : v))
+    )
+  }
 
   // For Build and Run modes, all layers should be on
   const allLayersOn: LayerState = {
@@ -129,6 +136,7 @@ export function UILayersBlueprint() {
             formVersions={formVersions}
             selectedVersion={selectedVersion}
             onVersionChange={setSelectedVersion}
+            onStatusChange={handleStatusChange}
           />
         )}
 
@@ -142,7 +150,7 @@ export function UILayersBlueprint() {
         )}
 
         {/* Form Visualization Canvas */}
-        <div className="pl-60">
+        <div className={mode === "build" ? "pl-64" : "pl-60"}>
           <div className="max-w-md mx-auto w-full space-y-6 bg-slate-950 p-6 rounded-lg">
             {mode === "design" && <SchemaDrivenForm schema={currentSchema} layers={effectiveLayers} />}
             {mode === "build" && <SchemaDrivenForm schema={currentSchema} layers={effectiveLayers} hideAnnotations />}

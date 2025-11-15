@@ -6,6 +6,7 @@ export const formVersions: FormVersion[] = [
     version: "v1.2.1",
     label: "Fixed email validation",
     date: "2025-07-22",
+    status: "released",
     schema: {
       fields: [
         {
@@ -47,6 +48,7 @@ export const formVersions: FormVersion[] = [
     version: "v1.2.0",
     label: "Terms & Conditions",
     date: "2025-06-10",
+    status: "released",
     schema: {
       fields: [
         {
@@ -88,6 +90,7 @@ export const formVersions: FormVersion[] = [
     version: "v1.1.0",
     label: "Added Validation",
     date: "2025-03-22",
+    status: "deprecated",
     schema: {
       fields: [
         {
@@ -122,6 +125,7 @@ export const formVersions: FormVersion[] = [
     version: "v1.0.0",
     label: "Initial Release",
     date: "2025-01-15",
+    status: "deprecated",
     schema: {
       fields: [
         {
