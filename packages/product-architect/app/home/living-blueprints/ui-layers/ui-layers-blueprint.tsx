@@ -97,7 +97,7 @@ export function UILayersBlueprint() {
           <button
             key={key}
             onClick={() => setMode(key as Mode)}
-            className={`px-4 py-2 rounded-t border-b-2 transition-all ${
+            className={`px-4 py-2 border-b-2 transition-all ${
               mode === key
                 ? "border-blue-500 text-blue-300 bg-slate-800/50"
                 : "border-transparent text-slate-400 hover:text-slate-300 hover:bg-slate-800/30"
@@ -111,7 +111,7 @@ export function UILayersBlueprint() {
 
       {/* Form Visualization with Overlaid Controls */}
       <div 
-        className="relative bg-slate-950 border border-slate-700 rounded-lg p-8 min-h-[540px] flex flex-col justify-center"
+        className="relative bg-slate-950 border border-slate-700 p-8 min-h-[540px] flex flex-col justify-center"
         style={{
           backgroundImage: `
             linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
@@ -151,7 +151,7 @@ export function UILayersBlueprint() {
 
         {/* Form Visualization Canvas */}
         <div className={mode === "build" ? "pl-64" : "pl-60"}>
-          <div className="max-w-md mx-auto w-full space-y-6 bg-slate-950 p-6 rounded-lg">
+          <div className="max-w-md mx-auto w-full space-y-6 bg-slate-950 p-6 ">
             {mode === "design" && <SchemaDrivenForm schema={currentSchema} layers={effectiveLayers} />}
             {mode === "build" && <SchemaDrivenForm schema={currentSchema} layers={effectiveLayers} hideAnnotations />}
             {mode === "run" && (

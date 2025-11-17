@@ -19,7 +19,7 @@ interface DesignModeProps {
 
 export function DesignMode({ layers, toggleLayer, toggleLayerAll, cycleLayersOn }: DesignModeProps) {
   return (
-    <div className="absolute left-0 top-0 bottom-0 w-56 bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-sm border-r border-slate-700 rounded-l-lg p-4 flex flex-col">
+    <div className="absolute left-0 top-0 bottom-0 w-56 bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-sm border-r border-slate-700 p-4 flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <Layers className="w-4 h-4 mr-2 text-slate-300" />

@@ -3,48 +3,6 @@ import type { FormVersion } from "./build-mode"
 
 export const formVersions: FormVersion[] = [
   {
-    version: "v1.2.1",
-    label: "Fixed email validation",
-    date: "2025-07-22",
-    status: "released",
-    schema: {
-      fields: [
-        {
-          name: "name",
-          type: "text",
-          label: "Full Name",
-          placeholder: "Enter full name",
-          required: true,
-          defaultValue: "",
-          disabled: false,
-        },
-        {
-          name: "email",
-          type: "email",
-          label: "Email Address",
-          placeholder: "Enter email address",
-          required: true,
-          defaultValue: "",
-          disabled: false,
-          validation: {
-            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-          },
-        },
-        {
-          name: "agreeToTerms",
-          type: "checkbox",
-          label: "I agree to the terms and conditions",
-          defaultValue: false,
-        },
-      ],
-      submitButton: {
-        label: "Submit",
-        disabledUntil: "agreeToTerms",
-      },
-      onSubmit: (data) => console.log("Form submitted:", data),
-    },
-  },
-  {
     version: "v1.2.0",
     label: "Terms & Conditions",
     date: "2025-06-10",

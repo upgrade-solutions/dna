@@ -1,0 +1,15 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-net --allow-env --allow-read --allow-sys --watch src/main.ts",
+    "start": "deno run --allow-net --allow-env --allow-read src/main.ts"
+  },
+  "imports": {
+    "oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
+    "neogma": "npm:neogma@^1.14.1",
+    "zod": "npm:zod@^3.22.4"
+  },
+  "compilerOptions": {
+    "lib": ["deno.window"],
+    "strict": true
+  }
+}
