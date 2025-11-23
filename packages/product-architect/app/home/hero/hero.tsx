@@ -13,6 +13,9 @@ export function Hero() {
 
       <div className="container relative mx-auto px-4 py-24 sm:py-32 lg:py-40">
         <div className="mx-auto max-w-4xl text-center">
+          <div className="flex justify-center mb-6">
+            <img src="/icon" alt="" className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28" />
+          </div>
           <h1 className="mb-6 text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl text-balance">
             Product Architect
           </h1>

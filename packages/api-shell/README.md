@@ -493,7 +493,7 @@ Comprehensive documentation is available in the `docs/` folder:
 CONFIG_PATH=./config/openapi.yaml
 
 # Server binding
-HOSTNAME=127.0.0.1
+HOSTNAME=localhost
 PORT=3000
 
 # Enable configuration file watching
@@ -628,7 +628,7 @@ Ensure your OpenAPI YAML is valid. Use `openapi-generator` or similar tools to v
 ### Permission Denied
 
 ```
-error: Requires net access to "127.0.0.1:3000"
+error: Requires net access to "localhost:3000"
 ```
 
 Use `deno run --allow-net --allow-read --allow-env mod.ts`

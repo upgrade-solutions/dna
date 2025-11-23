@@ -2,7 +2,6 @@
 // Provides access to canonical JSON schemas via REST API
 
 import { Router } from "oak";
-import { readTextFile } from "std/fs/mod.ts";
 import { join } from "std/path/mod.ts";
 
 const schemasBaseDir = "../core/schemas";
@@ -61,7 +60,7 @@ export function createSchemasRouter(): Router {
             absolutePath &&
             absolutePath.startsWith(await Deno.realPath(schemasBaseDir))
           ) {
-            schemaContent = await readTextFile(filePath);
+            schemaContent = await Deno.readTextFile(filePath);
             break;
           }
         } catch {

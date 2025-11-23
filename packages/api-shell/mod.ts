@@ -24,7 +24,7 @@ import { createSchemasRouter } from "./core/routes/schemas.ts";
 const configPath =
   Deno.env.get("CONFIG_PATH") || "./config/openapi.yaml";
 const port = parseInt(Deno.env.get("PORT") || "3000");
-const hostname = Deno.env.get("HOSTNAME") || "127.0.0.1";
+const hostname = Deno.env.get("HOSTNAME") || "localhost";
 
 async function main() {
   console.log(`🧬 API Shell - Configuration-Driven API Server`);

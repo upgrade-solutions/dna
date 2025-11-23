@@ -111,7 +111,7 @@ export function UILayersBlueprint() {
 
       {/* Form Visualization with Overlaid Controls */}
       <div 
-        className="relative bg-slate-950 border border-slate-700 p-8 min-h-[540px] flex flex-col justify-center"
+        className="relative bg-slate-950 border border-slate-700 p-8 min-h-[340px] flex flex-col justify-center"
         style={{
           backgroundImage: `
             linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),

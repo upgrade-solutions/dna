@@ -418,9 +418,7 @@ paths:
       x-auth:
         role: admin
       x-access-control:
-        description: Only administrators can list all users
-        roles: ["admin"]
-        rules: []
+        $ref: '#/components/x-policies/user:list'
       x-feature-flags:
         - $ref: '#/components/x-flags/advanced-user-features'
 
@@ -477,9 +475,7 @@ paths:
         resource: users
         operation: create
       x-access-control:
-        description: Public endpoint for user registration
-        roles: []
-        rules: []
+        $ref: '#/components/x-policies/user:create'
 
   /users/{id}:
     get:
@@ -532,10 +528,7 @@ paths:
         resource: users
         operation: read
       x-access-control:
-        description: Users can view their own profile or admins can view any profile
-        roles: ["admin"]
-        rules:
-          - subject.id == resource.id
+        $ref: '#/components/x-policies/user:read'
 
     put:
       summary: Update User
@@ -594,10 +587,7 @@ paths:
         resource: users
         operation: update
       x-access-control:
-        description: Users can update their own profile or admins can update any profile
-        roles: ["admin"]
-        rules:
-          - subject.id == resource.id
+        $ref: '#/components/x-policies/user:update'
 
     delete:
       summary: Delete User
@@ -636,9 +626,7 @@ paths:
         resource: users
         operation: delete
       x-access-control:
-        description: Only administrators can delete users
-        roles: ["admin"]
-        rules: []
+        $ref: '#/components/x-policies/user:delete'
 
 components:
   schemas:

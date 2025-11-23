@@ -1,12 +1,11 @@
-import type { FormSchema } from "./schema-driven-form"
 import type { FormVersion } from "./build-mode"
 
 export const formVersions: FormVersion[] = [
   {
     version: "v1.2.0",
     label: "Terms & Conditions",
-    date: "2025-06-10",
-    status: "released",
+    date: "2025-02-26",
+    status: "deployed",
     schema: {
       fields: [
         {
@@ -47,8 +46,8 @@ export const formVersions: FormVersion[] = [
   {
     version: "v1.1.0",
     label: "Added Validation",
-    date: "2025-03-22",
-    status: "deprecated",
+    date: "2025-02-11",
+    status: "released",
     schema: {
       fields: [
         {
