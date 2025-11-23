@@ -847,7 +847,7 @@ components:
         - email
         - password
 
-    # Metadata schemas
+  securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer

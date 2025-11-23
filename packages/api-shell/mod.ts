@@ -8,6 +8,7 @@ import { SchemaValidator } from "./core/validator.ts";
 import { DynamicRouter } from "./core/router.ts";
 import { validateSpecContracts } from "./core/spec_contract.ts";
 import { createStructuredLoggingMiddleware } from "./core/middleware/structured-logging.ts";
+import { createJWTMiddleware } from "./core/middleware/jwt.ts";
 
 // Import handlers
 import { handleCrud } from "./core/handlers/crud.ts";
@@ -98,6 +99,11 @@ async function main() {
   });
 
   app.use(loggingMiddleware.middleware());
+
+  // Add JWT authentication middleware (before routes)
+  const jwtMiddleware = createJWTMiddleware({ required: false });
+  app.use(jwtMiddleware);
+  console.log(`🔐 JWT authentication middleware enabled`);
 
   // Optionally add secondary JSON logging for redundancy
   if (Deno.env.get("ENABLE_SECONDARY_LOGGING") === "true") {
