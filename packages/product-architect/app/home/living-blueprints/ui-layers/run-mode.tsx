@@ -2,13 +2,18 @@
 
 import { Zap, Shield, Activity, Flag, type LucideIcon } from "lucide-react"
 
-export type RunLayer = "featureFlags" | "analytics" | "auditLog" | "accessControl"
+export type RunLayer = "featureFlags" | "accessControl" | "analytics" | "auditLog"
 
 export interface RunModeData {
   featureFlags: {
     icon: LucideIcon
     label: string
     data: Array<{ flag: string; enabled: boolean; fieldName?: string }>
+  }
+  accessControl: {
+    icon: LucideIcon
+    label: string
+    data: Array<{ role: string; canView: boolean; canEdit: boolean }>
   }
   analytics: {
     icon: LucideIcon
@@ -19,11 +24,6 @@ export interface RunModeData {
     icon: LucideIcon
     label: string
     data: Array<{ timestamp: string; user: string; action: string; result: string; fieldName?: string }>
-  }
-  accessControl: {
-    icon: LucideIcon
-    label: string
-    data: Array<{ role: string; canView: boolean; canEdit: boolean }>
   }
 }
 
@@ -106,6 +106,20 @@ export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature }
             </button>
           </div>
         ))}
+
+        {layer === "accessControl" && 'data' in data && data.data.map((item: any, i: number) => (
+          <div key={i} className="p-2 bg-slate-800/50 rounded">
+            <div className="font-semibold text-slate-300 mb-1">{item.role}</div>
+            <div className="flex gap-3 text-xs">
+              <span className={item.canView ? "text-blue-400" : "text-red-400"}>
+                View: {item.canView ? "✓" : "✗"}
+              </span>
+              <span className={item.canEdit ? "text-blue-400" : "text-red-400"}>
+                Edit: {item.canEdit ? "✓" : "✗"}
+              </span>
+            </div>
+          </div>
+        ))}
         
         {layer === "analytics" && filteredData.map((item: any, i: number) => (
           <div key={i} className="flex justify-between items-center p-2 bg-slate-800/50 rounded">
@@ -125,20 +139,6 @@ export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature }
             <div className="text-slate-400">{item.user} • {item.action}</div>
           </div>
         ))}
-        
-        {layer === "accessControl" && 'data' in data && data.data.map((item: any, i: number) => (
-          <div key={i} className="p-2 bg-slate-800/50 rounded">
-            <div className="font-semibold text-slate-300 mb-1">{item.role}</div>
-            <div className="flex gap-3 text-xs">
-              <span className={item.canView ? "text-blue-400" : "text-red-400"}>
-                View: {item.canView ? "✓" : "✗"}
-              </span>
-              <span className={item.canEdit ? "text-blue-400" : "text-red-400"}>
-                Edit: {item.canEdit ? "✓" : "✗"}
-              </span>
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   )
@@ -152,6 +152,13 @@ export const createRunModeData = (): RunModeData => ({
       { flag: "name_field", enabled: true, fieldName: "name" },
       { flag: "email_field", enabled: true, fieldName: "email" },
       { flag: "terms_checkbox", enabled: true, fieldName: "agreeToTerms" },
+    ],
+  },
+  accessControl: {
+    icon: Shield,
+    label: "Access Control",
+    data: [
+      { role: "Guest", canView: true, canEdit: true },
     ],
   },
   analytics: {
@@ -171,13 +178,6 @@ export const createRunModeData = (): RunModeData => ({
       { timestamp: "2025-11-14 14:31:28", user: "user@example.com", action: "email_updated", result: "success", fieldName: "email" },
       { timestamp: "2025-11-14 14:31:29", user: "user@example.com", action: "email_validated", result: "success", fieldName: "email" },
       { timestamp: "2025-11-14 14:31:45", user: "user@example.com", action: "agreeToTerms_checked", result: "success", fieldName: "agreeToTerms" },
-    ],
-  },
-  accessControl: {
-    icon: Shield,
-    label: "Access Control",
-    data: [
-      { role: "Guest", canView: true, canEdit: true },
     ],
   },
 })
