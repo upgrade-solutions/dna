@@ -56,9 +56,16 @@ interface SchemaDrivenFormProps {
     style: boolean
   }
   hideAnnotations?: boolean
+  runMode?: {
+    enabled: boolean
+    selectedLayer: string
+    onHotspotClick?: (fieldName: string) => void
+    hotspots?: string[]
+    disabledFields?: string[]
+  }
 }
 
-export function SchemaDrivenForm({ schema, layers, hideAnnotations = false }: SchemaDrivenFormProps) {
+export function SchemaDrivenForm({ schema, layers, hideAnnotations = false, runMode }: SchemaDrivenFormProps) {
   const defaultValues = schema.fields.reduce((acc, field) => {
     acc[field.name] = field.defaultValue ?? (field.type === "checkbox" ? false : "")
     return acc
@@ -82,6 +89,9 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false }: Sc
     ? !formValues[schema.submitButton.disabledUntil]
     : false
 
+  // In run mode, don't apply the disabled logic for submit button
+  const finalSubmitDisabled = runMode?.enabled ? false : isSubmitDisabled
+
   const showLabels = !layers || layers.structure
   const useSchemaLabels = !layers || layers.schema
   const applyStateLogic = !layers || layers.state
@@ -103,6 +113,8 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false }: Sc
         >
           {schema.fields.map((fieldSchema) => {
             const isCheckbox = fieldSchema.type === "checkbox"
+            const isHotspot = runMode?.enabled && runMode.hotspots?.includes(fieldSchema.name)
+            const isDisabledByFeatureFlag = runMode?.enabled && runMode.disabledFields?.includes(fieldSchema.name)
             
             return (
               <FormField
@@ -136,16 +148,22 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false }: Sc
                   }),
                 }}
                 render={({ field, fieldState }) => (
-                  <FormItem className={isCheckbox ? "mb-6" : "mb-6"}>
+                  <FormItem 
+                    className={`${isCheckbox ? "mb-6" : "mb-6"} ${isHotspot ? "relative cursor-pointer group" : ""} ${isDisabledByFeatureFlag ? "opacity-50" : ""}`}
+                    onClick={() => isHotspot && !isDisabledByFeatureFlag && runMode?.onHotspotClick?.(fieldSchema.name)}
+                  >
                     {isCheckbox ? (
                       <div className="space-y-2">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 relative">
+                          {isHotspot && (
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse group-hover:scale-125 transition-transform z-10" />
+                          )}
                           <FormControl>
                             <Checkbox
                               id={fieldSchema.name}
                               checked={field.value}
                               onCheckedChange={field.onChange}
-                              disabled={applyStateLogic && fieldSchema.disabled}
+                              disabled={applyStateLogic && (fieldSchema.disabled || isDisabledByFeatureFlag)}
                               className={
                                 schema.style?.input ||
                                 `w-4 h-4 border transition-all cursor-pointer ${
@@ -167,9 +185,24 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false }: Sc
                               }
                             >
                               <span className="transition-all duration-500">
-                                {useSchemaLabels
-                                  ? fieldSchema.label
-                                  : `Checkbox field`}
+                                {useSchemaLabels ? (
+                                  fieldSchema.labelLink ? (
+                                    <>
+                                      I agree to the{" "}
+                                      <a 
+                                        href={fieldSchema.labelLink.href} 
+                                        className="text-blue-400 underline decoration-blue-400 hover:text-blue-300 hover:decoration-blue-300"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        {fieldSchema.labelLink.text}
+                                      </a>
+                                    </>
+                                  ) : (
+                                    fieldSchema.label
+                                  )
+                                ) : (
+                                  `Checkbox field`
+                                )}
                               </span>
                             </FormLabel>
                           )}
@@ -216,15 +249,19 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false }: Sc
                           </FormLabel>
                         )}
                         <FormControl>
-                          <Input
-                            type={fieldSchema.type}
-                            placeholder={
-                              useSchemaLabels ? fieldSchema.placeholder : ""
-                            }
-                            disabled={applyStateLogic && fieldSchema.disabled}
-                            className={
-                              schema.style?.input ||
-                              `w-full px-4 py-2 rounded border transition-all ${
+                          <div className="relative">
+                            {isHotspot && (
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse group-hover:scale-125 transition-transform z-10" />
+                            )}
+                            <Input
+                              type={fieldSchema.type}
+                              placeholder={
+                                useSchemaLabels ? fieldSchema.placeholder : ""
+                              }
+                              disabled={applyStateLogic && (fieldSchema.disabled || isDisabledByFeatureFlag)}
+                              className={
+                                schema.style?.input ||
+                                `w-full px-4 py-2 rounded border transition-all ${isHotspot ? "ring-2 ring-blue-500/30 hover:ring-blue-500/50 " : ""}${
                                 applyStyle
                                   ? `bg-slate-800 text-slate-100 border-blue-500 focus:border-blue-500 focus:outline-blue-500 rounded-lg ${
                                       fieldState.error
@@ -242,8 +279,9 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false }: Sc
                                     }`
                               } disabled:cursor-not-allowed`
                             }
-                            {...field}
-                          />
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
                         {applyStateLogic && fieldState.error && (
                           <FormMessage
@@ -264,18 +302,18 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false }: Sc
           {schema.submitButton && (
             <Button
               type="submit"
-              disabled={isSubmitDisabled}
+              disabled={finalSubmitDisabled}
               className={
                 schema.style?.button ||
                 `w-full py-3 font-semibold transition-all ${
                   applyStyle
                     ? `${
-                        isSubmitDisabled
+                        finalSubmitDisabled
                           ? "bg-slate-700 text-slate-500 cursor-not-allowed rounded-lg"
                           : "bg-blue-500 text-white hover:bg-blue-600 active:scale-95 rounded-lg"
                       }`
                     : `${
-                        isSubmitDisabled
+                        finalSubmitDisabled
                           ? "bg-slate-800 text-slate-500 cursor-not-allowed"
                           : "bg-slate-700 text-slate-100 hover:bg-slate-600 active:scale-95"
                       }`

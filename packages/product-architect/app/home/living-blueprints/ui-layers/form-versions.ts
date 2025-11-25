@@ -33,6 +33,7 @@ export const formVersions: FormVersion[] = [
           name: "agreeToTerms",
           type: "checkbox",
           label: "I agree to the terms and conditions",
+          labelLink: { text: "terms and conditions", href: "#" },
           defaultValue: false,
         },
       ],

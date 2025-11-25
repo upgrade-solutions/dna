@@ -28,10 +28,50 @@ export function UILayersBlueprint() {
   })
   const [selectedVersion, setSelectedVersion] = useState<string>("v1.2.1")
   const [selectedRunLayer, setSelectedRunLayer] = useState<RunLayer>("featureFlags")
+  const [selectedHotspot, setSelectedHotspot] = useState<string | null>(null)
   const [formVersions, setFormVersions] = useState(initialFormVersions)
+  const [runModeData, setRunModeData] = useState(createRunModeData())
 
   const currentSchema = formVersions.find((v) => v.version === selectedVersion)?.schema || formVersions[0].schema
-  const runModeData = createRunModeData()
+
+  // Get hotspots based on selected layer
+  const getHotspotsForLayer = (layer: RunLayer): string[] => {
+    if (!('data' in runModeData[layer])) return []
+    const data = runModeData[layer].data as any[]
+    return [...new Set(data.map((item: any) => item.fieldName).filter(Boolean))]
+  }
+
+  // Get disabled fields based on feature flags
+  const getDisabledFields = (): string[] => {
+    if (mode !== "run") return []
+    return runModeData.featureFlags.data
+      .filter((flag) => !flag.enabled && flag.fieldName)
+      .map((flag) => flag.fieldName!)
+  }
+
+  const currentHotspots = mode === "run" ? getHotspotsForLayer(selectedRunLayer) : []
+  const disabledFields = getDisabledFields()
+
+  const handleHotspotClick = (fieldName: string) => {
+    setSelectedHotspot(fieldName)
+  }
+
+  const handleLayerChange = (layer: RunLayer) => {
+    setSelectedRunLayer(layer)
+    setSelectedHotspot(null) // Reset hotspot when changing layers
+  }
+
+  const handleToggleFeature = (flag: string) => {
+    setRunModeData((prev) => ({
+      ...prev,
+      featureFlags: {
+        ...prev.featureFlags,
+        data: prev.featureFlags.data.map((item) =>
+          item.flag === flag ? { ...item, enabled: !item.enabled } : item
+        ),
+      },
+    }))
+  }
 
   const handleStatusChange = (version: string, newStatus: VersionStatus) => {
     setFormVersions((prev) =>
@@ -145,23 +185,41 @@ export function UILayersBlueprint() {
           <RunModeSidebar
             runModeData={runModeData}
             selectedRunLayer={selectedRunLayer}
-            onLayerChange={setSelectedRunLayer}
+            onLayerChange={handleLayerChange}
           />
         )}
 
         {/* Form Visualization Canvas */}
-        <div className={mode === "build" ? "pl-64" : "pl-60"}>
+        <div className={mode === "build" ? "pl-64" : mode === "run" ? "pl-60 pr-56" : "pl-60"}>
           <div className="max-w-md mx-auto w-full space-y-6 bg-slate-950 p-6 ">
             {mode === "design" && <SchemaDrivenForm schema={currentSchema} layers={effectiveLayers} />}
             {mode === "build" && <SchemaDrivenForm schema={currentSchema} layers={effectiveLayers} hideAnnotations />}
             {mode === "run" && (
-              <>
-                <SchemaDrivenForm schema={currentSchema} layers={effectiveLayers} hideAnnotations />
-                <RunModeOverlay layer={selectedRunLayer} data={runModeData[selectedRunLayer]} />
-              </>
+              <SchemaDrivenForm 
+                schema={currentSchema} 
+                layers={effectiveLayers} 
+                hideAnnotations 
+                runMode={{
+                  enabled: true,
+                  selectedLayer: selectedRunLayer,
+                  onHotspotClick: handleHotspotClick,
+                  hotspots: currentHotspots,
+                  disabledFields: disabledFields
+                }}
+              />
             )}
           </div>
         </div>
+        
+        {/* Run Mode - Right Sidebar for Data */}
+        {mode === "run" && (
+          <RunModeOverlay 
+            layer={selectedRunLayer} 
+            data={runModeData[selectedRunLayer]} 
+            selectedHotspot={selectedHotspot}
+            onToggleFeature={handleToggleFeature}
+          />
+        )}
       </div>
     </div>
   )
