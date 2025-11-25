@@ -13,7 +13,7 @@ export interface RunModeData {
   accessControl: {
     icon: LucideIcon
     label: string
-    data: Array<{ role: string; canView: boolean; canEdit: boolean }>
+    data: Array<{ role: string; canView: { enabled: boolean }; canEdit: { enabled: boolean } }>
   }
   analytics: {
     icon: LucideIcon
@@ -38,6 +38,7 @@ interface RunModeOverlayProps {
   data: RunModeData[RunLayer]
   selectedHotspot: string | null
   onToggleFeature?: (flag: string) => void
+  onTogglePermission?: (role: string, permission: 'view' | 'edit') => void
 }
 
 export function RunModeSidebar({ runModeData, selectedRunLayer, onLayerChange }: RunModeSidebarProps) {
@@ -70,7 +71,7 @@ export function RunModeSidebar({ runModeData, selectedRunLayer, onLayerChange }:
   )
 }
 
-export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature }: RunModeOverlayProps) {
+export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature, onTogglePermission }: RunModeOverlayProps) {
   const Icon = data.icon
   
   // Filter data based on selected hotspot
@@ -108,15 +109,39 @@ export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature }
         ))}
 
         {layer === "accessControl" && 'data' in data && data.data.map((item: any, i: number) => (
-          <div key={i} className="p-2 bg-slate-800/50 rounded">
-            <div className="font-semibold text-slate-300 mb-1">{item.role}</div>
-            <div className="flex gap-3 text-xs">
-              <span className={item.canView ? "text-blue-400" : "text-red-400"}>
-                View: {item.canView ? "✓" : "✗"}
-              </span>
-              <span className={item.canEdit ? "text-blue-400" : "text-red-400"}>
-                Edit: {item.canEdit ? "✓" : "✗"}
-              </span>
+          <div key={i} className="p-2 bg-slate-800/50 rounded space-y-2">
+            <div className="font-semibold text-slate-300 mb-2">{item.role}</div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400 text-xs">View</span>
+                <button
+                  onClick={() => onTogglePermission?.(item.role, 'view')}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                    item.canView.enabled ? "bg-blue-500" : "bg-slate-600"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                      item.canView.enabled ? "translate-x-5" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400 text-xs">Edit</span>
+                <button
+                  onClick={() => onTogglePermission?.(item.role, 'edit')}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                    item.canEdit.enabled ? "bg-blue-500" : "bg-slate-600"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                      item.canEdit.enabled ? "translate-x-5" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -158,7 +183,7 @@ export const createRunModeData = (): RunModeData => ({
     icon: Shield,
     label: "Access Control",
     data: [
-      { role: "Guest", canView: true, canEdit: true },
+      { role: "Guest", canView: { enabled: true }, canEdit: { enabled: true } },
     ],
   },
   analytics: {
@@ -181,3 +206,15 @@ export const createRunModeData = (): RunModeData => ({
     ],
   },
 })
+
+// Helper to check if view permission is enabled for a role
+export function canViewForRole(runModeData: RunModeData, role: string = "Guest"): boolean {
+  const roleData = runModeData.accessControl.data.find(r => r.role === role)
+  return roleData?.canView.enabled ?? true
+}
+
+// Helper to check if edit permission is enabled for a role
+export function canEditForRole(runModeData: RunModeData, role: string = "Guest"): boolean {
+  const roleData = runModeData.accessControl.data.find(r => r.role === role)
+  return roleData?.canEdit.enabled ?? true
+}

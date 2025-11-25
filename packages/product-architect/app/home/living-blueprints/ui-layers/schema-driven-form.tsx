@@ -62,6 +62,10 @@ interface SchemaDrivenFormProps {
     onHotspotClick?: (fieldName: string) => void
     hotspots?: string[]
     disabledFields?: string[]
+    accessControl?: {
+      canView: boolean
+      canEdit: boolean
+    }
   }
 }
 
@@ -89,14 +93,26 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false, runM
     ? !formValues[schema.submitButton.disabledUntil]
     : false
 
-  // In run mode, don't apply the disabled logic for submit button
-  const finalSubmitDisabled = runMode?.enabled ? false : isSubmitDisabled
+  // In run mode, check access control for edit permission and feature flag logic
+  const finalSubmitDisabled = runMode?.enabled 
+    ? (runMode.accessControl && !runMode.accessControl.canEdit) || false
+    : isSubmitDisabled
 
   const showLabels = !layers || layers.structure
   const useSchemaLabels = !layers || layers.schema
   const applyStateLogic = !layers || layers.state
   const showSignals = !hideAnnotations && layers?.signal
   const applyStyle = !layers || layers.style
+
+  // If canView is false in run mode, hide the entire form
+  if (runMode?.enabled && runMode.accessControl && !runMode.accessControl.canView) {
+    return (
+      <div className="border-2 border-red-500/50 bg-slate-900/80 rounded-2xl p-8 text-center">
+        <div className="text-red-400 font-mono text-sm mb-2">Access Denied</div>
+        <div className="text-slate-400 text-xs">You do not have permission to view this form</div>
+      </div>
+    )
+  }
 
   return (
     <Form {...form}>
@@ -115,6 +131,7 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false, runM
             const isCheckbox = fieldSchema.type === "checkbox"
             const isHotspot = runMode?.enabled && runMode.hotspots?.includes(fieldSchema.name)
             const isDisabledByFeatureFlag = runMode?.enabled && runMode.disabledFields?.includes(fieldSchema.name)
+            const isReadonlyByAccessControl = runMode?.enabled && runMode.accessControl && !runMode.accessControl.canEdit
             
             return (
               <FormField
@@ -149,7 +166,7 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false, runM
                 }}
                 render={({ field, fieldState }) => (
                   <FormItem 
-                    className={`${isCheckbox ? "mb-6" : "mb-6"} ${isHotspot ? "relative cursor-pointer group" : ""} ${isDisabledByFeatureFlag ? "opacity-50" : ""}`}
+                    className={`${isCheckbox ? "mb-6" : "mb-6"} ${isHotspot ? "relative cursor-pointer group" : ""} ${isDisabledByFeatureFlag ? "opacity-50" : ""} ${isReadonlyByAccessControl ? "opacity-60" : ""}`}
                     onClick={() => isHotspot && !isDisabledByFeatureFlag && runMode?.onHotspotClick?.(fieldSchema.name)}
                   >
                     {isCheckbox ? (
@@ -163,7 +180,7 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false, runM
                               id={fieldSchema.name}
                               checked={field.value}
                               onCheckedChange={field.onChange}
-                              disabled={applyStateLogic && (fieldSchema.disabled || isDisabledByFeatureFlag)}
+                              disabled={applyStateLogic && (fieldSchema.disabled || isDisabledByFeatureFlag || isReadonlyByAccessControl)}
                               className={
                                 schema.style?.input ||
                                 `w-4 h-4 border transition-all cursor-pointer ${
@@ -259,6 +276,7 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false, runM
                                 useSchemaLabels ? fieldSchema.placeholder : ""
                               }
                               disabled={applyStateLogic && (fieldSchema.disabled || isDisabledByFeatureFlag)}
+                              readOnly={isReadonlyByAccessControl}
                               className={
                                 schema.style?.input ||
                                 `w-full px-4 py-2 rounded border transition-all ${isHotspot ? "ring-2 ring-blue-500/30 hover:ring-blue-500/50 " : ""}${
@@ -268,16 +286,16 @@ export function SchemaDrivenForm({ schema, layers, hideAnnotations = false, runM
                                         ? "border-red-500 outline-red-500"
                                         : ""
                                     } ${
-                                      fieldSchema.disabled ? "opacity-50" : ""
+                                      fieldSchema.disabled || isReadonlyByAccessControl ? "opacity-50" : ""
                                     }`
                                   : `bg-slate-900 text-slate-300 border-slate-700 rounded ${
                                       fieldState.error
                                         ? "border-red-500 outline-red-500"
                                         : ""
                                     } ${
-                                      fieldSchema.disabled ? "opacity-50" : ""
+                                      fieldSchema.disabled || isReadonlyByAccessControl ? "opacity-50" : ""
                                     }`
-                              } disabled:cursor-not-allowed`
+                              } ${isReadonlyByAccessControl ? "cursor-not-allowed" : ""} disabled:cursor-not-allowed`
                             }
                               {...field}
                             />

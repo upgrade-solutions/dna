@@ -49,8 +49,19 @@ export function UILayersBlueprint() {
       .map((flag) => flag.fieldName!)
   }
 
+  // Get access control status
+  const getAccessControlStatus = () => {
+    if (mode !== "run") return { canView: true, canEdit: true }
+    const guestRole = runModeData.accessControl.data.find(r => r.role === "Guest")
+    return {
+      canView: guestRole?.canView.enabled ?? true,
+      canEdit: guestRole?.canEdit.enabled ?? true,
+    }
+  }
+
   const currentHotspots = mode === "run" ? getHotspotsForLayer(selectedRunLayer) : []
   const disabledFields = getDisabledFields()
+  const accessControl = getAccessControlStatus()
 
   const handleHotspotClick = (fieldName: string) => {
     setSelectedHotspot(fieldName)
@@ -68,6 +79,25 @@ export function UILayersBlueprint() {
         ...prev.featureFlags,
         data: prev.featureFlags.data.map((item) =>
           item.flag === flag ? { ...item, enabled: !item.enabled } : item
+        ),
+      },
+    }))
+  }
+
+  const handleTogglePermission = (role: string, permission: 'view' | 'edit') => {
+    setRunModeData((prev) => ({
+      ...prev,
+      accessControl: {
+        ...prev.accessControl,
+        data: prev.accessControl.data.map((item) =>
+          item.role === role
+            ? {
+                ...item,
+                [permission === 'view' ? 'canView' : 'canEdit']: {
+                  enabled: !item[permission === 'view' ? 'canView' : 'canEdit'].enabled,
+                },
+              }
+            : item
         ),
       },
     }))
@@ -204,7 +234,8 @@ export function UILayersBlueprint() {
                   selectedLayer: selectedRunLayer,
                   onHotspotClick: handleHotspotClick,
                   hotspots: currentHotspots,
-                  disabledFields: disabledFields
+                  disabledFields: disabledFields,
+                  accessControl: accessControl
                 }}
               />
             )}
@@ -218,6 +249,7 @@ export function UILayersBlueprint() {
             data={runModeData[selectedRunLayer]} 
             selectedHotspot={selectedHotspot}
             onToggleFeature={handleToggleFeature}
+            onTogglePermission={handleTogglePermission}
           />
         )}
       </div>
