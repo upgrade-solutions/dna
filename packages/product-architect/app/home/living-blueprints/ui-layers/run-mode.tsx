@@ -18,7 +18,7 @@ export interface RunModeData {
   analytics: {
     icon: LucideIcon
     label: string
-    data: Array<{ action: string; actionType: string; count: number; fieldName?: string }>
+    data: Array<{ action: string; actionType: string; count: number; fieldName?: string; timeframe?: string }>
   }
   auditLog: {
     icon: LucideIcon
@@ -39,6 +39,8 @@ interface RunModeOverlayProps {
   selectedHotspot: string | null
   onToggleFeature?: (flag: string) => void
   onTogglePermission?: (role: string, permission: 'view' | 'edit') => void
+  selectedTimeframe?: string
+  onTimeframeChange?: (timeframe: string) => void
 }
 
 export function RunModeSidebar({ runModeData, selectedRunLayer, onLayerChange }: RunModeSidebarProps) {
@@ -71,7 +73,7 @@ export function RunModeSidebar({ runModeData, selectedRunLayer, onLayerChange }:
   )
 }
 
-export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature, onTogglePermission }: RunModeOverlayProps) {
+export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature, onTogglePermission, selectedTimeframe = "last week", onTimeframeChange }: RunModeOverlayProps) {
   const Icon = data.icon
   
   // Filter data based on selected hotspot
@@ -88,6 +90,20 @@ export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature, 
           <span className="ml-auto text-xs text-slate-400">• {selectedHotspot}</span>
         )}
       </div>
+      
+      {/* Analytics Timeframe Selector */}
+      {layer === "analytics" && onTimeframeChange && (
+        <div className="mb-3">
+          <select
+            value={selectedTimeframe}
+            onChange={(e) => onTimeframeChange(e.target.value)}
+            className="w-full px-2 py-1.5 text-xs font-mono bg-slate-800 border border-slate-600 rounded text-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer hover:bg-slate-750 transition-colors"
+          >
+            <option value="last week" className="bg-slate-800 text-slate-300 py-1">Last Week</option>
+            <option value="last month" className="bg-slate-800 text-slate-300 py-1">Last Month</option>
+          </select>
+        </div>
+      )}
       
       <div className="space-y-2 text-xs font-mono flex-1 overflow-y-auto">
         {layer === "featureFlags" && filteredData.map((item: any, i: number) => (
@@ -190,9 +206,12 @@ export const createRunModeData = (): RunModeData => ({
     icon: Activity,
     label: "User Analytics",
     data: [
-      { action: "name", actionType: "entered", count: 2345, fieldName: "name" },
-      { action: "email", actionType: "entered", count: 2245, fieldName: "email" },
-      { action: "agreeToTerms", actionType: "checked", count: 1098, fieldName: "agreeToTerms" },
+      { action: "name", actionType: "entered", count: 2345, fieldName: "name", timeframe: "last month" },
+      { action: "email", actionType: "entered", count: 2245, fieldName: "email", timeframe: "last month" },
+      { action: "agreeToTerms", actionType: "checked", count: 1098, fieldName: "agreeToTerms", timeframe: "last month" },
+      { action: "name", actionType: "entered", count: 587, fieldName: "name", timeframe: "last week" },
+      { action: "email", actionType: "entered", count: 543, fieldName: "email", timeframe: "last week" },
+      { action: "agreeToTerms", actionType: "checked", count: 267, fieldName: "agreeToTerms", timeframe: "last week" },
     ],
   },
   auditLog: {

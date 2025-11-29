@@ -29,16 +29,33 @@ export function UILayersBlueprint() {
   const [selectedVersion, setSelectedVersion] = useState<string>("v1.2.1")
   const [selectedRunLayer, setSelectedRunLayer] = useState<RunLayer>("featureFlags")
   const [selectedHotspot, setSelectedHotspot] = useState<string | null>(null)
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>("last week")
   const [formVersions, setFormVersions] = useState(initialFormVersions)
   const [runModeData, setRunModeData] = useState(createRunModeData())
 
   const currentSchema = formVersions.find((v) => v.version === selectedVersion)?.schema || formVersions[0].schema
 
+  // Get filtered run mode data based on timeframe selection
+  const getFilteredRunModeData = () => {
+    if (selectedRunLayer !== "analytics") return runModeData
+    
+    return {
+      ...runModeData,
+      analytics: {
+        ...runModeData.analytics,
+        data: runModeData.analytics.data.filter((item: any) => item.timeframe === selectedTimeframe)
+      }
+    }
+  }
+
+  const filteredRunModeData = getFilteredRunModeData()
+
   // Get hotspots based on selected layer
   const getHotspotsForLayer = (layer: RunLayer): string[] => {
-    if (!('data' in runModeData[layer])) return []
-    const data = runModeData[layer].data as any[]
-    return [...new Set(data.map((item: any) => item.fieldName).filter(Boolean))]
+    const data = filteredRunModeData[layer]
+    if (!('data' in data)) return []
+    const dataArray = data.data as any[]
+    return [...new Set(dataArray.map((item: any) => item.fieldName).filter(Boolean))]
   }
 
   // Get disabled fields based on feature flags
@@ -246,10 +263,12 @@ export function UILayersBlueprint() {
         {mode === "run" && (
           <RunModeOverlay 
             layer={selectedRunLayer} 
-            data={runModeData[selectedRunLayer]} 
+            data={filteredRunModeData[selectedRunLayer]} 
             selectedHotspot={selectedHotspot}
             onToggleFeature={handleToggleFeature}
             onTogglePermission={handleTogglePermission}
+            selectedTimeframe={selectedTimeframe}
+            onTimeframeChange={setSelectedTimeframe}
           />
         )}
       </div>
