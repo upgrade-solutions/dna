@@ -22,20 +22,20 @@ export function DesignMode({ layers, toggleLayer, toggleLayerAll, cycleLayersOn 
     <div className="absolute left-0 top-0 bottom-0 w-56 bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-sm border-r border-slate-700 p-4 flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
-          <Layers className="w-4 h-4 mr-2 text-slate-300" />
-          <h3 className="text-sm font-mono text-slate-300">LAYERS</h3>
+          <Layers className="w-4 h-4 mr-2 text-slate-200" />
+          <h3 className="text-sm font-mono text-slate-100">LAYERS</h3>
         </div>
         <div className="flex gap-1">
           <button
             onClick={cycleLayersOn}
-            className="text-xs font-mono px-2 py-1 bg-blue-500 hover:bg-blue-600 rounded text-white transition-colors"
+            className="text-xs font-mono px-2 py-1 bg-blue-400 hover:bg-blue-500 rounded text-white transition-colors"
             title="Cycle through layers"
           >
             Cycle
           </button>
           <button
             onClick={toggleLayerAll}
-            className="text-xs font-mono px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-slate-300 transition-colors"
+            className="text-xs font-mono px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-slate-100 transition-colors"
           >
             {Object.values(layers).every((v) => v) ? "Reset" : "All"}
           </button>
@@ -56,8 +56,8 @@ export function DesignMode({ layers, toggleLayer, toggleLayerAll, cycleLayersOn 
             disabled={key === "structure"}
             className={`relative w-full p-3 rounded border transition-all duration-500 text-left text-xs ${
               layers[key as keyof LayerState]
-                ? "bg-blue-900/30 border-blue-500/50 text-blue-300"
-                : "bg-slate-800/40 border-slate-700 text-slate-500 hover:bg-slate-800/60"
+                ? "bg-blue-900/40 border-blue-400 text-blue-200"
+                : "bg-slate-800/40 border-slate-600 text-slate-300 hover:bg-slate-800/60 hover:border-slate-500"
             } ${key === "structure" ? "cursor-not-allowed opacity-75" : ""}`}
           >
             <div className="flex items-start gap-2">

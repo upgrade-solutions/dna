@@ -117,5 +117,4 @@ export const APIExample: React.FC = () => {
   );
 };
 
-// Maintain backwards compatibility with the old name
-export const TRPCExample = APIExample;
+

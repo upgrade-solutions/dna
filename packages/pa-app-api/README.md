@@ -124,6 +124,12 @@ const updateResponse = await fetch(`http://localhost:3000/api/users/${user.id}`,
 const updatedUser = await updateResponse.json();
 
 // Delete user
+const deleteResponse = await fetch(`http://localhost:3000/api/users/${user.id}`, {
+  method: 'DELETE',
+});
+const deleteResult = await deleteResponse.json();
+```
+
 ## Development
 
 To add new models:
@@ -131,11 +137,6 @@ To add new models:
 1. Create a model in `src/models/` with Zod schema and Neogma configuration
 2. Create a router in `src/routers/` with Oak routes
 3. Mount the router in `src/main.ts`
-To add new models:
-
-1. Create a model in `src/models/` with Zod schema and Neogma configuration
-2. Create a router in `src/routers/` with tRPC procedures
-3. Add the router to `src/router.ts`
 
 ## License
 

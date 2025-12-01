@@ -16,33 +16,33 @@ export interface FormVersion {
 const statusConfig: Record<VersionStatus, { label: string; color: string; bgColor: string; borderColor: string }> = {
   planned: {
     label: "Planned",
-    color: "text-slate-400",
-    bgColor: "bg-slate-800/30",
-    borderColor: "border-slate-600",
+    color: "text-slate-200",
+    bgColor: "bg-slate-800/50",
+    borderColor: "border-slate-500",
   },
   "in-development": {
     label: "In Development",
-    color: "text-yellow-400",
-    bgColor: "bg-yellow-900/20",
-    borderColor: "border-yellow-600/50",
+    color: "text-yellow-300",
+    bgColor: "bg-yellow-900/30",
+    borderColor: "border-yellow-500",
   },
   deployed: {
     label: "Deployed",
-    color: "text-blue-400",
-    bgColor: "bg-blue-900/20",
-    borderColor: "border-blue-600/50",
+    color: "text-blue-300",
+    bgColor: "bg-blue-900/30",
+    borderColor: "border-blue-400",
   },
   released: {
     label: "Released",
-    color: "text-green-400",
-    bgColor: "bg-green-900/20",
-    borderColor: "border-green-600/50",
+    color: "text-green-300",
+    bgColor: "bg-green-900/30",
+    borderColor: "border-green-400",
   },
   deprecated: {
     label: "Deprecated",
-    color: "text-red-400",
-    bgColor: "bg-red-900/20",
-    borderColor: "border-red-600/50",
+    color: "text-red-300",
+    bgColor: "bg-red-900/30",
+    borderColor: "border-red-400",
   },
 }
 
@@ -68,8 +68,8 @@ export function BuildMode({ formVersions, selectedVersion, onVersionChange, onSt
   return (
     <div className="absolute left-0 top-0 bottom-0 w-64 bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-sm border-r border-slate-700 p-4 flex flex-col">
       <div className="flex items-center mb-6">
-        <GitBranch className="w-4 h-4 mr-2 text-slate-300" />
-        <h3 className="text-sm font-mono text-slate-300">VERSIONS</h3>
+        <GitBranch className="w-4 h-4 mr-2 text-slate-200" />
+        <h3 className="text-sm font-mono text-slate-100">VERSIONS</h3>
       </div>
 
       <div className="space-y-2 flex-1 overflow-y-auto">
@@ -81,8 +81,8 @@ export function BuildMode({ formVersions, selectedVersion, onVersionChange, onSt
               onClick={() => onVersionChange(version)}
               className={`relative w-full p-3 rounded border transition-all text-left text-xs ${
                 selectedVersion === version
-                  ? "bg-blue-900/30 border-blue-500/50 text-blue-300"
-                  : "bg-slate-800/40 border-slate-700 text-slate-400 hover:bg-slate-800/60"
+                  ? "bg-blue-900/40 border-blue-400 text-blue-200"
+                  : "bg-slate-800/40 border-slate-600 text-slate-200 hover:bg-slate-800/60 hover:border-slate-500"
               }`}
             >
               <div className="flex items-center justify-between mb-1">

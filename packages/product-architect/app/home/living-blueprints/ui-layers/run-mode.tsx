@@ -47,8 +47,8 @@ export function RunModeSidebar({ runModeData, selectedRunLayer, onLayerChange }:
   return (
     <div className="absolute left-0 top-0 bottom-0 w-56 bg-gradient-to-r from-slate-900/95 to-slate-900/80 backdrop-blur-sm border-r border-slate-700 p-4 flex flex-col">
       <div className="flex items-center mb-6">
-        <Zap className="w-4 h-4 mr-2 text-slate-300" />
-        <h3 className="text-sm font-mono text-slate-300">INSIGHTS</h3>
+        <Zap className="w-4 h-4 mr-2 text-slate-200" />
+        <h3 className="text-sm font-mono text-slate-100">INSIGHTS</h3>
       </div>
 
       <div className="space-y-2 flex-1 overflow-y-auto">
@@ -58,8 +58,8 @@ export function RunModeSidebar({ runModeData, selectedRunLayer, onLayerChange }:
             onClick={() => onLayerChange(key as RunLayer)}
             className={`relative w-full p-3 rounded border transition-all text-left text-xs ${
               selectedRunLayer === key
-                ? "bg-blue-900/30 border-blue-500/50 text-blue-300"
-                : "bg-slate-800/40 border-slate-700 text-slate-400 hover:bg-slate-800/60"
+                ? "bg-blue-900/40 border-blue-400 text-blue-200"
+                : "bg-slate-800/40 border-slate-600 text-slate-200 hover:bg-slate-800/60 hover:border-slate-500"
             }`}
           >
             <div className="flex items-center gap-2">
@@ -84,10 +84,10 @@ export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature, 
   return (
     <div className="absolute right-0 top-0 bottom-0 w-56 bg-gradient-to-l from-slate-900/95 to-slate-900/80 backdrop-blur-sm border-l border-slate-700 p-4 flex flex-col">
       <div className="flex items-center gap-2 mb-4">
-        <Icon className="w-4 h-4 text-blue-400" />
-        <h4 className="font-mono text-sm font-semibold text-slate-300">{data.label}</h4>
+        <Icon className="w-4 h-4 text-blue-300" />
+        <h4 className="font-mono text-sm font-semibold text-slate-100">{data.label}</h4>
         {selectedHotspot && (
-          <span className="ml-auto text-xs text-slate-400">• {selectedHotspot}</span>
+          <span className="ml-auto text-xs text-slate-300">• {selectedHotspot}</span>
         )}
       </div>
       
@@ -97,10 +97,10 @@ export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature, 
           <select
             value={selectedTimeframe}
             onChange={(e) => onTimeframeChange(e.target.value)}
-            className="w-full px-2 py-1.5 text-xs font-mono bg-slate-800 border border-slate-600 rounded text-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer hover:bg-slate-750 transition-colors"
+            className="w-full px-2 py-1.5 text-xs font-mono bg-slate-800 border border-slate-500 rounded text-slate-100 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 cursor-pointer hover:bg-slate-750 hover:border-slate-400 transition-colors"
           >
-            <option value="last week" className="bg-slate-800 text-slate-300 py-1">Last Week</option>
-            <option value="last month" className="bg-slate-800 text-slate-300 py-1">Last Month</option>
+            <option value="last week" className="bg-slate-800 text-slate-100 py-1">Last Week</option>
+            <option value="last month" className="bg-slate-800 text-slate-100 py-1">Last Month</option>
           </select>
         </div>
       )}
@@ -108,11 +108,11 @@ export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature, 
       <div className="space-y-2 text-xs font-mono flex-1 overflow-y-auto">
         {layer === "featureFlags" && filteredData.map((item: any, i: number) => (
           <div key={i} className="flex justify-between items-center p-2 bg-slate-800/50 rounded">
-            <span className="text-slate-400">{item.flag}</span>
+            <span className="text-slate-200">{item.flag}</span>
             <button
               onClick={() => onToggleFeature?.(item.flag)}
-              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                item.enabled ? "bg-blue-500" : "bg-slate-600"
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                item.enabled ? "bg-blue-400" : "bg-slate-600"
               }`}
             >
               <span
@@ -126,14 +126,14 @@ export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature, 
 
         {layer === "accessControl" && 'data' in data && data.data.map((item: any, i: number) => (
           <div key={i} className="p-2 bg-slate-800/50 rounded space-y-2">
-            <div className="font-semibold text-slate-300 mb-2">{item.role}</div>
+            <div className="font-semibold text-slate-100 mb-2">{item.role}</div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-slate-400 text-xs">View</span>
+                <span className="text-slate-200 text-xs">View</span>
                 <button
                   onClick={() => onTogglePermission?.(item.role, 'view')}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                    item.canView.enabled ? "bg-blue-500" : "bg-slate-600"
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                    item.canView.enabled ? "bg-blue-400" : "bg-slate-600"
                   }`}
                 >
                   <span
@@ -144,11 +144,11 @@ export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature, 
                 </button>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400 text-xs">Edit</span>
+                <span className="text-slate-200 text-xs">Edit</span>
                 <button
                   onClick={() => onTogglePermission?.(item.role, 'edit')}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                    item.canEdit.enabled ? "bg-blue-500" : "bg-slate-600"
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                    item.canEdit.enabled ? "bg-blue-400" : "bg-slate-600"
                   }`}
                 >
                   <span
@@ -164,20 +164,20 @@ export function RunModeOverlay({ layer, data, selectedHotspot, onToggleFeature, 
         
         {layer === "analytics" && filteredData.map((item: any, i: number) => (
           <div key={i} className="flex justify-between items-center p-2 bg-slate-800/50 rounded">
-            <span className="text-slate-400">{item.action} <span className="text-slate-500">({item.actionType})</span></span>
-            <span className="text-blue-400">{item.count}x</span>
+            <span className="text-slate-200">{item.action} <span className="text-slate-400">({item.actionType})</span></span>
+            <span className="text-blue-300 font-semibold">{item.count}x</span>
           </div>
         ))}
         
         {layer === "auditLog" && filteredData.map((item: any, i: number) => (
           <div key={i} className="p-2 bg-slate-800/50 rounded space-y-1">
             <div className="flex justify-between">
-              <span className="text-slate-500">{item.timestamp}</span>
-              <span className={`${item.result === "success" ? "text-blue-400" : "text-red-400"}`}>
+              <span className="text-slate-400">{item.timestamp}</span>
+              <span className={`${item.result === "success" ? "text-blue-300" : "text-red-300"} font-semibold`}>
                 {item.result}
               </span>
             </div>
-            <div className="text-slate-400">{item.user} • {item.action}</div>
+            <div className="text-slate-200">{item.user} • {item.action}</div>
           </div>
         ))}
       </div>

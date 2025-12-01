@@ -15,7 +15,7 @@ file, You can obtain one at https://www.jointjs.com/license
 // allows you to do things like:
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
-import '../node_modules/@testing-library/jest-dom/extend-expect.js';
+import '@testing-library/jest-dom/extend-expect.js';
 
 // Mock method which is not implemented in JSDOM
 window.SVGPathElement = jest.fn();

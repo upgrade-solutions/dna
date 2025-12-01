@@ -1,6 +1,6 @@
 /**
  * Custom React hooks for API calls
- * Provides a simple alternative to React Query/TRPC
+ * Provides a simple alternative to React Query
  */
 
 import { useState, useEffect, useCallback } from 'react';
