@@ -13,6 +13,7 @@ import { ShapeTypesEnum } from '../../../joint-plus/shapes/app.shapes';
 const Inspector = (): ReactElement => {
     const [cell, setCell] = useState<dia.Cell>(null);
     const [subscriptions] = useState(new Subscription());
+    const [isOpen, setIsOpen] = useState(true);
     const eventBusService = useContext(eventBusServiceContext);
 
     const setSelection = (selection: dia.Cell[]): void => {
@@ -54,11 +55,29 @@ const Inspector = (): ReactElement => {
         );
     };
 
+    const togglePanel = (): void => {
+        setIsOpen(prev => !prev);
+    };
+
     return (
-        <div className={'chatbot-inspector ' + (!cell ? 'disabled-chatbot-inspector' : '')}>
-            {
-                cell ? chooseInspector() : emptyInspector()
-            }
+        <div className={'chatbot-inspector ' + (!cell ? 'disabled-chatbot-inspector' : '') + (isOpen ? '' : ' closed')}>
+            <div className="inspector-header">
+                <span>Inspector</span>
+                <button 
+                    className="inspector-toggle" 
+                    onClick={togglePanel}
+                    aria-label={isOpen ? 'Close inspector' : 'Open inspector'}
+                >
+                    {isOpen ? '−' : '+'}
+                </button>
+            </div>
+            {isOpen && (
+                <div className="inspector-content">
+                    {
+                        cell ? chooseInspector() : emptyInspector()
+                    }
+                </div>
+            )}
         </div>
     );
 };

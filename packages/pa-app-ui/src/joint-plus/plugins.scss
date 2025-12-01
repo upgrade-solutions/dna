@@ -86,6 +86,12 @@
         flex-direction: column;
         z-index: 10;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        transition: all 0.2s ease;
+
+        &.closed {
+            max-height: none;
+            height: auto;
+        }
 
         .layers-panel-header {
             padding: 12px 16px;
@@ -96,6 +102,36 @@
             border-bottom: 1px solid #444;
             flex-shrink: 0;
             cursor: default;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .layers-panel-toggle {
+            background: transparent;
+            border: 1px solid #555;
+            border-radius: 3px;
+            color: #fff;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1;
+            padding: 0;
+            transition: all 0.2s ease;
+
+            &:hover {
+                background: #3C3C3C;
+                border-color: #666;
+            }
+
+            &:active {
+                background: #444;
+            }
         }
 
         .layers-list {
