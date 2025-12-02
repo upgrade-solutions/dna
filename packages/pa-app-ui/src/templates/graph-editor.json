@@ -1,0 +1,113 @@
+{
+  "$schema": "../schemas/template.schema.json",
+  "id": "graph-editor",
+  "name": "Graph Editor",
+  "description": "Three-column layout with toolbar, canvas, and inspector",
+  "layout": "three-column",
+  "sections": [
+    {
+      "id": "toolbar",
+      "position": "top",
+      "height": "64px",
+      "layout": "horizontal",
+      "blocks": [
+        {
+          "id": "select-tool",
+          "type": "button",
+          "props": {
+            "label": "Select",
+            "icon": "cursor",
+            "variant": "ghost"
+          }
+        },
+        {
+          "id": "pan-tool",
+          "type": "button",
+          "props": {
+            "label": "Pan",
+            "icon": "hand",
+            "variant": "ghost"
+          }
+        },
+        {
+          "id": "connect-tool",
+          "type": "button",
+          "props": {
+            "label": "Connect",
+            "icon": "link",
+            "variant": "ghost"
+          }
+        },
+        {
+          "id": "divider-1",
+          "type": "divider",
+          "props": {
+            "orientation": "vertical"
+          }
+        },
+        {
+          "id": "zoom-in",
+          "type": "button",
+          "props": {
+            "label": "Zoom In",
+            "icon": "zoom-in",
+            "variant": "ghost"
+          }
+        },
+        {
+          "id": "zoom-out",
+          "type": "button",
+          "props": {
+            "label": "Zoom Out",
+            "icon": "zoom-out",
+            "variant": "ghost"
+          }
+        },
+        {
+          "id": "fit-to-screen",
+          "type": "button",
+          "props": {
+            "label": "Fit to Screen",
+            "icon": "maximize",
+            "variant": "ghost"
+          }
+        }
+      ]
+    },
+    {
+      "id": "canvas",
+      "position": "center",
+      "layout": "fill",
+      "blocks": [
+        {
+          "id": "graph-canvas",
+          "type": "graph-canvas",
+          "props": {
+            "editable": true,
+            "zoom": true,
+            "pan": true,
+            "grid": true,
+            "snapToGrid": false,
+            "dataSource": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "inspector",
+      "position": "right",
+      "width": "320px",
+      "layout": "vertical",
+      "blocks": [
+        {
+          "id": "property-inspector",
+          "type": "property-inspector",
+          "props": {
+            "title": "Properties",
+            "emptyMessage": "Select a node or link to edit properties"
+          }
+        }
+      ]
+    }
+  ]
+}

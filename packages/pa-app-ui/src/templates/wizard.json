@@ -1,0 +1,65 @@
+{
+  "$schema": "../schemas/template.schema.json",
+  "id": "wizard",
+  "name": "Multi-Step Wizard",
+  "description": "Guided multi-step form with progress indicator",
+  "layout": "centered",
+  "sections": [
+    {
+      "id": "progress",
+      "position": "top",
+      "height": "80px",
+      "layout": "horizontal",
+      "blocks": [
+        {
+          "id": "stepper",
+          "type": "stepper",
+          "props": {
+            "steps": [],
+            "currentStep": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "content",
+      "position": "center",
+      "layout": "vertical",
+      "maxWidth": "640px",
+      "blocks": [
+        {
+          "id": "step-container",
+          "type": "step-container",
+          "props": {
+            "steps": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "actions",
+      "position": "bottom",
+      "height": "80px",
+      "layout": "horizontal",
+      "justify": "space-between",
+      "blocks": [
+        {
+          "id": "back-button",
+          "type": "button",
+          "props": {
+            "label": "Back",
+            "variant": "ghost"
+          }
+        },
+        {
+          "id": "next-button",
+          "type": "button",
+          "props": {
+            "label": "Next",
+            "variant": "primary"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "$schema": "../schemas/template.schema.json",
+  "id": "dashboard",
+  "name": "Dashboard",
+  "description": "Grid-based dashboard layout for metrics and visualizations",
+  "layout": "grid",
+  "sections": [
+    {
+      "id": "header",
+      "position": "top",
+      "height": "80px",
+      "layout": "horizontal",
+      "blocks": [
+        {
+          "id": "title",
+          "type": "heading",
+          "props": {
+            "level": 1,
+            "text": "Dashboard"
+          }
+        },
+        {
+          "id": "date-range",
+          "type": "date-range-picker",
+          "props": {
+            "defaultRange": "last-7-days"
+          }
+        }
+      ]
+    },
+    {
+      "id": "metrics",
+      "position": "main",
+      "layout": "grid",
+      "gridColumns": 4,
+      "gap": "16px",
+      "blocks": [
+        {
+          "id": "metric-1",
+          "type": "metric-card",
+          "props": {
+            "title": "Total Revenue",
+            "value": "$0",
+            "change": "+0%",
+            "trend": "up",
+            "dataSource": null
+          }
+        },
+        {
+          "id": "metric-2",
+          "type": "metric-card",
+          "props": {
+            "title": "Active Users",
+            "value": "0",
+            "change": "+0%",
+            "trend": "up",
+            "dataSource": null
+          }
+        },
+        {
+          "id": "metric-3",
+          "type": "metric-card",
+          "props": {
+            "title": "Conversion Rate",
+            "value": "0%",
+            "change": "-0%",
+            "trend": "down",
+            "dataSource": null
+          }
+        },
+        {
+          "id": "metric-4",
+          "type": "metric-card",
+          "props": {
+            "title": "Avg. Order Value",
+            "value": "$0",
+            "change": "+0%",
+            "trend": "up",
+            "dataSource": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "charts",
+      "position": "main",
+      "layout": "grid",
+      "gridColumns": 2,
+      "gap": "16px",
+      "blocks": [
+        {
+          "id": "chart-1",
+          "type": "chart",
+          "props": {
+            "title": "Revenue Over Time",
+            "chartType": "line",
+            "dataSource": null
+          }
+        },
+        {
+          "id": "chart-2",
+          "type": "chart",
+          "props": {
+            "title": "User Growth",
+            "chartType": "bar",
+            "dataSource": null
+          }
+        }
+      ]
+    }
+  ]
+}

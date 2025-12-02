@@ -1,0 +1,136 @@
+{
+  "id": "graph-editor-example",
+  "type": "app",
+  "name": "Product Architect",
+  "theme": "dark",
+  "version": "1.0.0",
+  "modules": [
+    {
+      "id": "editor",
+      "type": "module",
+      "name": "Graph Editor",
+      "icon": "network",
+      "pages": [
+        {
+          "id": "canvas-page",
+          "type": "page",
+          "title": "Canvas",
+          "sections": [
+            {
+              "id": "left-sidebar",
+              "type": "section",
+              "layout": "vertical",
+              "blocks": [
+                {
+                  "id": "sidebar-title",
+                  "type": "heading",
+                  "props": {
+                    "level": 3,
+                    "text": "Tools"
+                  }
+                },
+                {
+                  "id": "tool-1",
+                  "type": "button",
+                  "props": {
+                    "label": "Select",
+                    "icon": "→",
+                    "variant": "ghost"
+                  }
+                },
+                {
+                  "id": "tool-2",
+                  "type": "button",
+                  "props": {
+                    "label": "Pan",
+                    "icon": "✋",
+                    "variant": "ghost"
+                  }
+                },
+                {
+                  "id": "tool-3",
+                  "type": "button",
+                  "props": {
+                    "label": "Connect",
+                    "icon": "🔗",
+                    "variant": "ghost"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "canvas",
+              "type": "section",
+              "layout": "flex",
+              "blocks": [
+                {
+                "id": "graph",
+                "type": "graph-canvas",
+                "props": {
+                  "editable": true,
+                  "zoom": true,
+                  "pan": true,
+                  "grid": true,
+                  "snapToGrid": false,
+                  "data": {
+                    "nodes": [
+                      {
+                        "id": "node-1",
+                        "x": 200,
+                        "y": 150,
+                        "width": 120,
+                        "height": 60,
+                        "label": "Node 1",
+                        "color": "#3b82f6"
+                      },
+                      {
+                        "id": "node-2",
+                        "x": 450,
+                        "y": 200,
+                        "width": 120,
+                        "height": 60,
+                        "label": "Node 2",
+                        "color": "#10b981"
+                      }
+                    ],
+                    "links": [
+                      {
+                        "id": "link-1",
+                        "source": "node-1",
+                        "target": "node-2",
+                        "color": "#6b7280"
+                      }
+                    ]
+                  }
+                }
+              }
+              ]
+            },
+            {
+              "id": "right-sidebar",
+              "type": "section",
+              "layout": "vertical",
+              "blocks": [
+                {
+                  "id": "inspector-title",
+                  "type": "heading",
+                  "props": {
+                    "level": 3,
+                    "text": "Inspector"
+                  }
+                },
+                {
+                  "id": "inspector-desc",
+                  "type": "paragraph",
+                  "props": {
+                    "text": "Select a node to view its properties."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
