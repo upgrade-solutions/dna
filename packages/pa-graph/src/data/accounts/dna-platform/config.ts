@@ -10,7 +10,7 @@ export const dnaPlatformConfig = {
   name: 'DNA Platform',
   description: 'BizOps-as-Code platform architecture',
   
-  styles: defaultStyles as GraphStyles,
+  styles: defaultStyles,
   
-  settings: defaultSettings as TenantSettings
+  settings: defaultSettings
 }

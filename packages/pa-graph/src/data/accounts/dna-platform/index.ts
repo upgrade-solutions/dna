@@ -4,9 +4,8 @@
 
 import { dnaPlatformConfig } from './config'
 import { dnaPlatformResources } from './resources'
-import type { TenantConfig } from '../../tenant-config'
 
-export const dnaPlatformTenant: TenantConfig = {
+export const dnaPlatformTenant = {
   ...dnaPlatformConfig,
   data: dnaPlatformResources
 }

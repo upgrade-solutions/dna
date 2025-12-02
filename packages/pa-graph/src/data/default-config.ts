@@ -9,6 +9,7 @@ export interface NodeStyle {
   strokeWidth?: number
   rx?: number
   ry?: number
+  icon?: string
 }
 
 export interface LinkStyle {
@@ -32,53 +33,63 @@ export interface TenantSettings {
 }
 
 /**
+ * Base node style configuration - shared across all node types
+ */
+export const baseNodeStyle = {
+  fill: '#ffffff',
+  stroke: '#000000',
+  strokeWidth: 1,
+  rx: 8,
+  ry: 8
+}
+
+/**
+ * Node type definitions - only unique properties per type
+ * All nodes inherit from baseNodeStyle
+ */
+export const nodeTypeStyles = {
+  'web-application': {
+    icon: 'https://api.iconify.design/mdi/web.svg?color=white'
+  },
+  'web-app': {
+    icon: 'https://api.iconify.design/mdi/web.svg?color=white'
+  },
+  'api': {
+    icon: 'https://api.iconify.design/mdi/api.svg?color=white'
+  },
+  'database': {
+    icon: 'https://api.iconify.design/mdi/database.svg?color=white'
+  },
+  'service': {
+    icon: 'https://api.iconify.design/mdi/cog.svg?color=white'
+  },
+  'form': {
+    icon: 'https://api.iconify.design/mdi/form-select.svg?color=white'
+  },
+  'form-component': {
+    icon: 'https://api.iconify.design/mdi/form-select.svg?color=white'
+  },
+  'ui-component': {
+    icon: 'https://api.iconify.design/mdi/view-dashboard.svg?color=white'
+  }
+}
+
+/**
+ * Combine base style with type-specific styles to create complete node styles
+ */
+const createNodeStyles = (): Record<string, NodeStyle> => {
+  const result: Record<string, NodeStyle> = {}
+  for (const [type, typeStyle] of Object.entries(nodeTypeStyles)) {
+    result[type] = { ...baseNodeStyle, ...typeStyle }
+  }
+  return result
+}
+
+/**
  * Default graph styles
  */
-export const defaultStyles: GraphStyles = {
-  nodes: {
-    'web-app': {
-      fill: '#3b82f6',
-      stroke: '#1e40af',
-      strokeWidth: 2,
-      rx: 8,
-      ry: 8
-    },
-    'api': {
-      fill: '#10b981',
-      stroke: '#047857',
-      strokeWidth: 2,
-      rx: 8,
-      ry: 8
-    },
-    'database': {
-      fill: '#f59e0b',
-      stroke: '#d97706',
-      strokeWidth: 2,
-      rx: 8,
-      ry: 8
-    },
-    'service': {
-      fill: '#8b5cf6',
-      stroke: '#6d28d9',
-      strokeWidth: 2,
-      rx: 8,
-      ry: 8
-    },
-    'form': {
-      fill: '#ec4899',
-      stroke: '#db2777',
-      strokeWidth: 2,
-      rx: 8,
-      ry: 8
-    },
-    'ui-component': {
-      fill: '#06b6d4',
-      stroke: '#0891b2',
-      strokeWidth: 2,
-      rx: 8,
-      ry: 8
-    }
-  },
+export const defaultStyles = {
+  nodes: createNodeStyles(),
   links: {
     'communicates-with': {
       stroke: '#6b7280',
@@ -107,11 +118,10 @@ export const defaultStyles: GraphStyles = {
     }
   },
   defaultNode: {
+    ...baseNodeStyle,
     fill: '#6b7280',
     stroke: '#4b5563',
-    strokeWidth: 2,
-    rx: 8,
-    ry: 8
+    icon: 'https://api.iconify.design/mdi/cube-outline.svg?color=white'
   },
   defaultLink: {
     stroke: '#6b7280',

@@ -49,24 +49,51 @@ export function GraphCanvas({
     // Create nodes from resource data with tenant styles
     const nodeElements = graphData.nodes.map(node => {
       const nodeStyle = tenantConfig.styles.nodes[node.type] || tenantConfig.styles.defaultNode
+      
+      // Debug: log the icon URL being used
+      console.log('Node:', node.label, 'Type:', node.type, 'Icon:', nodeStyle.icon, 'Full nodeStyle:', nodeStyle)
 
       return new shapes.standard.Rectangle({
         id: node.id,
         position: node.position,
         size: { width: 160, height: 80 },
+        markup: [{
+          tagName: 'rect',
+          selector: 'body'
+        }, {
+          tagName: 'image',
+          selector: 'icon',
+          attributes: {
+            'preserveAspectRatio': 'xMidYMid'
+          }
+        }, {
+          tagName: 'text',
+          selector: 'label'
+        }],
         attrs: {
           body: {
             fill: nodeStyle.fill,
             stroke: nodeStyle.stroke,
-            strokeWidth: nodeStyle.strokeWidth || 2,
+            strokeWidth: nodeStyle.strokeWidth || 1,
             rx: nodeStyle.rx || 8,
             ry: nodeStyle.ry || 8
+          },
+          icon: {
+            'xlink:href': nodeStyle.icon || 'https://api.iconify.design/mdi/cube-outline.svg?color=white',
+            width: 24,
+            height: 24,
+            x: 68, // (160 - 24) / 2 = 68
+            y: 35
           },
           label: {
             text: node.label,
             fill: '#ffffff',
-            fontSize: 13,
-            fontWeight: 'bold'
+            fontSize: 12,
+            fontWeight: '600',
+            // Position label at top like fieldset legend
+            y: 10,
+            textAnchor: 'middle',
+            textVerticalAnchor: 'top'
           }
         }
       })
@@ -113,8 +140,21 @@ export function GraphCanvas({
         selectedCellViewRef.current.unhighlight()
       }
       
-      // Highlight and track new selection
-      cellView.highlight()
+      // Highlight and track new selection with 2px theme color border (convention)
+      cellView.highlight(null, {
+        highlighter: {
+          name: 'stroke',
+          options: {
+            padding: 0,
+            rx: 8,
+            ry: 8,
+            attrs: {
+              'stroke-width': 2,
+              stroke: tenantConfig.styles.nodes[cellView.model.get('type')]?.stroke || '#3b82f6'
+            }
+          }
+        }
+      })
       selectedCellViewRef.current = cellView
       onCellViewSelected?.(cellView)
     })
