@@ -10,7 +10,7 @@ A graph-based visual editor for designing and manipulating business models and w
 - **Workflow Engine**: XState 5.x (tool modes, save workflows)
 - **State Management**: MobX (graph model state)
 - **Validation**: Zod schemas
-- **Styling**: CSS modules + global styles (dark theme)
+- **Styling**: Tailwind + global styles (dark theme)
 - **Diagram Library**: JointJS Plus 4.1.1
 - **Package Manager**: npm (use `npm install`, not pnpm)
 

@@ -1,0 +1,154 @@
+import { useState, useCallback } from 'react'
+import { dia } from '@joint/plus'
+
+// Simple SVG icons
+const ZoomInIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="11" cy="11" r="8"/>
+    <path d="m21 21-4.35-4.35"/>
+    <line x1="11" y1="8" x2="11" y2="14"/>
+    <line x1="8" y1="11" x2="14" y2="11"/>
+  </svg>
+)
+
+const ZoomOutIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="11" cy="11" r="8"/>
+    <path d="m21 21-4.35-4.35"/>
+    <line x1="8" y1="11" x2="14" y2="11"/>
+  </svg>
+)
+
+const MaximizeIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="15 3 21 3 21 9"/>
+    <polyline points="9 21 3 21 3 15"/>
+    <line x1="21" y1="3" x2="14" y2="10"/>
+    <line x1="3" y1="21" x2="10" y2="14"/>
+  </svg>
+)
+
+const PlusIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="12" y1="5" x2="12" y2="19"/>
+    <line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+)
+
+/**
+ * Example toolbar component for graph canvas
+ * Demonstrates how to use the modular graph-canvas utilities
+ */
+export interface GraphToolbarProps {
+  graph: dia.Graph | null
+  paper: dia.Paper | null
+  onAddNode?: () => void
+}
+
+export function GraphToolbar({ graph, paper, onAddNode }: GraphToolbarProps) {
+  const [scale, setScale] = useState(1)
+
+  const handleZoomIn = useCallback(() => {
+    if (!paper) return
+    const currentScale = paper.scale()
+    const newScale = currentScale.sx * 1.2
+    paper.scale(newScale, newScale)
+    setScale(newScale)
+  }, [paper])
+
+  const handleZoomOut = useCallback(() => {
+    if (!paper) return
+    const currentScale = paper.scale()
+    const newScale = currentScale.sx / 1.2
+    paper.scale(newScale, newScale)
+    setScale(newScale)
+  }, [paper])
+
+  const handleFitToContent = useCallback(() => {
+    if (!paper) return
+    paper.transformToFitContent({
+      padding: 50,
+      maxScale: 1.5,
+      minScale: 0.2
+    })
+    const newScale = paper.scale()
+    setScale(newScale.sx)
+  }, [paper])
+
+  const handleResetZoom = useCallback(() => {
+    if (!paper) return
+    paper.scale(1, 1)
+    setScale(1)
+  }, [paper])
+
+  return (
+    <div 
+      className="bg-blue-950 border-b border-gray-700/50 shadow-lg"
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, overflow: 'hidden' }}
+    >
+      <div 
+        className="flex flex-nowrap items-center gap-2 px-3 py-2 overflow-x-auto overflow-y-hidden"
+        style={{ height: '44px' }}
+      >
+      {/* Zoom Controls */}
+      <button
+        onClick={handleZoomOut}
+        className="p-1.5 hover:bg-gray-800 rounded text-gray-400 hover:text-white transition-all flex-shrink-0"
+        title="Zoom Out"
+        disabled={!paper}
+      >
+        <ZoomOutIcon />
+      </button>
+      <button
+        onClick={handleResetZoom}
+        className="px-2 py-1 hover:bg-gray-800 rounded text-xs font-medium text-gray-400 hover:text-white transition-all min-w-[48px] flex-shrink-0"
+        title="Reset Zoom"
+        disabled={!paper}
+      >
+        {Math.round(scale * 100)}%
+      </button>
+      <button
+        onClick={handleZoomIn}
+        className="p-1.5 hover:bg-gray-800 rounded text-gray-400 hover:text-white transition-all flex-shrink-0"
+        title="Zoom In"
+        disabled={!paper}
+      >
+        <ZoomInIcon />
+      </button>
+
+      <div className="w-px h-4 bg-gray-700 flex-shrink-0" />
+
+      {/* Fit to Content */}
+      <button
+        onClick={handleFitToContent}
+        className="p-1.5 hover:bg-gray-800 rounded text-gray-400 hover:text-white transition-all flex-shrink-0"
+        title="Fit to Content"
+        disabled={!paper}
+      >
+        <MaximizeIcon />
+      </button>
+
+      {/* Add Node */}
+      {onAddNode && (
+        <>
+          <div className="w-px h-4 bg-gray-700 flex-shrink-0" />
+          <button
+            onClick={onAddNode}
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-600/90 hover:bg-blue-600 rounded text-xs font-medium text-white transition-all flex-shrink-0"
+            title="Add Node"
+          >
+            <PlusIcon />
+            <span>Add Node</span>
+          </button>
+        </>
+      )}
+
+      {/* Stats */}
+      <div className="ml-auto flex flex-nowrap items-center gap-3 text-xs flex-shrink-0">
+        <span className="text-gray-500 whitespace-nowrap">Nodes: <span className="text-gray-300 font-medium">{graph?.getElements().length || 0}</span></span>
+        <span className="text-gray-500 whitespace-nowrap">Links: <span className="text-gray-300 font-medium">{graph?.getLinks().length || 0}</span></span>
+      </div>
+      </div>
+    </div>
+  )
+}
