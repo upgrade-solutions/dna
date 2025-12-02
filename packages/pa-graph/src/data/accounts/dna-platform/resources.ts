@@ -1,32 +1,10 @@
 /**
- * Example resource-based data for graph visualization
- * Resources represent business/technical entities with relationships between them
+ * DNA Platform Resources and Relationships
  */
 
-export interface Resource {
-  id: string
-  type: 'web-application' | 'api' | 'database' | 'form-component' | 'service' | 'ui-component'
-  name: string
-  description?: string
-  metadata?: Record<string, unknown>
-}
+import type { ResourceGraph } from '../../example-resources'
 
-export interface Relationship {
-  id: string
-  type: 'depends-on' | 'contains' | 'communicates-with' | 'reads-from' | 'writes-to' | 'renders'
-  sourceId: string
-  targetId: string
-  label?: string
-  metadata?: Record<string, unknown>
-}
-
-export interface ResourceGraph {
-  resources: Resource[]
-  relationships: Relationship[]
-}
-
-// DNA Platform Architecture
-export const dnaPlatformArchitecture: ResourceGraph = {
+export const dnaPlatformResources: ResourceGraph = {
   resources: [
     // Frontend Applications
     {

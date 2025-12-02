@@ -8,9 +8,20 @@ This document describes the organization of the codebase and the separation of c
 
 ```
 /src
-  /data                 ← Hard-coded example data (resource-based)
-    example-resources.ts ← Example resources and relationships
+  /data                 ← Account/tenant data and configuration
+    default-config.ts   ← Default styles and settings template
+    tenant-config.ts    ← TenantConfig interface and exports
+    example-resources.ts ← Resource/Relationship type definitions
     index.ts            ← Data exports
+    /accounts           ← Account-specific data folders
+      /dna-platform     ← DNA Platform account
+        config.ts       ← Visual styling configuration
+        resources.ts    ← Platform architecture data
+        index.ts        ← Combined tenant export
+      /perfected-claims ← Perfected Claims account
+        config.ts       ← Visual styling configuration
+        resources.ts    ← Mass tort platform data
+        index.ts        ← Combined tenant export
   
   /components           ← React components (functional with observer HOC)
     GraphCanvas.tsx     ← Main canvas component, JointJS Paper wrapper
@@ -78,14 +89,24 @@ This document describes the organization of the codebase and the separation of c
 ## Architecture Layers
 
 ### 0. Data Layer (`/data`)
-**Purpose**: Hard-coded example data for resources and relationships.
+**Purpose**: Account/tenant-specific data and configuration with multi-tenancy support.
 
+- **Account-based organization**: Each tenant in isolated folder (`/accounts/[tenant-name]/`)
+- **Separated concerns**: Visual config (`config.ts`) separate from data (`resources.ts`)
+- **Default templates**: Reusable base styles and settings (`default-config.ts`)
 - **Resource-based model**: Business/technical entities (web-application, api, database, form-component, etc.)
 - **Relationships**: Typed connections between resources (depends-on, contains, communicates-with, reads-from, writes-to, renders)
-- **Example datasets**: Pre-built resource graphs for testing and demonstration
 - **NO visual logic**: Pure business/technical data structures
 
-**Key Point**: This is the raw business model before any graph transformation.
+**Account Structure**:
+```
+/accounts/[tenant-name]/
+  config.ts     ← Visual styles (node colors, link styles, canvas settings)
+  resources.ts  ← Platform architecture (resources & relationships)
+  index.ts      ← Combined TenantConfig export
+```
+
+**Key Point**: Each tenant has completely isolated configuration and data, enabling true multi-tenancy.
 
 ---
 
@@ -134,13 +155,14 @@ This document describes the organization of the codebase and the separation of c
 ---
 
 ### 4. Component Layer (`/components`)
-**Purpose**: React presentational components.
-
-- **Functional components** with hooks (React 19)
-- **Observer pattern**: `observer()` HOC from `mobx-react-lite`
-- **Direct manipulation**: Visual interaction with graph elements
-- **Minimal logic**: Delegates to models and machines
-
+### Account Data vs. Resource Data vs. Graph Data vs. Visual Representation
+```
+/data/accounts/[tenant]/config.ts       ← Tenant visual configuration (styles, settings)
+/data/accounts/[tenant]/resources.ts    ← Business model (Resources + Relationships)
+/graph/mappers/resourceToGraph.ts       ← Data transformation layer
+/graph/schemas/node.schema.ts           ← Graph data structure (Zod)
+/graph/elements/TaskNode.ts             ← Visual shape (JointJS)
+```
 **Key Point**: Components react to MobX store changes automatically.
 ## Key Separation Patterns
 
@@ -225,12 +247,14 @@ export const toolMachine = createMachine({
     pan: { on: { SWITCH_TO_SELECT: 'select' } }
   }
 })
-```
 ## Data Flow
 
-1. **Resource Data** → `resourceToGraph()` mapper → Graph Nodes/Edges → JointJS rendering
-2. **User Interaction** → JointJS event → MobX model update → React re-render
-3. **Tool Change** → XState transition → Canvas mode update → UI feedback
+1. **Account Selection** → Load tenant config + resources
+2. **Tenant Config** → Apply visual styles and settings to canvas
+3. **Resource Data** → `resourceToGraph()` mapper → Graph Nodes/Edges → JointJS rendering with tenant styles
+4. **User Interaction** → JointJS event → MobX model update → React re-render
+5. **Tool Change** → XState transition → Canvas mode update → UI feedback
+6. **Save Operation** → `graphToResource()` mapper → XState workflow → API service → Success/error state
 4. **Save Operation** → `graphToResource()` mapper → XState workflow → API service → Success/error state
 1. **User Interaction** → JointJS event → MobX model update → React re-render
 2. **Tool Change** → XState transition → Canvas mode update → UI feedback
@@ -239,3 +263,31 @@ export const toolMachine = createMachine({
 ---
 
 For state management patterns and architectural philosophy, see `STATE_ARCHITECTURE.md`.
+
+---
+
+## Multi-Tenancy
+
+Each account/tenant has complete isolation:
+
+- **Visual Identity**: Custom color schemes, line styles, canvas settings
+- **Data Isolation**: Separate resource graphs per tenant
+- **Extensibility**: Add new tenants by creating `/accounts/[tenant-name]/` folder
+- **Default Fallbacks**: Inherit from `default-config.ts` for consistency
+
+**Example Tenants**:
+- `dna-platform`: DNA Platform architecture (11 resources, 16 relationships)
+- `perfected-claims`: Mass tort case management platform (11 resources, 16 relationships)
+
+**Usage**:
+```typescript
+import { dnaPlatformTenant, perfectedClaimsTenant } from './data'
+
+// Use default tenant (DNA Platform)
+<GraphCanvas />
+
+// Use specific tenant
+<GraphCanvas tenantConfig={perfectedClaimsTenant} />
+```
+
+````

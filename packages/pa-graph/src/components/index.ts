@@ -1,2 +1,5 @@
 export { GraphCanvas } from './GraphCanvas'
 export type { GraphCanvasProps } from './GraphCanvas'
+export { Header } from './Header'
+export { LeftSidebar } from './LeftSidebar'
+export { RightSidebar } from './right-sidebar'
