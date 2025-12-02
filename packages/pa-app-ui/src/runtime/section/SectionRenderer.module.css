@@ -1,0 +1,39 @@
+.section {
+  display: flex;
+  background: #111;
+}
+
+.section-layout-horizontal {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+}
+
+.section-layout-vertical {
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  width: 250px;
+  background: #1a1a1a;
+  border-right: 1px solid #333;
+  overflow-y: auto;
+}
+
+.section-layout-flex {
+  flex: 1;
+  overflow: hidden;
+}
+
+.section-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Right sidebar variant */
+.section[id="right-sidebar"] {
+  border-right: none;
+  border-left: 1px solid #333;
+}

@@ -23,6 +23,7 @@ export const SectionConfigSchema = BaseConfigSchema.extend({
 export const PageConfigSchema = BaseConfigSchema.extend({
   type: z.literal('page'),
   title: z.string(),
+  showHeader: z.boolean().optional(),
   template: z.string().optional(),
   overrides: z.record(z.string(), z.unknown()).optional(),
   sections: z.array(SectionConfigSchema),
@@ -32,6 +33,7 @@ export const ModuleConfigSchema = BaseConfigSchema.extend({
   type: z.literal('module'),
   name: z.string(),
   icon: z.string().optional(),
+  showNavigation: z.boolean().optional(),
   pages: z.array(PageConfigSchema),
 })
 
@@ -40,6 +42,7 @@ export const AppConfigSchema = BaseConfigSchema.extend({
   name: z.string(),
   theme: z.enum(['light', 'dark']).default('dark'),
   version: z.string().optional(),
+  showModuleSidebar: z.boolean().default(true),
   modules: z.array(ModuleConfigSchema),
 })
 

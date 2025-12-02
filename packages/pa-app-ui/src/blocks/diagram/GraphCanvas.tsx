@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { dia, shapes } from '@joint/plus'
+import styles from './GraphCanvas.module.css'
 
 interface Node {
   id: string
@@ -139,7 +140,7 @@ export function GraphCanvas({
   return (
     <div 
       ref={canvasRef} 
-      className="graph-canvas"
+      className={styles['graph-canvas']}
       style={{ 
         width: '100%', 
         height: '100%', 

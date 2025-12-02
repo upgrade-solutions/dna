@@ -1,0 +1,115 @@
+{
+  "id": "dashboard-example",
+  "type": "app",
+  "name": "Dashboard",
+  "theme": "dark",
+  "showModuleSidebar": false,
+  "version": "1.0.0",
+  "modules": [
+    {
+      "id": "dashboard",
+      "type": "module",
+      "name": "Dashboard",
+      "icon": "grid",
+      "showNavigation": false,
+      "pages": [
+        {
+          "id": "overview-page",
+          "type": "page",
+          "title": "Overview",
+          "showHeader": false,
+          "sections": [
+            {
+              "id": "top-section",
+              "type": "section",
+              "layout": "vertical",
+              "blocks": [
+                {
+                  "id": "header",
+                  "type": "heading",
+                  "props": {
+                    "level": 2,
+                    "text": "Dashboard Overview"
+                  }
+                },
+                {
+                  "id": "description",
+                  "type": "paragraph",
+                  "props": {
+                    "text": "Welcome to your dashboard. Here's a quick overview of your metrics."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "metrics-grid",
+              "type": "section",
+              "layout": "grid",
+              "blocks": [
+                {
+                  "id": "metric-1",
+                  "type": "panel",
+                  "props": {
+                    "title": "Total Users",
+                    "content": "12,458",
+                    "variant": "stat"
+                  }
+                },
+                {
+                  "id": "metric-2",
+                  "type": "panel",
+                  "props": {
+                    "title": "Active Projects",
+                    "content": "38",
+                    "variant": "stat"
+                  }
+                },
+                {
+                  "id": "metric-3",
+                  "type": "panel",
+                  "props": {
+                    "title": "Tasks Completed",
+                    "content": "1,247",
+                    "variant": "stat"
+                  }
+                },
+                {
+                  "id": "metric-4",
+                  "type": "panel",
+                  "props": {
+                    "title": "Success Rate",
+                    "content": "94.2%",
+                    "variant": "stat"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "content-grid",
+              "type": "section",
+              "layout": "grid",
+              "blocks": [
+                {
+                  "id": "recent-activity",
+                  "type": "panel",
+                  "props": {
+                    "title": "Recent Activity",
+                    "content": "No recent activity to display."
+                  }
+                },
+                {
+                  "id": "quick-actions",
+                  "type": "panel",
+                  "props": {
+                    "title": "Quick Actions",
+                    "content": "Create new project, Add team member, View reports"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

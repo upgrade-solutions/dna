@@ -1,0 +1,121 @@
+{
+  "id": "split-view-example",
+  "type": "app",
+  "name": "Split View",
+  "theme": "dark",
+  "showModuleSidebar": false,
+  "version": "1.0.0",
+  "modules": [
+    {
+      "id": "editor-module",
+      "type": "module",
+      "name": "Editor",
+      "icon": "code",
+      "showNavigation": false,
+      "pages": [
+        {
+          "id": "code-editor-page",
+          "type": "page",
+          "title": "Code Editor",
+          "showHeader": false,
+          "sections": [
+            {
+              "id": "left-panel",
+              "type": "section",
+              "layout": "vertical",
+              "blocks": [
+                {
+                  "id": "editor-title",
+                  "type": "heading",
+                  "props": {
+                    "level": 3,
+                    "text": "Editor"
+                  }
+                },
+                {
+                  "id": "editor-toolbar",
+                  "type": "horizontal",
+                  "props": {
+                    "gap": "8px"
+                  }
+                },
+                {
+                  "id": "run-btn",
+                  "type": "button",
+                  "props": {
+                    "label": "Run",
+                    "icon": "▶",
+                    "variant": "primary"
+                  }
+                },
+                {
+                  "id": "save-btn",
+                  "type": "button",
+                  "props": {
+                    "label": "Save",
+                    "icon": "💾",
+                    "variant": "secondary"
+                  }
+                },
+                {
+                  "id": "code-area",
+                  "type": "textarea",
+                  "props": {
+                    "placeholder": "// Write your code here...",
+                    "rows": 20,
+                    "monospace": true
+                  }
+                }
+              ]
+            },
+            {
+              "id": "center-panel",
+              "type": "section",
+              "layout": "flex",
+              "blocks": [
+                {
+                  "id": "preview-panel",
+                  "type": "panel",
+                  "props": {
+                    "title": "Preview",
+                    "content": "Output will appear here when you run your code."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "right-panel",
+              "type": "section",
+              "layout": "vertical",
+              "blocks": [
+                {
+                  "id": "console-title",
+                  "type": "heading",
+                  "props": {
+                    "level": 3,
+                    "text": "Console"
+                  }
+                },
+                {
+                  "id": "clear-console-btn",
+                  "type": "button",
+                  "props": {
+                    "label": "Clear",
+                    "variant": "ghost"
+                  }
+                },
+                {
+                  "id": "console-output",
+                  "type": "paragraph",
+                  "props": {
+                    "text": "Console output will appear here..."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

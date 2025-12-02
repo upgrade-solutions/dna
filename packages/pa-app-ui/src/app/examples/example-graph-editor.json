@@ -3,6 +3,7 @@
   "type": "app",
   "name": "Product Architect",
   "theme": "dark",
+  "showModuleSidebar": false,
   "version": "1.0.0",
   "modules": [
     {
@@ -10,11 +11,13 @@
       "type": "module",
       "name": "Graph Editor",
       "icon": "network",
+      "showNavigation": false,
       "pages": [
         {
           "id": "canvas-page",
           "type": "page",
           "title": "Canvas",
+          "showHeader": false,
           "sections": [
             {
               "id": "left-sidebar",
@@ -71,37 +74,7 @@
                   "zoom": true,
                   "pan": true,
                   "grid": true,
-                  "snapToGrid": false,
-                  "data": {
-                    "nodes": [
-                      {
-                        "id": "node-1",
-                        "x": 200,
-                        "y": 150,
-                        "width": 120,
-                        "height": 60,
-                        "label": "Node 1",
-                        "color": "#3b82f6"
-                      },
-                      {
-                        "id": "node-2",
-                        "x": 450,
-                        "y": 200,
-                        "width": 120,
-                        "height": 60,
-                        "label": "Node 2",
-                        "color": "#10b981"
-                      }
-                    ],
-                    "links": [
-                      {
-                        "id": "link-1",
-                        "source": "node-1",
-                        "target": "node-2",
-                        "color": "#6b7280"
-                      }
-                    ]
-                  }
+                  "snapToGrid": false
                 }
               }
               ]

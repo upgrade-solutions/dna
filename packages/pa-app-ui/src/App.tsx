@@ -1,9 +1,11 @@
 import './App.css'
 import { AppRenderer } from './runtime/app/AppRenderer'
-import exampleConfig from './app/example-graph-editor.json'
+import { examples, graphData } from './app/examples'
 
 function App() {
-  return <AppRenderer config={exampleConfig as any} />
+  return (
+    <AppRenderer config={examples[0].config} data={{ 'graph-data': graphData }} />
+  )
 }
 
 export default App

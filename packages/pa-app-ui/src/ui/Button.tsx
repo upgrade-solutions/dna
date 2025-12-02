@@ -1,3 +1,5 @@
+import styles from './Button.module.css'
+
 interface ButtonProps {
   label: string
   onClick?: () => void
@@ -15,7 +17,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button 
-      className={`btn btn-${variant}`}
+      className={`${styles.btn} ${styles[`btn-${variant}`]}`}
       onClick={onClick}
       disabled={disabled}
     >

@@ -1,12 +1,14 @@
 import type { SectionConfig } from '@/schemas'
 import { BlockRenderer } from '../block/BlockRenderer'
+import styles from './SectionRenderer.module.css'
 
 interface SectionRendererProps {
   config: SectionConfig
+  data?: Record<string, unknown>
 }
 
-export function SectionRenderer({ config }: SectionRendererProps) {
-  const layoutClass = `section-layout-${config.layout}`
+export function SectionRenderer({ config, data }: SectionRendererProps) {
+  const layoutClass = `${styles.section} ${styles[`section-layout-${config.layout}`]}`
   
   return (
     <section
@@ -18,7 +20,7 @@ export function SectionRenderer({ config }: SectionRendererProps) {
       }}
     >
       {config.blocks.map((block) => (
-        <BlockRenderer key={block.id} config={block} />
+        <BlockRenderer key={block.id} config={block} data={data} />
       ))}
     </section>
   )

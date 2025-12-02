@@ -1,0 +1,154 @@
+{
+  "id": "form-example",
+  "type": "app",
+  "name": "Form Layout",
+  "theme": "dark",
+  "showModuleSidebar": false,
+  "version": "1.0.0",
+  "modules": [
+    {
+      "id": "form-module",
+      "type": "module",
+      "name": "Forms",
+      "icon": "edit",
+      "showNavigation": false,
+      "pages": [
+        {
+          "id": "user-form-page",
+          "type": "page",
+          "title": "User Profile Form",
+          "showHeader": false,
+          "sections": [
+            {
+              "id": "form-header",
+              "type": "section",
+              "layout": "vertical",
+              "blocks": [
+                {
+                  "id": "form-title",
+                  "type": "heading",
+                  "props": {
+                    "level": 2,
+                    "text": "Edit User Profile"
+                  }
+                },
+                {
+                  "id": "form-description",
+                  "type": "paragraph",
+                  "props": {
+                    "text": "Update your profile information below."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "form-body",
+              "type": "section",
+              "layout": "vertical",
+              "blocks": [
+                {
+                  "id": "personal-info",
+                  "type": "panel",
+                  "props": {
+                    "title": "Personal Information"
+                  }
+                },
+                {
+                  "id": "first-name-group",
+                  "type": "horizontal",
+                  "props": {
+                    "gap": "16px"
+                  }
+                },
+                {
+                  "id": "first-name",
+                  "type": "text-field",
+                  "props": {
+                    "label": "First Name",
+                    "placeholder": "Enter first name",
+                    "required": true
+                  }
+                },
+                {
+                  "id": "last-name",
+                  "type": "text-field",
+                  "props": {
+                    "label": "Last Name",
+                    "placeholder": "Enter last name",
+                    "required": true
+                  }
+                },
+                {
+                  "id": "email",
+                  "type": "text-field",
+                  "props": {
+                    "label": "Email Address",
+                    "placeholder": "email@example.com",
+                    "type": "email",
+                    "required": true
+                  }
+                },
+                {
+                  "id": "bio",
+                  "type": "textarea",
+                  "props": {
+                    "label": "Bio",
+                    "placeholder": "Tell us about yourself",
+                    "rows": 4
+                  }
+                },
+                {
+                  "id": "account-settings",
+                  "type": "panel",
+                  "props": {
+                    "title": "Account Settings"
+                  }
+                },
+                {
+                  "id": "role",
+                  "type": "select",
+                  "props": {
+                    "label": "Role",
+                    "options": ["Admin", "Editor", "Viewer"],
+                    "required": true
+                  }
+                },
+                {
+                  "id": "notifications",
+                  "type": "checkbox",
+                  "props": {
+                    "label": "Enable email notifications",
+                    "checked": true
+                  }
+                },
+                {
+                  "id": "form-actions",
+                  "type": "horizontal",
+                  "props": {
+                    "gap": "12px"
+                  }
+                },
+                {
+                  "id": "save-btn",
+                  "type": "button",
+                  "props": {
+                    "label": "Save Changes",
+                    "variant": "primary"
+                  }
+                },
+                {
+                  "id": "cancel-btn",
+                  "type": "button",
+                  "props": {
+                    "label": "Cancel",
+                    "variant": "ghost"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
