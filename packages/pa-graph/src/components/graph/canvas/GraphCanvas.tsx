@@ -4,7 +4,7 @@ import { dnaPlatformTenant } from '../../../data'
 import { resourceToGraph } from '../../../graph/mappers'
 import { initializeGraph, cleanupGraph, populateGraph } from '../utils'
 import { ShapesFactory } from '../shapes'
-import { GraphEventHandler } from '../features'
+import { GraphEventHandler, ZoomHandler, PanHandler, KeyboardHandler } from '../features'
 import { GraphToolbar } from '../toolbar/GraphToolbar'
 import type { GraphCanvasProps } from '../utils/types'
 
@@ -18,6 +18,9 @@ export function GraphCanvas({
 }: GraphCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const eventHandlerRef = useRef<GraphEventHandler | null>(null)
+  const zoomHandlerRef = useRef<ZoomHandler | null>(null)
+  const panHandlerRef = useRef<PanHandler | null>(null)
+  const keyboardHandlerRef = useRef<KeyboardHandler | null>(null)
   const [graph, setGraph] = useState<dia.Graph | null>(null)
   const [paper, setPaper] = useState<dia.Paper | null>(null)
   const [scale, setScale] = useState(1)
@@ -49,134 +52,61 @@ export function GraphCanvas({
     eventHandler.setupEvents()
     eventHandlerRef.current = eventHandler
 
-    // Enable mouse wheel for zoom (with Ctrl/Cmd) or pan (without)
-    let isPanning = false
-    let startPan = { x: 0, y: 0 }
+    // Setup interaction handlers
+    const zoomHandler = new ZoomHandler({
+      paper,
+      container: containerRef.current,
+      minScale: 0.2,
+      maxScale: 3,
+      zoomFactor: 1.1,
+      onScaleChange: setScale
+    })
+    zoomHandlerRef.current = zoomHandler
 
+    const panHandler = new PanHandler({ paper })
+    panHandlerRef.current = panHandler
+
+    const keyboardHandler = new KeyboardHandler({ zoomHandler })
+    keyboardHandler.setup()
+    keyboardHandlerRef.current = keyboardHandler
+
+    // Mouse wheel: Ctrl/Cmd + scroll = zoom, scroll = pan
     const handleWheel = (evt: WheelEvent) => {
       evt.preventDefault()
-      
-      // Zoom with Ctrl/Cmd + scroll
+
       if (evt.ctrlKey || evt.metaKey) {
-        const oldScale = paper.scale()
-        const delta = evt.deltaY > 0 ? 0.9 : 1.1
-        const newScale = oldScale.sx * delta
-        
-        // Limit scale between 0.2 and 3
-        if (newScale >= 0.2 && newScale <= 3) {
-          // Get cursor position relative to the paper
-          const rect = containerRef.current!.getBoundingClientRect()
-          const cursorX = evt.clientX - rect.left
-          const cursorY = evt.clientY - rect.top
-          
-          // Get current transform
-          const currentTranslate = paper.translate()
-          
-          // Calculate point in paper coordinates before scaling
-          const pointBeforeZoom = {
-            x: (cursorX - currentTranslate.tx) / oldScale.sx,
-            y: (cursorY - currentTranslate.ty) / oldScale.sy
-          }
-          
-          // Apply new scale
-          paper.scale(newScale, newScale)
-          setScale(newScale)
-          
-          // Calculate new translation to keep cursor point fixed
-          const newTx = cursorX - pointBeforeZoom.x * newScale
-          const newTy = cursorY - pointBeforeZoom.y * newScale
-          
-          paper.translate(newTx, newTy)
-        }
-      } 
-      // Pan without modifier keys
-      else {
-        const currentTranslate = paper.translate()
-        // Use deltaX for horizontal scroll, deltaY for vertical scroll
-        paper.translate(
-          currentTranslate.tx - evt.deltaX,
-          currentTranslate.ty - evt.deltaY
-        )
+        // Zoom at cursor position
+        const zoomIn = evt.deltaY < 0
+        zoomHandler.zoomAtPoint(evt.clientX, evt.clientY, zoomIn)
+      } else {
+        // Pan
+        panHandler.pan(-evt.deltaX, -evt.deltaY)
       }
     }
 
-    // Enable panning with blank paper drag
+    // Blank area drag to pan
     const handleBlankPointerDown = (evt: dia.Event, x: number, y: number) => {
-      isPanning = true
-      startPan = { x: (evt as any).clientX || x, y: (evt as any).clientY || y }
-      paper.el.style.cursor = 'grabbing'
+      const clientX = (evt as any).clientX || x
+      const clientY = (evt as any).clientY || y
+      panHandler.startPan(clientX, clientY)
     }
 
-    const handleMouseMove = (evt: MouseEvent) => {
-      if (!isPanning) return
-      const dx = evt.clientX - startPan.x
-      const dy = evt.clientY - startPan.y
-      
-      // Get current translation and add the delta
-      const currentTranslate = paper.translate()
-      paper.translate(currentTranslate.tx + dx, currentTranslate.ty + dy)
-      
-      startPan = { x: evt.clientX, y: evt.clientY }
-    }
-
-    const handleMouseUp = () => {
-      if (isPanning) {
-        isPanning = false
-        paper.el.style.cursor = 'default'
-      }
-    }
-
-    // Keyboard shortcuts for zoom
-    const handleKeyDown = (evt: KeyboardEvent) => {
-      // Ctrl/Cmd + Plus/Equals for zoom in
-      if ((evt.ctrlKey || evt.metaKey) && (evt.key === '+' || evt.key === '=')) {
-        evt.preventDefault()
-        const currentScale = paper.scale()
-        const newScale = currentScale.sx * 1.2
-        if (newScale <= 3) {
-          paper.scale(newScale, newScale)
-          setScale(newScale)
-        }
-      }
-      // Ctrl/Cmd + Minus for zoom out
-      else if ((evt.ctrlKey || evt.metaKey) && evt.key === '-') {
-        evt.preventDefault()
-        const currentScale = paper.scale()
-        const newScale = currentScale.sx / 1.2
-        if (newScale >= 0.2) {
-          paper.scale(newScale, newScale)
-          setScale(newScale)
-        }
-      }
-      // Ctrl/Cmd + 0 for reset zoom
-      else if ((evt.ctrlKey || evt.metaKey) && evt.key === '0') {
-        evt.preventDefault()
-        paper.scale(1, 1)
-        setScale(1)
-      }
-    }
-
-    // Attach wheel event for zooming
+    // Attach event listeners
     containerRef.current.addEventListener('wheel', handleWheel, { passive: false })
-    
-    // Attach panning events
     paper.on('blank:pointerdown', handleBlankPointerDown)
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
-    
-    // Attach keyboard shortcuts
-    document.addEventListener('keydown', handleKeyDown)
 
     // Cleanup
     return () => {
       containerRef.current?.removeEventListener('wheel', handleWheel)
       paper.off('blank:pointerdown', handleBlankPointerDown)
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-      document.removeEventListener('keydown', handleKeyDown)
+      keyboardHandler.cleanup()
+      panHandler.cleanup()
       eventHandler.cleanup()
       cleanupGraph({ graph, paper })
       eventHandlerRef.current = null
+      zoomHandlerRef.current = null
+      panHandlerRef.current = null
+      keyboardHandlerRef.current = null
       setGraph(null)
       setPaper(null)
     }
