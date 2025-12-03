@@ -8,6 +8,7 @@ import { ShapesFactory } from '../shapes'
 import { GraphEventHandler, ZoomHandler, PanHandler, KeyboardHandler } from '../features'
 import { GraphToolbar } from '../toolbar/GraphToolbar'
 import { GraphModel } from '../../../models'
+import { getThemedColors } from '../../../types/theme'
 import type { GraphCanvasProps } from '../utils/types'
 
 export type { GraphCanvasProps }
@@ -125,6 +126,18 @@ export const GraphCanvas = observer(function GraphCanvas({
       keyboardHandlerRef.current = null
     }
   }, [width, height, stableConfig, model])
+
+  // Separate effect to update theme-related styles without reinitializing graph
+  useEffect(() => {
+    if (!model.paper) return
+
+    const themed = getThemedColors(tenantConfig.theme)
+    
+    // Update paper background color when theme changes
+    model.paper.drawBackground({
+      color: themed.canvas.background
+    })
+  }, [tenantConfig.theme, model])
 
   return (
     <div 

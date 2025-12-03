@@ -113,7 +113,7 @@ export function getThemedColors(theme: Theme) {
     
     // Toolbar uses secondary brand color
     toolbar: {
-      background: brand?.secondary || colors.backgroundSecondary,
+      background: colors.backgroundSecondary,
       borderColor: colors.border,
       text: colors.text,
       textSecondary: colors.textSecondary,
