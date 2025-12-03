@@ -49,20 +49,54 @@ export function GraphCanvas({
     eventHandler.setupEvents()
     eventHandlerRef.current = eventHandler
 
-    // Enable mouse wheel zoom
+    // Enable mouse wheel for zoom (with Ctrl/Cmd) or pan (without)
     let isPanning = false
     let startPan = { x: 0, y: 0 }
 
     const handleWheel = (evt: WheelEvent) => {
       evt.preventDefault()
-      const oldScale = paper.scale()
-      const delta = evt.deltaY > 0 ? 0.9 : 1.1
-      const newScale = oldScale.sx * delta
       
-      // Limit scale between 0.2 and 3
-      if (newScale >= 0.2 && newScale <= 3) {
-        paper.scale(newScale, newScale)
-        setScale(newScale)
+      // Zoom with Ctrl/Cmd + scroll
+      if (evt.ctrlKey || evt.metaKey) {
+        const oldScale = paper.scale()
+        const delta = evt.deltaY > 0 ? 0.9 : 1.1
+        const newScale = oldScale.sx * delta
+        
+        // Limit scale between 0.2 and 3
+        if (newScale >= 0.2 && newScale <= 3) {
+          // Get cursor position relative to the paper
+          const rect = containerRef.current!.getBoundingClientRect()
+          const cursorX = evt.clientX - rect.left
+          const cursorY = evt.clientY - rect.top
+          
+          // Get current transform
+          const currentTranslate = paper.translate()
+          
+          // Calculate point in paper coordinates before scaling
+          const pointBeforeZoom = {
+            x: (cursorX - currentTranslate.tx) / oldScale.sx,
+            y: (cursorY - currentTranslate.ty) / oldScale.sy
+          }
+          
+          // Apply new scale
+          paper.scale(newScale, newScale)
+          setScale(newScale)
+          
+          // Calculate new translation to keep cursor point fixed
+          const newTx = cursorX - pointBeforeZoom.x * newScale
+          const newTy = cursorY - pointBeforeZoom.y * newScale
+          
+          paper.translate(newTx, newTy)
+        }
+      } 
+      // Pan without modifier keys
+      else {
+        const currentTranslate = paper.translate()
+        // Use deltaX for horizontal scroll, deltaY for vertical scroll
+        paper.translate(
+          currentTranslate.tx - evt.deltaX,
+          currentTranslate.ty - evt.deltaY
+        )
       }
     }
 
