@@ -16,7 +16,7 @@ function App() {
         tenantOptions={[dnaPlatformTenant, perfectedClaimsTenant]}
       /> */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <LeftSidebar />
+        <LeftSidebar resources={tenant.data.resources} />
         <div style={{ flex: 1, overflow: 'hidden' }}>
           <GraphCanvas 
             tenantConfig={tenant} 
