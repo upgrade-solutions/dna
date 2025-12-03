@@ -2,11 +2,10 @@ import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
 import { dia } from '@joint/plus'
 import { dnaPlatformTenant } from '../../../data'
 import { resourceToGraph } from '../../../graph/mappers'
-import { initializeGraph, cleanupGraph } from './graph-init'
-import { ShapesFactory } from './shapes-factory'
-import { GraphEventHandler } from './event-handler'
-import { populateGraph } from './utils'
-import type { GraphCanvasProps } from './types'
+import { initializeGraph, cleanupGraph, populateGraph } from '../utils'
+import { ShapesFactory } from '../shapes'
+import { GraphEventHandler } from '../features'
+import type { GraphCanvasProps } from '../utils/types'
 
 /**
  * Ref handle to expose graph and paper instances

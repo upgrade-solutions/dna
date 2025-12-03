@@ -1,5 +1,5 @@
 import { dia } from '@joint/plus'
-import { ShapesFactory } from './shapes-factory'
+import { ShapesFactory } from '../shapes'
 import type { GraphData } from './types'
 
 /**

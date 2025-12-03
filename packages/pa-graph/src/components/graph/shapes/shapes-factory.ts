@@ -1,6 +1,6 @@
 import { shapes } from '@joint/plus'
 import { dnaPlatformTenant } from '../../../data'
-import type { NodeData, EdgeData } from './types'
+import type { NodeData, EdgeData } from '../utils/types'
 
 /**
  * Factory for creating JointJS node elements from node data

@@ -2,12 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { dia } from '@joint/plus'
 import { dnaPlatformTenant } from '../../../data'
 import { resourceToGraph } from '../../../graph/mappers'
-import { initializeGraph, cleanupGraph } from './graph-init'
-import { ShapesFactory } from './shapes-factory'
-import { GraphEventHandler } from './event-handler'
-import { populateGraph } from './utils'
+import { initializeGraph, cleanupGraph, populateGraph } from '../utils'
+import { ShapesFactory } from '../shapes'
+import { GraphEventHandler } from '../features'
 import { GraphToolbar } from '../toolbar/GraphToolbar'
-import type { GraphCanvasProps } from './types'
+import type { GraphCanvasProps } from '../utils/types'
 
 export type { GraphCanvasProps }
 
@@ -62,16 +61,15 @@ export function GraphCanvas({
       
       // Limit scale between 0.2 and 3
       if (newScale >= 0.2 && newScale <= 3) {
-        const mousePosition = { x: evt.offsetX, y: evt.offsetY }
-        paper.scale(newScale, newScale, mousePosition.x, mousePosition.y)
+        paper.scale(newScale, newScale)
         setScale(newScale)
       }
     }
 
     // Enable panning with blank paper drag
-    const handleBlankPointerDown = (evt: dia.Event) => {
+    const handleBlankPointerDown = (evt: dia.Event, x: number, y: number) => {
       isPanning = true
-      startPan = { x: evt.clientX, y: evt.clientY }
+      startPan = { x: (evt as any).clientX || x, y: (evt as any).clientY || y }
       paper.el.style.cursor = 'grabbing'
     }
 

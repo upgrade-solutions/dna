@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { dia } from '@joint/plus'
+import { zoomIn, zoomOut, resetZoom, zoomToFit } from '../actions'
 
 // Simple SVG icons
 const ZoomInIcon = () => (
@@ -53,39 +54,30 @@ export function GraphToolbar({ graph, paper, scale: externalScale, onScaleChange
 
   const handleZoomIn = useCallback(() => {
     if (!paper) return
-    const currentScale = paper.scale()
-    const newScale = currentScale.sx * 1.2
-    paper.scale(newScale, newScale)
+    const newScale = zoomIn(paper)
     setInternalScale(newScale)
     onScaleChange?.(newScale)
   }, [paper, onScaleChange])
 
   const handleZoomOut = useCallback(() => {
     if (!paper) return
-    const currentScale = paper.scale()
-    const newScale = currentScale.sx / 1.2
-    paper.scale(newScale, newScale)
+    const newScale = zoomOut(paper)
     setInternalScale(newScale)
     onScaleChange?.(newScale)
   }, [paper, onScaleChange])
 
   const handleFitToContent = useCallback(() => {
     if (!paper) return
-    paper.transformToFitContent({
-      padding: 50,
-      maxScale: 1.5,
-      minScale: 0.2
-    })
-    const newScale = paper.scale()
-    setInternalScale(newScale.sx)
-    onScaleChange?.(newScale.sx)
+    const newScale = zoomToFit(paper)
+    setInternalScale(newScale)
+    onScaleChange?.(newScale)
   }, [paper, onScaleChange])
 
   const handleResetZoom = useCallback(() => {
     if (!paper) return
-    paper.scale(1, 1)
-    setInternalScale(1)
-    onScaleChange?.(1)
+    const newScale = resetZoom(paper)
+    setInternalScale(newScale)
+    onScaleChange?.(newScale)
   }, [paper, onScaleChange])
 
   return (
