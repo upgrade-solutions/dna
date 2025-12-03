@@ -41,6 +41,7 @@ export interface LayersControlProps {
 export const LayersControl = observer(function LayersControl({ layerManager, theme }: LayersControlProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 })
+  const [, forceUpdate] = useState({})
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const themed = getThemedColors(theme)
@@ -74,28 +75,28 @@ export const LayersControl = observer(function LayersControl({ layerManager, the
   const handleToggleLayer = useCallback((layerId: string) => {
     if (!layerManager) return
     layerManager.toggleLayerVisibility(layerId)
+    forceUpdate({}) // Force re-render
   }, [layerManager])
 
   const handleShowAll = useCallback(() => {
     if (!layerManager) return
     layerManager.showAllLayers()
+    forceUpdate({}) // Force re-render
   }, [layerManager])
 
   const handleHideAll = useCallback(() => {
     if (!layerManager) return
     layerManager.hideAllLayers()
+    forceUpdate({}) // Force re-render
   }, [layerManager])
 
   if (!layerManager) return null
 
-  const languageLayers = layerManager.getLayersByCategory('language')
-  const runtimeLayers = layerManager.getLayersByCategory('runtime')
+  const allLayers = layerManager.getAllLayers()
 
   const renderLayerItem = (layer: LayerConfig) => {
-    const count = layerManager.countCellsInLayer(layer.id)
-    
-    // Show all layers for debugging (you can add back the filter later)
-    // if (count === 0) return null
+    // For language/runtime layers, count all cells with that property set
+    const count = layerManager.countCellsWithProperty(layer.category)
 
     return (
       <div
@@ -146,31 +147,6 @@ export const LayersControl = observer(function LayersControl({ layerManager, the
         }}>
           {count}
         </span>
-      </div>
-    )
-  }
-
-  const renderCategory = (title: string, layers: LayerConfig[]) => {
-    // Show all layers for debugging
-    const visibleLayers = layers
-    
-    if (visibleLayers.length === 0) return null
-
-    return (
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ 
-          fontSize: '11px', 
-          fontWeight: '600',
-          textTransform: 'uppercase',
-          color: themed.toolbar.textSecondary,
-          padding: '8px 12px 4px',
-          letterSpacing: '0.5px'
-        }}>
-          {title}
-        </div>
-        <div>
-          {visibleLayers.map(renderLayerItem)}
-        </div>
       </div>
     )
   }
@@ -292,9 +268,10 @@ export const LayersControl = observer(function LayersControl({ layerManager, the
               Hide All
             </button>
           </div>
-          {/* Layer Categories */}
-          {renderCategory('Languages', languageLayers)}
-          {renderCategory('Runtimes', runtimeLayers)}
+          {/* Layer List */}
+          <div style={{ padding: '4px 0' }}>
+            {allLayers.map(renderLayerItem)}
+          </div>
         </div>
       )}
     </div>

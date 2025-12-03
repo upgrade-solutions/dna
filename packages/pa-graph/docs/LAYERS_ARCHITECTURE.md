@@ -52,110 +52,45 @@ Each layer can apply visual treatments to resources:
 
 ### **Layer Manager Role**
 
-The LayerManager doesn't control cell visibility—it controls **what visual decorations are active**:
+The LayerManager controls **what visual decorations are active** rather than cell visibility. It manages which property visualizations (language badges, runtime badges) are currently displayed on nodes.
 
-```typescript
-export class LayerManager {
-  private activeVisualizationModes: Set<'resource-type' | 'language' | 'runtime'>
-  private visualDecorators: Map<string, CellDecorator>
-  
-  // Toggle which properties are visually emphasized
-  toggleVisualizationMode(mode: 'resource-type' | 'language' | 'runtime') {
-    if (this.activeVisualizationModes.has(mode)) {
-      this.activeVisualizationModes.delete(mode)
-      this.removeDecorations(mode)
-    } else {
-      this.activeVisualizationModes.add(mode)
-      this.applyDecorations(mode)
-    }
-  }
-  
-  // Apply visual decorations to cells based on active modes
-  applyDecorations(mode: string) {
-    this.graph.getCells().forEach(cell => {
-      if (cell.isLink()) return
-      
-      const decorator = this.getDecoratorForMode(mode, cell)
-      decorator.apply(cell)
-    })
-  }
-}
-```
+**Core Responsibilities:**
+- Maintain registry of available visualization modes (language, runtime)
+- Track which modes are currently active
+- Apply/remove visual decorations when modes are toggled
+- Coordinate between layer state and visual rendering
 
 ### **Cell Decorator Pattern**
 
-Decorators apply visual treatments without modifying core cell data:
+Decorators apply visual treatments without modifying core cell data. Each decorator type knows how to:
+- Apply its specific visual treatment (badges, glows, borders)
+- Remove its visual treatment cleanly
+- Target the correct markup selectors in ResourceNode
 
-```typescript
-interface CellDecorator {
-  apply(cell: dia.Cell): void
-  remove(cell: dia.Cell): void
-}
-
-class LanguageBadgeDecorator implements CellDecorator {
-  apply(cell: dia.Cell) {
-    const language = cell.get('dna')?.language
-    if (!language) return
-    
-    // Add language icon badge to top-right corner
-    cell.attr('languageBadge/xlink:href', getLanguageIcon(language))
-    cell.attr('languageBadge/x', '85%')
-    cell.attr('languageBadge/y', '5%')
-  }
-  
-  remove(cell: dia.Cell) {
-    cell.removeAttr('languageBadge')
-  }
-}
-
-class RuntimeGlowDecorator implements CellDecorator {
-  apply(cell: dia.Cell) {
-    const runtime = cell.get('dna')?.runtime
-    if (!runtime) return
-    
-    // Add colored glow based on runtime
-    const color = getRuntimeColor(runtime)
-    cell.attr('body/filter', {
-      name: 'dropShadow',
-      args: { dx: 0, dy: 0, blur: 8, color, opacity: 0.6 }
-    })
-  }
-  
-  remove(cell: dia.Cell) {
-    cell.removeAttr('body/filter')
-  }
-}
-```
+**Decorator Types:**
+- **Badge Decorators**: Add icon overlays in specific positions
+- **Glow Decorators**: Apply shadow/filter effects
+- **Border Decorators**: Modify stroke properties
+- **Pattern Decorators**: Apply background textures or patterns
 
 ---
 
 ## 4. Updated Shape Definition
 
-Shapes need markup for decoration elements:
+Shapes need markup for decoration elements. The ResourceNode shape includes:
 
-```typescript
-export class ResourceNode extends shapes.standard.Rectangle {
-  defaults() {
-    return {
-      ...super.defaults,
-      markup: [
-        { tagName: 'rect', selector: 'body' },
-        { tagName: 'image', selector: 'icon' },          // Resource type (always visible)
-        { tagName: 'image', selector: 'languageBadge' }, // Language layer
-        { tagName: 'image', selector: 'runtimeBadge' },  // Runtime layer
-        { tagName: 'text', selector: 'label' }
-      ],
-      attrs: {
-        body: { /* ... */ },
-        icon: { /* resource type icon */ },
-        languageBadge: { width: 20, height: 20, opacity: 0 }, // Hidden by default
-        runtimeBadge: { width: 20, height: 20, opacity: 0 },  // Hidden by default
-        label: { /* ... */ }
-      }
-    }
-  }
-}
-```
+**Markup Elements:**
+- `body`: Main rectangle background
+- `icon`: Resource type icon (center, always visible)
+- `languageBadge`: Language icon selector (top-right corner)
+- `runtimeBadge`: Runtime icon selector (bottom-right corner)
+- `label`: Resource name text
+
+**Key Attributes:**
+- Badge elements start with `opacity: 0` (hidden)
+- Positioned in corners to avoid overlap
+- Use `xlink:href` for icon images
+- Support for width/height sizing
 
 ---
 
@@ -189,31 +124,32 @@ The layers dropdown becomes a **visualization mode selector**:
 
 ## 6. Implementation Phases
 
-### **Phase 1: Foundation**
-- ✅ LayerManager class structure
-- ✅ Layer configuration system
-- ✅ UI controls in toolbar
+### **Phase 1: Foundation** ✅
+- LayerManager class structure
+- Layer configuration system  
+- UI controls in toolbar
+- ResourceNode shape with badge selectors
 
-### **Phase 2: Decorator System** (Current Focus)
-- [ ] Define CellDecorator interface
-- [ ] Implement LanguageBadgeDecorator
-- [ ] Implement RuntimeBadgeDecorator
-- [ ] Create decorator registry
+### **Phase 2: Decorator System** (Next)
+- Define CellDecorator interface
+- Implement LanguageBadgeDecorator
+- Implement RuntimeBadgeDecorator
+- Create decorator registry
 
 ### **Phase 3: Shape Integration**
-- [ ] Update ResourceNode markup with badge selectors
-- [ ] Position badge elements in corners
-- [ ] Add icon mappers for languages and runtimes
+- Connect decorators to layer toggle events
+- Position badge elements correctly
+- Add icon mappers for languages and runtimes
 
 ### **Phase 4: Interactive Toggling**
-- [ ] Connect UI controls to decorator system
-- [ ] Animate badge appearance/disappearance
-- [ ] Handle multi-layer combinations
+- Animate badge appearance/disappearance
+- Handle multi-layer combinations
+- Update cell counts in UI
 
 ### **Phase 5: Advanced Visualizations**
-- [ ] Add border/glow effects
-- [ ] Implement color coding
-- [ ] Add filtering by property (show only TypeScript resources)
+- Add border/glow effects
+- Implement color coding
+- Add filtering by property
 
 ---
 

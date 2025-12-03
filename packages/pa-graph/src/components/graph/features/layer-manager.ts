@@ -1,4 +1,5 @@
 import { dia } from '@joint/plus'
+import { LanguageBadgeDecorator, RuntimeBadgeDecorator, type CellDecorator } from './decorators'
 
 export interface LayerConfig {
   id: string
@@ -14,47 +15,34 @@ export interface LayerConfig {
  */
 export class LayerManager {
   private graph: dia.Graph
-  private paper: dia.Paper
   private layerConfigs: Map<string, LayerConfig>
+  private decorators: Map<string, CellDecorator>
 
-  constructor(graph: dia.Graph, paper: dia.Paper) {
+  constructor(graph: dia.Graph, _paper: dia.Paper) {
     this.graph = graph
-    this.paper = paper
     this.layerConfigs = new Map()
+    this.decorators = new Map()
     this.initializeDefaultLayers()
+    this.initializeDecorators()
+  }
+
+  /**
+   * Initialize decorators for each layer type
+   */
+  private initializeDecorators(): void {
+    this.decorators.set('language', new LanguageBadgeDecorator())
+    this.decorators.set('runtime', new RuntimeBadgeDecorator())
   }
 
   /**
    * Initialize default language and runtime layers
    */
   private initializeDefaultLayers(): void {
-    // Language layers (hidden by default)
-    this.createLayer('language-typescript', 'TypeScript', 'language', { visible: false })
-    this.createLayer('language-javascript', 'JavaScript', 'language', { visible: false })
-    this.createLayer('language-python', 'Python', 'language', { visible: false })
-    this.createLayer('language-go', 'Go', 'language', { visible: false })
-    this.createLayer('language-rust', 'Rust', 'language', { visible: false })
-    this.createLayer('language-java', 'Java', 'language', { visible: false })
-    this.createLayer('language-csharp', 'C#', 'language', { visible: false })
-    this.createLayer('language-php', 'PHP', 'language', { visible: false })
-    this.createLayer('language-ruby', 'Ruby', 'language', { visible: false })
-    this.createLayer('language-other', 'Other', 'language', { visible: false })
-
-    // Runtime layers (hidden by default)
-    this.createLayer('runtime-deno', 'Deno', 'runtime', { visible: false })
-    this.createLayer('runtime-nodejs', 'Node.js', 'runtime', { visible: false })
-    this.createLayer('runtime-bun', 'Bun', 'runtime', { visible: false })
-    this.createLayer('runtime-python', 'Python', 'runtime', { visible: false })
-    this.createLayer('runtime-go', 'Go', 'runtime', { visible: false })
-    this.createLayer('runtime-docker', 'Docker', 'runtime', { visible: false })
-    this.createLayer('runtime-kubernetes', 'Kubernetes', 'runtime', { visible: false })
-    this.createLayer('runtime-postgresql', 'PostgreSQL', 'runtime', { visible: false })
-    this.createLayer('runtime-mysql', 'MySQL', 'runtime', { visible: false })
-    this.createLayer('runtime-mongodb', 'MongoDB', 'runtime', { visible: false })
-    this.createLayer('runtime-redis', 'Redis', 'runtime', { visible: false })
-    this.createLayer('runtime-rabbitmq', 'RabbitMQ', 'runtime', { visible: false })
-    this.createLayer('runtime-kafka', 'Kafka', 'runtime', { visible: false })
-    this.createLayer('runtime-other', 'Other', 'runtime', { visible: false })
+    // Single language layer - controls visibility of all language badges
+    this.createLayer('language', 'Language', 'language', { visible: false })
+    
+    // Single runtime layer - controls visibility of all runtime badges
+    this.createLayer('runtime', 'Runtime', 'runtime', { visible: false })
   }
 
   /**
@@ -115,8 +103,21 @@ export class LayerManager {
     const newVisibility = !config.visible
     config.visible = newVisibility
 
-    // Force paper to re-render affected cells
-    this.refreshCellVisibility()
+    // Apply or remove decorators based on new visibility
+    const decorator = this.decorators.get(layerId)
+    if (decorator) {
+      const cells = this.graph.getCells()
+
+      cells.forEach(cell => {
+        if (newVisibility) {
+          decorator.apply(cell)
+        } else {
+          decorator.remove(cell)
+        }
+      })
+    } else {
+      console.warn('[LayerManager] No decorator found for layer:', layerId)
+    }
 
     return newVisibility
   }
@@ -134,8 +135,17 @@ export class LayerManager {
 
     config.visible = visible
 
-    // Force paper to re-render affected cells
-    this.refreshCellVisibility()
+    // Apply or remove decorators based on visibility
+    const decorator = this.decorators.get(layerId)
+    if (decorator) {
+      this.graph.getCells().forEach(cell => {
+        if (visible) {
+          decorator.apply(cell)
+        } else {
+          decorator.remove(cell)
+        }
+      })
+    }
   }
 
   /**
@@ -179,6 +189,17 @@ export class LayerManager {
    */
   countCellsInLayer(layerId: string): number {
     return this.getCellsInLayer(layerId).length
+  }
+
+  /**
+   * Count cells that have a specific property (language or runtime)
+   */
+  countCellsWithProperty(property: 'language' | 'runtime'): number {
+    return this.graph.getCells().filter(cell => {
+      if (cell.isLink()) return false
+      const dna = cell.get('dna')
+      return dna && dna[property] !== undefined && dna[property] !== null
+    }).length
   }
 
   /**
@@ -230,27 +251,10 @@ export class LayerManager {
   }
 
   /**
-   * Refresh cell visibility by triggering a batch update
-   * This forces the paper to re-evaluate which cells should be visible
-   */
-  private refreshCellVisibility(): void {
-    // Trigger a batch update to refresh all cell views
-    this.graph.getCells().forEach(cell => {
-      const view = this.paper.findViewByModel(cell)
-      if (view) {
-        const visible = this.isCellVisible(cell)
-        // Toggle visibility using CSS
-        if (view.el) {
-          view.el.style.display = visible ? '' : 'none'
-        }
-      }
-    })
-  }
-
-  /**
    * Cleanup
    */
   cleanup(): void {
     this.layerConfigs.clear()
+    this.decorators.clear()
   }
 }
