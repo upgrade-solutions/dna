@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import { dia } from '@joint/plus'
 import { observer } from 'mobx-react-lite'
 import { dnaPlatformTenant } from '../../../data'
@@ -27,6 +27,15 @@ export const GraphCanvas = observer(function GraphCanvas({
   const panHandlerRef = useRef<PanHandler | null>(null)
   const keyboardHandlerRef = useRef<KeyboardHandler | null>(null)
 
+  // Memoize tenantConfig to prevent unnecessary rerenders when only theme changes
+  // Only reinitialize graph when data or styles actually change
+  const stableConfig = useMemo(() => tenantConfig, [
+    tenantConfig.id,
+    tenantConfig.data,
+    tenantConfig.styles,
+    tenantConfig.settings
+  ])
+
   useEffect(() => {
     if (!containerRef.current) return
 
@@ -35,7 +44,7 @@ export const GraphCanvas = observer(function GraphCanvas({
       container: containerRef.current,
       width,
       height,
-      tenantConfig
+      tenantConfig: stableConfig
     })
 
     // Store in MobX model
@@ -43,10 +52,10 @@ export const GraphCanvas = observer(function GraphCanvas({
     model.setPaper(paper)
 
     // Create shapes factory for cell creation
-    const shapesFactory = new ShapesFactory(tenantConfig)
+    const shapesFactory = new ShapesFactory(stableConfig)
 
     // Load and populate graph with tenant data
-    const graphData = resourceToGraph(tenantConfig.data)
+    const graphData = resourceToGraph(stableConfig.data)
     populateGraph(graph, graphData, shapesFactory)
 
     // Setup interaction handlers (zoom handler needed for event handler)
@@ -63,7 +72,7 @@ export const GraphCanvas = observer(function GraphCanvas({
     // Setup event handlers (pass zoom handler for double-click zoom)
     const eventHandler = new GraphEventHandler(
       paper, 
-      tenantConfig, 
+      stableConfig, 
       (cellView) => model.setSelectedCellView(cellView),
       zoomHandler
     )
@@ -115,7 +124,7 @@ export const GraphCanvas = observer(function GraphCanvas({
       panHandlerRef.current = null
       keyboardHandlerRef.current = null
     }
-  }, [width, height, tenantConfig, model])
+  }, [width, height, stableConfig, model])
 
   return (
     <div 

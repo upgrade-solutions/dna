@@ -44,16 +44,19 @@ export class GraphEventHandler {
       }
       
       // Highlight and track new selection with 2px theme color border (convention)
-      cellView.highlight(null, {
+      // Use 'body' selector specifically to only highlight the body rect, not the entire cell
+      cellView.highlight('body', {
         highlighter: {
           name: 'stroke',
           options: {
-            padding: 0,
+            padding: 3,
             rx: 8,
             ry: 8,
             attrs: {
               'stroke-width': 2,
-              stroke: this.tenantConfig.styles.nodes[cellView.model.get('type')]?.stroke || '#3b82f6'
+              stroke: this.tenantConfig.styles.nodes[cellView.model.get('type')]?.stroke || '#3b82f6',
+              'fill': 'none',
+              'pointer-events': 'none'
             }
           }
         }
