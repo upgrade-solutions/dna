@@ -5,9 +5,11 @@ interface HeaderProps {
   tenant: TenantConfig
   onTenantChange: (tenant: TenantConfig) => void
   tenantOptions: TenantConfig[]
+  isDarkMode: boolean
+  onThemeToggle: () => void
 }
 
-export function Header({ tenant, onTenantChange, tenantOptions }: HeaderProps) {
+export function Header({ tenant, onTenantChange, tenantOptions, isDarkMode, onThemeToggle }: HeaderProps) {
   const themed = getThemedColors(tenant.theme)
   
   return (
@@ -28,9 +30,9 @@ export function Header({ tenant, onTenantChange, tenantOptions }: HeaderProps) {
           onClick={() => onTenantChange(option)}
           style={{
             padding: '0.5rem 1rem',
-            background: 'transparent',
-            color: tenant.id === option.id ? '#ffffff' : 'rgba(255, 255, 255, 0.7)',
-            border: `1px solid ${tenant.id === option.id ? '#ffffff' : 'rgba(255, 255, 255, 0.7)'}`,
+            background: tenant.id === option.id ? themed.header.buttonActive : themed.header.buttonInactive,
+            color: themed.header.buttonText,
+            border: `1px solid ${tenant.id === option.id ? themed.header.buttonActive : themed.header.borderColor}`,
             borderRadius: '0.375rem',
             cursor: 'pointer',
             fontSize: '0.875rem',
@@ -41,14 +43,33 @@ export function Header({ tenant, onTenantChange, tenantOptions }: HeaderProps) {
           {option.name}
         </button>
       ))}
-      <span style={{ 
-        marginLeft: 'auto', 
-        color: themed.header.textSecondary, 
-        fontSize: '0.75rem',
-        fontStyle: 'italic'
-      }}>
-        {tenant.description}
-      </span>
+      <button
+        onClick={onThemeToggle}
+        style={{
+          marginLeft: 'auto',
+          padding: '0.5rem',
+          background: 'transparent',
+          color: themed.header.text,
+          border: `1px solid ${themed.header.borderColor}`,
+          borderRadius: '0.375rem',
+          cursor: 'pointer',
+          fontSize: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'all 0.2s'
+        }}
+        title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+      >
+        <img 
+          src={isDarkMode 
+            ? 'https://api.iconify.design/mdi/white-balance-sunny.svg?color=white'
+            : `https://api.iconify.design/mdi/weather-night.svg?color=${encodeURIComponent(themed.header.text.replace('#', ''))}`
+          } 
+          alt={isDarkMode ? 'Light mode' : 'Dark mode'}
+          style={{ width: '20px', height: '20px' }}
+        />
+      </button>
     </div>
   )
 }
