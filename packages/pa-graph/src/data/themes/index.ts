@@ -6,7 +6,5 @@
 export { darkTheme } from './dark'
 export { lightTheme } from './light'
 
-// Account-specific themes
-export { dnaPlatformTheme } from './dna-platform'
-export { perfectedClaimsTheme } from './perfected-claims'
-export { inAudioTheme } from './inaudio'
+// Brand color mapper for account-specific theming
+export { accountBrandColors, createBrandedTheme, getAccountTheme } from './brand-mapper'

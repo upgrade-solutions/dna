@@ -5,7 +5,7 @@
 
 import type { GraphStyles, TenantSettings } from '../../default-config'
 import { baseNodeStyle, nodeTypeStyles } from '../../default-config'
-import { inAudioTheme } from '../../themes'
+import { getAccountTheme } from '../../themes/brand-mapper'
 
 // Base theme colors for inAudio audiobook distribution platform
 const theme = {
@@ -46,7 +46,7 @@ export const inAudioConfig = {
   id: 'inaudio',
   name: 'INaudio',
   description: 'Audiobook distribution platform with Voices and Passport applications',
-  theme: inAudioTheme,
+  theme: getAccountTheme('inaudio'),
   styles: {
     nodes: createBrandedNodes(),
     links: {
