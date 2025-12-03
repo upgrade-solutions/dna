@@ -108,8 +108,7 @@ export function GraphToolbar({ graph, paper, layerManager, scale: externalScale,
           alignItems: 'center',
           gap: '8px',
           padding: '8px 12px',
-          overflowX: 'auto',
-          overflowY: 'visible',
+          overflow: 'hidden',
           height: '44px'
         }}
       >
