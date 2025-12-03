@@ -21,6 +21,7 @@ export type { GraphStyles, TenantSettings, NodeStyle, LinkStyle } from './defaul
 // Import account-specific tenants
 export { dnaPlatformTenant } from './accounts/dna-platform'
 export { perfectedClaimsTenant } from './accounts/perfected-claims'
+export { inAudioTenant } from './accounts/inaudio'
 
 // Default export is DNA Platform tenant
 export { dnaPlatformTenant as default } from './accounts/dna-platform'
