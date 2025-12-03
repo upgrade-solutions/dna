@@ -13,7 +13,7 @@ import type { GraphNode, GraphEdge } from './resourceToGraph'
  */
 function mapNodeTypeToResourceType(nodeType: string): Resource['type'] {
   const typeMap: Record<string, Resource['type']> = {
-    'web-app': 'web-application',
+    'web-application': 'web-application',
     'api': 'api',
     'database': 'database',
     'form': 'form-component',

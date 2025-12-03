@@ -51,9 +51,6 @@ export const nodeTypeStyles = {
   'web-application': {
     icon: 'https://api.iconify.design/mdi/web.svg?color=white'
   },
-  'web-app': {
-    icon: 'https://api.iconify.design/mdi/web.svg?color=white'
-  },
   'api': {
     icon: 'https://api.iconify.design/mdi/api.svg?color=white'
   },

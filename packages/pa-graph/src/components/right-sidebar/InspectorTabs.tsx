@@ -40,7 +40,7 @@ export function InspectorTabs({ activeTab, onTabChange, theme }: InspectorTabsPr
           }
         }}
       >
-        DNA Metadata
+        Metadata
       </button>
       <button
         onClick={() => onTabChange('properties')}
@@ -66,7 +66,7 @@ export function InspectorTabs({ activeTab, onTabChange, theme }: InspectorTabsPr
           }
         }}
       >
-        Node Properties
+        Node
       </button>
     </div>
   )

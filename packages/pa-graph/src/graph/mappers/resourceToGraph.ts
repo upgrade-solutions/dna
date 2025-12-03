@@ -58,7 +58,7 @@ function calculateNodePositions(resources: Resource[]): Map<string, { x: number;
  */
 function mapResourceTypeToNodeType(resourceType: Resource['type']): string {
   const typeMap: Record<Resource['type'], string> = {
-    'web-application': 'web-app',
+    'web-application': 'web-application',
     'api': 'api',
     'database': 'database',
     'form-component': 'form',

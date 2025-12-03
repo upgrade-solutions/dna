@@ -5,7 +5,7 @@ import { ui } from '@joint/plus'
  */
 
 export const dnaMetadataGroups = {
-  dna: { label: 'DNA Metadata', index: 1, closed: false },
+  dna: { label: 'Schema', index: 1, closed: false },
   data: { label: 'Data', index: 2, closed: true }
 }
 
@@ -20,6 +20,7 @@ export const nodePropertiesGroups = {
  */
 
 export const dnaNodeTypeOptions = [
+  { value: '', content: '' },
   { value: 'task', content: 'Task' },
   { value: 'resource', content: 'Resource' },
   { value: 'actor', content: 'Actor' },
@@ -28,11 +29,56 @@ export const dnaNodeTypeOptions = [
   { value: 'metric', content: 'Metric' }
 ]
 
+export const dnaResourceTypeOptions = [
+  { value: 'web-application', content: 'Web Application' },
+  { value: 'api', content: 'API' },
+  { value: 'database', content: 'Database' },
+  { value: 'service', content: 'Service' },
+  { value: 'file', content: 'File' },
+  { value: 'queue', content: 'Queue' },
+  { value: 'cache', content: 'Cache' },
+  { value: 'storage', content: 'Storage' },
+  { value: 'other', content: 'Other' }
+]
+
 export const dnaPriorityOptions = [
+  { value: '', content: '' },
   { value: 'low', content: 'Low Priority' },
   { value: 'medium', content: 'Medium Priority' },
   { value: 'high', content: 'High Priority' },
   { value: 'critical', content: 'Critical' }
+]
+
+export const dnaLanguageOptions = [
+  { value: '', content: '' },
+  { value: 'typescript', content: 'TypeScript' },
+  { value: 'javascript', content: 'JavaScript' },
+  { value: 'python', content: 'Python' },
+  { value: 'go', content: 'Go' },
+  { value: 'rust', content: 'Rust' },
+  { value: 'java', content: 'Java' },
+  { value: 'csharp', content: 'C#' },
+  { value: 'php', content: 'PHP' },
+  { value: 'ruby', content: 'Ruby' },
+  { value: 'other', content: 'Other' }
+]
+
+export const dnaRuntimeOptions = [
+  { value: '', content: '' },
+  { value: 'deno', content: 'Deno' },
+  { value: 'nodejs', content: 'Node.js' },
+  { value: 'bun', content: 'Bun' },
+  { value: 'python', content: 'Python' },
+  { value: 'go', content: 'Go' },
+  { value: 'docker', content: 'Docker' },
+  { value: 'kubernetes', content: 'Kubernetes' },
+  { value: 'postgresql', content: 'PostgreSQL' },
+  { value: 'mysql', content: 'MySQL' },
+  { value: 'mongodb', content: 'MongoDB' },
+  { value: 'redis', content: 'Redis' },
+  { value: 'rabbitmq', content: 'RabbitMQ' },
+  { value: 'kafka', content: 'Kafka' },
+  { value: 'other', content: 'Other' }
 ]
 
 /**
@@ -40,34 +86,59 @@ export const dnaPriorityOptions = [
  */
 
 export const dnaMetadataInputs = {
+  'attrs/label/text': {
+    type: 'text',
+    label: 'Name',
+    group: 'dna',
+    index: 1
+  },
+  'dna/resourceType': {
+    type: 'select',
+    label: 'Resource Type',
+    group: 'dna',
+    index: 2,
+    options: dnaResourceTypeOptions
+  },
+  'dna/language': {
+    type: 'select',
+    label: 'Language',
+    group: 'dna',
+    index: 3,
+    options: dnaLanguageOptions
+  },
+  'dna/runtime': {
+    type: 'select',
+    label: 'Runtime',
+    group: 'dna',
+    index: 4,
+    options: dnaRuntimeOptions
+  },
   'dna/type': {
     type: 'select',
     label: 'Node Type',
     group: 'dna',
-    index: 1,
-    options: dnaNodeTypeOptions,
-    defaultValue: 'task'
+    index: 5,
+    options: dnaNodeTypeOptions
   },
   'dna/description': {
     type: 'textarea',
     label: 'Description',
     group: 'dna',
-    index: 2,
+    index: 6,
     attrs: { textarea: { rows: 4, placeholder: 'Enter description...' } }
   },
   'dna/priority': {
     type: 'select',
     label: 'Priority',
     group: 'dna',
-    index: 3,
-    options: dnaPriorityOptions,
-    defaultValue: 'medium'
+    index: 7,
+    options: dnaPriorityOptions
   },
   'dna/tags': {
     type: 'list',
     label: 'Tags',
     group: 'dna',
-    index: 4,
+    index: 8,
     item: { type: 'text', placeholder: 'Add tag...' },
     addButtonLabel: '+ Add Tag',
     removeButtonLabel: '×'
@@ -76,14 +147,14 @@ export const dnaMetadataInputs = {
     type: 'text',
     label: 'Assignee',
     group: 'dna',
-    index: 5,
+    index: 9,
     placeholder: 'Assign to...'
   },
   'dna/status': {
     type: 'select',
     label: 'Status',
     group: 'dna',
-    index: 6,
+    index: 10,
     options: [
       { value: 'draft', content: 'Draft' },
       { value: 'active', content: 'Active' },
@@ -233,7 +304,7 @@ export function createLinkInspectorConfig(): Partial<ui.Inspector.Options> {
     groups: {
       basic: { label: 'Link Properties', index: 1, closed: false },
       style: { label: 'Style', index: 2, closed: false },
-      dna: { label: 'DNA Metadata', index: 3, closed: true }
+      dna: { label: 'Schema', index: 3, closed: true }
     },
     inputs: {
       labels: {

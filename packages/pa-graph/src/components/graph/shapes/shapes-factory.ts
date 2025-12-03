@@ -1,6 +1,7 @@
 import { shapes } from '@joint/plus'
 import type { TenantConfig } from '../../../data/tenant-config'
 import type { NodeData, EdgeData } from '../utils/types'
+import { getIconForResourceType } from '../../../utils/icon-mapper'
 
 /**
  * Factory for creating JointJS node elements from node data
@@ -17,8 +18,12 @@ export class ShapesFactory {
    */
   createNode(node: NodeData): shapes.standard.Rectangle {
     const nodeStyle = this.tenantConfig.styles.nodes[node.type] || this.tenantConfig.styles.defaultNode
+    
+    // Get resource type from metadata (e.g., 'web-application', 'api', 'database')
+    const resourceType = (node.metadata?.resourceType as string) || 'other'
+    const iconUrl = getIconForResourceType(resourceType)
 
-    return new shapes.standard.Rectangle({
+    const element = new shapes.standard.Rectangle({
       id: node.id,
       position: node.position,
       size: { width: 160, height: 80 },
@@ -44,7 +49,7 @@ export class ShapesFactory {
           ry: nodeStyle.ry || 8
         },
         icon: {
-          'xlink:href': nodeStyle.icon || 'https://api.iconify.design/mdi/cube-outline.svg?color=white',
+          'xlink:href': iconUrl,
           width: 24,
           height: 24,
           x: 68, // (160 - 24) / 2 = 68
@@ -62,6 +67,20 @@ export class ShapesFactory {
         }
       }
     })
+
+    // Set DNA metadata properties - explicitly set undefined for optional fields
+    // so Inspector knows they're unset rather than auto-selecting first option
+    element.set('dna', {
+      resourceType: resourceType,
+      language: (node.metadata?.language as string) || undefined,
+      runtime: (node.metadata?.runtime as string) || undefined,
+      description: (node.metadata?.description as string) || undefined,
+      type: undefined,
+      priority: undefined,
+      status: 'draft'
+    })
+
+    return element
   }
 
   /**

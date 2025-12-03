@@ -1,6 +1,7 @@
 import { makeAutoObservable } from 'mobx'
 import { dia } from '@joint/plus'
 import type { ZoomHandler } from '../components/graph/features'
+import { getIconForResourceType } from '../utils/icon-mapper'
 
 /**
  * MobX observable model for the graph state
@@ -22,6 +23,7 @@ export class GraphModel {
    */
   setGraph(graph: dia.Graph) {
     this.graph = graph
+    this.setupGraphListeners()
   }
 
   setPaper(paper: dia.Paper) {
@@ -30,6 +32,39 @@ export class GraphModel {
 
   setZoomHandler(zoomHandler: ZoomHandler) {
     this.zoomHandler = zoomHandler
+  }
+
+  /**
+   * Set up listeners for graph changes
+   * 
+   * Watches for changes to dna/resourceType and automatically updates
+   * the cell's icon to match the selected resource type.
+   * 
+   * This provides reactive icon updates when users change the resource type
+   * in the inspector dropdown without requiring manual refresh.
+   */
+  private setupGraphListeners() {
+    if (!this.graph) return
+
+    // Listen for changes to the 'dna' object (which contains resourceType)
+    this.graph.on('change:dna', (cell: dia.Cell) => {
+      const dnaData = cell.get('dna')
+      
+      if (dnaData && dnaData.resourceType) {
+        this.updateCellIcon(cell, dnaData.resourceType)
+      }
+    })
+  }
+
+  /**
+   * Update a cell's icon based on its resource type
+   * 
+   * Maps resource types (api, database, service, etc.) to their
+   * corresponding Iconify icons and updates the cell's visual representation.
+   */
+  updateCellIcon(cell: dia.Cell, resourceType: string) {
+    const iconUrl = getIconForResourceType(resourceType)
+    cell.attr('icon/xlink:href', iconUrl)
   }
 
   /**

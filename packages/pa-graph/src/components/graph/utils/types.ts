@@ -18,6 +18,7 @@ export interface NodeData {
   type: string
   label: string
   position: { x: number; y: number }
+  metadata?: Record<string, unknown>
 }
 
 export interface EdgeData {
@@ -26,6 +27,7 @@ export interface EdgeData {
   source: string
   target: string
   label?: string
+  metadata?: Record<string, unknown>
 }
 
 export interface GraphData {
