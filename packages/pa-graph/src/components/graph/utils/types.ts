@@ -1,10 +1,10 @@
 import { dia } from '@joint/plus'
-import { dnaPlatformTenant } from '../../../data'
+import type { TenantConfig } from '../../../data/tenant-config'
 
 export interface GraphCanvasProps {
   width?: number | string
   height?: number | string
-  tenantConfig?: typeof dnaPlatformTenant
+  tenantConfig?: TenantConfig
   onCellViewSelected?: (cellView: dia.CellView | null) => void
 }
 

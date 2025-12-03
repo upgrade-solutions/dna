@@ -1,15 +1,15 @@
 import { dia, shapes } from '@joint/plus'
-import { dnaPlatformTenant } from '../../../data'
+import type { TenantConfig } from '../../../data/tenant-config'
 import type { GraphInstance } from './types'
 
 /**
  * Configuration for initializing a JointJS graph and paper
  */
-export interface GraphInitConfig {
-  container: HTMLElement
-  width: number | string
-  height: number | string
-  tenantConfig: typeof dnaPlatformTenant
+interface GraphInitConfig {
+  container: HTMLDivElement
+  width: string | number
+  height: string | number
+  tenantConfig: TenantConfig
 }
 
 /**

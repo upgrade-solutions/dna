@@ -1,14 +1,14 @@
 import { shapes } from '@joint/plus'
-import { dnaPlatformTenant } from '../../../data'
+import type { TenantConfig } from '../../../data/tenant-config'
 import type { NodeData, EdgeData } from '../utils/types'
 
 /**
  * Factory for creating JointJS node elements from node data
  */
 export class ShapesFactory {
-  private tenantConfig: typeof dnaPlatformTenant
+  private tenantConfig: TenantConfig
 
-  constructor(tenantConfig: typeof dnaPlatformTenant) {
+  constructor(tenantConfig: TenantConfig) {
     this.tenantConfig = tenantConfig
   }
 

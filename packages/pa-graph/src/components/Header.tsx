@@ -1,4 +1,4 @@
-import type { TenantConfig } from '../types'
+import type { TenantConfig } from '../data/tenant-config'
 
 interface HeaderProps {
   tenant: TenantConfig

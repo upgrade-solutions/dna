@@ -4,7 +4,7 @@
  */
 
 import type { GraphStyles, TenantSettings } from '../../default-config'
-import { defaultStyles, baseNodeStyle, nodeTypeStyles } from '../../default-config'
+import { baseNodeStyle, nodeTypeStyles } from '../../default-config'
 
 // Base theme colors derived from perfectedclaims.com
 const theme = {

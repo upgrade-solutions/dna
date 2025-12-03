@@ -1,29 +1,31 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { dia } from '@joint/plus'
+import { observer } from 'mobx-react-lite'
 import { dnaPlatformTenant } from '../../../data'
 import { resourceToGraph } from '../../../graph/mappers'
 import { initializeGraph, cleanupGraph, populateGraph } from '../utils'
 import { ShapesFactory } from '../shapes'
 import { GraphEventHandler, ZoomHandler, PanHandler, KeyboardHandler } from '../features'
 import { GraphToolbar } from '../toolbar/GraphToolbar'
+import { GraphModel } from '../../../models'
 import type { GraphCanvasProps } from '../utils/types'
 
 export type { GraphCanvasProps }
 
-export function GraphCanvas({ 
+interface GraphCanvasPropsWithModel extends Omit<GraphCanvasProps, 'onCellViewSelected'> {
+  model: GraphModel
+}
+
+export const GraphCanvas = observer(function GraphCanvas({ 
   width = '100%', 
   height = '100vh',
   tenantConfig = dnaPlatformTenant,
-  onCellViewSelected
-}: GraphCanvasProps) {
+  model
+}: GraphCanvasPropsWithModel) {
   const containerRef = useRef<HTMLDivElement>(null)
   const eventHandlerRef = useRef<GraphEventHandler | null>(null)
-  const zoomHandlerRef = useRef<ZoomHandler | null>(null)
   const panHandlerRef = useRef<PanHandler | null>(null)
   const keyboardHandlerRef = useRef<KeyboardHandler | null>(null)
-  const [graph, setGraph] = useState<dia.Graph | null>(null)
-  const [paper, setPaper] = useState<dia.Paper | null>(null)
-  const [scale, setScale] = useState(1)
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -36,9 +38,9 @@ export function GraphCanvas({
       tenantConfig
     })
 
-    // Store graph and paper in state for toolbar
-    setGraph(graph)
-    setPaper(paper)
+    // Store in MobX model
+    model.setGraph(graph)
+    model.setPaper(paper)
 
     // Create shapes factory for cell creation
     const shapesFactory = new ShapesFactory(tenantConfig)
@@ -54,12 +56,17 @@ export function GraphCanvas({
       minScale: 0.2,
       maxScale: 3,
       zoomFactor: 1.1,
-      onScaleChange: setScale
+      onScaleChange: (scale) => model.setScale(scale)
     })
-    zoomHandlerRef.current = zoomHandler
+    model.setZoomHandler(zoomHandler)
 
     // Setup event handlers (pass zoom handler for double-click zoom)
-    const eventHandler = new GraphEventHandler(paper, tenantConfig, onCellViewSelected, zoomHandler)
+    const eventHandler = new GraphEventHandler(
+      paper, 
+      tenantConfig, 
+      (cellView) => model.setSelectedCellView(cellView),
+      zoomHandler
+    )
     eventHandler.setupEvents()
     eventHandlerRef.current = eventHandler
 
@@ -103,14 +110,12 @@ export function GraphCanvas({
       panHandler.cleanup()
       eventHandler.cleanup()
       cleanupGraph({ graph, paper })
+      model.cleanup()
       eventHandlerRef.current = null
-      zoomHandlerRef.current = null
       panHandlerRef.current = null
       keyboardHandlerRef.current = null
-      setGraph(null)
-      setPaper(null)
     }
-  }, [width, height, tenantConfig, onCellViewSelected])
+  }, [width, height, tenantConfig, model])
 
   return (
     <div 
@@ -121,10 +126,10 @@ export function GraphCanvas({
       }}
     >
       <GraphToolbar 
-        graph={graph} 
-        paper={paper}
-        scale={scale}
-        onScaleChange={setScale}
+        graph={model.graph} 
+        paper={model.paper}
+        scale={model.scale}
+        onScaleChange={(scale) => model.setScale(scale)}
       />
       <div 
         ref={containerRef} 
@@ -136,4 +141,4 @@ export function GraphCanvas({
       />
     </div>
   )
-}
+})

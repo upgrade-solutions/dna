@@ -3,7 +3,7 @@
  */
 
 import { defaultStyles, defaultSettings } from '../../default-config'
-import type { GraphStyles, TenantSettings } from '../../default-config'
+
 
 export const dnaPlatformConfig = {
   id: 'dna-platform',

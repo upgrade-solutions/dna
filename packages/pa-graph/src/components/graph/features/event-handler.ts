@@ -1,5 +1,5 @@
 import { dia } from '@joint/plus'
-import { dnaPlatformTenant } from '../../../data'
+import type { TenantConfig } from '../../../data/tenant-config'
 import type { ZoomHandler } from './zoom-handler'
 
 /**
@@ -8,13 +8,13 @@ import type { ZoomHandler } from './zoom-handler'
 export class GraphEventHandler {
   private selectedCellView: dia.CellView | null = null
   private paper: dia.Paper
-  private tenantConfig: typeof dnaPlatformTenant
+  private tenantConfig: TenantConfig
   private onCellViewSelected?: (cellView: dia.CellView | null) => void
   private zoomHandler?: ZoomHandler
 
   constructor(
     paper: dia.Paper,
-    tenantConfig: typeof dnaPlatformTenant,
+    tenantConfig: TenantConfig,
     onCellViewSelected?: (cellView: dia.CellView | null) => void,
     zoomHandler?: ZoomHandler
   ) {
