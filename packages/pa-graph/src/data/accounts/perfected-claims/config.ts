@@ -5,10 +5,9 @@
 
 import type { GraphStyles, TenantSettings } from '../../default-config'
 import { baseNodeStyle, nodeTypeStyles } from '../../default-config'
-import { getAccountTheme } from '../../themes/brand-mapper'
 
 // Base theme colors derived from perfectedclaims.com
-const theme = {
+export const perfectedClaimsTheme = {
   primary: '#1a4d8f',        // Deep professional blue (main brand color)
   secondary: '#2c5aa0',      // Lighter blue variant
   accent: '#3d7a3f',         // Justice green (accountability)
@@ -29,8 +28,8 @@ const theme = {
 // Custom base node style for Perfected Claims brand - inherits from theme
 const perfectedClaimsNodeStyle = {
   ...baseNodeStyle,
-  fill: theme.primary,
-  stroke: theme.primary,
+  fill: perfectedClaimsTheme.primary,
+  stroke: perfectedClaimsTheme.primary,
 }
 
 // Apply brand colors to all node types
@@ -46,33 +45,32 @@ export const perfectedClaimsConfig = {
   id: 'perfected-claims',
   name: 'Perfected Claims',
   description: 'Mass tort case management platform (perfectedclaims.com)',
-  theme: getAccountTheme('perfected-claims'),
   styles: {
     nodes: createBrandedNodes(),
     links: {
       'communicates-with': {
-        stroke: theme.text.secondary,
+        stroke: perfectedClaimsTheme.text.secondary,
         strokeWidth: 2
       },
       'depends-on': {
-        stroke: theme.secondary,
+        stroke: perfectedClaimsTheme.secondary,
         strokeWidth: 2,
         strokeDasharray: '6,4'
       },
       'reads-from': {
-        stroke: theme.accent,
+        stroke: perfectedClaimsTheme.accent,
         strokeWidth: 2
       },
       'writes-to': {
-        stroke: theme.warning,
+        stroke: perfectedClaimsTheme.warning,
         strokeWidth: 2
       },
       'contains': {
-        stroke: theme.primary,
+        stroke: perfectedClaimsTheme.primary,
         strokeWidth: 3
       },
       'renders': {
-        stroke: theme.info,
+        stroke: perfectedClaimsTheme.info,
         strokeWidth: 2
       }
     },
@@ -81,7 +79,7 @@ export const perfectedClaimsConfig = {
       icon: 'https://api.iconify.design/mdi/cube-outline.svg?color=white'
     },
     defaultLink: {
-      stroke: theme.text.secondary,
+      stroke: perfectedClaimsTheme.text.secondary,
       strokeWidth: 2
     }
   } as GraphStyles,
@@ -89,7 +87,7 @@ export const perfectedClaimsConfig = {
   settings: {
     gridSize: 15,
     drawGrid: true,
-    backgroundColor: theme.surface,
+    backgroundColor: perfectedClaimsTheme.surface,
     autoLayout: 'grid'
   } as TenantSettings
 }

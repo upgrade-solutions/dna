@@ -7,38 +7,52 @@
 import type { Theme, BrandColors } from '../../types/theme'
 import { darkTheme } from './dark'
 import { lightTheme } from './light'
+import { dnaPlatformTheme } from '../accounts/dna-platform/config'
+import { inAudioTheme } from '../accounts/inaudio/config'
+import { perfectedClaimsTheme } from '../accounts/perfected-claims/config'
 
 /**
- * Account-specific brand color definitions
+ * Convert hex color to rgba with alpha
+ */
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+/**
+ * Darken a hex color by a percentage
+ */
+function darkenColor(hex: string, percent: number): string {
+  const r = Math.max(0, parseInt(hex.slice(1, 3), 16) - Math.round(255 * percent))
+  const g = Math.max(0, parseInt(hex.slice(3, 5), 16) - Math.round(255 * percent))
+  const b = Math.max(0, parseInt(hex.slice(5, 7), 16) - Math.round(255 * percent))
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+}
+
+/**
+ * Extract brand colors from account theme configuration
+ */
+function toBrandColors(theme: typeof dnaPlatformTheme): BrandColors {
+  return {
+    primary: theme.primary,
+    primaryHover: theme.secondary || darkenColor(theme.primary, 0.1),
+    primaryLight: hexToRgba(theme.primary, 0.15),
+    secondary: theme.secondary || darkenColor(theme.primary, 0.2),
+    secondaryHover: theme.secondary ? darkenColor(theme.secondary, 0.1) : darkenColor(theme.primary, 0.3),
+    accent: theme.accent || theme.primary,
+    accentHover: theme.accent ? darkenColor(theme.accent, 0.1) : theme.secondary || darkenColor(theme.primary, 0.1),
+  }
+}
+
+/**
+ * Account-specific brand colors mapped from their theme definitions
  */
 export const accountBrandColors: Record<string, BrandColors> = {
-  'dna-platform': {
-    primary: '#2563eb',          // Vibrant blue
-    primaryHover: '#1d4ed8',
-    primaryLight: 'rgba(37, 99, 235, 0.15)',
-    secondary: '#0f1d3d',        // Dark blue
-    secondaryHover: '#1a2744',
-    accent: '#3b82f6',           // Lighter blue
-    accentHover: '#2563eb',
-  },
-  'inaudio': {
-    primary: '#6366f1',          // Vibrant indigo
-    primaryHover: '#5558e3',
-    primaryLight: 'rgba(99, 102, 241, 0.15)',
-    secondary: '#8b5cf6',        // Purple
-    secondaryHover: '#7c3aed',
-    accent: '#ec4899',           // Pink
-    accentHover: '#db2777',
-  },
-  'perfected-claims': {
-    primary: '#10b981',          // Emerald green
-    primaryHover: '#059669',
-    primaryLight: 'rgba(16, 185, 129, 0.15)',
-    secondary: '#1e3a32',        // Dark green
-    secondaryHover: '#2d4a3f',
-    accent: '#34d399',           // Light green
-    accentHover: '#10b981',
-  },
+  'dna-platform': toBrandColors(dnaPlatformTheme),
+  'inaudio': toBrandColors(inAudioTheme),
+  'perfected-claims': toBrandColors(perfectedClaimsTheme),
 }
 
 /**
@@ -51,7 +65,6 @@ export function createBrandedTheme(
   const brandColors = accountBrandColors[accountId]
   
   if (!brandColors) {
-    // No brand colors defined, return base theme
     return baseTheme
   }
 
@@ -67,7 +80,7 @@ export function createBrandedTheme(
 }
 
 /**
- * Helper to get themed colors for a specific account
+ * Get themed colors for a specific account
  * Defaults to dark theme with brand colors
  */
 export function getAccountTheme(

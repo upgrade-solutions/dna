@@ -5,10 +5,9 @@
 
 import type { GraphStyles, TenantSettings } from '../../default-config'
 import { baseNodeStyle, nodeTypeStyles } from '../../default-config'
-import { getAccountTheme } from '../../themes/brand-mapper'
 
 // Base theme colors for inAudio audiobook distribution platform
-const theme = {
+export const inAudioTheme = {
   primary: '#6366f1',        // Vibrant indigo (audio/media brand)
   secondary: '#8b5cf6',      // Purple variant (creative arts)
   accent: '#ec4899',         // Pink accent (passion for stories)
@@ -29,8 +28,8 @@ const theme = {
 // Custom base node style for inAudio brand - inherits from theme
 const inAudioNodeStyle = {
   ...baseNodeStyle,
-  fill: theme.primary,
-  stroke: theme.primary,
+  fill: inAudioTheme.primary,
+  stroke: inAudioTheme.primary,
 }
 
 // Apply brand colors to all node types
@@ -46,33 +45,32 @@ export const inAudioConfig = {
   id: 'inaudio',
   name: 'INaudio',
   description: 'Audiobook distribution platform with Voices and Passport applications',
-  theme: getAccountTheme('inaudio'),
   styles: {
     nodes: createBrandedNodes(),
     links: {
       'communicates-with': {
-        stroke: theme.text.secondary,
+        stroke: inAudioTheme.text.secondary,
         strokeWidth: 2
       },
       'depends-on': {
-        stroke: theme.secondary,
+        stroke: inAudioTheme.secondary,
         strokeWidth: 2,
         strokeDasharray: '6,4'
       },
       'reads-from': {
-        stroke: theme.accent,
+        stroke: inAudioTheme.accent,
         strokeWidth: 2
       },
       'writes-to': {
-        stroke: theme.warning,
+        stroke: inAudioTheme.warning,
         strokeWidth: 2
       },
       'contains': {
-        stroke: theme.primary,
+        stroke: inAudioTheme.primary,
         strokeWidth: 3
       },
       'renders': {
-        stroke: theme.info,
+        stroke: inAudioTheme.info,
         strokeWidth: 2
       }
     },
@@ -81,7 +79,7 @@ export const inAudioConfig = {
       icon: 'https://api.iconify.design/mdi/cube-outline.svg?color=white'
     },
     defaultLink: {
-      stroke: theme.text.secondary,
+      stroke: inAudioTheme.text.secondary,
       strokeWidth: 2
     }
   } as GraphStyles,
@@ -89,7 +87,7 @@ export const inAudioConfig = {
   settings: {
     gridSize: 15,
     drawGrid: true,
-    backgroundColor: theme.surface,
+    backgroundColor: inAudioTheme.surface,
     autoLayout: 'grid'
   } as TenantSettings
 }

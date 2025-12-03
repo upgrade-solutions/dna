@@ -5,10 +5,9 @@
 
 import type { GraphStyles, TenantSettings } from '../../default-config'
 import { baseNodeStyle, nodeTypeStyles } from '../../default-config'
-import { getAccountTheme } from '../../themes/brand-mapper'
 
 // Base theme colors for DNA Platform
-const theme = {
+export const dnaPlatformTheme = {
   primary: '#2563eb',        // Vibrant blue (brand identity)
   secondary: '#1e40af',      // Darker blue variant
   accent: '#3b82f6',         // Lighter blue accent
@@ -29,8 +28,8 @@ const theme = {
 // Custom base node style for DNA Platform brand - inherits from theme
 const dnaPlatformNodeStyle = {
   ...baseNodeStyle,
-  fill: theme.primary,
-  stroke: theme.primary,
+  fill: dnaPlatformTheme.primary,
+  stroke: dnaPlatformTheme.primary,
 }
 
 // Apply brand colors to all node types
@@ -46,33 +45,32 @@ export const dnaPlatformConfig = {
   id: 'dna-platform',
   name: 'DNA Platform',
   description: 'BizOps-as-Code platform architecture',
-  theme: getAccountTheme('dna-platform'),
   styles: {
     nodes: createBrandedNodes(),
     links: {
       'communicates-with': {
-        stroke: theme.text.secondary,
+        stroke: dnaPlatformTheme.text.secondary,
         strokeWidth: 2
       },
       'depends-on': {
-        stroke: theme.secondary,
+        stroke: dnaPlatformTheme.secondary,
         strokeWidth: 2,
         strokeDasharray: '6,4'
       },
       'reads-from': {
-        stroke: theme.accent,
+        stroke: dnaPlatformTheme.accent,
         strokeWidth: 2
       },
       'writes-to': {
-        stroke: theme.warning,
+        stroke: dnaPlatformTheme.warning,
         strokeWidth: 2
       },
       'contains': {
-        stroke: theme.primary,
+        stroke: dnaPlatformTheme.primary,
         strokeWidth: 3
       },
       'renders': {
-        stroke: theme.info,
+        stroke: dnaPlatformTheme.info,
         strokeWidth: 2
       }
     },
@@ -81,7 +79,7 @@ export const dnaPlatformConfig = {
       icon: 'https://api.iconify.design/mdi/cube-outline.svg?color=white'
     },
     defaultLink: {
-      stroke: theme.text.secondary,
+      stroke: dnaPlatformTheme.text.secondary,
       strokeWidth: 2
     }
   } as GraphStyles,
@@ -89,7 +87,7 @@ export const dnaPlatformConfig = {
   settings: {
     gridSize: 15,
     drawGrid: true,
-    backgroundColor: theme.surface,
+    backgroundColor: dnaPlatformTheme.surface,
     autoLayout: 'grid'
   } as TenantSettings
 }

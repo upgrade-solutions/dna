@@ -17,8 +17,6 @@ export class ShapesFactory {
    */
   createNode(node: NodeData): shapes.standard.Rectangle {
     const nodeStyle = this.tenantConfig.styles.nodes[node.type] || this.tenantConfig.styles.defaultNode
-    
-    console.log('Node:', node.label, 'Type:', node.type, 'Icon:', nodeStyle.icon, 'Full nodeStyle:', nodeStyle)
 
     return new shapes.standard.Rectangle({
       id: node.id,
