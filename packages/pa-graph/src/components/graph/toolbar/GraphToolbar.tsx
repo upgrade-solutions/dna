@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react'
 import { dia } from '@joint/plus'
 import { zoomIn, zoomOut, resetZoom, zoomToFit } from '../actions'
+import type { Theme } from '../../../types/theme'
+import { getThemedColors } from '../../../types/theme'
 
 // Simple SVG icons
 const ZoomInIcon = () => (
@@ -46,11 +48,13 @@ export interface GraphToolbarProps {
   scale?: number
   onScaleChange?: (scale: number) => void
   onAddNode?: () => void
+  theme: Theme
 }
 
-export function GraphToolbar({ graph, paper, scale: externalScale, onScaleChange, onAddNode }: GraphToolbarProps) {
+export function GraphToolbar({ graph, paper, scale: externalScale, onScaleChange, onAddNode, theme }: GraphToolbarProps) {
   const [internalScale, setInternalScale] = useState(1)
   const scale = externalScale ?? internalScale
+  const themed = getThemedColors(theme)
 
   const handleZoomIn = useCallback(() => {
     if (!paper) return
@@ -82,47 +86,152 @@ export function GraphToolbar({ graph, paper, scale: externalScale, onScaleChange
 
   return (
     <div 
-      className="bg-blue-950 border-b border-gray-700/50 shadow-lg"
-      style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, overflow: 'hidden' }}
+      style={{ 
+        position: 'absolute', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        zIndex: 10, 
+        overflow: 'hidden',
+        background: themed.toolbar.background,
+        borderBottom: `1px solid ${themed.toolbar.borderColor}`,
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+      }}
     >
       <div 
-        className="flex flex-nowrap items-center gap-2 px-3 py-2 overflow-x-auto overflow-y-hidden"
-        style={{ height: '44px' }}
+        style={{ 
+          display: 'flex',
+          flexWrap: 'nowrap',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 12px',
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          height: '44px'
+        }}
       >
       {/* Zoom Controls */}
       <button
         onClick={handleZoomOut}
-        className="p-1.5 hover:bg-gray-800 rounded text-gray-400 hover:text-white transition-all flex-shrink-0"
-        title="Zoom Out"
         disabled={!paper}
+        style={{
+          padding: '6px',
+          background: themed.toolbar.buttonBackground,
+          border: 'none',
+          borderRadius: '4px',
+          color: themed.toolbar.buttonText,
+          cursor: paper ? 'pointer' : 'not-allowed',
+          transition: 'all 0.2s',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+        onMouseEnter={(e) => {
+          if (paper) {
+            e.currentTarget.style.background = themed.toolbar.buttonBackgroundHover
+            e.currentTarget.style.color = themed.toolbar.buttonTextHover
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = themed.toolbar.buttonBackground
+          e.currentTarget.style.color = themed.toolbar.buttonText
+        }}
+        title="Zoom Out"
       >
         <ZoomOutIcon />
       </button>
       <button
         onClick={handleResetZoom}
-        className="px-2 py-1 hover:bg-gray-800 rounded text-xs font-medium text-gray-400 hover:text-white transition-all min-w-[48px] flex-shrink-0"
-        title="Reset Zoom"
         disabled={!paper}
+        style={{
+          padding: '4px 8px',
+          background: themed.toolbar.buttonBackground,
+          border: 'none',
+          borderRadius: '4px',
+          color: themed.toolbar.buttonText,
+          cursor: paper ? 'pointer' : 'not-allowed',
+          transition: 'all 0.2s',
+          minWidth: '48px',
+          flexShrink: 0,
+          fontSize: '12px',
+          fontWeight: '500'
+        }}
+        onMouseEnter={(e) => {
+          if (paper) {
+            e.currentTarget.style.background = themed.toolbar.buttonBackgroundHover
+            e.currentTarget.style.color = themed.toolbar.buttonTextHover
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = themed.toolbar.buttonBackground
+          e.currentTarget.style.color = themed.toolbar.buttonText
+        }}
+        title="Reset Zoom"
       >
         {Math.round(scale * 100)}%
       </button>
       <button
         onClick={handleZoomIn}
-        className="p-1.5 hover:bg-gray-800 rounded text-gray-400 hover:text-white transition-all flex-shrink-0"
-        title="Zoom In"
         disabled={!paper}
+        style={{
+          padding: '6px',
+          background: themed.toolbar.buttonBackground,
+          border: 'none',
+          borderRadius: '4px',
+          color: themed.toolbar.buttonText,
+          cursor: paper ? 'pointer' : 'not-allowed',
+          transition: 'all 0.2s',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+        onMouseEnter={(e) => {
+          if (paper) {
+            e.currentTarget.style.background = themed.toolbar.buttonBackgroundHover
+            e.currentTarget.style.color = themed.toolbar.buttonTextHover
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = themed.toolbar.buttonBackground
+          e.currentTarget.style.color = themed.toolbar.buttonText
+        }}
+        title="Zoom In"
       >
         <ZoomInIcon />
       </button>
 
-      <div className="w-px h-4 bg-gray-700 flex-shrink-0" />
+      <div style={{ width: '1px', height: '16px', background: themed.toolbar.divider, flexShrink: 0 }} />
 
       {/* Fit to Content */}
       <button
         onClick={handleFitToContent}
-        className="p-1.5 hover:bg-gray-800 rounded text-gray-400 hover:text-white transition-all flex-shrink-0"
-        title="Fit to Content"
         disabled={!paper}
+        style={{
+          padding: '6px',
+          background: themed.toolbar.buttonBackground,
+          border: 'none',
+          borderRadius: '4px',
+          color: themed.toolbar.buttonText,
+          cursor: paper ? 'pointer' : 'not-allowed',
+          transition: 'all 0.2s',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+        onMouseEnter={(e) => {
+          if (paper) {
+            e.currentTarget.style.background = themed.toolbar.buttonBackgroundHover
+            e.currentTarget.style.color = themed.toolbar.buttonTextHover
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = themed.toolbar.buttonBackground
+          e.currentTarget.style.color = themed.toolbar.buttonText
+        }}
+        title="Fit to Content"
       >
         <FitToContentIcon />
       </button>
@@ -130,10 +239,30 @@ export function GraphToolbar({ graph, paper, scale: externalScale, onScaleChange
       {/* Add Node */}
       {onAddNode && (
         <>
-          <div className="w-px h-4 bg-gray-700 flex-shrink-0" />
+          <div style={{ width: '1px', height: '16px', background: themed.toolbar.divider, flexShrink: 0 }} />
           <button
             onClick={onAddNode}
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-600/90 hover:bg-blue-600 rounded text-xs font-medium text-white transition-all flex-shrink-0"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 10px',
+              background: themed.toolbar.buttonPrimary,
+              border: 'none',
+              borderRadius: '4px',
+              color: '#ffffff',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              flexShrink: 0,
+              fontSize: '12px',
+              fontWeight: '500'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = themed.toolbar.buttonPrimaryHover
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = themed.toolbar.buttonPrimary
+            }}
             title="Add Node"
           >
             <PlusIcon />
@@ -143,9 +272,9 @@ export function GraphToolbar({ graph, paper, scale: externalScale, onScaleChange
       )}
 
       {/* Stats */}
-      <div className="ml-auto flex flex-nowrap items-center gap-3 text-xs flex-shrink-0">
-        <span className="text-gray-500 whitespace-nowrap">Nodes: <span className="text-gray-300 font-medium">{graph?.getElements().length || 0}</span></span>
-        <span className="text-gray-500 whitespace-nowrap">Links: <span className="text-gray-300 font-medium">{graph?.getLinks().length || 0}</span></span>
+      <div style={{ marginLeft: 'auto', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', gap: '12px', fontSize: '12px', flexShrink: 0 }}>
+        <span style={{ color: themed.toolbar.textSecondary, whiteSpace: 'nowrap' }}>Nodes: <span style={{ color: themed.toolbar.text, fontWeight: '500' }}>{graph?.getElements().length || 0}</span></span>
+        <span style={{ color: themed.toolbar.textSecondary, whiteSpace: 'nowrap' }}>Links: <span style={{ color: themed.toolbar.text, fontWeight: '500' }}>{graph?.getLinks().length || 0}</span></span>
       </div>
       </div>
     </div>

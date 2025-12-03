@@ -1,13 +1,21 @@
 import { useState } from 'react'
 import { ResourceNode } from './ResourceNode'
 import type { LeftSidebarProps } from './types'
+import type { Theme } from '../../types/theme'
+import { getThemedColors } from '../../types/theme'
+
+export interface LeftSidebarPropsWithTheme extends LeftSidebarProps {
+  theme: Theme
+}
 
 export function LeftSidebar({ 
   width = 280, 
   resources = [], 
-  onResourceClick 
-}: LeftSidebarProps) {
+  onResourceClick,
+  theme
+}: LeftSidebarPropsWithTheme) {
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null)
+  const themed = getThemedColors(theme)
 
   const handleResourceClick = (resourceId: string) => {
     setSelectedResourceId(resourceId)
@@ -20,15 +28,15 @@ export function LeftSidebar({
         width,
         minWidth: width,
         height: '100%',
-        backgroundColor: '#1e1e1e',
-        borderRight: '1px solid #333',
+        backgroundColor: themed.leftSidebar.background,
+        borderRight: `1px solid ${themed.leftSidebar.borderColor}`,
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
       }}
     >
       <div style={{ padding: '20px', flex: 1, overflow: 'auto' }}>
-        <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#fff' }}>
+        <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: themed.leftSidebar.text }}>
           Structure
         </h3>
         
@@ -40,6 +48,7 @@ export function LeftSidebar({
               level={0} 
               onResourceClick={handleResourceClick}
               selectedResourceId={selectedResourceId}
+              theme={theme}
             />
           ))}
         </div>

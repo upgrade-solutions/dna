@@ -2,20 +2,25 @@ import { useEffect, useRef, useState } from 'react'
 import { ui, dia } from '@joint/plus'
 import { InspectorTabs } from './InspectorTabs'
 import { getInspectorConfigForCell } from './config'
+import type { Theme } from '../../types/theme'
+import { getThemedColors } from '../../types/theme'
 import './styles'
 
 interface RightSidebarProps {
   width?: number
   cellView?: dia.CellView | null
+  theme: Theme
 }
 
 export function RightSidebar({ 
   width = 320, 
-  cellView = null
+  cellView = null,
+  theme
 }: RightSidebarProps) {
   const inspectorContainerRef = useRef<HTMLDivElement>(null)
   const inspectorRef = useRef<ui.Inspector | null>(null)
   const [activeTab, setActiveTab] = useState<'dna' | 'properties'>('dna')
+  const themed = getThemedColors(theme)
 
   // Check if the selected cell is a node (not a link)
   const isNode = cellView && cellView.model && !cellView.model.isLink()
@@ -57,22 +62,22 @@ export function RightSidebar({
         width,
         minWidth: width,
         height: '100%',
-        backgroundColor: '#1e1e1e',
-        borderLeft: '1px solid #333',
+        backgroundColor: themed.rightSidebar.background,
+        borderLeft: `1px solid ${themed.rightSidebar.borderColor}`,
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-        <div style={{ padding: '20px', borderBottom: '1px solid #333' }}>
-          <h3 style={{ margin: 0, fontSize: '16px', color: '#fff' }}>
+        <div style={{ padding: '20px', borderBottom: `1px solid ${themed.rightSidebar.borderColor}` }}>
+          <h3 style={{ margin: 0, fontSize: '16px', color: themed.rightSidebar.text }}>
             Inspector
           </h3>
         </div>
         
         {isNode && (
-          <InspectorTabs activeTab={activeTab} onTabChange={setActiveTab} />
+          <InspectorTabs activeTab={activeTab} onTabChange={setActiveTab} theme={theme} />
         )}
         
         <div 
@@ -87,7 +92,7 @@ export function RightSidebar({
           {!cellView && (
             <div style={{ 
               padding: '20px', 
-              color: '#888', 
+              color: themed.rightSidebar.textSecondary, 
               fontSize: '14px',
               textAlign: 'center'
             }}>

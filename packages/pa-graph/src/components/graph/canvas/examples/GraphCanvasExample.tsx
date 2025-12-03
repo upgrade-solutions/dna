@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { GraphCanvasWithRef, type GraphCanvasRef } from '../GraphCanvasWithRef'
 import { GraphToolbar } from '../../toolbar/GraphToolbar'
 import { dnaPlatformTenant } from '../../../../data'
+import { dnaPlatformTheme } from '../../../../data/themes'
 import type { dia } from '@joint/plus'
 
 /**
@@ -35,6 +36,7 @@ export function GraphCanvasExample() {
         graph={graphCanvasRef.current?.graph || null}
         paper={graphCanvasRef.current?.paper || null}
         onAddNode={handleAddNode}
+        theme={dnaPlatformTheme}
       />
       <div style={{ paddingTop: '48px', height: '100%' }}>
         <GraphCanvasWithRef

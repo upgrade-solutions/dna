@@ -1,6 +1,7 @@
 import { dia, shapes } from '@joint/plus'
 import type { TenantConfig } from '../../../data/tenant-config'
 import type { GraphInstance } from './types'
+import { getThemedColors } from '../../../types/theme'
 
 /**
  * Configuration for initializing a JointJS graph and paper
@@ -17,6 +18,7 @@ interface GraphInitConfig {
  */
 export function initializeGraph(config: GraphInitConfig): GraphInstance {
   const { container, width, height, tenantConfig } = config
+  const themed = getThemedColors(tenantConfig.theme)
 
   // Initialize graph
   const graph = new dia.Graph({}, { cellNamespace: shapes })
@@ -30,7 +32,7 @@ export function initializeGraph(config: GraphInitConfig): GraphInstance {
     gridSize: tenantConfig.settings?.gridSize || 10,
     drawGrid: tenantConfig.settings?.drawGrid ?? true,
     background: {
-      color: tenantConfig.settings?.backgroundColor || '#f8f9fa'
+      color: themed.canvas.background
     },
     cellViewNamespace: shapes,
     // Enable panning by dragging blank paper area

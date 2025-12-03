@@ -5,6 +5,7 @@
 
 import type { GraphStyles, TenantSettings } from '../../default-config'
 import { baseNodeStyle, nodeTypeStyles } from '../../default-config'
+import { perfectedClaimsTheme } from '../../themes'
 
 // Base theme colors derived from perfectedclaims.com
 const theme = {
@@ -45,9 +46,7 @@ export const perfectedClaimsConfig = {
   id: 'perfected-claims',
   name: 'Perfected Claims',
   description: 'Mass tort case management platform (perfectedclaims.com)',
-  
-  theme,
-  
+  theme: perfectedClaimsTheme,
   styles: {
     nodes: createBrandedNodes(),
     links: {

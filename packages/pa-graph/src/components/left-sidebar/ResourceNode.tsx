@@ -1,15 +1,23 @@
 import { useState } from 'react'
 import type { ResourceNodeProps } from './types'
+import type { Theme } from '../../types/theme'
+import { getThemedColors } from '../../types/theme'
+
+export interface ResourceNodePropsWithTheme extends ResourceNodeProps {
+  theme: Theme
+}
 
 export function ResourceNode({ 
   resource, 
   level, 
   onResourceClick, 
-  selectedResourceId 
-}: ResourceNodeProps) {
+  selectedResourceId,
+  theme
+}: ResourceNodePropsWithTheme) {
   const [isExpanded, setIsExpanded] = useState(level < 2) // Auto-expand first 2 levels
   const hasChildren = resource.children && resource.children.length > 0
   const isSelected = selectedResourceId === resource.id
+  const themed = getThemedColors(theme)
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent triggering parent click
@@ -34,10 +42,10 @@ export function ResourceNode({
         <div
           style={{
             padding: '4px 10px',
-            backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
-            border: `1px solid ${isSelected ? '#3b82f6' : '#555'}`,
+            backgroundColor: isSelected ? themed.leftSidebar.itemBackgroundSelected : themed.leftSidebar.itemBackground,
+            border: `1px solid ${isSelected ? themed.leftSidebar.itemBorderSelected : themed.leftSidebar.itemBorder}`,
             borderRadius: '6px',
-            color: isSelected ? '#fff' : '#ccc',
+            color: isSelected ? themed.leftSidebar.itemTextSelected : themed.leftSidebar.itemText,
             fontSize: '12px',
             fontWeight: '400',
             flex: 1,
@@ -51,16 +59,16 @@ export function ResourceNode({
           onClick={handleResourceClick}
           onMouseEnter={(e) => {
             if (!isSelected) {
-              e.currentTarget.style.borderColor = '#3b82f6'
-              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)'
-              e.currentTarget.style.color = '#fff'
+              e.currentTarget.style.borderColor = themed.leftSidebar.itemBorderHover
+              e.currentTarget.style.backgroundColor = themed.leftSidebar.itemBackgroundHover
+              e.currentTarget.style.color = themed.leftSidebar.itemTextHover
             }
           }}
           onMouseLeave={(e) => {
             if (!isSelected) {
-              e.currentTarget.style.borderColor = '#555'
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.color = '#ccc'
+              e.currentTarget.style.borderColor = themed.leftSidebar.itemBorder
+              e.currentTarget.style.backgroundColor = themed.leftSidebar.itemBackground
+              e.currentTarget.style.color = themed.leftSidebar.itemText
             }
           }}
         >
@@ -68,7 +76,7 @@ export function ResourceNode({
           {hasChildren && (
             <span 
               style={{ 
-                color: '#666',
+                color: themed.leftSidebar.textSecondary,
                 fontSize: '14px',
                 lineHeight: '1',
                 fontWeight: '400',
@@ -78,10 +86,10 @@ export function ResourceNode({
               }}
               onClick={handleToggle}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#fff'
+                e.currentTarget.style.color = themed.leftSidebar.text
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#666'
+                e.currentTarget.style.color = themed.leftSidebar.textSecondary
               }}
             >
               {isExpanded ? '−' : '+'}
@@ -99,6 +107,7 @@ export function ResourceNode({
               level={level + 1}
               onResourceClick={onResourceClick}
               selectedResourceId={selectedResourceId}
+              theme={theme}
             />
           ))}
         </div>

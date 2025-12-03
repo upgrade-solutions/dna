@@ -5,11 +5,13 @@
 
 import type { ResourceGraph } from './example-resources'
 import type { GraphStyles, TenantSettings } from './default-config'
+import type { Theme } from '../types/theme'
 
 export interface TenantConfig {
   id: string
   name: string
   description?: string
+  theme: Theme
   styles: GraphStyles
   data: ResourceGraph
   settings?: TenantSettings

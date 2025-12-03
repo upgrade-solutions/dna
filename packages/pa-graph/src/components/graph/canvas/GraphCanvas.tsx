@@ -130,6 +130,7 @@ export const GraphCanvas = observer(function GraphCanvas({
         paper={model.paper}
         scale={model.scale}
         onScaleChange={(scale) => model.setScale(scale)}
+        theme={tenantConfig.theme}
       />
       <div 
         ref={containerRef} 

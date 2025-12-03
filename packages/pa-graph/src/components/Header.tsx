@@ -1,4 +1,5 @@
 import type { TenantConfig } from '../data/tenant-config'
+import { getThemedColors } from '../types/theme'
 
 interface HeaderProps {
   tenant: TenantConfig
@@ -7,16 +8,18 @@ interface HeaderProps {
 }
 
 export function Header({ tenant, onTenantChange, tenantOptions }: HeaderProps) {
+  const themed = getThemedColors(tenant.theme)
+  
   return (
     <div style={{ 
       padding: '1rem', 
-      background: '#1f2937', 
-      borderBottom: '1px solid #374151',
+      background: themed.header.background, 
+      borderBottom: `1px solid ${themed.header.borderColor}`,
       display: 'flex',
       gap: '0.5rem',
       alignItems: 'center'
     }}>
-      <span style={{ color: '#9ca3af', marginRight: '0.5rem', fontSize: '0.875rem' }}>
+      <span style={{ color: themed.header.textSecondary, marginRight: '0.5rem', fontSize: '0.875rem' }}>
         Account:
       </span>
       {tenantOptions.map((option) => (
@@ -25,9 +28,9 @@ export function Header({ tenant, onTenantChange, tenantOptions }: HeaderProps) {
           onClick={() => onTenantChange(option)}
           style={{
             padding: '0.5rem 1rem',
-            background: tenant.id === option.id ? '#3b82f6' : '#374151',
-            color: '#ffffff',
-            border: 'none',
+            background: 'transparent',
+            color: tenant.id === option.id ? '#ffffff' : 'rgba(255, 255, 255, 0.7)',
+            border: `1px solid ${tenant.id === option.id ? '#ffffff' : 'rgba(255, 255, 255, 0.7)'}`,
             borderRadius: '0.375rem',
             cursor: 'pointer',
             fontSize: '0.875rem',
@@ -40,7 +43,7 @@ export function Header({ tenant, onTenantChange, tenantOptions }: HeaderProps) {
       ))}
       <span style={{ 
         marginLeft: 'auto', 
-        color: '#6b7280', 
+        color: themed.header.textSecondary, 
         fontSize: '0.75rem',
         fontStyle: 'italic'
       }}>
