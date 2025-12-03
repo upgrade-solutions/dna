@@ -47,12 +47,7 @@ export function GraphCanvas({
     const graphData = resourceToGraph(tenantConfig.data)
     populateGraph(graph, graphData, shapesFactory)
 
-    // Setup event handlers
-    const eventHandler = new GraphEventHandler(paper, tenantConfig, onCellViewSelected)
-    eventHandler.setupEvents()
-    eventHandlerRef.current = eventHandler
-
-    // Setup interaction handlers
+    // Setup interaction handlers (zoom handler needed for event handler)
     const zoomHandler = new ZoomHandler({
       paper,
       container: containerRef.current,
@@ -62,6 +57,11 @@ export function GraphCanvas({
       onScaleChange: setScale
     })
     zoomHandlerRef.current = zoomHandler
+
+    // Setup event handlers (pass zoom handler for double-click zoom)
+    const eventHandler = new GraphEventHandler(paper, tenantConfig, onCellViewSelected, zoomHandler)
+    eventHandler.setupEvents()
+    eventHandlerRef.current = eventHandler
 
     const panHandler = new PanHandler({ paper })
     panHandlerRef.current = panHandler

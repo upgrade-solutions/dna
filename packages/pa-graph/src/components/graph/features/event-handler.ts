@@ -1,5 +1,6 @@
 import { dia } from '@joint/plus'
 import { dnaPlatformTenant } from '../../../data'
+import type { ZoomHandler } from './zoom-handler'
 
 /**
  * Manages event handlers for graph interactions
@@ -9,15 +10,18 @@ export class GraphEventHandler {
   private paper: dia.Paper
   private tenantConfig: typeof dnaPlatformTenant
   private onCellViewSelected?: (cellView: dia.CellView | null) => void
+  private zoomHandler?: ZoomHandler
 
   constructor(
     paper: dia.Paper,
     tenantConfig: typeof dnaPlatformTenant,
-    onCellViewSelected?: (cellView: dia.CellView | null) => void
+    onCellViewSelected?: (cellView: dia.CellView | null) => void,
+    zoomHandler?: ZoomHandler
   ) {
     this.paper = paper
     this.tenantConfig = tenantConfig
     this.onCellViewSelected = onCellViewSelected
+    this.zoomHandler = zoomHandler
   }
 
   /**
@@ -25,6 +29,7 @@ export class GraphEventHandler {
    */
   setupEvents(): void {
     this.setupCellClickHandler()
+    this.setupCellDoubleClickHandler()
     this.setupBlankClickHandler()
   }
 
@@ -56,6 +61,18 @@ export class GraphEventHandler {
       
       this.selectedCellView = cellView
       this.onCellViewSelected?.(cellView)
+    })
+  }
+
+  /**
+   * Handle cell (node/link) double-click events to zoom and focus
+   */
+  private setupCellDoubleClickHandler(): void {
+    this.paper.on('cell:pointerdblclick', (cellView: dia.CellView) => {
+      // Only zoom to elements (nodes), not links
+      if (cellView.model.isElement() && this.zoomHandler) {
+        this.zoomHandler.zoomToNode(cellView.model as dia.Element)
+      }
     })
   }
 
@@ -95,6 +112,7 @@ export class GraphEventHandler {
    */
   cleanup(): void {
     this.paper.off('cell:pointerclick')
+    this.paper.off('cell:pointerdblclick')
     this.paper.off('blank:pointerclick')
     this.deselectCell()
   }
