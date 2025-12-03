@@ -4,4 +4,5 @@ export * from './pan-handler'
 export * from './keyboard-handler'
 export * from './layer-manager'
 export * from './decorators'
-export * from './event-handler'
+export * from './hierarchy-visibility-manager'
+

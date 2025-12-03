@@ -3,6 +3,7 @@ import type { TenantConfig } from '../../../data/tenant-config'
 import type { NodeData, EdgeData } from '../utils/types'
 import { getIconForResourceType } from '../../../utils/icon-mapper'
 import { ResourceNode } from './ResourceNode'
+import { ContainerNode } from './ContainerNode'
 
 /**
  * Factory for creating JointJS node elements from node data
@@ -22,52 +23,111 @@ export class ShapesFactory {
     
     // Get resource type from metadata (e.g., 'web-application', 'api', 'database')
     const resourceType = (node.metadata?.resourceType as string) || 'other'
-    const iconUrl = getIconForResourceType(resourceType)
-
-    const element = new ResourceNode({
-      id: node.id,
-      position: node.position,
-      size: { width: 160, height: 80 },
-      attrs: {
-        body: {
-          fill: nodeStyle.fill,
-          stroke: nodeStyle.stroke,
-          strokeWidth: nodeStyle.strokeWidth || 1,
-          rx: nodeStyle.rx || 8,
-          ry: nodeStyle.ry || 8
-        },
-        icon: {
-          'xlink:href': iconUrl,
-          width: 24,
-          height: 24,
-          x: 68, // (160 - 24) / 2
-          y: 35
-        },
-        label: {
-          text: node.label,
-          fill: '#ffffff',
-          fontSize: 12,
-          fontWeight: '600',
-          y: 10,
-          textAnchor: 'middle',
-          textVerticalAnchor: 'top'
+    
+    // Determine if this should be a container node or leaf node
+    const hasChildren = node.hasChildren ?? false
+    
+    if (hasChildren) {
+      // Create container node for resources with children
+      
+      const element = new ContainerNode({
+        id: node.id,
+        position: node.position,
+        size: { width: 500, height: 250 },  // Larger initial size, will auto-fit to children
+        expanded: true,
+        attrs: {
+          body: {
+            fill: 'rgba(31, 41, 55, 0.15)',  // More transparent for better visibility
+            stroke: nodeStyle.stroke || '#4b5563',
+            strokeWidth: 2
+          },
+          header: {
+            fill: nodeStyle.fill || '#374151',
+            stroke: nodeStyle.stroke || '#4b5563'
+          },
+          label: {
+            text: node.label,
+            fill: '#ffffff',
+            fontSize: 14,
+            fontWeight: '700'
+          },
+          expandIcon: {
+            stroke: '#9ca3af'
+          }
         }
-      }
-    })
+      })
+      
+      // Set DNA metadata
+      element.set('dna', {
+        resourceType: resourceType,
+        language: (node.metadata?.language as string) || undefined,
+        runtime: (node.metadata?.runtime as string) || undefined,
+        description: (node.metadata?.description as string) || undefined,
+        type: undefined,
+        priority: undefined,
+        status: 'draft'
+      })
+      
+      // Store hierarchy metadata
+      element.set('hierarchyLevel', node.hierarchyLevel ?? 0)
+      element.set('parentId', node.parentId)
+      element.set('isContainer', true)
+      
+      return element
+    } else {
+      // Create regular resource node for leaf nodes
+      const iconUrl = getIconForResourceType(resourceType)
 
-    // Set DNA metadata properties - explicitly set undefined for optional fields
-    // so Inspector knows they're unset rather than auto-selecting first option
-    element.set('dna', {
-      resourceType: resourceType,
-      language: (node.metadata?.language as string) || undefined,
-      runtime: (node.metadata?.runtime as string) || undefined,
-      description: (node.metadata?.description as string) || undefined,
-      type: undefined,
-      priority: undefined,
-      status: 'draft'
-    })
+      const element = new ResourceNode({
+        id: node.id,
+        position: node.position,
+        size: { width: 160, height: 80 },
+        attrs: {
+          body: {
+            fill: nodeStyle.fill,
+            stroke: nodeStyle.stroke,
+            strokeWidth: nodeStyle.strokeWidth || 1,
+            rx: nodeStyle.rx || 8,
+            ry: nodeStyle.ry || 8
+          },
+          icon: {
+            'xlink:href': iconUrl,
+            width: 24,
+            height: 24,
+            x: 68, // (160 - 24) / 2
+            y: 35
+          },
+          label: {
+            text: node.label,
+            fill: '#ffffff',
+            fontSize: 12,
+            fontWeight: '600',
+            y: 10,
+            textAnchor: 'middle',
+            textVerticalAnchor: 'top'
+          }
+        }
+      })
 
-    return element
+      // Set DNA metadata properties - explicitly set undefined for optional fields
+      // so Inspector knows they're unset rather than auto-selecting first option
+      element.set('dna', {
+        resourceType: resourceType,
+        language: (node.metadata?.language as string) || undefined,
+        runtime: (node.metadata?.runtime as string) || undefined,
+        description: (node.metadata?.description as string) || undefined,
+        type: undefined,
+        priority: undefined,
+        status: 'draft'
+      })
+      
+      // Store hierarchy metadata
+      element.set('hierarchyLevel', node.hierarchyLevel ?? 0)
+      element.set('parentId', node.parentId)
+      element.set('isContainer', false)
+
+      return element
+    }
   }
 
   /**

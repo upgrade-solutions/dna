@@ -6,7 +6,8 @@ import { resourceToGraph } from '../../../graph/mappers'
 import { initializeGraph, cleanupGraph, populateGraph } from '../utils'
 import { ShapesFactory } from '../shapes'
 import '../shapes/ResourceNode' // Register custom shape
-import { GraphEventHandler, ZoomHandler, PanHandler, KeyboardHandler, LayerManager } from '../features'
+import '../shapes/ContainerNode' // Register container shape
+import { GraphEventHandler, ZoomHandler, PanHandler, KeyboardHandler, LayerManager, HierarchyVisibilityManager } from '../features'
 import { GraphToolbar } from '../toolbar/GraphToolbar'
 import { GraphModel } from '../../../models'
 import { getThemedColors } from '../../../types/theme'
@@ -66,6 +67,17 @@ export const GraphCanvas = observer(function GraphCanvas({
     const graphData = resourceToGraph(stableConfig.data)
     populateGraph(graph, graphData, shapesFactory)
 
+    // Setup hierarchy visibility manager
+    const hierarchyVisibilityManager = new HierarchyVisibilityManager({
+      graph,
+      paper,
+      enabled: true
+    })
+    model.setHierarchyVisibilityManager(hierarchyVisibilityManager)
+    
+    // Initialize visibility based on current zoom (1.0)
+    hierarchyVisibilityManager.updateVisibility(1.0)
+
     // Note: We don't assign cells to layers anymore. 
     // Layers now control badge visibility (language/runtime badges on nodes)
     // All resource nodes are always visible - layers are visual decorations only
@@ -86,7 +98,8 @@ export const GraphCanvas = observer(function GraphCanvas({
       paper, 
       stableConfig, 
       (cellView) => model.setSelectedCellView(cellView),
-      zoomHandler
+      zoomHandler,
+      hierarchyVisibilityManager
     )
     eventHandler.setupEvents()
     eventHandlerRef.current = eventHandler
@@ -131,6 +144,7 @@ export const GraphCanvas = observer(function GraphCanvas({
       panHandler.cleanup()
       eventHandler.cleanup()
       layerManager.cleanup()
+      hierarchyVisibilityManager.cleanup()
       cleanupGraph({ graph, paper })
       model.cleanup()
       eventHandlerRef.current = null

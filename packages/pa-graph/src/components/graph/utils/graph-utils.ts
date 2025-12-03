@@ -17,7 +17,30 @@ export function populateGraph(
   const nodeElements = shapesFactory.createNodes(graphData.nodes)
   const linkElements = shapesFactory.createLinks(graphData.edges)
   
+  // Add all cells to graph
   graph.addCells([...nodeElements, ...linkElements])
+  
+  // Establish parent-child relationships via embedding
+  nodeElements.forEach(element => {
+    const parentId = element.get('parentId')
+    if (parentId) {
+      const parent = graph.getCell(parentId)
+      if (parent && parent.isElement()) {
+        (parent as dia.Element).embed(element)
+      }
+    }
+  })
+  
+  // Auto-resize container nodes to fit their children
+  // Do this after a short delay to ensure all children are positioned
+  nodeElements.forEach(element => {
+    const isContainer = element.get('isContainer')
+    if (isContainer && typeof (element as any).fitToChildren === 'function') {
+      setTimeout(() => {
+        (element as any).fitToChildren(50) // 50px padding for better spacing
+      }, 50)
+    }
+  })
 }
 
 /**

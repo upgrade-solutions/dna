@@ -1,6 +1,6 @@
 import { makeAutoObservable } from 'mobx'
 import { dia } from '@joint/plus'
-import type { ZoomHandler, LayerManager } from '../components/graph/features'
+import type { ZoomHandler, LayerManager, HierarchyVisibilityManager } from '../components/graph/features'
 import { getIconForResourceType } from '../utils/icon-mapper'
 
 /**
@@ -12,6 +12,7 @@ export class GraphModel {
   paper: dia.Paper | null = null
   zoomHandler: ZoomHandler | null = null
   layerManager: LayerManager | null = null
+  hierarchyVisibilityManager: HierarchyVisibilityManager | null = null
   selectedCellView: dia.CellView | null = null
   scale: number = 1
 
@@ -37,6 +38,10 @@ export class GraphModel {
 
   setLayerManager(layerManager: LayerManager) {
     this.layerManager = layerManager
+  }
+
+  setHierarchyVisibilityManager(manager: HierarchyVisibilityManager) {
+    this.hierarchyVisibilityManager = manager
   }
 
   /**
@@ -109,6 +114,8 @@ export class GraphModel {
    */
   setScale(scale: number) {
     this.scale = scale
+    // Update hierarchy visibility based on new zoom level
+    this.hierarchyVisibilityManager?.updateVisibility(scale)
   }
 
   /**
@@ -125,9 +132,18 @@ export class GraphModel {
 
     if (element) {
       this.zoomHandler.zoomToNode(element)
+      // Focus on this node to show its children
+      this.hierarchyVisibilityManager?.focusOnNode(resourceId)
     } else {
       console.warn(`Element with id ${resourceId} not found`)
     }
+  }
+
+  /**
+   * Focus on a specific node - show its children, hide others
+   */
+  focusOnNode(nodeId: string | null) {
+    this.hierarchyVisibilityManager?.focusOnNode(nodeId)
   }
 
   /**
@@ -149,10 +165,12 @@ export class GraphModel {
    */
   cleanup() {
     this.layerManager?.cleanup()
+    this.hierarchyVisibilityManager?.cleanup()
     this.graph = null
     this.paper = null
     this.zoomHandler = null
     this.layerManager = null
+    this.hierarchyVisibilityManager = null
     this.selectedCellView = null
     this.scale = 1
   }

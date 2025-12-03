@@ -1,6 +1,7 @@
 import { dia } from '@joint/plus'
 import type { TenantConfig } from '../../../data/tenant-config'
 import type { ZoomHandler } from './zoom-handler'
+import type { HierarchyVisibilityManager } from './hierarchy-visibility-manager'
 
 /**
  * Manages event handlers for graph interactions
@@ -11,17 +12,20 @@ export class GraphEventHandler {
   private tenantConfig: TenantConfig
   private onCellViewSelected?: (cellView: dia.CellView | null) => void
   private zoomHandler?: ZoomHandler
+  private hierarchyVisibilityManager?: HierarchyVisibilityManager
 
   constructor(
     paper: dia.Paper,
     tenantConfig: TenantConfig,
     onCellViewSelected?: (cellView: dia.CellView | null) => void,
-    zoomHandler?: ZoomHandler
+    zoomHandler?: ZoomHandler,
+    hierarchyVisibilityManager?: HierarchyVisibilityManager
   ) {
     this.paper = paper
     this.tenantConfig = tenantConfig
     this.onCellViewSelected = onCellViewSelected
     this.zoomHandler = zoomHandler
+    this.hierarchyVisibilityManager = hierarchyVisibilityManager
   }
 
   /**
@@ -74,7 +78,11 @@ export class GraphEventHandler {
     this.paper.on('cell:pointerdblclick', (cellView: dia.CellView) => {
       // Only zoom to elements (nodes), not links
       if (cellView.model.isElement() && this.zoomHandler) {
-        this.zoomHandler.zoomToNode(cellView.model as dia.Element)
+        const element = cellView.model as dia.Element
+        this.zoomHandler.zoomToNode(element)
+        
+        // Focus on this node to show its children
+        this.hierarchyVisibilityManager?.focusOnNode(element.id.toString())
       }
     })
   }

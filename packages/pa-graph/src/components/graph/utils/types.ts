@@ -19,6 +19,9 @@ export interface NodeData {
   label: string
   position: { x: number; y: number }
   metadata?: Record<string, unknown>
+  hierarchyLevel?: number      // Depth in hierarchy (0=Platform, 1=Application, etc.)
+  hasChildren?: boolean         // Whether this node has children (use container shape)
+  parentId?: string            // ID of parent node for embedding
 }
 
 export interface EdgeData {
