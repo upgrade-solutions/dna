@@ -42,27 +42,32 @@ const PlusIcon = () => (
 export interface GraphToolbarProps {
   graph: dia.Graph | null
   paper: dia.Paper | null
+  scale?: number
+  onScaleChange?: (scale: number) => void
   onAddNode?: () => void
 }
 
-export function GraphToolbar({ graph, paper, onAddNode }: GraphToolbarProps) {
-  const [scale, setScale] = useState(1)
+export function GraphToolbar({ graph, paper, scale: externalScale, onScaleChange, onAddNode }: GraphToolbarProps) {
+  const [internalScale, setInternalScale] = useState(1)
+  const scale = externalScale ?? internalScale
 
   const handleZoomIn = useCallback(() => {
     if (!paper) return
     const currentScale = paper.scale()
     const newScale = currentScale.sx * 1.2
     paper.scale(newScale, newScale)
-    setScale(newScale)
-  }, [paper])
+    setInternalScale(newScale)
+    onScaleChange?.(newScale)
+  }, [paper, onScaleChange])
 
   const handleZoomOut = useCallback(() => {
     if (!paper) return
     const currentScale = paper.scale()
     const newScale = currentScale.sx / 1.2
     paper.scale(newScale, newScale)
-    setScale(newScale)
-  }, [paper])
+    setInternalScale(newScale)
+    onScaleChange?.(newScale)
+  }, [paper, onScaleChange])
 
   const handleFitToContent = useCallback(() => {
     if (!paper) return
@@ -72,14 +77,16 @@ export function GraphToolbar({ graph, paper, onAddNode }: GraphToolbarProps) {
       minScale: 0.2
     })
     const newScale = paper.scale()
-    setScale(newScale.sx)
-  }, [paper])
+    setInternalScale(newScale.sx)
+    onScaleChange?.(newScale.sx)
+  }, [paper, onScaleChange])
 
   const handleResetZoom = useCallback(() => {
     if (!paper) return
     paper.scale(1, 1)
-    setScale(1)
-  }, [paper])
+    setInternalScale(1)
+    onScaleChange?.(1)
+  }, [paper, onScaleChange])
 
   return (
     <div 

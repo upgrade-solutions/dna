@@ -21,6 +21,7 @@ export function GraphCanvas({
   const eventHandlerRef = useRef<GraphEventHandler | null>(null)
   const [graph, setGraph] = useState<dia.Graph | null>(null)
   const [paper, setPaper] = useState<dia.Paper | null>(null)
+  const [scale, setScale] = useState(1)
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -63,6 +64,7 @@ export function GraphCanvas({
       if (newScale >= 0.2 && newScale <= 3) {
         const mousePosition = { x: evt.offsetX, y: evt.offsetY }
         paper.scale(newScale, newScale, mousePosition.x, mousePosition.y)
+        setScale(newScale)
       }
     }
 
@@ -92,6 +94,36 @@ export function GraphCanvas({
       }
     }
 
+    // Keyboard shortcuts for zoom
+    const handleKeyDown = (evt: KeyboardEvent) => {
+      // Ctrl/Cmd + Plus/Equals for zoom in
+      if ((evt.ctrlKey || evt.metaKey) && (evt.key === '+' || evt.key === '=')) {
+        evt.preventDefault()
+        const currentScale = paper.scale()
+        const newScale = currentScale.sx * 1.2
+        if (newScale <= 3) {
+          paper.scale(newScale, newScale)
+          setScale(newScale)
+        }
+      }
+      // Ctrl/Cmd + Minus for zoom out
+      else if ((evt.ctrlKey || evt.metaKey) && evt.key === '-') {
+        evt.preventDefault()
+        const currentScale = paper.scale()
+        const newScale = currentScale.sx / 1.2
+        if (newScale >= 0.2) {
+          paper.scale(newScale, newScale)
+          setScale(newScale)
+        }
+      }
+      // Ctrl/Cmd + 0 for reset zoom
+      else if ((evt.ctrlKey || evt.metaKey) && evt.key === '0') {
+        evt.preventDefault()
+        paper.scale(1, 1)
+        setScale(1)
+      }
+    }
+
     // Attach wheel event for zooming
     containerRef.current.addEventListener('wheel', handleWheel, { passive: false })
     
@@ -99,6 +131,9 @@ export function GraphCanvas({
     paper.on('blank:pointerdown', handleBlankPointerDown)
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
+    
+    // Attach keyboard shortcuts
+    document.addEventListener('keydown', handleKeyDown)
 
     // Cleanup
     return () => {
@@ -106,6 +141,7 @@ export function GraphCanvas({
       paper.off('blank:pointerdown', handleBlankPointerDown)
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('keydown', handleKeyDown)
       eventHandler.cleanup()
       cleanupGraph({ graph, paper })
       eventHandlerRef.current = null
@@ -125,6 +161,8 @@ export function GraphCanvas({
       <GraphToolbar 
         graph={graph} 
         paper={paper}
+        scale={scale}
+        onScaleChange={setScale}
       />
       <div 
         ref={containerRef} 
