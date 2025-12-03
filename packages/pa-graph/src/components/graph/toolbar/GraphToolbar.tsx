@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react'
 import { dia } from '@joint/plus'
 import { zoomIn, zoomOut, resetZoom, zoomToFit } from '../actions'
+import type { LayerManager } from '../features'
 import type { Theme } from '../../../types/theme'
 import { getThemedColors } from '../../../types/theme'
+import { LayersControl } from './LayersControl'
 
 // Simple SVG icons
 const ZoomInIcon = () => (
@@ -45,13 +47,14 @@ const PlusIcon = () => (
 export interface GraphToolbarProps {
   graph: dia.Graph | null
   paper: dia.Paper | null
+  layerManager?: LayerManager | null
   scale?: number
   onScaleChange?: (scale: number) => void
   onAddNode?: () => void
   theme: Theme
 }
 
-export function GraphToolbar({ graph, paper, scale: externalScale, onScaleChange, onAddNode, theme }: GraphToolbarProps) {
+export function GraphToolbar({ graph, paper, layerManager, scale: externalScale, onScaleChange, onAddNode, theme }: GraphToolbarProps) {
   const [internalScale, setInternalScale] = useState(1)
   const scale = externalScale ?? internalScale
   const themed = getThemedColors(theme)
@@ -92,7 +95,7 @@ export function GraphToolbar({ graph, paper, scale: externalScale, onScaleChange
         left: 0, 
         right: 0, 
         zIndex: 10, 
-        overflow: 'hidden',
+        overflow: 'visible',
         background: themed.toolbar.background,
         borderBottom: `1px solid ${themed.toolbar.borderColor}`,
         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
@@ -106,7 +109,7 @@ export function GraphToolbar({ graph, paper, scale: externalScale, onScaleChange
           gap: '8px',
           padding: '8px 12px',
           overflowX: 'auto',
-          overflowY: 'hidden',
+          overflowY: 'visible',
           height: '44px'
         }}
       >
@@ -235,6 +238,11 @@ export function GraphToolbar({ graph, paper, scale: externalScale, onScaleChange
       >
         <FitToContentIcon />
       </button>
+
+      <div style={{ width: '1px', height: '16px', background: themed.toolbar.divider, flexShrink: 0 }} />
+
+      {/* Layers Control */}
+      <LayersControl layerManager={layerManager || null} theme={theme} />
 
       {/* Add Node */}
       {onAddNode && (

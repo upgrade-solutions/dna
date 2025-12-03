@@ -12,35 +12,65 @@ export const dnaPlatformResources: ResourceGraph = {
       type: 'web-application',
       name: 'UI Shell',
       description: 'Next.js config-driven UI framework',
-      metadata: { package: 'ui-shell', tech: 'Next.js 14' }
+      metadata: { 
+        package: 'ui-shell', 
+        tech: 'Next.js 14',
+        resourceType: 'web-application',
+        language: 'typescript',
+        runtime: 'nodejs'
+      }
     },
     {
       id: 'product-architect',
       type: 'web-application',
       name: 'Product Architect',
       description: 'DNA framework layer explorer',
-      metadata: { package: 'product-architect', tech: 'Next.js 16' }
+      metadata: { 
+        package: 'product-architect', 
+        tech: 'Next.js 16',
+        resourceType: 'web-application',
+        language: 'typescript',
+        runtime: 'nodejs'
+      }
     },
     {
       id: 'dna-studio',
       type: 'web-application',
       name: 'DNA Studio',
       description: 'Voice capture & schema browser',
-      metadata: { package: 'dna-studio-mockup', tech: 'Next.js' }
+      metadata: { 
+        package: 'dna-studio-mockup', 
+        tech: 'Next.js',
+        resourceType: 'web-application',
+        language: 'typescript',
+        runtime: 'nodejs'
+      }
     },
     {
       id: 'pa-app-ui',
       type: 'web-application',
       name: 'PA App UI',
       description: 'Product Architect UI',
-      metadata: { package: 'pa-app-ui', tech: 'React + Vite' }
+      metadata: { 
+        package: 'pa-app-ui', 
+        tech: 'React + Vite',
+        resourceType: 'web-application',
+        language: 'typescript',
+        runtime: 'nodejs'
+      }
     },
     {
       id: 'pa-graph',
       type: 'web-application',
       name: 'PA Graph',
       description: 'Graph visualization editor',
-      metadata: { package: 'pa-graph', tech: 'React + Vite + JointJS' }
+      metadata: { 
+        package: 'pa-graph', 
+        tech: 'React + Vite + JointJS',
+        resourceType: 'web-application',
+        language: 'typescript',
+        runtime: 'nodejs'
+      }
     },
 
     // Backend APIs
@@ -49,14 +79,26 @@ export const dnaPlatformResources: ResourceGraph = {
       type: 'api',
       name: 'API Shell',
       description: 'OpenAPI-driven runtime API',
-      metadata: { package: 'api-shell', tech: 'Deno + Oak' }
+      metadata: { 
+        package: 'api-shell', 
+        tech: 'Deno + Oak',
+        resourceType: 'api',
+        language: 'typescript',
+        runtime: 'deno'
+      }
     },
     {
       id: 'pa-app-api',
       type: 'api',
       name: 'PA App API',
       description: 'REST API with Neo4j',
-      metadata: { package: 'pa-app-api', tech: 'Deno + Neogma' }
+      metadata: { 
+        package: 'pa-app-api', 
+        tech: 'Deno + Neogma',
+        resourceType: 'api',
+        language: 'typescript',
+        runtime: 'deno'
+      }
     },
 
     // Core Services
@@ -65,14 +107,24 @@ export const dnaPlatformResources: ResourceGraph = {
       type: 'service',
       name: 'Auth Service',
       description: 'RBAC/ABAC access control',
-      metadata: { location: 'api-shell/middleware' }
+      metadata: { 
+        location: 'api-shell/middleware',
+        resourceType: 'service',
+        language: 'typescript',
+        runtime: 'deno'
+      }
     },
     {
       id: 'schema-validator',
       type: 'service',
       name: 'Schema Validator',
       description: 'Zod-based validation',
-      metadata: { location: 'api-shell/core' }
+      metadata: { 
+        location: 'api-shell/core',
+        resourceType: 'service',
+        language: 'typescript',
+        runtime: 'deno'
+      }
     },
 
     // Data Layer
@@ -81,14 +133,24 @@ export const dnaPlatformResources: ResourceGraph = {
       type: 'database',
       name: 'Neo4j',
       description: 'Graph database for product models',
-      metadata: { tech: 'Neo4j + Neogma OGM' }
+      metadata: { 
+        tech: 'Neo4j + Neogma OGM',
+        resourceType: 'database',
+        runtime: 'postgresql' // Using as closest match for database runtime
+      }
     },
     {
       id: 'dna-schemas',
       type: 'database',
       name: 'DNA Schemas',
       description: 'Core schema library',
-      metadata: { package: '@dna/core', tech: 'Zod schemas' }
+      metadata: { 
+        package: '@dna/core', 
+        tech: 'Zod schemas',
+        resourceType: 'file',
+        language: 'typescript',
+        runtime: 'nodejs'
+      }
     }
   ],
   relationships: [

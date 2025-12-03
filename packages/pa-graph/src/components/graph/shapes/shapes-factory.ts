@@ -1,7 +1,8 @@
-import { shapes } from '@joint/plus'
+import { dia, shapes } from '@joint/plus'
 import type { TenantConfig } from '../../../data/tenant-config'
 import type { NodeData, EdgeData } from '../utils/types'
 import { getIconForResourceType } from '../../../utils/icon-mapper'
+import { ResourceNode } from './ResourceNode'
 
 /**
  * Factory for creating JointJS node elements from node data
@@ -16,30 +17,17 @@ export class ShapesFactory {
   /**
    * Create a node element with tenant styling
    */
-  createNode(node: NodeData): shapes.standard.Rectangle {
+  createNode(node: NodeData): dia.Element {
     const nodeStyle = this.tenantConfig.styles.nodes[node.type] || this.tenantConfig.styles.defaultNode
     
     // Get resource type from metadata (e.g., 'web-application', 'api', 'database')
     const resourceType = (node.metadata?.resourceType as string) || 'other'
     const iconUrl = getIconForResourceType(resourceType)
 
-    const element = new shapes.standard.Rectangle({
+    const element = new ResourceNode({
       id: node.id,
       position: node.position,
       size: { width: 160, height: 80 },
-      markup: [{
-        tagName: 'rect',
-        selector: 'body'
-      }, {
-        tagName: 'image',
-        selector: 'icon',
-        attributes: {
-          'preserveAspectRatio': 'xMidYMid'
-        }
-      }, {
-        tagName: 'text',
-        selector: 'label'
-      }],
       attrs: {
         body: {
           fill: nodeStyle.fill,
@@ -52,7 +40,7 @@ export class ShapesFactory {
           'xlink:href': iconUrl,
           width: 24,
           height: 24,
-          x: 68, // (160 - 24) / 2 = 68
+          x: 68, // (160 - 24) / 2
           y: 35
         },
         label: {
@@ -60,7 +48,6 @@ export class ShapesFactory {
           fill: '#ffffff',
           fontSize: 12,
           fontWeight: '600',
-          // Position label at top like fieldset legend
           y: 10,
           textAnchor: 'middle',
           textVerticalAnchor: 'top'
@@ -86,7 +73,7 @@ export class ShapesFactory {
   /**
    * Create multiple node elements
    */
-  createNodes(nodes: NodeData[]): shapes.standard.Rectangle[] {
+  createNodes(nodes: NodeData[]): dia.Element[] {
     return nodes.map(node => this.createNode(node))
   }
 

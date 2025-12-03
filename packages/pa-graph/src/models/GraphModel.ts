@@ -1,6 +1,6 @@
 import { makeAutoObservable } from 'mobx'
 import { dia } from '@joint/plus'
-import type { ZoomHandler } from '../components/graph/features'
+import type { ZoomHandler, LayerManager } from '../components/graph/features'
 import { getIconForResourceType } from '../utils/icon-mapper'
 
 /**
@@ -11,6 +11,7 @@ export class GraphModel {
   graph: dia.Graph | null = null
   paper: dia.Paper | null = null
   zoomHandler: ZoomHandler | null = null
+  layerManager: LayerManager | null = null
   selectedCellView: dia.CellView | null = null
   scale: number = 1
 
@@ -32,6 +33,35 @@ export class GraphModel {
 
   setZoomHandler(zoomHandler: ZoomHandler) {
     this.zoomHandler = zoomHandler
+  }
+
+  setLayerManager(layerManager: LayerManager) {
+    this.layerManager = layerManager
+  }
+
+  /**
+   * Toggle layer visibility
+   */
+  toggleLayer(layerId: string): boolean {
+    if (!this.layerManager) {
+      console.warn('LayerManager not initialized')
+      return false
+    }
+    return this.layerManager.toggleLayerVisibility(layerId)
+  }
+
+  /**
+   * Get all visible layers
+   */
+  getVisibleLayers() {
+    return this.layerManager?.getVisibleLayers() || []
+  }
+
+  /**
+   * Get layers by category
+   */
+  getLayersByCategory(category: 'language' | 'runtime') {
+    return this.layerManager?.getLayersByCategory(category) || []
   }
 
   /**
@@ -118,9 +148,11 @@ export class GraphModel {
    * Clean up the model
    */
   cleanup() {
+    this.layerManager?.cleanup()
     this.graph = null
     this.paper = null
     this.zoomHandler = null
+    this.layerManager = null
     this.selectedCellView = null
     this.scale = 1
   }
