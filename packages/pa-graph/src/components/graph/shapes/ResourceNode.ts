@@ -1,16 +1,18 @@
 import { dia } from '@joint/plus'
 
 /**
- * Custom rectangle shape for resource nodes with built-in badge support.
+ * Custom rectangle shape for resource nodes with 4-corner badge support.
  * 
  * This shape extends the standard rectangle to include additional markup
- * for language and runtime badges that can be toggled via the layers system.
+ * for category badges that can be toggled via the layers system.
  * 
  * Markup structure:
  * - body: Main rectangle
  * - icon: Resource type icon (center, always visible)
- * - languageBadge: Language icon (top-right corner, layer-controlled)
- * - runtimeBadge: Runtime icon (bottom-right corner, layer-controlled)
+ * - topLeftBadge: Process category badge (top-left corner)
+ * - topRightBadge: Technology category badge (top-right corner)
+ * - bottomLeftBadge: People category badge (bottom-left corner)
+ * - bottomRightBadge: Security category badge (bottom-right corner)
  * - label: Resource name (top edge)
  */
 export const ResourceNode = dia.Element.define('dna.ResourceNode', {
@@ -29,14 +31,28 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
     },
     {
       tagName: 'image',
-      selector: 'languageBadge',
+      selector: 'topLeftBadge',
       attributes: {
         'preserveAspectRatio': 'xMidYMid'
       }
     },
     {
       tagName: 'image',
-      selector: 'runtimeBadge',
+      selector: 'topRightBadge',
+      attributes: {
+        'preserveAspectRatio': 'xMidYMid'
+      }
+    },
+    {
+      tagName: 'image',
+      selector: 'bottomLeftBadge',
+      attributes: {
+        'preserveAspectRatio': 'xMidYMid'
+      }
+    },
+    {
+      tagName: 'image',
+      selector: 'bottomRightBadge',
       attributes: {
         'preserveAspectRatio': 'xMidYMid'
       }
@@ -64,8 +80,17 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       y: 35,
       'xlink:href': ''
     },
-    languageBadge: {
-      // Language badge (top-right, 20x20px)
+    topLeftBadge: {
+      // Process category badge (top-left, 20x20px)
+      width: 20,
+      height: 20,
+      x: 10,
+      y: 10,
+      opacity: 0, // Hidden by default
+      'xlink:href': ''
+    },
+    topRightBadge: {
+      // Technology category badge (top-right, 20x20px)
       width: 20,
       height: 20,
       x: 130, // 160 - 20 - 10 (10px from edge)
@@ -73,8 +98,17 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       opacity: 0, // Hidden by default
       'xlink:href': ''
     },
-    runtimeBadge: {
-      // Runtime badge (bottom-right, 20x20px)
+    bottomLeftBadge: {
+      // People category badge (bottom-left, 20x20px)
+      width: 20,
+      height: 20,
+      x: 10,
+      y: 50, // 80 - 20 - 10
+      opacity: 0, // Hidden by default
+      'xlink:href': ''
+    },
+    bottomRightBadge: {
+      // Security category badge (bottom-right, 20x20px)
       width: 20,
       height: 20,
       x: 130, // 160 - 20 - 10

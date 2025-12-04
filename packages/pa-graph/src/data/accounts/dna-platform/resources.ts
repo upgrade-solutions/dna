@@ -15,7 +15,19 @@ export const dnaPlatformResources: ResourceGraph = {
       metadata: {
         resourceType: 'web-application',
         language: 'typescript',
-        runtime: 'nodejs'
+        runtime: 'nodejs',
+        // Process concerns
+        status: 'up',
+        version: '2.0.0',
+        lifecycle: 'run',
+        // People concerns
+        owner: 'Tim Kleier',
+        team: 'Platform Team',
+        raci: 'accountable',
+        // Security concerns
+        dataClassification: 'internal',
+        compliance: ['soc2'],
+        riskLevel: 'low'
       },
       children: [
         // Frontend Layer
@@ -40,7 +52,16 @@ export const dnaPlatformResources: ResourceGraph = {
                 tech: 'Next.js 14',
                 resourceType: 'web-application',
                 language: 'typescript',
-                runtime: 'nodejs'
+                runtime: 'nodejs',
+                status: 'up',
+                version: '1.4.2',
+                lifecycle: 'run',
+                owner: 'Sarah Chen',
+                team: 'Frontend Team',
+                raci: 'responsible',
+                infrastructure: 'service',
+                dataClassification: 'internal',
+                riskLevel: 'low'
               }
             },
             {
@@ -53,7 +74,16 @@ export const dnaPlatformResources: ResourceGraph = {
                 tech: 'Next.js 16',
                 resourceType: 'web-application',
                 language: 'typescript',
-                runtime: 'nodejs'
+                runtime: 'nodejs',
+                status: 'degraded',
+                version: '1.6.0',
+                lifecycle: 'build',
+                owner: 'Mike Johnson',
+                team: 'Frontend Team',
+                raci: 'responsible',
+                infrastructure: 'service',
+                dataClassification: 'internal',
+                riskLevel: 'medium'
               }
             },
             {
@@ -119,7 +149,17 @@ export const dnaPlatformResources: ResourceGraph = {
                 tech: 'Deno + Oak',
                 resourceType: 'api',
                 language: 'typescript',
-                runtime: 'deno'
+                runtime: 'deno',
+                status: 'up',
+                version: '2.1.0',
+                lifecycle: 'run',
+                owner: 'Alex Rivera',
+                team: 'Backend Team',
+                raci: 'accountable',
+                infrastructure: 'service',
+                dataClassification: 'pii',
+                compliance: ['soc2', 'hipaa'],
+                riskLevel: 'high'
               }
             },
             {
@@ -132,7 +172,16 @@ export const dnaPlatformResources: ResourceGraph = {
                 tech: 'Deno + Neogma',
                 resourceType: 'api',
                 language: 'typescript',
-                runtime: 'deno'
+                runtime: 'deno',
+                status: 'up',
+                version: '1.3.5',
+                lifecycle: 'run',
+                owner: 'Jordan Lee',
+                team: 'Backend Team',
+                raci: 'responsible',
+                infrastructure: 'service',
+                dataClassification: 'internal',
+                riskLevel: 'low'
               }
             }
           ]
@@ -194,7 +243,17 @@ export const dnaPlatformResources: ResourceGraph = {
               metadata: { 
                 tech: 'Neo4j + Neogma OGM',
                 resourceType: 'database',
-                runtime: 'postgresql'
+                runtime: 'postgresql',
+                status: 'up',
+                version: '5.12.0',
+                lifecycle: 'run',
+                owner: 'Database Team',
+                team: 'Infrastructure',
+                raci: 'consulted',
+                infrastructure: 'database',
+                dataClassification: 'pci',
+                compliance: ['soc2'],
+                riskLevel: 'high'
               }
             },
             {

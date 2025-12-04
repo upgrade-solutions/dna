@@ -7,7 +7,9 @@ import { initializeGraph, cleanupGraph, populateGraph } from '../utils'
 import { ShapesFactory } from '../shapes'
 import '../shapes/ResourceNode' // Register custom shape
 import '../shapes/ContainerNode' // Register container shape
-import { GraphEventHandler, ZoomHandler, PanHandler, KeyboardHandler, LayerManager, LayoutManager, HierarchyVisibilityManager } from '../features'
+import { GraphEventHandler, ZoomHandler, PanHandler, KeyboardHandler } from '../features/interaction'
+import { OverlayManager } from '../features/overlays'
+import { LayoutManager, HierarchyVisibilityManager } from '../features/layout'
 import { GraphToolbar } from '../toolbar/GraphToolbar'
 import { GraphModel } from '../../../models'
 import { getThemedColors } from '../../../types/theme'
@@ -29,7 +31,7 @@ export const GraphCanvas = observer(function GraphCanvas({
   const eventHandlerRef = useRef<GraphEventHandler | null>(null)
   const panHandlerRef = useRef<PanHandler | null>(null)
   const keyboardHandlerRef = useRef<KeyboardHandler | null>(null)
-  const layerManagerRef = useRef<LayerManager | null>(null)
+  const overlayManagerRef = useRef<OverlayManager | null>(null)
   const layoutManagerRef = useRef<LayoutManager | null>(null)
 
   // Memoize tenantConfig to prevent unnecessary rerenders when only theme changes
@@ -56,10 +58,10 @@ export const GraphCanvas = observer(function GraphCanvas({
     model.setGraph(graph)
     model.setPaper(paper)
 
-    // Create and initialize layer manager
-    const layerManager = new LayerManager(graph, paper)
-    layerManagerRef.current = layerManager
-    model.setLayerManager(layerManager)
+    // Create and initialize overlay manager
+    const overlayManager = new OverlayManager(graph, paper)
+    overlayManagerRef.current = overlayManager
+    model.setOverlayManager(overlayManager)
 
     // Create and initialize layout manager
     const layoutManager = new LayoutManager(graph, 'tree', 'tree')
@@ -154,7 +156,7 @@ export const GraphCanvas = observer(function GraphCanvas({
       keyboardHandler.cleanup()
       panHandler.cleanup()
       eventHandler.cleanup()
-      layerManager.cleanup()
+      overlayManager.cleanup()
       layoutManager.cleanup()
       hierarchyVisibilityManager.cleanup()
       cleanupGraph({ graph, paper })
@@ -162,7 +164,7 @@ export const GraphCanvas = observer(function GraphCanvas({
       eventHandlerRef.current = null
       panHandlerRef.current = null
       keyboardHandlerRef.current = null
-      layerManagerRef.current = null
+      overlayManagerRef.current = null
       layoutManagerRef.current = null
     }
   }, [width, height, stableConfig, model])
@@ -190,7 +192,7 @@ export const GraphCanvas = observer(function GraphCanvas({
       <GraphToolbar 
         graph={model.graph} 
         paper={model.paper}
-        layerManager={model.layerManager}
+        overlayManager={model.overlayManager}
         layoutManager={model.layoutManager}
         scale={model.scale}
         onScaleChange={(scale) => model.setScale(scale)}

@@ -75,10 +75,23 @@ export class ShapesFactory {
         resourceType: resourceType,
         language: (node.metadata?.language as string) || undefined,
         runtime: (node.metadata?.runtime as string) || undefined,
+        infrastructure: (node.metadata?.infrastructure as string) || undefined,
         description: (node.metadata?.description as string) || undefined,
+        // Process concerns
+        status: (node.metadata?.status as string) || undefined,
+        version: (node.metadata?.version as string) || undefined,
+        lifecycle: (node.metadata?.lifecycle as string) || undefined,
+        // People concerns
+        owner: (node.metadata?.owner as string) || undefined,
+        team: (node.metadata?.team as string) || undefined,
+        raci: (node.metadata?.raci as string) || undefined,
+        // Security concerns
+        dataClassification: (node.metadata?.dataClassification as string) || undefined,
+        compliance: (node.metadata?.compliance as string[]) || undefined,
+        riskLevel: (node.metadata?.riskLevel as string) || undefined,
+        // Legacy fields
         type: undefined,
-        priority: undefined,
-        status: 'draft'
+        priority: undefined
       })
       
       // Store hierarchy metadata
@@ -128,10 +141,23 @@ export class ShapesFactory {
         resourceType: resourceType,
         language: (node.metadata?.language as string) || undefined,
         runtime: (node.metadata?.runtime as string) || undefined,
+        infrastructure: (node.metadata?.infrastructure as string) || undefined,
         description: (node.metadata?.description as string) || undefined,
+        // Process concerns
+        status: (node.metadata?.status as string) || undefined,
+        version: (node.metadata?.version as string) || undefined,
+        lifecycle: (node.metadata?.lifecycle as string) || undefined,
+        // People concerns
+        owner: (node.metadata?.owner as string) || undefined,
+        team: (node.metadata?.team as string) || undefined,
+        raci: (node.metadata?.raci as string) || undefined,
+        // Security concerns
+        dataClassification: (node.metadata?.dataClassification as string) || undefined,
+        compliance: (node.metadata?.compliance as string[]) || undefined,
+        riskLevel: (node.metadata?.riskLevel as string) || undefined,
+        // Legacy fields
         type: undefined,
-        priority: undefined,
-        status: 'draft'
+        priority: undefined
       })
       
       // Store hierarchy metadata

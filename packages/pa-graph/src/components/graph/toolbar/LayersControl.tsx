@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
-import type { LayerManager, LayerConfig } from '../features/layer-manager'
+import type { OverlayManager } from '../features/overlays/overlay-manager'
+import type { CategoryId } from '../features/overlays/layer-types'
 import type { Theme } from '../../../types/theme'
 import { getThemedColors } from '../../../types/theme'
 
@@ -13,32 +14,44 @@ const LayersIcon = () => (
   </svg>
 )
 
-const EyeIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-)
-
-const EyeOffIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-    <line x1="1" y1="1" x2="23" y2="23"/>
-  </svg>
-)
-
 const ChevronDownIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="6 9 12 15 18 9"/>
   </svg>
 )
 
+const CheckboxCheckedIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="currentColor"/>
+    <polyline points="9 12 11 14 15 10" stroke="white" strokeWidth="2"/>
+  </svg>
+)
+
+const CheckboxUncheckedIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+  </svg>
+)
+
+const RadioSelectedIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10"/>
+    <circle cx="12" cy="12" r="5" fill="currentColor"/>
+  </svg>
+)
+
+const RadioUnselectedIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10"/>
+  </svg>
+)
+
 export interface LayersControlProps {
-  layerManager: LayerManager | null
+  overlayManager: OverlayManager | null
   theme: Theme
 }
 
-export const LayersControl = observer(function LayersControl({ layerManager, theme }: LayersControlProps) {
+export const LayersControl = observer(function LayersControl({ overlayManager, theme }: LayersControlProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 })
   const [, forceUpdate] = useState({})
@@ -72,81 +85,146 @@ export const LayersControl = observer(function LayersControl({ layerManager, the
     }
   }, [isOpen])
 
-  const handleToggleLayer = useCallback((layerId: string) => {
-    if (!layerManager) return
-    layerManager.toggleLayerVisibility(layerId)
-    forceUpdate({}) // Force re-render
-  }, [layerManager])
+  const handleToggleCategory = useCallback((categoryId: CategoryId) => {
+    if (!overlayManager) return
+    overlayManager.toggleCategory(categoryId)
+    forceUpdate({})
+  }, [overlayManager])
 
-  const handleShowAll = useCallback(() => {
-    if (!layerManager) return
-    layerManager.showAllLayers()
-    forceUpdate({}) // Force re-render
-  }, [layerManager])
+  const handleSelectConcern = useCallback((categoryId: CategoryId, concernId: string) => {
+    if (!overlayManager) return
+    overlayManager.setActiveConcern(categoryId, concernId)
+    forceUpdate({})
+  }, [overlayManager])
 
-  const handleHideAll = useCallback(() => {
-    if (!layerManager) return
-    layerManager.hideAllLayers()
-    forceUpdate({}) // Force re-render
-  }, [layerManager])
+  if (!overlayManager) return null
 
-  if (!layerManager) return null
+  const categories = overlayManager.getAllCategories()
 
-  const allLayers = layerManager.getAllLayers()
+  // Corner indicators
+  const cornerIndicators: Record<string, string> = {
+    'top-left': '⬉',
+    'top-right': '⬈',
+    'bottom-left': '⬋',
+    'bottom-right': '⬊'
+  }
 
-  const renderLayerItem = (layer: LayerConfig) => {
-    // For language/runtime layers, count all cells with that property set
-    const count = layerManager.countCellsWithProperty(layer.category)
-
+  const renderCategory = (category: typeof categories[0]) => {
+    const indicator = cornerIndicators[category.corner]
+    
     return (
       <div
-        key={layer.id}
+        key={category.id}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '6px 12px',
-          cursor: 'pointer',
-          transition: 'background 0.15s',
-          background: layer.visible ? 'transparent' : themed.toolbar.buttonBackground,
-          borderRadius: '4px',
-          margin: '2px 0',
-          opacity: count === 0 ? 0.5 : 1
-        }}
-        onClick={() => handleToggleLayer(layer.id)}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = themed.toolbar.buttonBackgroundHover
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = layer.visible ? 'transparent' : themed.toolbar.buttonBackground
+          marginBottom: '12px',
+          borderBottom: `1px solid ${themed.toolbar.borderColor}`,
+          paddingBottom: '12px'
         }}
       >
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          width: '20px',
-          color: layer.visible ? themed.toolbar.text : themed.toolbar.textSecondary
-        }}>
-          {layer.visible ? <EyeIcon /> : <EyeOffIcon />}
+        {/* Category Header with Enable/Disable Checkbox */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '6px 12px',
+            cursor: 'pointer',
+            background: category.enabled ? themed.toolbar.buttonBackgroundHover : 'transparent',
+            borderRadius: '4px',
+            marginBottom: '6px',
+            transition: 'background 0.15s'
+          }}
+          onClick={() => handleToggleCategory(category.id)}
+          onMouseEnter={(e) => {
+            if (!category.enabled) {
+              e.currentTarget.style.background = themed.toolbar.buttonBackground
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!category.enabled) {
+              e.currentTarget.style.background = 'transparent'
+            }
+          }}
+        >
+          <span style={{ fontSize: '16px', width: '20px', textAlign: 'center' }}>
+            {indicator}
+          </span>
+          <span style={{
+            flex: 1,
+            fontSize: '13px',
+            fontWeight: '600',
+            color: themed.toolbar.text
+          }}>
+            {category.name} ({category.corner})
+          </span>
+          <div style={{ color: category.enabled ? themed.toolbar.text : themed.toolbar.textSecondary }}>
+            {category.enabled ? <CheckboxCheckedIcon /> : <CheckboxUncheckedIcon />}
+          </div>
         </div>
-        <span style={{ 
-          flex: 1, 
-          fontSize: '13px',
-          color: layer.visible ? themed.toolbar.text : themed.toolbar.textSecondary,
-          opacity: layer.visible ? 1 : 0.6
+
+        {/* Concerns List (shown when enabled or always visible) */}
+        <div style={{
+          paddingLeft: '36px',
+          opacity: category.enabled ? 1 : 0.5,
+          pointerEvents: category.enabled ? 'auto' : 'none'
         }}>
-          {layer.name}
-        </span>
-        <span style={{ 
-          fontSize: '12px',
-          color: themed.toolbar.textSecondary,
-          fontWeight: '500',
-          minWidth: '24px',
-          textAlign: 'right'
-        }}>
-          {count}
-        </span>
+          {category.concerns.map(concern => {
+            const isActive = category.activeConcern === concern.id
+            const count = overlayManager.countCellsWithConcern(category.id, concern.id)
+            
+            return (
+              <div
+                key={concern.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '4px 8px',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  margin: '2px 0',
+                  background: isActive ? themed.toolbar.buttonBackground : 'transparent',
+                  transition: 'background 0.15s'
+                }}
+                onClick={() => handleSelectConcern(category.id, concern.id)}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = themed.toolbar.buttonBackground
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = 'transparent'
+                  }
+                }}
+              >
+                <div style={{
+                  color: isActive ? themed.toolbar.text : themed.toolbar.textSecondary,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  {isActive ? <RadioSelectedIcon /> : <RadioUnselectedIcon />}
+                </div>
+                <span style={{
+                  flex: 1,
+                  fontSize: '12px',
+                  color: isActive ? themed.toolbar.text : themed.toolbar.textSecondary
+                }}>
+                  {concern.name}
+                </span>
+                <span style={{
+                  fontSize: '11px',
+                  color: themed.toolbar.textSecondary,
+                  fontWeight: '500',
+                  minWidth: '20px',
+                  textAlign: 'right'
+                }}>
+                  {count}
+                </span>
+              </div>
+            )
+          })}
+        </div>
       </div>
     )
   }
@@ -156,7 +234,7 @@ export const LayersControl = observer(function LayersControl({ layerManager, the
       <button
         ref={buttonRef}
         onClick={handleToggleDropdown}
-        disabled={!layerManager}
+        disabled={!overlayManager}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -166,13 +244,13 @@ export const LayersControl = observer(function LayersControl({ layerManager, the
           border: 'none',
           borderRadius: '4px',
           color: themed.toolbar.buttonText,
-          cursor: layerManager ? 'pointer' : 'not-allowed',
+          cursor: overlayManager ? 'pointer' : 'not-allowed',
           transition: 'all 0.2s',
           fontSize: '12px',
           fontWeight: '500'
         }}
         onMouseEnter={(e) => {
-          if (layerManager && !isOpen) {
+          if (overlayManager && !isOpen) {
             e.currentTarget.style.background = themed.toolbar.buttonBackgroundHover
             e.currentTarget.style.color = themed.toolbar.buttonTextHover
           }
@@ -187,7 +265,7 @@ export const LayersControl = observer(function LayersControl({ layerManager, the
       >
         <LayersIcon />
         <span>Layers</span>
-        <div style={{ 
+        <div style={{
           transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.2s'
         }}>
@@ -201,80 +279,24 @@ export const LayersControl = observer(function LayersControl({ layerManager, the
             position: 'fixed',
             top: `${dropdownPosition.top}px`,
             left: `${dropdownPosition.left}px`,
-            minWidth: '280px',
-            maxWidth: '320px',
-            maxHeight: '500px',
+            minWidth: '320px',
+            maxWidth: '380px',
+            maxHeight: '600px',
             overflowY: 'auto',
             background: themed.toolbar.background,
             border: `1px solid ${themed.toolbar.borderColor}`,
             borderRadius: '6px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             zIndex: 10000,
-            padding: '8px 0 0 0'
+            padding: '12px 0'
           }}
         >
-          {/* Quick Actions */}
-          <div style={{ 
-            display: 'flex', 
-            gap: '8px', 
-            padding: '8px 12px',
-            borderBottom: `1px solid ${themed.toolbar.borderColor}`,
-            marginBottom: '8px'
-          }}>
-            <button
-              onClick={handleShowAll}
-              style={{
-                flex: 1,
-                padding: '6px',
-                background: themed.toolbar.buttonBackground,
-                border: 'none',
-                borderRadius: '4px',
-                color: themed.toolbar.buttonText,
-                cursor: 'pointer',
-                fontSize: '11px',
-                fontWeight: '500',
-                transition: 'all 0.15s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = themed.toolbar.buttonBackgroundHover
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = themed.toolbar.buttonBackground
-              }}
-            >
-              Show All
-            </button>
-            <button
-              onClick={handleHideAll}
-              style={{
-                flex: 1,
-                padding: '6px',
-                background: themed.toolbar.buttonBackground,
-                border: 'none',
-                borderRadius: '4px',
-                color: themed.toolbar.buttonText,
-                cursor: 'pointer',
-                fontSize: '11px',
-                fontWeight: '500',
-                transition: 'all 0.15s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = themed.toolbar.buttonBackgroundHover
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = themed.toolbar.buttonBackground
-              }}
-            >
-              Hide All
-            </button>
-          </div>
-          {/* Layer List */}
-          <div style={{ padding: '4px 0' }}>
-            {allLayers.map(renderLayerItem)}
+          {/* Categories List */}
+          <div style={{ padding: '0 4px' }}>
+            {categories.map(renderCategory)}
           </div>
         </div>
       )}
     </div>
   )
 })
-

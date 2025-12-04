@@ -1,6 +1,9 @@
 import { makeAutoObservable } from 'mobx'
 import { dia } from '@joint/plus'
-import type { ZoomHandler, LayerManager, HierarchyVisibilityManager, LayoutManager } from '../components/graph/features'
+import type { ZoomHandler } from '../components/graph/features/interaction'
+import type { OverlayManager } from '../components/graph/features/overlays'
+import type { HierarchyVisibilityManager, LayoutManager } from '../components/graph/features/layout'
+import type { CategoryId } from '../components/graph/features/overlays/layer-types'
 import { getIconForResourceType } from '../utils/icon-mapper'
 
 /**
@@ -11,7 +14,7 @@ export class GraphModel {
   graph: dia.Graph | null = null
   paper: dia.Paper | null = null
   zoomHandler: ZoomHandler | null = null
-  layerManager: LayerManager | null = null
+  overlayManager: OverlayManager | null = null
   layoutManager: LayoutManager | null = null
   hierarchyVisibilityManager: HierarchyVisibilityManager | null = null
   selectedCellView: dia.CellView | null = null
@@ -37,8 +40,8 @@ export class GraphModel {
     this.zoomHandler = zoomHandler
   }
 
-  setLayerManager(layerManager: LayerManager) {
-    this.layerManager = layerManager
+  setOverlayManager(overlayManager: OverlayManager) {
+    this.overlayManager = overlayManager
   }
 
   setLayoutManager(layoutManager: LayoutManager) {
@@ -50,28 +53,46 @@ export class GraphModel {
   }
 
   /**
-   * Toggle layer visibility
+   * Toggle category visibility
    */
-  toggleLayer(layerId: string): boolean {
-    if (!this.layerManager) {
-      console.warn('LayerManager not initialized')
+  toggleCategory(categoryId: CategoryId): boolean {
+    if (!this.overlayManager) {
+      console.warn('OverlayManager not initialized')
       return false
     }
-    return this.layerManager.toggleLayerVisibility(layerId)
+    return this.overlayManager.toggleCategory(categoryId)
   }
 
   /**
-   * Get all visible layers
+   * Set active concern for a category
    */
-  getVisibleLayers() {
-    return this.layerManager?.getVisibleLayers() || []
+  setActiveConcern(categoryId: CategoryId, concernId: string) {
+    if (!this.overlayManager) {
+      console.warn('OverlayManager not initialized')
+      return
+    }
+    this.overlayManager.setActiveConcern(categoryId, concernId)
   }
 
   /**
-   * Get layers by category
+   * Get all categories
    */
-  getLayersByCategory(category: 'language' | 'runtime') {
-    return this.layerManager?.getLayersByCategory(category) || []
+  getAllCategories() {
+    return this.overlayManager?.getAllCategories() || []
+  }
+
+  /**
+   * Enable a category
+   */
+  enableCategory(categoryId: CategoryId) {
+    this.overlayManager?.enableCategory(categoryId)
+  }
+
+  /**
+   * Disable a category
+   */
+  disableCategory(categoryId: CategoryId) {
+    this.overlayManager?.disableCategory(categoryId)
   }
 
   /**
@@ -169,12 +190,12 @@ export class GraphModel {
    * Clean up the model
    */
   cleanup() {
-    this.layerManager?.cleanup()
+    this.overlayManager?.cleanup()
     this.hierarchyVisibilityManager?.cleanup()
     this.graph = null
     this.paper = null
     this.zoomHandler = null
-    this.layerManager = null
+    this.overlayManager = null
     this.hierarchyVisibilityManager = null
     this.selectedCellView = null
     this.scale = 1

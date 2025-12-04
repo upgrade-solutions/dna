@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react'
 import { dia } from '@joint/plus'
 import { zoomIn, zoomOut, resetZoom, zoomToFit } from '../actions'
-import type { LayerManager, LayoutManager } from '../features'
+import type { OverlayManager } from '../features/overlays'
+import type { LayoutManager } from '../features/layout'
 import type { Theme } from '../../../types/theme'
 import { getThemedColors } from '../../../types/theme'
 import { LayersControl } from './LayersControl'
@@ -48,7 +49,7 @@ const PlusIcon = () => (
 export interface GraphToolbarProps {
   graph: dia.Graph | null
   paper: dia.Paper | null
-  layerManager?: LayerManager | null
+  overlayManager?: OverlayManager | null
   layoutManager?: LayoutManager | null
   scale?: number
   onScaleChange?: (scale: number) => void
@@ -56,7 +57,7 @@ export interface GraphToolbarProps {
   theme: Theme
 }
 
-export function GraphToolbar({ graph, paper, layerManager, layoutManager, scale: externalScale, onScaleChange, onAddNode, theme }: GraphToolbarProps) {
+export function GraphToolbar({ graph, paper, overlayManager, layoutManager, scale: externalScale, onScaleChange, onAddNode, theme }: GraphToolbarProps) {
   const [internalScale, setInternalScale] = useState(1)
   const scale = externalScale ?? internalScale
   const themed = getThemedColors(theme)
@@ -243,7 +244,7 @@ export function GraphToolbar({ graph, paper, layerManager, layoutManager, scale:
       <div style={{ width: '1px', height: '16px', background: themed.toolbar.divider, flexShrink: 0 }} />
 
       {/* Layers Control */}
-      <LayersControl layerManager={layerManager || null} theme={theme} />
+      <LayersControl overlayManager={overlayManager || null} theme={theme} />
 
       {/* Layout Control */}
       <LayoutControl layoutManager={layoutManager || null} theme={theme} />
