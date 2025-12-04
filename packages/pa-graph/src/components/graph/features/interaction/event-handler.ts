@@ -61,7 +61,8 @@ export class GraphEventHandler {
               stroke: this.tenantConfig.styles.nodes[cellView.model.get('type')]?.stroke || '#3b82f6',
               'fill': 'none',
               'pointer-events': 'none'
-            }
+            },
+            layer: 'back' // Place highlight behind other elements
           }
         }
       })

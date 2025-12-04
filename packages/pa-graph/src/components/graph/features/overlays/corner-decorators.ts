@@ -127,6 +127,44 @@ export class VersionDecorator extends BaseConcernDecorator {
   getColor(_value: string): string {
     return '#3b82f6'
   }
+  
+  // Override apply to customize circle styling for version badges
+  apply(cell: dia.Cell, corner: Corner): void {
+    if (cell.isLink()) return
+    
+    const value = this.getValue(cell)
+    if (!value) return
+    
+    const selectors = CORNER_SELECTORS[corner]
+    
+    // Show circle with custom styling - background same as node, stroke is theme color
+    cell.attr(`${selectors.circle}/opacity`, 1)
+    cell.attr(`${selectors.circle}/fill`, '#1f2937') // Same as node background
+    cell.attr(`${selectors.circle}/stroke`, '#3b82f6') // Blue theme color
+    cell.attr(`${selectors.circle}/strokeWidth`, 2)
+    
+    // Store full version in tooltip
+    cell.attr(`${selectors.circle}/data-tooltip`, value)
+    
+    // Check if we can display as text
+    const text = this.getText(value)
+    if (text) {
+      // Show text, hide icon
+      cell.attr(`${selectors.text}/text`, text)
+      cell.attr(`${selectors.text}/opacity`, 1)
+      cell.attr(`${selectors.text}/fill`, '#3b82f6') // Blue text color
+      cell.attr(`${selectors.text}/data-tooltip`, value)
+      cell.attr(`${selectors.badge}/opacity`, 0)
+    } else {
+      // Show icon, hide text
+      const iconUrl = this.getIcon(value)
+      cell.attr(`${selectors.badge}/href`, iconUrl)
+      cell.attr(`${selectors.badge}/xlink:href`, iconUrl)
+      cell.attr(`${selectors.badge}/opacity`, 1)
+      cell.attr(`${selectors.badge}/data-tooltip`, value)
+      cell.attr(`${selectors.text}/opacity`, 0)
+    }
+  }
 }
 
 /**

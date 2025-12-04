@@ -163,7 +163,8 @@ export const GraphCanvas = observer(function GraphCanvas({
       
       if (selector && (
         selector.includes('BadgeCircle') || 
-        (selector.includes('Badge') && !selector.includes('Circle'))
+        selector.includes('BadgeText') ||
+        (selector.includes('Badge') && !selector.includes('Circle') && !selector.includes('Text'))
       )) {
         const tooltipAttr = target.getAttribute('data-tooltip')
         if (tooltipAttr) {

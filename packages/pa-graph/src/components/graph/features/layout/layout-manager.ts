@@ -41,8 +41,8 @@ export interface LayoutOptions extends CommonLayoutOptions {
  */
 const DEFAULT_TREE_OPTIONS: Required<TreeLayoutOptions> = {
   direction: 'R',
-  parentGap: 50,
-  siblingGap: 30,
+  parentGap: 40,
+  siblingGap: 40,
   firstChildGap: 20,
   symmetrical: false,
 }
