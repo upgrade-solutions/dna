@@ -88,7 +88,7 @@ export class GraphEventHandler {
   }
 
   /**
-   * Handle blank area click (deselect)
+   * Handle blank area click (deselect and unfocus)
    */
   private setupBlankClickHandler(): void {
     this.paper.on('blank:pointerclick', () => {
@@ -97,6 +97,9 @@ export class GraphEventHandler {
         this.selectedCellView = null
         this.onCellViewSelected?.(null)
       }
+      
+      // Unfocus from any focused node, return to default visibility
+      this.hierarchyVisibilityManager?.focusOnNode(null)
     })
   }
 
