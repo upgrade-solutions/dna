@@ -101,18 +101,26 @@ export class GraphModel {
    * Watches for changes to dna/resourceType and automatically updates
    * the cell's icon to match the selected resource type.
    * 
+   * Also watches for any DNA changes to refresh category badges/overlays.
+   * 
    * This provides reactive icon updates when users change the resource type
    * in the inspector dropdown without requiring manual refresh.
    */
   private setupGraphListeners() {
     if (!this.graph) return
 
-    // Listen for changes to the 'dna' object (which contains resourceType)
+    // Listen for changes to the 'dna' object (which contains resourceType and all DNA properties)
     this.graph.on('change:dna', (cell: dia.Cell) => {
       const dnaData = cell.get('dna')
       
       if (dnaData && dnaData.resourceType) {
         this.updateCellIcon(cell, dnaData.resourceType)
+      }
+
+      // Refresh overlay badges for this cell when DNA properties change
+      // This ensures badges update when user changes properties like language, status, owner, etc.
+      if (this.overlayManager) {
+        this.overlayManager.refreshDecorators()
       }
     })
   }

@@ -412,7 +412,6 @@ export function createNodeInspectorConfig(tab: 'dna' | 'properties'): Partial<ui
   const inputs = tab === 'dna' ? dnaMetadataInputs : nodePropertiesInputs
   
   return {
-    live: true,
     groups,
     inputs
   }

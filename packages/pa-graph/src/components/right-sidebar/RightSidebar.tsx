@@ -41,8 +41,21 @@ export function RightSidebar({
       const config = getInspectorConfigForCell(cell, activeTab)
       
       const inspector = ui.Inspector.create(inspectorContainerRef.current, {
-        cellView,
-        ...config
+        cell: cell,  // Pass cell instead of cellView for better compatibility
+        ...config,
+        live: true,  // Ensure live updates are enabled
+        renderFieldContent: false,
+        operators: {
+          // Custom operators to ensure proper updates
+          set: (cell: dia.Cell, path: string, value: any) => {
+            cell.prop(path, value)
+            // Force view update
+            const view = cellView.paper?.findViewByModel(cell)
+            if (view) {
+              view.update()
+            }
+          }
+        }
       })
 
       inspectorRef.current = inspector
