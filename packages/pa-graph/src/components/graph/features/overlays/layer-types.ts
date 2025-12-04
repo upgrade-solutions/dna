@@ -93,11 +93,21 @@ export interface ConcernDecorator {
 /**
  * Map corner positions to badge selectors in JointJS markup
  */
-export const CORNER_SELECTORS: Record<Corner, string> = {
-  'top-left': 'topLeftBadge',
-  'top-right': 'topRightBadge',
-  'bottom-left': 'bottomLeftBadge',
-  'bottom-right': 'bottomRightBadge'
+export const CORNER_SELECTORS: Record<Corner, { badge: string; circle: string }> = {
+  'top-left': { badge: 'topLeftBadge', circle: 'topLeftBadgeCircle' },
+  'top-right': { badge: 'topRightBadge', circle: 'topRightBadgeCircle' },
+  'bottom-left': { badge: 'bottomLeftBadge', circle: 'bottomLeftBadgeCircle' },
+  'bottom-right': { badge: 'bottomRightBadge', circle: 'bottomRightBadgeCircle' }
+}
+
+/**
+ * Category-specific theme colors
+ */
+export const CATEGORY_COLORS: Record<CategoryId, string> = {
+  'process': '#3b82f6',      // Blue
+  'technology': '#8b5cf6',   // Purple
+  'people': '#10b981',       // Green
+  'security': '#ef4444'      // Red
 }
 
 /**
@@ -113,4 +123,4 @@ export const CORNER_POSITIONS: Record<Corner, { x: number, y: number }> = {
 /**
  * Badge size standard
  */
-export const BADGE_SIZE = 20
+export const BADGE_SIZE = 16 // Icon size within circle

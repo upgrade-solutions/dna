@@ -22,25 +22,25 @@ abstract class BaseConcernDecorator implements ConcernDecorator {
     if (!displayValue) return
     
     const iconUrl = this.getIcon(displayValue)
-    const selector = CORNER_SELECTORS[corner]
+    const selectors = CORNER_SELECTORS[corner]
     
-    // Apply badge attributes
-    cell.attr(`${selector}/href`, iconUrl)
-    cell.attr(`${selector}/xlink:href`, iconUrl)
-    cell.attr(`${selector}/opacity`, 1)
+    // Show circle background
+    cell.attr(`${selectors.circle}/opacity`, 1)
     
-    // Apply color if provided
-    if (this.getColor) {
-      const color = this.getColor(displayValue)
-      cell.attr(`${selector}/fill`, color)
-    }
+    // Apply badge icon
+    cell.attr(`${selectors.badge}/href`, iconUrl)
+    cell.attr(`${selectors.badge}/xlink:href`, iconUrl)
+    cell.attr(`${selectors.badge}/opacity`, 1)
   }
   
   remove(cell: dia.Cell, corner: Corner): void {
     if (cell.isLink()) return
     
-    const selector = CORNER_SELECTORS[corner]
-    cell.attr(`${selector}/opacity`, 0)
+    const selectors = CORNER_SELECTORS[corner]
+    
+    // Hide both circle and badge
+    cell.attr(`${selectors.circle}/opacity`, 0)
+    cell.attr(`${selectors.badge}/opacity`, 0)
   }
 }
 

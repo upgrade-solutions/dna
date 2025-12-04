@@ -9,10 +9,10 @@ import { dia } from '@joint/plus'
  * Markup structure:
  * - body: Main rectangle
  * - icon: Resource type icon (center, always visible)
- * - topLeftBadge: Process category badge (top-left corner)
- * - topRightBadge: Technology category badge (top-right corner)
- * - bottomLeftBadge: People category badge (bottom-left corner)
- * - bottomRightBadge: Security category badge (bottom-right corner)
+ * - topLeftBadgeCircle/topLeftBadge: Process category badge (top-left corner)
+ * - topRightBadgeCircle/topRightBadge: Technology category badge (top-right corner)
+ * - bottomLeftBadgeCircle/bottomLeftBadge: People category badge (bottom-left corner)
+ * - bottomRightBadgeCircle/bottomRightBadge: Security category badge (bottom-right corner)
  * - label: Resource name (top edge)
  */
 export const ResourceNode = dia.Element.define('dna.ResourceNode', {
@@ -23,11 +23,20 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       selector: 'body'
     },
     {
+      tagName: 'text',
+      selector: 'label'
+    },
+    {
       tagName: 'image',
       selector: 'icon',
       attributes: {
         'preserveAspectRatio': 'xMidYMid'
       }
+    },
+    // Top-left badge (Process) - rendered last for highest z-index
+    {
+      tagName: 'circle',
+      selector: 'topLeftBadgeCircle'
     },
     {
       tagName: 'image',
@@ -36,12 +45,22 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
         'preserveAspectRatio': 'xMidYMid'
       }
     },
+    // Top-right badge (Technology)
+    {
+      tagName: 'circle',
+      selector: 'topRightBadgeCircle'
+    },
     {
       tagName: 'image',
       selector: 'topRightBadge',
       attributes: {
         'preserveAspectRatio': 'xMidYMid'
       }
+    },
+    // Bottom-left badge (People)
+    {
+      tagName: 'circle',
+      selector: 'bottomLeftBadgeCircle'
     },
     {
       tagName: 'image',
@@ -50,16 +69,17 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
         'preserveAspectRatio': 'xMidYMid'
       }
     },
+    // Bottom-right badge (Security)
+    {
+      tagName: 'circle',
+      selector: 'bottomRightBadgeCircle'
+    },
     {
       tagName: 'image',
       selector: 'bottomRightBadge',
       attributes: {
         'preserveAspectRatio': 'xMidYMid'
       }
-    },
-    {
-      tagName: 'text',
-      selector: 'label'
     }
   ],
   attrs: {
@@ -80,40 +100,76 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       y: 35,
       'xlink:href': ''
     },
+    // Top-left badge (Process) - circle centered at corner
+    topLeftBadgeCircle: {
+      r: 14, // Radius 14px = 28px diameter
+      cx: 0, // Circle center at corner
+      cy: 0,
+      fill: '#3b82f6', // Blue theme for Process
+      stroke: '#1f2937',
+      strokeWidth: 2,
+      opacity: 0 // Hidden by default
+    },
     topLeftBadge: {
-      // Process category badge (top-left, 20x20px)
-      width: 20,
-      height: 20,
-      x: 10,
-      y: 10,
+      width: 16,
+      height: 16,
+      x: -8, // Center icon within circle (-8 to 8)
+      y: -8,
       opacity: 0, // Hidden by default
       'xlink:href': ''
+    },
+    // Top-right badge (Technology) - circle centered at corner
+    topRightBadgeCircle: {
+      r: 14,
+      cx: 160, // Circle center at right edge
+      cy: 0,
+      fill: '#8b5cf6', // Purple theme for Technology
+      stroke: '#1f2937',
+      strokeWidth: 2,
+      opacity: 0
     },
     topRightBadge: {
-      // Technology category badge (top-right, 20x20px)
-      width: 20,
-      height: 20,
-      x: 130, // 160 - 20 - 10 (10px from edge)
-      y: 10,
-      opacity: 0, // Hidden by default
+      width: 16,
+      height: 16,
+      x: 152, // 160 - 8
+      y: -8,
+      opacity: 0,
       'xlink:href': ''
+    },
+    // Bottom-left badge (People) - circle centered at corner
+    bottomLeftBadgeCircle: {
+      r: 14,
+      cx: 0,
+      cy: 80, // Circle center at bottom edge
+      fill: '#10b981', // Green theme for People
+      stroke: '#1f2937',
+      strokeWidth: 2,
+      opacity: 0
     },
     bottomLeftBadge: {
-      // People category badge (bottom-left, 20x20px)
-      width: 20,
-      height: 20,
-      x: 10,
-      y: 50, // 80 - 20 - 10
-      opacity: 0, // Hidden by default
+      width: 16,
+      height: 16,
+      x: -8,
+      y: 72, // 80 - 8
+      opacity: 0,
       'xlink:href': ''
     },
+    // Bottom-right badge (Security) - circle centered at corner
+    bottomRightBadgeCircle: {
+      r: 14,
+      cx: 160, // Circle center at right edge
+      cy: 80, // Circle center at bottom edge
+      fill: '#ef4444', // Red theme for Security
+      stroke: '#1f2937',
+      strokeWidth: 2,
+      opacity: 0
+    },
     bottomRightBadge: {
-      // Security category badge (bottom-right, 20x20px)
-      width: 20,
-      height: 20,
-      x: 130, // 160 - 20 - 10
-      y: 50, // 80 - 20 - 10
-      opacity: 0, // Hidden by default
+      width: 16,
+      height: 16,
+      x: 152, // 160 - 8
+      y: 72, // 80 - 8
+      opacity: 0,
       'xlink:href': ''
     },
     label: {
