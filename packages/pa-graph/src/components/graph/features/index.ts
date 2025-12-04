@@ -7,7 +7,7 @@ export * from './interaction/keyboard-handler'
 // Overlay system
 export * from './overlays/overlay-manager'
 export * from './overlays/layer-types'
-export * from './overlays/concern-decorators'
+export * from './overlays/corner-decorators'
 
 // Layout system
 export * from './layout/hierarchy-visibility-manager'

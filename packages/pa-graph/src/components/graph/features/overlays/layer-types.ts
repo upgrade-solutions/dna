@@ -93,11 +93,11 @@ export interface ConcernDecorator {
 /**
  * Map corner positions to badge selectors in JointJS markup
  */
-export const CORNER_SELECTORS: Record<Corner, { badge: string; circle: string }> = {
-  'top-left': { badge: 'topLeftBadge', circle: 'topLeftBadgeCircle' },
-  'top-right': { badge: 'topRightBadge', circle: 'topRightBadgeCircle' },
-  'bottom-left': { badge: 'bottomLeftBadge', circle: 'bottomLeftBadgeCircle' },
-  'bottom-right': { badge: 'bottomRightBadge', circle: 'bottomRightBadgeCircle' }
+export const CORNER_SELECTORS: Record<Corner, { badge: string; circle: string; text: string }> = {
+  'top-left': { badge: 'topLeftBadge', circle: 'topLeftBadgeCircle', text: 'topLeftBadgeText' },
+  'top-right': { badge: 'topRightBadge', circle: 'topRightBadgeCircle', text: 'topRightBadgeText' },
+  'bottom-left': { badge: 'bottomLeftBadge', circle: 'bottomLeftBadgeCircle', text: 'bottomLeftBadgeText' },
+  'bottom-right': { badge: 'bottomRightBadge', circle: 'bottomRightBadgeCircle', text: 'bottomRightBadgeText' }
 }
 
 /**

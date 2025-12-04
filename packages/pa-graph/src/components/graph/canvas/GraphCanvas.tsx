@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react'
+import { useEffect, useRef, useMemo, useState } from 'react'
 import { dia } from '@joint/plus'
 import { observer } from 'mobx-react-lite'
 import { dnaPlatformTenant } from '../../../data'
@@ -14,6 +14,7 @@ import { GraphToolbar } from '../toolbar/GraphToolbar'
 import { GraphModel } from '../../../models'
 import { getThemedColors } from '../../../types/theme'
 import type { GraphCanvasProps } from '../utils/types'
+import { BadgeTooltip } from './BadgeTooltip'
 
 export type { GraphCanvasProps }
 
@@ -33,6 +34,10 @@ export const GraphCanvas = observer(function GraphCanvas({
   const keyboardHandlerRef = useRef<KeyboardHandler | null>(null)
   const overlayManagerRef = useRef<OverlayManager | null>(null)
   const layoutManagerRef = useRef<LayoutManager | null>(null)
+  
+  // Tooltip state
+  const [tooltipContent, setTooltipContent] = useState<string | null>(null)
+  const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null)
 
   // Memoize tenantConfig to prevent unnecessary rerenders when only theme changes
   // Only reinitialize graph when data or styles actually change
@@ -149,9 +154,43 @@ export const GraphCanvas = observer(function GraphCanvas({
     containerRef.current.addEventListener('wheel', handleWheel, { passive: false })
     paper.on('blank:pointerdown', handleBlankPointerDown)
 
+    // Badge tooltip handlers
+    const handleMouseMove = (evt: MouseEvent) => {
+      const target = evt.target as SVGElement
+      
+      // Check if hovering over a badge element (circle, image, or text)
+      const selector = target.getAttribute('joint-selector')
+      
+      if (selector && (
+        selector.includes('BadgeCircle') || 
+        (selector.includes('Badge') && !selector.includes('Circle'))
+      )) {
+        const tooltipAttr = target.getAttribute('data-tooltip')
+        if (tooltipAttr) {
+          setTooltipContent(tooltipAttr)
+          setTooltipPosition({ x: evt.clientX, y: evt.clientY })
+          return
+        }
+      }
+      
+      // Clear tooltip if not over a badge
+      setTooltipContent(null)
+      setTooltipPosition(null)
+    }
+
+    const handleMouseLeave = () => {
+      setTooltipContent(null)
+      setTooltipPosition(null)
+    }
+
+    containerRef.current.addEventListener('mousemove', handleMouseMove)
+    containerRef.current.addEventListener('mouseleave', handleMouseLeave)
+
     // Cleanup
     return () => {
       containerRef.current?.removeEventListener('wheel', handleWheel)
+      containerRef.current?.removeEventListener('mousemove', handleMouseMove)
+      containerRef.current?.removeEventListener('mouseleave', handleMouseLeave)
       paper.off('blank:pointerdown', handleBlankPointerDown)
       keyboardHandler.cleanup()
       panHandler.cleanup()
@@ -206,6 +245,7 @@ export const GraphCanvas = observer(function GraphCanvas({
           marginTop: '44px'
         }}
       />
+      <BadgeTooltip content={tooltipContent} position={tooltipPosition} />
     </div>
   )
 })

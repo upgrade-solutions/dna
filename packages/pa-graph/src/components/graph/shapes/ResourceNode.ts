@@ -45,6 +45,10 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
         'preserveAspectRatio': 'xMidYMid'
       }
     },
+    {
+      tagName: 'text',
+      selector: 'topLeftBadgeText'
+    },
     // Top-right badge (Technology)
     {
       tagName: 'circle',
@@ -56,6 +60,10 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       attributes: {
         'preserveAspectRatio': 'xMidYMid'
       }
+    },
+    {
+      tagName: 'text',
+      selector: 'topRightBadgeText'
     },
     // Bottom-left badge (People)
     {
@@ -69,6 +77,10 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
         'preserveAspectRatio': 'xMidYMid'
       }
     },
+    {
+      tagName: 'text',
+      selector: 'bottomLeftBadgeText'
+    },
     // Bottom-right badge (Security)
     {
       tagName: 'circle',
@@ -80,6 +92,10 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       attributes: {
         'preserveAspectRatio': 'xMidYMid'
       }
+    },
+    {
+      tagName: 'text',
+      selector: 'bottomRightBadgeText'
     }
   ],
   attrs: {
@@ -118,6 +134,17 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       opacity: 0, // Hidden by default
       'xlink:href': ''
     },
+    topLeftBadgeText: {
+      text: '',
+      fill: '#ffffff',
+      fontSize: 10,
+      fontWeight: '700',
+      x: 0,
+      y: 0,
+      textAnchor: 'middle',
+      textVerticalAnchor: 'middle',
+      opacity: 0
+    },
     // Top-right badge (Technology) - circle centered at corner
     topRightBadgeCircle: {
       r: 14,
@@ -135,6 +162,17 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       y: -8,
       opacity: 0,
       'xlink:href': ''
+    },
+    topRightBadgeText: {
+      text: '',
+      fill: '#ffffff',
+      fontSize: 10,
+      fontWeight: '700',
+      x: 160,
+      y: 0,
+      textAnchor: 'middle',
+      textVerticalAnchor: 'middle',
+      opacity: 0
     },
     // Bottom-left badge (People) - circle centered at corner
     bottomLeftBadgeCircle: {
@@ -154,6 +192,17 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       opacity: 0,
       'xlink:href': ''
     },
+    bottomLeftBadgeText: {
+      text: '',
+      fill: '#ffffff',
+      fontSize: 10,
+      fontWeight: '700',
+      x: 0,
+      y: 80,
+      textAnchor: 'middle',
+      textVerticalAnchor: 'middle',
+      opacity: 0
+    },
     // Bottom-right badge (Security) - circle centered at corner
     bottomRightBadgeCircle: {
       r: 14,
@@ -171,6 +220,17 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       y: 72, // 80 - 8
       opacity: 0,
       'xlink:href': ''
+    },
+    bottomRightBadgeText: {
+      text: '',
+      fill: '#ffffff',
+      fontSize: 10,
+      fontWeight: '700',
+      x: 160,
+      y: 80,
+      textAnchor: 'middle',
+      textVerticalAnchor: 'middle',
+      opacity: 0
     },
     label: {
       text: '',

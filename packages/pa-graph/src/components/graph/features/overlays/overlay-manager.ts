@@ -13,7 +13,7 @@ import {
   DataClassificationDecorator,
   ComplianceDecorator,
   RiskLevelDecorator
-} from './concern-decorators'
+} from './corner-decorators'
 
 /**
  * Manages graph overlay badges using a category-concern model.
