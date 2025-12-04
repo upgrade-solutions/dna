@@ -276,7 +276,7 @@ export class InfrastructureDecorator extends BaseConcernDecorator {
 // ============================================================================
 
 /**
- * Owner decorator - shows resource owner
+ * Owner decorator - shows resource owner with avatar
  */
 export class OwnerDecorator extends BaseConcernDecorator {
   getValue(cell: dia.Cell): string | null {
@@ -285,7 +285,61 @@ export class OwnerDecorator extends BaseConcernDecorator {
   }
   
   getIcon(_value: string): string {
+    // Check if the cell has an avatarUrl in its DNA
+    const cell = arguments[1] as dia.Cell | undefined
+    if (cell) {
+      const dna = cell.get('dna') as ResourceDNA | undefined
+      if (dna?.avatarUrl) {
+        return dna.avatarUrl
+      }
+    }
+    // Fallback to UI Avatars generated from name
     return 'https://api.iconify.design/mdi:account.svg?color=ec4899'
+  }
+  
+  apply(cell: dia.Cell, corner: Corner): void {
+    if (cell.isLink()) return
+    
+    const value = this.getValue(cell)
+    if (!value) return
+    
+    const dna = cell.get('dna') as ResourceDNA | undefined
+    const selectors = CORNER_SELECTORS[corner]
+    const hasAvatar = !!dna?.avatarUrl
+    
+    // Always show circle with original dark border (defined in ResourceNode.ts)
+    cell.attr(`${selectors.circle}/opacity`, 1)
+    cell.attr(`${selectors.circle}/data-tooltip`, value)
+    
+    // If avatar exists, make circle background transparent so image shows through
+    // If no avatar, use pink background for UI Avatars initials
+    if (hasAvatar) {
+      cell.attr(`${selectors.circle}/fill`, 'transparent')
+      const imageUrl = dna.avatarUrl
+      // Make image slightly larger (30x30) to fill past the 2px stroke border
+      cell.attr(`${selectors.badge}/href`, imageUrl)
+      cell.attr(`${selectors.badge}/xlink:href`, imageUrl)
+      cell.attr(`${selectors.badge}/opacity`, 1)
+      cell.attr(`${selectors.badge}/data-tooltip`, value)
+      cell.attr(`${selectors.badge}/width`, 30)
+      cell.attr(`${selectors.badge}/height`, 30)
+      cell.attr(`${selectors.badge}/x`, -15)
+      cell.attr(`${selectors.badge}/y`, corner.includes('bottom') ? 65 : -15)
+    } else {
+      // No avatar - use UI Avatars with pink background and white initials
+      cell.attr(`${selectors.circle}/fill`, 'transparent')
+      const imageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(value)}&size=128&background=ec4899&color=fff&bold=true&rounded=true`
+      cell.attr(`${selectors.badge}/href`, imageUrl)
+      cell.attr(`${selectors.badge}/xlink:href`, imageUrl)
+      cell.attr(`${selectors.badge}/opacity`, 1)
+      cell.attr(`${selectors.badge}/data-tooltip`, value)
+      cell.attr(`${selectors.badge}/width`, 30)
+      cell.attr(`${selectors.badge}/height`, 30)
+      cell.attr(`${selectors.badge}/x`, -15)
+      cell.attr(`${selectors.badge}/y`, corner.includes('bottom') ? 65 : -15)
+    }
+    
+    cell.attr(`${selectors.text}/opacity`, 0)
   }
   
   getColor(_value: string): string {

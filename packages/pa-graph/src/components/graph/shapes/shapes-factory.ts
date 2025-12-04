@@ -83,6 +83,7 @@ export class ShapesFactory {
         lifecycle: (node.metadata?.lifecycle as string) || undefined,
         // People concerns
         owner: (node.metadata?.owner as string) || undefined,
+        avatarUrl: (node.metadata?.avatarUrl as string) || undefined,
         team: (node.metadata?.team as string) || undefined,
         raci: (node.metadata?.raci as string) || undefined,
         // Security concerns
@@ -149,6 +150,7 @@ export class ShapesFactory {
         lifecycle: (node.metadata?.lifecycle as string) || undefined,
         // People concerns
         owner: (node.metadata?.owner as string) || undefined,
+        avatarUrl: (node.metadata?.avatarUrl as string) || undefined,
         team: (node.metadata?.team as string) || undefined,
         raci: (node.metadata?.raci as string) || undefined,
         // Security concerns

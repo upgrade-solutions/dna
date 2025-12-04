@@ -67,6 +67,17 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
     },
     // Bottom-left badge (People)
     {
+      tagName: 'defs',
+      children: [{
+        tagName: 'clipPath',
+        attributes: { id: 'bottomLeftAvatarClip' },
+        children: [{
+          tagName: 'circle',
+          attributes: { cx: 0, cy: 80, r: 14 }
+        }]
+      }]
+    },
+    {
       tagName: 'circle',
       selector: 'bottomLeftBadgeCircle'
     },
@@ -74,7 +85,8 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       tagName: 'image',
       selector: 'bottomLeftBadge',
       attributes: {
-        'preserveAspectRatio': 'xMidYMid'
+        'preserveAspectRatio': 'xMidYMid slice',
+        'clip-path': 'url(#bottomLeftAvatarClip)'
       }
     },
     {

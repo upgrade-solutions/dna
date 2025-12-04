@@ -30,6 +30,7 @@ export interface ResourceDNA {
   
   // People concerns
   owner?: string
+  avatarUrl?: string
   team?: string
   raci?: 'responsible' | 'accountable' | 'consulted' | 'informed'
   
