@@ -101,7 +101,7 @@ export const LayersControl = observer(function LayersControl({ overlayManager, t
 
   const categories = overlayManager.getAllCategories()
 
-  // Corner indicators
+  // Corner indicators (white arrows)
   const cornerIndicators: Record<string, string> = {
     'top-left': '⬉',
     'top-right': '⬈',
@@ -146,7 +146,7 @@ export const LayersControl = observer(function LayersControl({ overlayManager, t
             }
           }}
         >
-          <span style={{ fontSize: '16px', width: '20px', textAlign: 'center' }}>
+          <span style={{ fontSize: '16px', width: '20px', textAlign: 'center', color: 'white' }}>
             {indicator}
           </span>
           <span style={{
@@ -155,7 +155,7 @@ export const LayersControl = observer(function LayersControl({ overlayManager, t
             fontWeight: '600',
             color: themed.toolbar.text
           }}>
-            {category.name} ({category.corner})
+            {category.name}
           </span>
           <div style={{ color: category.enabled ? themed.toolbar.text : themed.toolbar.textSecondary }}>
             {category.enabled ? <CheckboxCheckedIcon /> : <CheckboxUncheckedIcon />}
@@ -279,8 +279,7 @@ export const LayersControl = observer(function LayersControl({ overlayManager, t
             position: 'fixed',
             top: `${dropdownPosition.top}px`,
             left: `${dropdownPosition.left}px`,
-            minWidth: '320px',
-            maxWidth: '380px',
+            width: '280px',
             maxHeight: '600px',
             overflowY: 'auto',
             background: themed.toolbar.background,
@@ -288,8 +287,12 @@ export const LayersControl = observer(function LayersControl({ overlayManager, t
             borderRadius: '6px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             zIndex: 10000,
-            padding: '12px 0'
+            padding: '12px 0',
+            // Themed scrollbar (matching inspector)
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#444 #1a1a1a'
           }}
+          className="layers-dropdown"
         >
           {/* Categories List */}
           <div style={{ padding: '0 4px' }}>

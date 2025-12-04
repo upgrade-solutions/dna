@@ -35,7 +35,10 @@ export function LeftSidebar({
         position: 'relative',
       }}
     >
-      <div style={{ padding: '20px', flex: 1, overflow: 'auto' }}>
+      <div 
+        className="left-sidebar-content"
+        style={{ padding: '20px', flex: 1, overflow: 'auto' }}
+      >
         <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: themed.leftSidebar.text }}>
           Structure
         </h3>

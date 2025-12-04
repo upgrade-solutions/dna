@@ -82,7 +82,7 @@ export function RightSidebar({
         
         <div 
           ref={inspectorContainerRef} 
-          className="inspector-container"
+          className="inspector-container right-sidebar-content"
           style={{ 
             flex: 1, 
             overflow: 'auto',
