@@ -20,13 +20,23 @@ export function populateGraph(
   const nodeElements = shapesFactory.createNodes(graphData.nodes)
   const linkElements = shapesFactory.createLinks(graphData.edges)
   
+  // Create a map of node IDs for quick lookup
+  const nodeIdSet = new Set(nodeElements.map(el => el.id))
+  
   // For tree layout, create parent-child links to show hierarchy
   const hierarchyLinks: shapes.standard.Link[] = []
   if (layoutMode === 'tree') {
     nodeElements.forEach(element => {
       const parentId = element.get('parentId')
-      if (parentId) {
-        // Create a link from parent to child
+      // Only create link if both parent and child nodes exist
+      if (parentId && nodeIdSet.has(parentId)) {
+        // Verify the target (current element) also exists
+        if (!nodeIdSet.has(element.id as string)) {
+          console.warn('Skipping link - target node not found:', element.id)
+          return
+        }
+        
+        // Create a link from parent to child (no label to avoid visual clutter)
         const link = new shapes.standard.Link({
           source: { id: parentId },
           target: { id: element.id },
@@ -41,9 +51,6 @@ export function populateGraph(
               }
             }
           },
-          labels: [{
-            attrs: { text: { text: 'contains', fontSize: 12, fill: '#9CA3AF' } }
-          }],
           z: -1 // Place links behind nodes
         })
         hierarchyLinks.push(link)
@@ -53,6 +60,20 @@ export function populateGraph(
   
   // Add all cells to graph
   graph.addCells([...nodeElements, ...linkElements, ...hierarchyLinks])
+  
+  // For tree layout, ensure no nodes are embedded (they should be connected via links only)
+  if (layoutMode === 'tree') {
+    nodeElements.forEach(element => {
+      const parentId = element.get('parentId')
+      if (parentId) {
+        const parent = graph.getCell(parentId)
+        if (parent && parent.isElement()) {
+          // Make sure element is NOT embedded in parent for tree layout
+          (parent as dia.Element).unembed(element)
+        }
+      }
+    })
+  }
   
   // For nested layout, establish parent-child relationships via embedding
   if (layoutMode === 'nested') {

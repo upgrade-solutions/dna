@@ -1,4 +1,4 @@
-import { dia, shapes, layout as jointLayout } from '@joint/plus'
+import { dia, layout as jointLayout } from '@joint/plus'
 import { makeObservable, observable, action, computed } from 'mobx'
 
 /**
@@ -103,7 +103,7 @@ export class LayoutManager {
   gridOptions: GridLayoutOptions
   commonOptions: CommonLayoutOptions
   private treeLayoutInstance: jointLayout.TreeLayout | null = null
-  private hierarchyLinkIds: string[] = [] // Track hierarchy links for cleanup
+  // private hierarchyLinkIds: string[] = [] // TODO: Will be used for dynamic mode switching
 
   constructor(graph: dia.Graph, initialType: LayoutType = 'tree', layoutMode: LayoutMode = 'tree') {
     this.graph = graph
@@ -160,18 +160,24 @@ export class LayoutManager {
 
   /**
    * Set layout mode (nested vs tree)
+   * Note: Switching modes requires rebuilding the graph with different node types
+   * For now, mode is set at initialization and shouldn't be changed dynamically
    */
   setLayoutMode(mode: LayoutMode): void {
     if (mode === this.layoutMode) return
     
+    console.warn('Dynamic layout mode switching requires graph rebuild - not yet implemented')
     this.layoutMode = mode
-    this.rebuildGraphForMode()
+    // TODO: Implement full graph rebuild with ShapesFactory.setLayoutMode()
+    // Future: this.rebuildGraphForMode()
   }
 
   /**
    * Rebuild graph structure when switching between nested and tree modes
+   * TODO: This needs to recreate nodes with appropriate types (ResourceNode vs ContainerNode)
+   * For now, layout mode should be set at initialization only
    */
-  private rebuildGraphForMode(): void {
+  /* private rebuildGraphForMode(): void {
     const elements = this.graph.getElements()
     
     if (this.layoutMode === 'tree') {
@@ -240,12 +246,13 @@ export class LayoutManager {
         })
       }, 50)
     }
-  }
+  } */
 
   /**
    * Remove all hierarchy links
+   * TODO: Will be used when rebuildGraphForMode is implemented
    */
-  private removeHierarchyLinks(): void {
+  /* private removeHierarchyLinks(): void {
     this.hierarchyLinkIds.forEach(linkId => {
       const link = this.graph.getCell(linkId)
       if (link) {
@@ -253,7 +260,7 @@ export class LayoutManager {
       }
     })
     this.hierarchyLinkIds = []
-  }
+  } */
 
   /**
    * Get layout-specific configuration

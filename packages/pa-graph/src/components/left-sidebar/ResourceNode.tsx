@@ -14,7 +14,7 @@ export function ResourceNode({
   selectedResourceId,
   theme
 }: ResourceNodePropsWithTheme) {
-  const [isExpanded, setIsExpanded] = useState(level < 2) // Auto-expand first 2 levels
+  const [isExpanded, setIsExpanded] = useState(true) // Auto-expand all levels
   const hasChildren = resource.children && resource.children.length > 0
   const isSelected = selectedResourceId === resource.id
   const themed = getThemedColors(theme)

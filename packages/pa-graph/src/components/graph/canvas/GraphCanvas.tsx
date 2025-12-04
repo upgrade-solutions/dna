@@ -66,8 +66,8 @@ export const GraphCanvas = observer(function GraphCanvas({
     layoutManagerRef.current = layoutManager
     model.setLayoutManager(layoutManager)
 
-    // Create shapes factory for cell creation
-    const shapesFactory = new ShapesFactory(stableConfig)
+    // Create shapes factory for cell creation (use 'tree' mode for ResourceNodes)
+    const shapesFactory = new ShapesFactory(stableConfig, 'tree')
 
     // Load and populate graph with tenant data
     const graphData = resourceToGraph(stableConfig.data)
@@ -77,15 +77,17 @@ export const GraphCanvas = observer(function GraphCanvas({
     layoutManager.applyLayout()
 
     // Setup hierarchy visibility manager
+    // Note: Disable for tree layout - we want all nodes visible in tree mode
+    // Only enable for nested/container layouts where progressive disclosure makes sense
     const hierarchyVisibilityManager = new HierarchyVisibilityManager({
       graph,
       paper,
-      enabled: true
+      enabled: false // Disabled for tree layout - show all nodes
     })
     model.setHierarchyVisibilityManager(hierarchyVisibilityManager)
     
-    // Initialize visibility based on current zoom (1.0)
-    hierarchyVisibilityManager.updateVisibility(1.0)
+    // Don't initialize visibility - all nodes should be visible in tree layout
+    // hierarchyVisibilityManager.updateVisibility(1.0)
 
     // Note: We don't assign cells to layers anymore. 
     // Layers now control badge visibility (language/runtime badges on nodes)

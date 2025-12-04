@@ -1,6 +1,7 @@
 import { dia, shapes } from '@joint/plus'
 import type { TenantConfig } from '../../../data/tenant-config'
 import type { NodeData, EdgeData } from '../utils/types'
+import type { LayoutMode } from '../features/layout/layout-manager'
 import { getIconForResourceType } from '../../../utils/icon-mapper'
 import { ResourceNode } from './ResourceNode'
 import { ContainerNode } from './ContainerNode'
@@ -10,9 +11,18 @@ import { ContainerNode } from './ContainerNode'
  */
 export class ShapesFactory {
   private tenantConfig: TenantConfig
+  private layoutMode: LayoutMode
 
-  constructor(tenantConfig: TenantConfig) {
+  constructor(tenantConfig: TenantConfig, layoutMode: LayoutMode = 'tree') {
     this.tenantConfig = tenantConfig
+    this.layoutMode = layoutMode
+  }
+
+  /**
+   * Set layout mode (affects node type selection)
+   */
+  setLayoutMode(mode: LayoutMode): void {
+    this.layoutMode = mode
   }
 
   /**
@@ -24,10 +34,13 @@ export class ShapesFactory {
     // Get resource type from metadata (e.g., 'web-application', 'api', 'database')
     const resourceType = (node.metadata?.resourceType as string) || 'other'
     
-    // Determine if this should be a container node or leaf node
+    // Determine if this should be a container node or resource node
+    // In tree layout, all nodes are ResourceNodes (simpler, no containers)
+    // In nested layout, nodes with children become ContainerNodes
     const hasChildren = node.hasChildren ?? false
+    const useContainer = this.layoutMode === 'nested' && hasChildren
     
-    if (hasChildren) {
+    if (useContainer) {
       // Create container node for resources with children
       
       const element = new ContainerNode({
