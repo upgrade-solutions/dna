@@ -6,11 +6,9 @@ import { makeObservable, observable, action, computed } from 'mobx'
  */
 export type LayoutType = 
   | 'tree'        // TreeLayout (primary)
-  | 'grid'        // GridLayout  
   | 'dagre'       // DirectedGraph (future)
   | 'force'       // ForceDirected (future)
   | 'msagl'       // MSAGL (future)
-  | 'none'        // Manual positioning only
 
 /**
  * Tree layout configuration
@@ -21,19 +19,6 @@ export interface TreeLayoutOptions {
   siblingGap?: number
   firstChildGap?: number
   symmetrical?: boolean
-}
-
-/**
- * Grid layout configuration
- */
-export interface GridLayoutOptions {
-  columns?: number
-  columnWidth?: 'auto' | 'compact' | number
-  rowHeight?: 'auto' | 'compact' | number
-  columnGap?: number
-  rowGap?: number
-  verticalAlign?: 'top' | 'middle' | 'bottom'
-  horizontalAlign?: 'left' | 'middle' | 'right'
 }
 
 /**
@@ -49,7 +34,6 @@ export interface CommonLayoutOptions {
  */
 export interface LayoutOptions extends CommonLayoutOptions {
   tree?: TreeLayoutOptions
-  grid?: GridLayoutOptions
 }
 
 /**
@@ -61,16 +45,6 @@ const DEFAULT_TREE_OPTIONS: Required<TreeLayoutOptions> = {
   siblingGap: 30,
   firstChildGap: 20,
   symmetrical: false,
-}
-
-const DEFAULT_GRID_OPTIONS: Required<GridLayoutOptions> = {
-  columns: 4,
-  columnWidth: 'auto',
-  rowHeight: 'auto',
-  columnGap: 50,
-  rowGap: 50,
-  verticalAlign: 'middle',
-  horizontalAlign: 'middle',
 }
 
 const DEFAULT_COMMON_OPTIONS: Required<CommonLayoutOptions> = {
@@ -100,7 +74,6 @@ export class LayoutManager {
   currentType: LayoutType
   layoutMode: LayoutMode
   treeOptions: TreeLayoutOptions
-  gridOptions: GridLayoutOptions
   commonOptions: CommonLayoutOptions
   private treeLayoutInstance: jointLayout.TreeLayout | null = null
   // private hierarchyLinkIds: string[] = [] // TODO: Will be used for dynamic mode switching
@@ -110,19 +83,16 @@ export class LayoutManager {
     this.currentType = initialType
     this.layoutMode = layoutMode
     this.treeOptions = { ...DEFAULT_TREE_OPTIONS }
-    this.gridOptions = { ...DEFAULT_GRID_OPTIONS }
     this.commonOptions = { ...DEFAULT_COMMON_OPTIONS }
 
     makeObservable(this, {
       currentType: observable,
       layoutMode: observable,
       treeOptions: observable,
-      gridOptions: observable,
       commonOptions: observable,
       setLayoutType: action,
       setLayoutMode: action,
       setTreeOptions: action,
-      setGridOptions: action,
       setCommonOptions: action,
       applyLayout: action,
       layoutTypeName: computed,
@@ -142,11 +112,9 @@ export class LayoutManager {
   get layoutTypeName(): string {
     const names: Record<LayoutType, string> = {
       tree: 'Tree (Hierarchical)',
-      grid: 'Grid (Uniform)',
       dagre: 'Directed Graph',
       force: 'Force-Directed',
       msagl: 'MSAGL',
-      none: 'Manual',
     }
     return names[this.currentType]
   }
@@ -265,14 +233,12 @@ export class LayoutManager {
   /**
    * Get layout-specific configuration
    */
-  getLayoutConfig(type: LayoutType): TreeLayoutOptions | GridLayoutOptions {
+  getLayoutConfig(type: LayoutType): TreeLayoutOptions {
     switch (type) {
       case 'tree':
         return { ...this.treeOptions }
-      case 'grid':
-        return { ...this.gridOptions }
       default:
-        return {}
+        return {} as TreeLayoutOptions
     }
   }
 
@@ -281,13 +247,6 @@ export class LayoutManager {
    */
   setTreeOptions(options: Partial<TreeLayoutOptions>): void {
     this.treeOptions = { ...this.treeOptions, ...options }
-  }
-
-  /**
-   * Set grid layout options
-   */
-  setGridOptions(options: Partial<GridLayoutOptions>): void {
-    this.gridOptions = { ...this.gridOptions, ...options }
   }
 
   /**
@@ -307,9 +266,6 @@ export class LayoutManager {
     if (options?.tree) {
       this.setTreeOptions(options.tree)
     }
-    if (options?.grid) {
-      this.setGridOptions(options.grid)
-    }
     if (options?.animated !== undefined || options?.duration !== undefined) {
       this.setCommonOptions({
         animated: options.animated,
@@ -321,12 +277,6 @@ export class LayoutManager {
     switch (layoutType) {
       case 'tree':
         this.applyTreeLayout()
-        break
-      case 'grid':
-        this.applyGridLayout()
-        break
-      case 'none':
-        // Manual positioning - do nothing
         break
       default:
         console.warn(`Layout type "${layoutType}" not yet implemented`)
@@ -363,28 +313,10 @@ export class LayoutManager {
   }
 
   /**
-   * Apply grid layout algorithm
-   */
-  private applyGridLayout(): void {
-    const layoutOptions: any = {
-      columns: this.gridOptions.columns,
-      columnWidth: this.gridOptions.columnWidth,
-      rowHeight: this.gridOptions.rowHeight,
-      columnGap: this.gridOptions.columnGap,
-      rowGap: this.gridOptions.rowGap,
-      verticalAlign: this.gridOptions.verticalAlign,
-      horizontalAlign: this.gridOptions.horizontalAlign,
-    }
-
-    jointLayout.GridLayout.layout(this.graph, layoutOptions)
-  }
-
-  /**
    * Reset layout to defaults
    */
   resetLayout(): void {
     this.treeOptions = { ...DEFAULT_TREE_OPTIONS }
-    this.gridOptions = { ...DEFAULT_GRID_OPTIONS }
     this.commonOptions = { ...DEFAULT_COMMON_OPTIONS }
     this.applyLayout()
   }
@@ -395,11 +327,9 @@ export class LayoutManager {
   static getAvailableLayouts(): Array<{ value: LayoutType; label: string; available: boolean }> {
     return [
       { value: 'tree', label: 'Tree (Hierarchical)', available: true },
-      { value: 'grid', label: 'Grid (Uniform)', available: true },
       { value: 'dagre', label: 'Directed Graph', available: false },
       { value: 'force', label: 'Force-Directed', available: false },
       { value: 'msagl', label: 'MSAGL', available: false },
-      { value: 'none', label: 'Manual', available: true },
     ]
   }
 

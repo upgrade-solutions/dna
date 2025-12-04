@@ -192,7 +192,7 @@ export const LayoutControl = observer(function LayoutControl({ layoutManager, th
             borderRadius: '6px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             zIndex: 10000,
-            padding: '8px 0'
+            padding: '8px 0 0 0'
           }}
         >
           {/* Header */}
@@ -215,21 +215,6 @@ export const LayoutControl = observer(function LayoutControl({ layoutManager, th
           {/* Layout List */}
           <div style={{ padding: '4px 8px' }}>
             {availableLayouts.map(renderLayoutItem)}
-          </div>
-
-          {/* Footer */}
-          <div style={{ 
-            padding: '8px 12px',
-            borderTop: `1px solid ${themed.toolbar.borderColor}`,
-            marginTop: '4px'
-          }}>
-            <div style={{
-              fontSize: '11px',
-              color: themed.toolbar.textSecondary,
-              lineHeight: '1.4'
-            }}>
-              Current: <strong style={{ color: themed.toolbar.text }}>{layoutManager.layoutTypeName}</strong>
-            </div>
           </div>
         </div>
       )}

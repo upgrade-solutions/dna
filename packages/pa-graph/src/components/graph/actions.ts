@@ -85,16 +85,47 @@ export function zoomToFit(paper: dia.Paper): number {
     height: maxY - minY
   }
   
-  // Fit to the visible content only
-  paper.transformToFitContent({
-    padding: PADDING,
-    maxScale: ZOOM_MAX,
-    minScale: ZOOM_MIN,
-    contentArea: contentArea
-  })
+  // Store current transform for smooth transition
+  const currentScale = paper.scale().sx
+  const currentTranslate = paper.translate()
   
-  const scale = paper.scale()
-  return scale.sx
+  // Calculate target transform (without applying it yet)
+  const paperSize = paper.getComputedSize()
+  const scaleX = (paperSize.width - 2 * PADDING) / contentArea.width
+  const scaleY = (paperSize.height - 2 * PADDING) / contentArea.height
+  const targetScale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.min(scaleX, scaleY)))
+  
+  const targetTx = (paperSize.width - contentArea.width * targetScale) / 2 - contentArea.x * targetScale
+  const targetTy = (paperSize.height - contentArea.height * targetScale) / 2 - contentArea.y * targetScale
+  
+  // Animate the transition
+  const duration = 400
+  const startTime = Date.now()
+  
+  const animate = () => {
+    const elapsed = Date.now() - startTime
+    const progress = Math.min(elapsed / duration, 1)
+    
+    // Ease-in-out function
+    const easeProgress = progress < 0.5
+      ? 2 * progress * progress
+      : 1 - Math.pow(-2 * progress + 2, 2) / 2
+    
+    const currentScaleValue = currentScale + (targetScale - currentScale) * easeProgress
+    const currentTx = currentTranslate.tx + (targetTx - currentTranslate.tx) * easeProgress
+    const currentTy = currentTranslate.ty + (targetTy - currentTranslate.ty) * easeProgress
+    
+    paper.scale(currentScaleValue, currentScaleValue)
+    paper.translate(currentTx, currentTy)
+    
+    if (progress < 1) {
+      requestAnimationFrame(animate)
+    }
+  }
+  
+  requestAnimationFrame(animate)
+  
+  return targetScale
 }
 
 // Paper Actions

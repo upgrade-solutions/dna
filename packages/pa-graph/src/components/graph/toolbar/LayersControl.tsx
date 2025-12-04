@@ -210,7 +210,7 @@ export const LayersControl = observer(function LayersControl({ layerManager, the
             borderRadius: '6px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             zIndex: 10000,
-            padding: '8px 0'
+            padding: '8px 0 0 0'
           }}
         >
           {/* Quick Actions */}
