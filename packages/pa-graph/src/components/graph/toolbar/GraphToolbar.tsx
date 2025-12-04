@@ -7,6 +7,7 @@ import type { Theme } from '../../../types/theme'
 import { getThemedColors } from '../../../types/theme'
 import { LayersControl } from './LayersControl'
 import { LayoutControl } from './LayoutControl'
+import { ExportControl } from './ExportControl'
 
 // Simple SVG icons
 const ZoomInIcon = () => (
@@ -284,11 +285,19 @@ export function GraphToolbar({ graph, paper, overlayManager, layoutManager, scal
         </>
       )}
 
+      {/* Spacer to push stats and export to the right */}
+      <div style={{ flex: 1 }} />
+
       {/* Stats */}
-      <div style={{ marginLeft: 'auto', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', gap: '12px', fontSize: '12px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', flexWrap: 'nowrap', alignItems: 'center', gap: '12px', fontSize: '12px', flexShrink: 0 }}>
         <span style={{ color: themed.toolbar.textSecondary, whiteSpace: 'nowrap' }}>Nodes: <span style={{ color: themed.toolbar.text, fontWeight: '500' }}>{graph?.getElements().length || 0}</span></span>
         <span style={{ color: themed.toolbar.textSecondary, whiteSpace: 'nowrap' }}>Links: <span style={{ color: themed.toolbar.text, fontWeight: '500' }}>{graph?.getLinks().length || 0}</span></span>
       </div>
+
+      <div style={{ width: '1px', height: '16px', background: themed.toolbar.divider, flexShrink: 0 }} />
+
+      {/* Export Control */}
+      <ExportControl paper={paper} theme={theme} />
       </div>
     </div>
   )
