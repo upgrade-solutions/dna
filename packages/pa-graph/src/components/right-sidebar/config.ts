@@ -5,8 +5,11 @@ import { ui } from '@joint/plus'
  */
 
 export const dnaMetadataGroups = {
-  dna: { label: 'Schema', index: 1, closed: false },
-  data: { label: 'Data', index: 2, closed: true }
+  basic: { label: 'Basic Information', index: 1, closed: false },
+  process: { label: 'Process Concerns', index: 2, closed: false },
+  people: { label: 'People & Ownership', index: 3, closed: true },
+  security: { label: 'Security & Compliance', index: 4, closed: true },
+  data: { label: 'Data & Metadata', index: 5, closed: true }
 }
 
 export const nodePropertiesGroups = {
@@ -81,107 +84,224 @@ export const dnaRuntimeOptions = [
   { value: 'other', content: 'Other' }
 ]
 
+export const dnaInfrastructureOptions = [
+  { value: '', content: '' },
+  { value: 'service', content: 'Service' },
+  { value: 'database', content: 'Database' },
+  { value: 'queue', content: 'Queue' },
+  { value: 'cache', content: 'Cache' },
+  { value: 'storage', content: 'Storage' },
+  { value: 'network', content: 'Network' },
+  { value: 'compute', content: 'Compute' },
+  { value: 'other', content: 'Other' }
+]
+
+export const dnaStatusOptions = [
+  { value: '', content: '' },
+  { value: 'up', content: 'Up' },
+  { value: 'down', content: 'Down' },
+  { value: 'degraded', content: 'Degraded' },
+  { value: 'maintenance', content: 'Maintenance' },
+  { value: 'unknown', content: 'Unknown' }
+]
+
+export const dnaLifecycleOptions = [
+  { value: '', content: '' },
+  { value: 'plan', content: 'Plan' },
+  { value: 'build', content: 'Build' },
+  { value: 'run', content: 'Run' },
+  { value: 'monitor', content: 'Monitor' },
+  { value: 'retired', content: 'Retired' }
+]
+
+export const dnaRaciOptions = [
+  { value: '', content: '' },
+  { value: 'responsible', content: 'Responsible' },
+  { value: 'accountable', content: 'Accountable' },
+  { value: 'consulted', content: 'Consulted' },
+  { value: 'informed', content: 'Informed' }
+]
+
+export const dnaDataClassificationOptions = [
+  { value: '', content: '' },
+  { value: 'public', content: 'Public' },
+  { value: 'internal', content: 'Internal' },
+  { value: 'confidential', content: 'Confidential' },
+  { value: 'pii', content: 'PII (Personally Identifiable)' },
+  { value: 'pci', content: 'PCI (Payment Card)' },
+  { value: 'phi', content: 'PHI (Protected Health)' }
+]
+
+export const dnaRiskLevelOptions = [
+  { value: '', content: '' },
+  { value: 'low', content: 'Low' },
+  { value: 'medium', content: 'Medium' },
+  { value: 'high', content: 'High' },
+  { value: 'critical', content: 'Critical' }
+]
+
 /**
  * DNA Metadata Inputs
  */
 
 export const dnaMetadataInputs = {
+  // Basic Information
   'attrs/label/text': {
     type: 'text',
     label: 'Name',
-    group: 'dna',
+    group: 'basic',
     index: 1
+  },
+  'dna/description': {
+    type: 'textarea',
+    label: 'Description',
+    group: 'basic',
+    index: 2,
+    attrs: { textarea: { rows: 4, placeholder: 'Enter description...' } }
   },
   'dna/resourceType': {
     type: 'select',
     label: 'Resource Type',
-    group: 'dna',
-    index: 2,
+    group: 'basic',
+    index: 3,
     options: dnaResourceTypeOptions
   },
   'dna/language': {
     type: 'select',
     label: 'Language',
-    group: 'dna',
-    index: 3,
+    group: 'basic',
+    index: 4,
     options: dnaLanguageOptions
   },
   'dna/runtime': {
     type: 'select',
     label: 'Runtime',
-    group: 'dna',
-    index: 4,
+    group: 'basic',
+    index: 5,
     options: dnaRuntimeOptions
   },
-  'dna/type': {
+  'dna/infrastructure': {
     type: 'select',
-    label: 'Node Type',
-    group: 'dna',
-    index: 5,
-    options: dnaNodeTypeOptions
-  },
-  'dna/description': {
-    type: 'textarea',
-    label: 'Description',
-    group: 'dna',
+    label: 'Infrastructure',
+    group: 'basic',
     index: 6,
-    attrs: { textarea: { rows: 4, placeholder: 'Enter description...' } }
+    options: dnaInfrastructureOptions
+  },
+  
+  // Process Concerns
+  'dna/status': {
+    type: 'select',
+    label: 'Status',
+    group: 'process',
+    index: 1,
+    options: dnaStatusOptions
+  },
+  'dna/version': {
+    type: 'text',
+    label: 'Version',
+    group: 'process',
+    index: 2,
+    placeholder: 'e.g., 1.0.0'
+  },
+  'dna/lifecycle': {
+    type: 'select',
+    label: 'Lifecycle Phase',
+    group: 'process',
+    index: 3,
+    options: dnaLifecycleOptions
   },
   'dna/priority': {
     type: 'select',
     label: 'Priority',
-    group: 'dna',
-    index: 7,
+    group: 'process',
+    index: 4,
     options: dnaPriorityOptions
   },
-  'dna/tags': {
-    type: 'list',
-    label: 'Tags',
-    group: 'dna',
-    index: 8,
-    item: { type: 'text', placeholder: 'Add tag...' },
-    addButtonLabel: '+ Add Tag',
-    removeButtonLabel: '×'
+  
+  // People & Ownership
+  'dna/owner': {
+    type: 'text',
+    label: 'Owner',
+    group: 'people',
+    index: 1,
+    placeholder: 'Resource owner...'
+  },
+  'dna/team': {
+    type: 'text',
+    label: 'Team',
+    group: 'people',
+    index: 2,
+    placeholder: 'Owning team...'
+  },
+  'dna/raci': {
+    type: 'select',
+    label: 'RACI Role',
+    group: 'people',
+    index: 3,
+    options: dnaRaciOptions
   },
   'dna/assignee': {
     type: 'text',
     label: 'Assignee',
-    group: 'dna',
-    index: 9,
-    placeholder: 'Assign to...'
+    group: 'people',
+    index: 4,
+    placeholder: 'Assigned to...'
   },
-  'dna/status': {
+  
+  // Security & Compliance
+  'dna/dataClassification': {
     type: 'select',
-    label: 'Status',
-    group: 'dna',
-    index: 10,
-    options: [
-      { value: 'draft', content: 'Draft' },
-      { value: 'active', content: 'Active' },
-      { value: 'completed', content: 'Completed' },
-      { value: 'archived', content: 'Archived' }
-    ],
-    defaultValue: 'draft'
+    label: 'Data Classification',
+    group: 'security',
+    index: 1,
+    options: dnaDataClassificationOptions
+  },
+  'dna/compliance': {
+    type: 'list',
+    label: 'Compliance',
+    group: 'security',
+    index: 2,
+    item: { type: 'text', placeholder: 'e.g., SOC2, HIPAA, PCI...' },
+    addButtonLabel: '+ Add Compliance',
+    removeButtonLabel: '×'
+  },
+  'dna/riskLevel': {
+    type: 'select',
+    label: 'Risk Level',
+    group: 'security',
+    index: 3,
+    options: dnaRiskLevelOptions
+  },
+  
+  // Data & Metadata
+  'dna/tags': {
+    type: 'list',
+    label: 'Tags',
+    group: 'data',
+    index: 1,
+    item: { type: 'text', placeholder: 'Add tag...' },
+    addButtonLabel: '+ Add Tag',
+    removeButtonLabel: '×'
   },
   'data/id': {
     type: 'text',
     label: 'ID',
     group: 'data',
-    index: 1,
+    index: 2,
     attrs: { input: { disabled: true, style: 'opacity: 0.6; cursor: not-allowed;' } }
   },
   'data/createdAt': {
     type: 'text',
     label: 'Created At',
     group: 'data',
-    index: 2,
+    index: 3,
     attrs: { input: { disabled: true } }
   },
   'data/updatedAt': {
     type: 'text',
     label: 'Updated At',
     group: 'data',
-    index: 3,
+    index: 4,
     attrs: { input: { disabled: true } }
   }
 }
