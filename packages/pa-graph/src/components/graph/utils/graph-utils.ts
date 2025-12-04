@@ -1,6 +1,7 @@
-import { dia } from '@joint/plus'
+import { dia, shapes } from '@joint/plus'
 import { ShapesFactory } from '../shapes'
 import type { GraphData } from './types'
+import type { LayoutMode } from '../features/layout/layout-manager'
 
 /**
  * Utility functions for graph operations
@@ -8,39 +9,74 @@ import type { GraphData } from './types'
 
 /**
  * Populate graph with nodes and edges
+ * @param layoutMode - 'nested' for container embedding, 'tree' for hierarchical links
  */
 export function populateGraph(
   graph: dia.Graph,
   graphData: GraphData,
-  shapesFactory: ShapesFactory
+  shapesFactory: ShapesFactory,
+  layoutMode: LayoutMode = 'tree'
 ): void {
   const nodeElements = shapesFactory.createNodes(graphData.nodes)
   const linkElements = shapesFactory.createLinks(graphData.edges)
   
-  // Add all cells to graph
-  graph.addCells([...nodeElements, ...linkElements])
-  
-  // Establish parent-child relationships via embedding
-  nodeElements.forEach(element => {
-    const parentId = element.get('parentId')
-    if (parentId) {
-      const parent = graph.getCell(parentId)
-      if (parent && parent.isElement()) {
-        (parent as dia.Element).embed(element)
+  // For tree layout, create parent-child links to show hierarchy
+  const hierarchyLinks: shapes.standard.Link[] = []
+  if (layoutMode === 'tree') {
+    nodeElements.forEach(element => {
+      const parentId = element.get('parentId')
+      if (parentId) {
+        // Create a link from parent to child
+        const link = new shapes.standard.Link({
+          source: { id: parentId },
+          target: { id: element.id },
+          attrs: {
+            line: {
+              stroke: '#6B7280',
+              strokeWidth: 2,
+              targetMarker: {
+                type: 'path',
+                d: 'M 10 -5 0 0 10 5 z',
+                fill: '#6B7280'
+              }
+            }
+          },
+          labels: [{
+            attrs: { text: { text: 'contains', fontSize: 12, fill: '#9CA3AF' } }
+          }],
+          z: -1 // Place links behind nodes
+        })
+        hierarchyLinks.push(link)
       }
-    }
-  })
+    })
+  }
   
-  // Auto-resize container nodes to fit their children
-  // Do this after a short delay to ensure all children are positioned
-  nodeElements.forEach(element => {
-    const isContainer = element.get('isContainer')
-    if (isContainer && typeof (element as any).fitToChildren === 'function') {
-      setTimeout(() => {
-        (element as any).fitToChildren(50) // 50px padding for better spacing
-      }, 50)
-    }
-  })
+  // Add all cells to graph
+  graph.addCells([...nodeElements, ...linkElements, ...hierarchyLinks])
+  
+  // For nested layout, establish parent-child relationships via embedding
+  if (layoutMode === 'nested') {
+    nodeElements.forEach(element => {
+      const parentId = element.get('parentId')
+      if (parentId) {
+        const parent = graph.getCell(parentId)
+        if (parent && parent.isElement()) {
+          (parent as dia.Element).embed(element)
+        }
+      }
+    })
+    
+    // Auto-resize container nodes to fit their children
+    // Do this after a short delay to ensure all children are positioned
+    nodeElements.forEach(element => {
+      const isContainer = element.get('isContainer')
+      if (isContainer && typeof (element as any).fitToChildren === 'function') {
+        setTimeout(() => {
+          (element as any).fitToChildren(50) // 50px padding for better spacing
+        }, 50)
+      }
+    })
+  }
 }
 
 /**

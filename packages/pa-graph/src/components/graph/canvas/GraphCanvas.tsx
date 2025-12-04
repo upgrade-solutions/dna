@@ -7,7 +7,7 @@ import { initializeGraph, cleanupGraph, populateGraph } from '../utils'
 import { ShapesFactory } from '../shapes'
 import '../shapes/ResourceNode' // Register custom shape
 import '../shapes/ContainerNode' // Register container shape
-import { GraphEventHandler, ZoomHandler, PanHandler, KeyboardHandler, LayerManager, HierarchyVisibilityManager } from '../features'
+import { GraphEventHandler, ZoomHandler, PanHandler, KeyboardHandler, LayerManager, LayoutManager, HierarchyVisibilityManager } from '../features'
 import { GraphToolbar } from '../toolbar/GraphToolbar'
 import { GraphModel } from '../../../models'
 import { getThemedColors } from '../../../types/theme'
@@ -30,6 +30,7 @@ export const GraphCanvas = observer(function GraphCanvas({
   const panHandlerRef = useRef<PanHandler | null>(null)
   const keyboardHandlerRef = useRef<KeyboardHandler | null>(null)
   const layerManagerRef = useRef<LayerManager | null>(null)
+  const layoutManagerRef = useRef<LayoutManager | null>(null)
 
   // Memoize tenantConfig to prevent unnecessary rerenders when only theme changes
   // Only reinitialize graph when data or styles actually change
@@ -60,12 +61,20 @@ export const GraphCanvas = observer(function GraphCanvas({
     layerManagerRef.current = layerManager
     model.setLayerManager(layerManager)
 
+    // Create and initialize layout manager
+    const layoutManager = new LayoutManager(graph, 'tree', 'tree')
+    layoutManagerRef.current = layoutManager
+    model.setLayoutManager(layoutManager)
+
     // Create shapes factory for cell creation
     const shapesFactory = new ShapesFactory(stableConfig)
 
     // Load and populate graph with tenant data
     const graphData = resourceToGraph(stableConfig.data)
-    populateGraph(graph, graphData, shapesFactory)
+    populateGraph(graph, graphData, shapesFactory, 'tree') // Use 'tree' mode for traditional tree layout
+
+    // Apply default tree layout after populating graph
+    layoutManager.applyLayout()
 
     // Setup hierarchy visibility manager
     const hierarchyVisibilityManager = new HierarchyVisibilityManager({
@@ -144,6 +153,7 @@ export const GraphCanvas = observer(function GraphCanvas({
       panHandler.cleanup()
       eventHandler.cleanup()
       layerManager.cleanup()
+      layoutManager.cleanup()
       hierarchyVisibilityManager.cleanup()
       cleanupGraph({ graph, paper })
       model.cleanup()
@@ -151,6 +161,7 @@ export const GraphCanvas = observer(function GraphCanvas({
       panHandlerRef.current = null
       keyboardHandlerRef.current = null
       layerManagerRef.current = null
+      layoutManagerRef.current = null
     }
   }, [width, height, stableConfig, model])
 
@@ -178,6 +189,7 @@ export const GraphCanvas = observer(function GraphCanvas({
         graph={model.graph} 
         paper={model.paper}
         layerManager={model.layerManager}
+        layoutManager={model.layoutManager}
         scale={model.scale}
         onScaleChange={(scale) => model.setScale(scale)}
         theme={tenantConfig.theme}

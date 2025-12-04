@@ -1,7 +1,7 @@
 import { dia } from '@joint/plus'
 import type { TenantConfig } from '../../../data/tenant-config'
 import type { ZoomHandler } from './zoom-handler'
-import type { HierarchyVisibilityManager } from './hierarchy-visibility-manager'
+import type { HierarchyVisibilityManager } from './layout/hierarchy-visibility-manager'
 
 /**
  * Manages event handlers for graph interactions

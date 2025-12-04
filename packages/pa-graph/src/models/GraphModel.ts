@@ -1,6 +1,6 @@
 import { makeAutoObservable } from 'mobx'
 import { dia } from '@joint/plus'
-import type { ZoomHandler, LayerManager, HierarchyVisibilityManager } from '../components/graph/features'
+import type { ZoomHandler, LayerManager, HierarchyVisibilityManager, LayoutManager } from '../components/graph/features'
 import { getIconForResourceType } from '../utils/icon-mapper'
 
 /**
@@ -12,6 +12,7 @@ export class GraphModel {
   paper: dia.Paper | null = null
   zoomHandler: ZoomHandler | null = null
   layerManager: LayerManager | null = null
+  layoutManager: LayoutManager | null = null
   hierarchyVisibilityManager: HierarchyVisibilityManager | null = null
   selectedCellView: dia.CellView | null = null
   scale: number = 1
@@ -38,6 +39,10 @@ export class GraphModel {
 
   setLayerManager(layerManager: LayerManager) {
     this.layerManager = layerManager
+  }
+
+  setLayoutManager(layoutManager: LayoutManager) {
+    this.layoutManager = layoutManager
   }
 
   setHierarchyVisibilityManager(manager: HierarchyVisibilityManager) {

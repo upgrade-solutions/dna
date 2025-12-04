@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react'
 import { dia } from '@joint/plus'
 import { zoomIn, zoomOut, resetZoom, zoomToFit } from '../actions'
-import type { LayerManager } from '../features'
+import type { LayerManager, LayoutManager } from '../features'
 import type { Theme } from '../../../types/theme'
 import { getThemedColors } from '../../../types/theme'
 import { LayersControl } from './LayersControl'
+import { LayoutControl } from './LayoutControl'
 
 // Simple SVG icons
 const ZoomInIcon = () => (
@@ -48,13 +49,14 @@ export interface GraphToolbarProps {
   graph: dia.Graph | null
   paper: dia.Paper | null
   layerManager?: LayerManager | null
+  layoutManager?: LayoutManager | null
   scale?: number
   onScaleChange?: (scale: number) => void
   onAddNode?: () => void
   theme: Theme
 }
 
-export function GraphToolbar({ graph, paper, layerManager, scale: externalScale, onScaleChange, onAddNode, theme }: GraphToolbarProps) {
+export function GraphToolbar({ graph, paper, layerManager, layoutManager, scale: externalScale, onScaleChange, onAddNode, theme }: GraphToolbarProps) {
   const [internalScale, setInternalScale] = useState(1)
   const scale = externalScale ?? internalScale
   const themed = getThemedColors(theme)
@@ -242,6 +244,9 @@ export function GraphToolbar({ graph, paper, layerManager, scale: externalScale,
 
       {/* Layers Control */}
       <LayersControl layerManager={layerManager || null} theme={theme} />
+
+      {/* Layout Control */}
+      <LayoutControl layoutManager={layoutManager || null} theme={theme} />
 
       {/* Add Node */}
       {onAddNode && (

@@ -1,28 +1,13 @@
 # PA Graph — Layout Architecture
 
-This document defines the **hierarchical layout strategy** for visualizing complex nested resource structures with intelligent zoom-based visibility controls.
+This document defines the **layout management strategy** for visualizing the DNA structure of applications, enabling users to arrange diagrams using various automatic layout algorithms.
 
 ---
 
-## 1. Problem Statement
+## 1. Overview
 
-Currently, the graph visualization displays all resources flatly in a simple grid layout, resulting in:
-- **Visual chaos**: Lines flowing everywhere without clear hierarchy
-- **No containment**: Child resources appear disconnected from parents
-- **Flat structure**: Platform > Application > Module > Page > Section > Block hierarchy not visually apparent
-- **Information overload**: All levels visible simultaneously, obscuring relationships
+PA Graph is a specialized diagramming tool for visualizing application DNA—the structural hierarchy of digital platforms:
 
-### **Requirements**
-1. **Hierarchical containment**: Nodes within nodes (containers/parent-child)
-2. **Same-level organization**: Swimlanes or axis-based grouping for siblings
-3. **Zoom-based visibility**: Show node + hint of children, hide grandchildren to reduce clutter
-4. **Cohesive connections**: Links should follow logical flow, not cross containers chaotically
-
----
-
-## 2. Hierarchy Definition
-
-### **Resource Type Hierarchy**
 ```
 Platform (L0)
 └── Application (L1)
@@ -32,790 +17,487 @@ Platform (L0)
                 └── Block (L5)
 ```
 
-### **Containment Rules**
-- **Level 0 (Platform)**: Top-level container, typically one per tenant
-- **Level 1 (Application)**: Multiple apps within a platform
-- **Level 2 (Module)**: Feature groupings within an app
-- **Level 3 (Page)**: Individual routes/views
-- **Level 4 (Section)**: Layout regions within a page
-- **Level 5 (Block)**: Atomic UI components
+### Purpose
 
-**Key Insight**: Current data structure already supports this via `children` property on resources.
+Unlike general-purpose diagramming tools, PA Graph focuses on:
+- **Hierarchical visualization**: Showing parent-child containment relationships
+- **DNA structure**: Encoding business operations into machine-readable schemas
+- **Multiple perspectives**: Allowing different layout modes to reveal different insights
+- **Automatic organization**: Applying layout algorithms to reduce manual positioning
 
 ---
 
-## 3. Layout Strategy
+## 2. Layout Philosophy
 
-### **3.1 JointJS Embedding & Grouping**
+### Core Principles
 
-**Use JointJS native parent-child embedding** instead of fighting against it.
+1. **Configuration over code**: Layouts are user-selectable, not hardcoded
+2. **Preserve hierarchy**: All layouts must respect parent-child relationships
+3. **Progressive disclosure**: Support zoom-based visibility management
+4. **Context-appropriate**: Different layouts serve different analysis needs
 
-#### **Embedding API**
-```typescript
-// Embed child within parent
-parent.embed(child)
+### Layout Requirements
 
-// Check if embedded
-parent.isEmbedded()
-
-// Get parent
-child.getParentCell()
-
-// Get all embedded children
-parent.getEmbeddedCells()
-
-// Unembed
-parent.unembed(child)
-```
-
-#### **Visual Implications**
-- **Automatic containment**: Children move with parent when dragged
-- **Bounding box**: Parent automatically sizes to contain children (with padding)
-- **Z-index**: Parents render behind children (proper layering)
-- **Selection**: Can configure parent vs. child selection priority
-
-#### **Container Shape Requirements**
-Parents need different visual treatment than leaf nodes:
-- **Expanded state**: Shows children, larger size, semi-transparent fill
-- **Collapsed state**: Hides children, compact size, solid fill
-- **Resize handles**: Allow manual adjustment of container bounds
-- **Header bar**: Title area at top (like swimlane header)
+Any layout algorithm integrated into PA Graph must:
+- Support hierarchical/nested structures (parents containing children)
+- Handle 6+ levels of depth gracefully
+- Preserve logical relationship flows (links between nodes)
+- Scale to 100+ nodes without performance degradation
+- Provide consistent, deterministic results
 
 ---
 
-### **3.2 Hierarchical Layout Algorithm**
+## 3. Available Layouts
 
-**Replace simple grid layout with recursive hierarchical layout:**
+### 3.1 Tree Layout (Primary)
 
-```typescript
-interface LayoutConfig {
-  nodeSpacing: number       // Space between sibling nodes
-  levelSpacing: number      // Vertical space between hierarchy levels
-  containerPadding: number  // Padding inside container nodes
-  swimlaneWidth: number     // Width of each vertical swimlane
-  direction: 'TB' | 'LR'   // Top-to-bottom or Left-to-right
-}
+**Purpose**: Hierarchical top-down organization showing clear parent-child relationships
 
-function layoutHierarchical(
-  resources: Resource[],
-  config: LayoutConfig
-): Map<string, Position> {
-  // Recursive layout:
-  // 1. Identify root nodes (no parent)
-  // 2. Layout roots horizontally (swimlanes)
-  // 3. For each root, recursively layout children within container
-  // 4. Calculate container size based on children bounds
-  // 5. Position children relative to container position
-}
-```
+**When to use**:
+- Exploring organizational structure
+- Understanding module/page hierarchies
+- Analyzing dependency flows
 
-#### **Layout Modes**
+**Configuration**:
+- Direction: Left-to-right, top-to-bottom, or diagonal variants
+- Parent-child gap: Vertical spacing between levels
+- Sibling gap: Horizontal spacing between nodes at same level
+- First child gap: Distance from parent to first child (diagonal only)
 
-**Mode A: Vertical Swimlanes** (Recommended)
-```
-┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│ Application │  │ Application │  │ Application │
-│      1      │  │      2      │  │      3      │
-│             │  │             │  │             │
-│ ┌─────────┐ │  │ ┌─────────┐ │  │ ┌─────────┐ │
-│ │ Module  │ │  │ │ Module  │ │  │ │ Module  │ │
-│ └─────────┘ │  │ └─────────┘ │  │ └─────────┘ │
-│ ┌─────────┐ │  │ ┌─────────┐ │  │ ┌─────────┐ │
-│ │ Module  │ │  │ │ Module  │ │  │ │ Module  │ │
-│ └─────────┘ │  │ └─────────┘ │  │ └─────────┘ │
-└─────────────┘  └─────────────┘  └─────────────┘
-```
+**JointJS API**: `layout.TreeLayout`
 
-**Benefits**:
-- Clear separation of parallel branches
-- Vertical scrolling feels natural
-- Easy to add new applications (new swimlane)
-- Links stay within or between adjacent lanes
-
-**Mode B: Tree Layout** (Alternative)
-```
-            Platform
-         /      |      \
-    App1      App2      App3
-    /  \       |       /  \
- Mod1 Mod2   Mod3   Mod4 Mod5
-```
-
-**Benefits**:
-- Traditional org-chart feel
-- Shows relationships clearly
-- Works well for smaller hierarchies
-- Good for overview/minimap
+**Characteristics**:
+- Best for strict hierarchies (single parent per node)
+- Handles mixed directions (different subtrees can have different orientations)
+- Supports sibling ranking for custom ordering
 
 ---
 
-### **3.3 Zoom-Based Visibility (Level of Detail)**
+### 3.2 Grid Layout
 
-**Core Principle**: Only show the **currently focused level + one level down (children)**, hide grandchildren and deeper.
+**Purpose**: Regular grid arrangement for consistent visual rhythm
 
-#### **Visibility Rules by Zoom Level**
+**When to use**:
+- Comparing similar entities (all apps, all modules)
+- Portfolio overviews
+- Initial exploration of flat structures
 
-| Zoom Level | Visible Nodes | Hidden Nodes | Use Case |
-|------------|---------------|--------------|----------|
-| **0.2-0.5x** (Far Out) | Platforms, Applications | Modules, Pages, Sections, Blocks | Architecture overview |
-| **0.5-1.0x** (Medium) | Applications, Modules | Pages, Sections, Blocks | Feature mapping |
-| **1.0-2.0x** (Standard) | Modules, Pages, Sections | Blocks | Workflow design |
-| **2.0-3.0x** (Close Up) | Sections, Blocks | None | Component detail |
+**Configuration**:
+- Columns: Number of columns in grid
+- Column width: Auto, compact, or fixed
+- Row height: Auto, compact, or fixed
+- Gaps: Spacing between cells
 
-#### **Implementation Approach**
+**JointJS API**: `layout.GridLayout`
 
-**Option 1: Dynamic Filtering** (Recommended)
-```typescript
-class ZoomVisibilityManager {
-  private graph: dia.Graph
-  private paper: dia.Paper
-  private currentZoom: number
-  
-  updateVisibility(zoomLevel: number) {
-    const visibleLevels = this.calculateVisibleLevels(zoomLevel)
-    
-    this.graph.getElements().forEach(element => {
-      const level = element.get('hierarchyLevel')
-      const shouldShow = visibleLevels.includes(level)
-      
-      // Fade out instead of hide for smoother transitions
-      element.attr('body/opacity', shouldShow ? 1 : 0.1)
-      element.attr('label/opacity', shouldShow ? 1 : 0)
-      
-      // Optionally collapse containers when zoomed out
-      if (!shouldShow && element.get('isContainer')) {
-        this.collapseContainer(element)
-      }
-    })
-    
-    this.updateLinks(visibleLevels)
-  }
-  
-  calculateVisibleLevels(zoom: number): number[] {
-    if (zoom < 0.5) return [0, 1]      // Platform, Application
-    if (zoom < 1.0) return [1, 2]      // Application, Module
-    if (zoom < 2.0) return [2, 3, 4]   // Module, Page, Section
-    return [3, 4, 5]                   // Page, Section, Block
-  }
-  
-  updateLinks(visibleLevels: number[]) {
-    this.graph.getLinks().forEach(link => {
-      const source = link.getSourceElement()
-      const target = link.getTargetElement()
-      
-      const sourceLevel = source?.get('hierarchyLevel') ?? 0
-      const targetLevel = target?.get('hierarchyLevel') ?? 0
-      
-      // Only show links where both ends are visible
-      const shouldShow = visibleLevels.includes(sourceLevel) 
-        && visibleLevels.includes(targetLevel)
-      
-      link.attr('line/opacity', shouldShow ? 1 : 0.1)
-      link.attr('line/strokeDasharray', shouldShow ? 'none' : '5,5')
-    })
-  }
-}
-```
-
-**Option 2: Container Expand/Collapse**
-```typescript
-class ContainerManager {
-  expandContainer(container: dia.Element) {
-    const children = container.getEmbeddedCells()
-    children.forEach(child => {
-      child.set('visible', true)
-      child.attr('body/display', 'block')
-    })
-    container.set('expanded', true)
-    this.resizeToFitChildren(container)
-  }
-  
-  collapseContainer(container: dia.Element) {
-    const children = container.getEmbeddedCells()
-    children.forEach(child => {
-      child.set('visible', false)
-      child.attr('body/display', 'none')
-    })
-    container.set('expanded', false)
-    this.resizeToCompact(container)
-  }
-}
-```
+**Characteristics**:
+- Predictable, uniform spacing
+- Good for presentations and reports
+- Works best with same-sized nodes
 
 ---
 
-### **3.4 Link Routing & Organization**
+### 3.3 Directed Graph (Future)
 
-**Problem**: Links currently flow everywhere, creating visual spaghetti.
+**Purpose**: Layered layout optimized for directed flows
 
-#### **Solution: Smart Router with Hierarchy Awareness**
+**When to use**:
+- Analyzing data flows
+- API dependency chains
+- Process workflows
 
-```typescript
-const linkDefaults = {
-  router: {
-    name: 'orthogonal',  // Right-angle routing (Manhattan)
-    args: {
-      padding: 20,
-      step: 10,
-      // Custom router that prefers routing along container edges
-      preferredSides: ['bottom', 'top'], // Exit bottom, enter top
-      avoidEmbeddedCells: true
-    }
-  },
-  connector: {
-    name: 'rounded',  // Smooth rounded corners
-    args: { radius: 10 }
-  }
-}
+**Configuration**:
+- Rank direction: TB, BT, LR, RL
+- Rank separation: Spacing between layers
+- Node separation: Spacing within layers
+- Edge routing: Polyline or spline
 
-// Apply hierarchy-specific routing rules
-function routeHierarchicalLink(link: dia.Link): void {
-  const source = link.getSourceElement()
-  const target = link.getTargetElement()
-  
-  const sourceParent = source?.getParentCell()
-  const targetParent = target?.getParentCell()
-  
-  // Same parent: route within container
-  if (sourceParent === targetParent) {
-    link.router('metro', {
-      startDirections: ['bottom'],
-      endDirections: ['top']
-    })
-  }
-  // Different parents: route between containers
-  else {
-    link.router('orthogonal', {
-      padding: 30,
-      avoidEmbeddedCells: true
-    })
-  }
-}
-```
+**JointJS API**: `layout.DirectedGraph` (Dagre-based)
 
-#### **Link Types by Relationship**
-
-| Relationship | Visual Style | Routing |
-|--------------|--------------|---------|
-| `contains` | Dotted, thin, gray | Inside container, straight |
-| `depends-on` | Solid, blue, arrow | Between containers, orthogonal |
-| `communicates-with` | Solid, green, double arrow | Between containers, shortest path |
-| `reads-from` / `writes-to` | Dashed, orange, arrow | Database to component, curved |
+**Characteristics**:
+- Minimizes edge crossings
+- Groups nodes into logical layers
+- Handles cyclic graphs
 
 ---
 
-## 4. Container Shape Design
+### 3.4 Force-Directed (Future)
 
-### **4.1 New Shape: ContainerNode**
+**Purpose**: Physics-based organic layout
 
-```typescript
-export const ContainerNode = dia.Element.define('dna.ContainerNode', {
-  size: { width: 300, height: 400 },
-  markup: [
-    {
-      tagName: 'rect',
-      selector: 'body'
-    },
-    {
-      tagName: 'rect',
-      selector: 'header'
-    },
-    {
-      tagName: 'text',
-      selector: 'label'
-    },
-    {
-      tagName: 'path',
-      selector: 'expandIcon'  // Chevron up/down
-    },
-    {
-      tagName: 'rect',
-      selector: 'contentArea'  // Where children render
-    }
-  ],
-  attrs: {
-    body: {
-      fill: 'rgba(31, 41, 55, 0.3)',  // Semi-transparent
-      stroke: '#4b5563',
-      strokeWidth: 2,
-      rx: 12,
-      ry: 12
-    },
-    header: {
-      width: 'calc(w)',
-      height: 40,
-      fill: '#374151',
-      rx: 12,
-      ry: 12
-    },
-    label: {
-      text: 'Container',
-      fill: '#ffffff',
-      fontSize: 14,
-      fontWeight: '700',
-      x: 15,
-      y: 25,
-      textAnchor: 'start'
-    },
-    expandIcon: {
-      d: 'M 270 15 L 280 25 L 290 15',  // Chevron
-      stroke: '#9ca3af',
-      strokeWidth: 2,
-      fill: 'none'
-    },
-    contentArea: {
-      y: 40,
-      width: 'calc(w)',
-      height: 'calc(h - 40)',
-      fill: 'transparent',
-      pointerEvents: 'none'
-    }
-  }
-})
-```
+**When to use**:
+- Discovering clusters/communities
+- Exploring unknown structures
+- Identifying hub nodes
 
-### **4.2 Shape Factory Updates**
+**Configuration**:
+- Link distance: Ideal edge length
+- Link strength: Spring stiffness
+- Charge force: Node repulsion
+- Gravity: Center attraction
 
-```typescript
-class ShapesFactory {
-  createNodes(nodes: GraphNode[]): dia.Element[] {
-    return nodes.map(node => {
-      const hasChildren = node.metadata?.hasChildren || false
-      
-      if (hasChildren) {
-        // Use container shape for nodes with children
-        return new ContainerNode({
-          id: node.id,
-          position: node.position,
-          attrs: {
-            label: { text: node.label },
-            body: { fill: this.getContainerColor(node.type) }
-          },
-          hierarchyLevel: this.calculateLevel(node),
-          isContainer: true,
-          expanded: true  // Start expanded
-        })
-      } else {
-        // Use regular ResourceNode for leaf nodes
-        return new ResourceNode({
-          id: node.id,
-          position: node.position,
-          attrs: {
-            label: { text: node.label },
-            icon: { 'xlink:href': this.getIconUrl(node.type) }
-          },
-          hierarchyLevel: this.calculateLevel(node),
-          isContainer: false
-        })
-      }
-    })
-  }
-  
-  private calculateLevel(node: GraphNode): number {
-    const levelMap: Record<string, number> = {
-      'platform': 0,
-      'web-application': 1,
-      'module': 2,
-      'page': 3,
-      'section': 4,
-      'block': 5
-    }
-    return levelMap[node.type] || 0
-  }
-}
-```
+**JointJS API**: `layout.ForceDirected`
+
+**Characteristics**:
+- Emergent, data-driven structure
+- Reveals natural groupings
+- Requires simulation time
 
 ---
 
-## 5. Data Model Updates
+### 3.5 MSAGL (Future)
 
-### **5.1 Enhance resourceToGraph Mapper**
+**Purpose**: Microsoft Automatic Graph Layout (Sugiyama algorithm)
 
-```typescript
-export function resourceToGraph(
-  resourceGraph: ResourceGraph,
-  config: LayoutConfig
-): GraphData {
-  // Build hierarchy tree
-  const hierarchy = buildHierarchyTree(resourceGraph.resources)
-  
-  // Calculate positions recursively
-  const positions = layoutHierarchical(hierarchy, config)
-  
-  // Create nodes with hierarchy metadata
-  const nodes: GraphNode[] = flattenHierarchy(hierarchy).map(resource => ({
-    id: resource.id,
-    type: resource.type,
-    label: resource.name,
-    position: positions.get(resource.id) || { x: 0, y: 0 },
-    metadata: {
-      ...resource.metadata,
-      description: resource.description,
-      resourceType: resource.type,
-      hierarchyLevel: calculateLevel(resource.type),
-      hasChildren: (resource.children?.length || 0) > 0,
-      parentId: findParentId(resource, hierarchy)
-    }
-  }))
-  
-  // Create edges (links)
-  const edges: GraphEdge[] = [
-    ...createRelationshipEdges(resourceGraph.relationships),
-    ...createContainmentEdges(hierarchy)  // Add parent-child edges
-  ]
-  
-  return { nodes, edges }
-}
+**When to use**:
+- Complex layered hierarchies
+- Need for advanced edge routing
+- Nested subgraph visualization
 
-function buildHierarchyTree(resources: Resource[]): HierarchyNode {
-  // Recursively build tree from flat resource list
-  // Root node is typically the Platform
-  const root = resources.find(r => r.type === 'platform')
-  return buildNode(root!, resources)
-}
+**Configuration**:
+- Direction: Top-to-bottom or left-to-right
+- Layer gap: Spacing between layers
+- Edge routing: Rectilinear or spline bundling
 
-function layoutHierarchical(
-  node: HierarchyNode,
-  config: LayoutConfig,
-  depth: number = 0
-): Map<string, Position> {
-  const positions = new Map<string, Position>()
-  
-  // Layout current node
-  const x = depth * config.levelSpacing
-  const y = calculateYPosition(node, depth)
-  positions.set(node.id, { x, y })
-  
-  // Recursively layout children
-  node.children?.forEach((child, index) => {
-    const childPositions = layoutHierarchical(
-      child,
-      config,
-      depth + 1
-    )
-    // Merge child positions
-    childPositions.forEach((pos, id) => positions.set(id, pos))
-  })
-  
-  return positions
-}
-```
+**JointJS API**: `@joint/layout-msagl`
 
-### **5.2 Add Hierarchy Support to GraphModel**
-
-```typescript
-class GraphModel {
-  // ... existing properties
-  
-  private zoomVisibilityManager: ZoomVisibilityManager
-  private containerManager: ContainerManager
-  
-  setupHierarchy() {
-    // After graph is populated, establish parent-child relationships
-    this.graph.getElements().forEach(element => {
-      const parentId = element.get('metadata')?.parentId
-      if (parentId) {
-        const parent = this.graph.getCell(parentId)
-        if (parent && parent.isElement()) {
-          parent.embed(element)
-        }
-      }
-    })
-  }
-  
-  handleZoomChange(scale: number) {
-    this.scale = scale
-    this.zoomVisibilityManager.updateVisibility(scale)
-  }
-  
-  toggleContainer(containerId: string) {
-    const container = this.graph.getCell(containerId)
-    if (!container) return
-    
-    const isExpanded = container.get('expanded')
-    if (isExpanded) {
-      this.containerManager.collapseContainer(container as dia.Element)
-    } else {
-      this.containerManager.expandContainer(container as dia.Element)
-    }
-  }
-}
-```
+**Characteristics**:
+- Production-quality edge routing
+- Supports nested containers
+- Advanced optimization
 
 ---
 
-## 6. Implementation Phases
+## 4. Layout Manager Architecture
 
-### **Phase 1: Foundation** (Week 1)
-- [ ] Create `ContainerNode` shape with header and expand/collapse
-- [ ] Implement hierarchy detection in mapper (`hasChildren`, `parentId`)
-- [ ] Add `hierarchyLevel` metadata to all nodes
-- [ ] Update `ShapesFactory` to use containers vs. leaf nodes
+### 4.1 Responsibility
 
-### **Phase 2: Layout Engine** (Week 2)
-- [ ] Implement hierarchical layout algorithm (vertical swimlanes)
-- [ ] Replace grid layout with recursive positioning
-- [ ] Establish parent-child embedding in `GraphModel.setupHierarchy()`
-- [ ] Test with inaudio data (6 levels deep)
+The `LayoutManager` class:
+- Stores current layout configuration
+- Applies selected layout algorithm to graph
+- Preserves layout settings in tenant config
+- Provides unified API for all layout types
+- Handles layout-specific options
 
-### **Phase 3: Zoom Visibility** (Week 3)
-- [ ] Create `ZoomVisibilityManager` class
-- [ ] Connect to zoom events from `ZoomHandler`
-- [ ] Implement level-based filtering logic
-- [ ] Add smooth fade transitions (opacity changes)
-- [ ] Update links to match node visibility
+### 4.2 API Design
 
-### **Phase 4: Container Interactions** (Week 4)
-- [ ] Create `ContainerManager` class
-- [ ] Implement expand/collapse functionality
-- [ ] Add click handler for expand icon
-- [ ] Animate expand/collapse transitions
-- [ ] Auto-resize containers to fit children
+```typescript
+interface LayoutManager {
+  // Current layout state
+  getCurrentLayout(): LayoutType
+  
+  // Apply layout
+  applyLayout(type: LayoutType, options?: LayoutOptions): void
+  
+  // Layout-specific configuration
+  getLayoutConfig(type: LayoutType): LayoutOptions
+  setLayoutConfig(type: LayoutType, options: LayoutOptions): void
+  
+  // Reset to defaults
+  resetLayout(): void
+}
 
-### **Phase 5: Smart Link Routing** (Week 5)
-- [ ] Implement hierarchy-aware link router
-- [ ] Apply relationship-specific routing rules
-- [ ] Configure orthogonal routing for cross-container links
-- [ ] Add link smoothing and corner rounding
-- [ ] Test with complex multi-level relationships
+type LayoutType = 
+  | 'tree'          // TreeLayout (primary)
+  | 'grid'          // GridLayout
+  | 'dagre'         // DirectedGraph (future)
+  | 'force'         // ForceDirected (future)
+  | 'msagl'         // MSAGL (future)
+  | 'none'          // Manual positioning only
 
-### **Phase 6: Polish & Optimization** (Week 6)
-- [ ] Add minimap with hierarchy overview (tree layout)
-- [ ] Implement keyboard shortcuts (Expand All, Collapse All)
-- [ ] Add breadcrumb navigation for deep hierarchies
-- [ ] Performance optimization for large graphs (>100 nodes)
-- [ ] Accessibility improvements (keyboard navigation, screen readers)
+interface LayoutOptions {
+  // Common options
+  animated?: boolean
+  duration?: number
+  
+  // Layout-specific
+  tree?: TreeLayoutOptions
+  grid?: GridLayoutOptions
+  // ... etc
+}
+```
+
+### 4.3 Integration Points
+
+**Toolbar Control**: 
+- Dropdown selector for layout type
+- Secondary panel for layout options
+- Preview mode before applying
+
+**Tenant Config**:
+- Default layout per tenant
+- Layout-specific defaults
+- Persisted layout state
+
+**Graph Model**:
+- Trigger layout on demand
+- Auto-layout on graph changes (optional)
+- Layout invalidation on structure changes
 
 ---
 
-## 7. Configuration & Settings
+## 5. Zoom-Based Visibility
 
-### **7.1 Layout Configuration**
+### 5.1 Strategy
+
+**Core Principle**: Show parent nodes and their immediate children only. Hide grandchildren and deeper descendants.
+
+**Why**: Reduces visual clutter while maintaining context. Users see current level + one level down.
+
+### 5.2 Implementation
+
+Managed by `HierarchyVisibilityManager` (existing):
+- Tracks current zoom level
+- Calculates visible depth based on zoom
+- Shows/hides nodes dynamically
+- Updates link visibility accordingly
+
+**Visibility Rules**:
+- Root nodes always visible
+- Direct children of visible parents are shown
+- Grandchildren (2+ levels deep) are hidden
+- Links only shown when both endpoints visible
+
+### 5.3 User Control
+
+- Automatic mode: Zoom level controls visibility
+- Manual mode: Expand/collapse specific nodes
+- Layers: Show/hide entire layers
+
+---
+
+## 6. Hierarchy Relationships
+
+### 6.1 Parent-Child Encoding
+
+**Data Model**: Resources have `children` array property
+
+**Graph Representation**:
+- JointJS embedding: `parent.embed(child)`
+- Custom property: `child.set('parentId', parent.id)`
+- Hierarchy level: `node.set('hierarchyLevel', level)`
+
+### 6.2 Link Routing
+
+**Intra-container links**: Routes stay within parent bounds
+**Inter-container links**: Routes between containers, avoiding overlaps
+
+**Router Options**:
+- Orthogonal: Right-angle turns (Manhattan routing)
+- Metro: Rounded corners, aligned paths
+- Straight: Direct lines (minimal, can overlap)
+
+---
+
+## 7. Implementation Phases
+
+### Phase 1: Foundation (Week 1)
+- [ ] Create `LayoutManager` class
+- [ ] Add TreeLayout integration
+- [ ] Build layout dropdown in toolbar
+- [ ] Wire up apply layout action
+
+### Phase 2: Tree Layout (Week 2)
+- [ ] Configure TreeLayout for DNA hierarchy
+- [ ] Test with inaudio data (6 levels)
+- [ ] Add direction options (LR, TB, diagonal)
+- [ ] Implement layout options panel
+
+### Phase 3: Grid Fallback (Week 3)
+- [ ] Integrate GridLayout as alternative
+- [ ] Add grid configuration options
+- [ ] Handle flat structures gracefully
+
+### Phase 4: Polish (Week 4)
+- [ ] Add layout animations
+- [ ] Persist layout preferences
+- [ ] Add layout preview mode
+- [ ] Performance optimization
+
+### Phase 5: Advanced Layouts (Future)
+- [ ] DirectedGraph (Dagre)
+- [ ] ForceDirected
+- [ ] MSAGL adapter
+- [ ] Custom layout algorithms
+
+---
+
+## 8. Configuration & Settings
+
+### 8.1 Tenant Config
 
 ```typescript
-// Add to TenantConfig
 interface TenantConfig {
   // ... existing properties
   layout: {
-    mode: 'swimlanes' | 'tree' | 'force-directed'
-    swimlaneWidth: number
-    nodeSpacing: number
-    levelSpacing: number
-    containerPadding: number
-    direction: 'TB' | 'LR'  // Top-to-bottom or Left-to-right
+    defaultType: LayoutType
+    tree: {
+      direction: 'L' | 'R' | 'T' | 'B' | 'TL' | 'TR' | 'BL' | 'BR'
+      parentGap: number
+      siblingGap: number
+      firstChildGap?: number
+      symmetrical: boolean
+    }
+    grid: {
+      columns: number
+      columnWidth: 'auto' | 'compact' | number
+      rowHeight: 'auto' | 'compact' | number
+      columnGap: number
+      rowGap: number
+    }
+    // ... other layout configs
   }
   visibility: {
     enableZoomFiltering: boolean
-    zoomThresholds: {
-      platform: number    // 0.2
-      application: number // 0.5
-      module: number      // 1.0
-      page: number        // 1.5
-      section: number     // 2.0
-      block: number       // 2.5
-    }
+    autoExpand: boolean
+    defaultCollapsedLevels: number[]
   }
 }
 ```
 
-### **7.2 User Controls (Toolbar Additions)**
+### 8.2 Toolbar UI
 
-```typescript
-// Add to GraphToolbar
-<Select value={layoutMode} onChange={setLayoutMode}>
-  <option value="swimlanes">Swimlanes (Vertical)</option>
+```tsx
+<Select 
+  value={currentLayout} 
+  onChange={handleLayoutChange}
+>
   <option value="tree">Tree (Hierarchical)</option>
+  <option value="grid">Grid (Uniform)</option>
+  <option value="dagre">Directed Graph</option>
   <option value="force">Force-Directed</option>
+  <option value="none">Manual</option>
 </Select>
 
-<Toggle 
-  enabled={zoomFiltering} 
-  onChange={toggleZoomFiltering}
-  label="Auto-hide Grandchildren"
-/>
+<Button onClick={openLayoutOptions}>
+  Configure Layout
+</Button>
 
-<ButtonGroup>
-  <Button onClick={expandAll}>Expand All</Button>
-  <Button onClick={collapseAll}>Collapse All</Button>
-</ButtonGroup>
+<Button onClick={applyLayout}>
+  Apply Layout
+</Button>
 ```
 
 ---
 
-## 8. Edge Cases & Considerations
+## 9. Edge Cases & Considerations
 
-### **8.1 Circular References**
-**Problem**: Child resource references parent (e.g., Block calls API at Application level)
+### 9.1 Circular References
+**Problem**: Child references ancestor (e.g., Block calls Platform API)
 
 **Solution**: 
-- Allow links to exit containers and route externally
-- Use different visual style for "upward" links (dashed, different color)
-- Router ensures links don't cross container boundaries unnecessarily
+- Layout treats as external link
+- Route outside container boundaries
+- Different visual style (dashed, different color)
 
-### **8.2 Orphan Nodes**
-**Problem**: Resource without explicit parent in hierarchy
+### 9.2 Orphan Nodes
+**Problem**: Resource without explicit parent
 
 **Solution**:
-- Create implicit "Uncategorized" container at root level
-- Allow drag-and-drop to reparent nodes
-- Highlight orphans with warning indicator
+- Create implicit root container
+- Allow drag-and-drop to reparent
+- Highlight orphans visually
 
-### **8.3 Deep Nesting (>6 levels)**
+### 9.3 Deep Nesting (>6 levels)
 **Problem**: Too many levels to visualize effectively
 
 **Solution**:
-- Collapse intermediate levels automatically
-- Show only "active path" (selected node + ancestors + children)
-- Provide breadcrumb trail for navigation
+- Automatic intermediate level collapsing
+- Breadcrumb navigation for deep paths
 - Minimap shows full tree structure
 
-### **8.4 Large Sibling Groups**
-**Problem**: 20+ modules in one application container
+### 9.4 Mixed Structures
+**Problem**: Some branches deeper than others
 
 **Solution**:
-- Implement virtual scrolling within containers
-- Auto-collapse containers with >10 children
-- Add filter/search within container
-- Pagination for large groups
-
-### **8.5 Cross-Hierarchy Relationships**
-**Problem**: Section in App A depends on API in App B
-
-**Solution**:
-- Route links outside containers at top level
-- Use distinct visual style (different color, thicker line)
-- Show tooltip with full path on hover
-- Minimap highlights cross-application dependencies
+- TreeLayout handles naturally
+- Visibility manager adapts per branch
+- No forced symmetry
 
 ---
 
-## 9. Performance Optimization
+## 10. Performance Considerations
 
-### **Large Graphs (>100 nodes)**
+### 10.1 Large Graphs (>100 nodes)
 
-1. **Lazy Loading**: Only render visible viewport cells
-2. **Level-of-Detail (LOD)**: Simplified shapes when zoomed out
-3. **Virtual Scrolling**: For long container child lists
-4. **Frozen Containers**: Don't recalculate layout for collapsed containers
-5. **Link Culling**: Don't render links outside viewport
-6. **Debounced Zoom**: Wait 100ms after zoom before updating visibility
+**Strategies**:
+- Virtual rendering (render visible nodes only)
+- Level-of-detail (LOD): Simplified shapes when zoomed out
+- Lazy loading: Load children on expansion
+- Viewport culling: Don't render off-screen nodes
 
-```typescript
-class PerformanceManager {
-  private renderQueue: Set<dia.Cell> = new Set()
-  private rafId: number | null = null
-  
-  scheduleRender(cell: dia.Cell) {
-    this.renderQueue.add(cell)
-    if (!this.rafId) {
-      this.rafId = requestAnimationFrame(() => this.batchRender())
-    }
-  }
-  
-  private batchRender() {
-    this.renderQueue.forEach(cell => cell.attr('body/display', 'block'))
-    this.renderQueue.clear()
-    this.rafId = null
-  }
-}
-```
+### 10.2 Layout Calculation
+
+**Optimization**:
+- Incremental layout (only affected nodes)
+- Layout caching (memoize results)
+- Web Worker offloading (for force-directed)
+- Debounced re-layout (batch changes)
 
 ---
 
-## 10. Testing Strategy
+## 11. Testing Strategy
 
-### **Unit Tests**
-- Hierarchy tree building from flat resource list
-- Layout algorithm position calculations
-- Visibility filtering by zoom level
-- Container expand/collapse state management
+### 11.1 Unit Tests
+- Layout manager state transitions
+- Layout option validation
+- Hierarchy traversal algorithms
 
-### **Integration Tests**
-- Full graph rendering with 6-level hierarchy
-- Zoom in/out updates visibility correctly
-- Links route correctly between containers
-- Drag-and-drop maintains hierarchy
+### 11.2 Integration Tests
+- TreeLayout with 6-level hierarchy
+- GridLayout with variable node sizes
+- Layout switching preserves graph state
 
-### **Visual Regression Tests**
-- Screenshot comparison at different zoom levels
-- Container expand/collapse animations
-- Link routing visual correctness
-- Theme consistency across hierarchy levels
+### 11.3 Visual Regression Tests
+- Screenshot comparison at standard zoom levels
+- Link routing correctness
+- Node positioning consistency
 
 ---
 
-## 11. Success Metrics
+## 12. Success Metrics
 
-### **Visual Clarity**
-- ✅ User can identify parent-child relationships at a glance
+### Visual Clarity
+- ✅ Users identify parent-child relationships at a glance
 - ✅ Links don't cross unnecessarily (>80% clean routing)
-- ✅ At most 20 nodes visible simultaneously (zoom filtering)
+- ✅ Layouts converge in <2 seconds
 
-### **Performance**
-- ✅ <100ms layout calculation for 200-node graph
-- ✅ 60fps zoom and pan with visibility updates
-- ✅ <1s full graph render for typical tenant (50-100 nodes)
+### Performance
+- ✅ <200ms layout calculation for 200-node graph
+- ✅ 60fps during layout animations
+- ✅ <1s full graph render for typical tenant
 
-### **Usability**
-- ✅ New users understand hierarchy without documentation
-- ✅ Power users can navigate 6 levels efficiently
-- ✅ Collapse/expand interaction feels natural (like file tree)
-
----
-
-## 12. Future Enhancements
-
-### **12.1 Fisheye Zoom**
-Keep focused node at normal size, fade/shrink surrounding nodes progressively
-
-### **12.2 Semantic Zoom**
-Show different information at different zoom levels (e.g., icons only when far out, full details when close)
-
-### **12.3 Path Highlighting**
-When hovering a node, highlight the full path from root to that node
-
-### **12.4 Relationship Filtering**
-Toggle visibility of specific relationship types (e.g., hide all "contains" links)
-
-### **12.5 Timeline View**
-Animate the graph to show how hierarchy evolved over time
-
-### **12.6 Compare Mode**
-Show two tenants side-by-side with synchronized zoom/pan
+### Usability
+- ✅ New users understand layout options without docs
+- ✅ Layout changes feel responsive and predictable
+- ✅ Preferred layout persists across sessions
 
 ---
 
-## 13. Migration Path
+## 13. References
 
-### **From Current (Flat Grid) to Hierarchical**
+### JointJS Documentation
+- [Layout Overview](https://docs.jointjs.com/api/layout/)
+- [TreeLayout API](https://docs.jointjs.com/api/layout/TreeLayout/)
+- [GridLayout API](https://docs.jointjs.com/api/layout/GridLayout/)
+- [MSAGL Layout](https://docs.jointjs.com/api/layout/MSAGL/)
+- [Release Notes 4.2.0](https://docs.jointjs.com/learn/release-notes/4.2.0)
 
-1. **Backward Compatible**: Keep flat layout as option (`layout.mode = 'flat'`)
-2. **Gradual Rollout**: Enable per-tenant via config flag
-3. **Data Migration**: No changes to resource data structure (already has `children`)
-4. **User Preference**: Remember user's preferred layout mode
-5. **Documentation**: Update README with layout modes comparison
+### Related DNA Docs
+- [State Architecture](./STATE_ARCHITECTURE.md)
+- [Layers Architecture](./LAYERS_ARCHITECTURE.md)
+- [Graph Conventions](./GRAPH_CONVENTIONS.md)
 
 ---
 
 ## Summary
 
-This architecture transforms the graph from a **flat collection of disconnected boxes** into a **cohesive hierarchical structure** that:
+PA Graph's layout system enables users to visualize application DNA through multiple lenses:
 
-1. **Visually groups related resources** using JointJS embedding
-2. **Organizes parallel branches** using vertical swimlanes
-3. **Reduces cognitive load** by hiding grandchildren based on zoom level
-4. **Routes links intelligently** to minimize crossing and confusion
-5. **Scales to 6+ levels** while maintaining clarity
+1. **TreeLayout** (primary): Hierarchical visualization of the 6-level structure
+2. **GridLayout**: Uniform presentation for comparison and overview
+3. **Advanced layouts** (future): Dagre, Force-Directed, MSAGL for specialized needs
 
-**Key Trade-offs**:
-- **Complexity**: More sophisticated layout algorithm, container management
-- **Performance**: Must optimize for large hierarchies (100+ nodes)
-- **Learning Curve**: Users need to understand expand/collapse interactions
+The `LayoutManager` provides a unified API for selecting and configuring layouts, with preferences persisted in tenant configuration. Combined with zoom-based visibility management, this creates a powerful system for navigating complex application structures.
 
-**Biggest Win**: Users can finally **see the structure** of their architecture instead of visual chaos.
-
----
-
-For implementation details on state management, see `STATE_ARCHITECTURE.md`.
-For layer-based visualization patterns, see `LAYERS_ARCHITECTURE.md`.
-For graph interaction conventions, see `GRAPH_CONVENTIONS.md`.
+**Key Philosophy**: Layouts are tools for revealing different aspects of the same underlying DNA structure—not rigid constraints but flexible lenses.

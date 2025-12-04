@@ -1,3 +1,7 @@
+/**
+ * Utility functions for graph operations
+ */
+
 import { dia } from '@joint/plus'
 import type { TenantConfig } from '../../../data/tenant-config'
 
