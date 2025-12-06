@@ -55,10 +55,11 @@ export interface GraphToolbarProps {
   scale?: number
   onScaleChange?: (scale: number) => void
   onAddNode?: () => void
+  onLayoutChange?: (type: any, requiresRebuild: boolean) => void
   theme: Theme
 }
 
-export function GraphToolbar({ graph, paper, overlayManager, layoutManager, scale: externalScale, onScaleChange, onAddNode, theme }: GraphToolbarProps) {
+export function GraphToolbar({ graph, paper, overlayManager, layoutManager, scale: externalScale, onScaleChange, onAddNode, onLayoutChange, theme }: GraphToolbarProps) {
   const [internalScale, setInternalScale] = useState(1)
   const scale = externalScale ?? internalScale
   const themed = getThemedColors(theme)
@@ -248,7 +249,7 @@ export function GraphToolbar({ graph, paper, overlayManager, layoutManager, scal
       <LayersControl overlayManager={overlayManager || null} theme={theme} />
 
       {/* Layout Control */}
-      <LayoutControl layoutManager={layoutManager || null} theme={theme} />
+      <LayoutControl layoutManager={layoutManager || null} theme={theme} onLayoutChange={onLayoutChange} />
 
       {/* Add Node */}
       {onAddNode && (

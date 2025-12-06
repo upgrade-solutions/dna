@@ -20,6 +20,7 @@ import { dia } from '@joint/plus'
 export const ContainerNode = dia.Element.define('dna.ContainerNode', {
   size: { width: 400, height: 200 },  // Wider, shorter default
   expanded: true,  // Start expanded by default
+  hierarchyLevel: 0,  // L0 = Account, L1 = Application, L2 = Module, L3 = Page, L4 = Section
   markup: [
     {
       tagName: 'rect',
@@ -157,5 +158,94 @@ export const ContainerNode = dia.Element.define('dna.ContainerNode', {
     const height = maxY - minY + (padding * 2) + headerHeight
 
     this.resize(width, height)
+  },
+
+  /**
+   * Get styles for a specific hierarchy level
+   * L0 = Account (largest, most prominent)
+   * L1 = Application
+   * L2 = Module
+   * L3 = Page
+   * L4 = Section
+   */
+  getStyleForLevel(this: dia.Element): {
+    bodyFill: string
+    bodyStroke: string
+    strokeWidth: number
+    headerFill: string
+    fontSize: number
+    minSize: { width: number; height: number }
+  } {
+    const level = this.get('hierarchyLevel') || 0
+    
+    // Style definitions per hierarchy level
+    const styles = {
+      0: { // Account (L0) - Largest, most prominent
+        bodyFill: 'rgba(59, 130, 246, 0.08)',  // Blue tint
+        bodyStroke: '#3b82f6',
+        strokeWidth: 3,
+        headerFill: '#1e40af',
+        fontSize: 16,
+        minSize: { width: 800, height: 600 }
+      },
+      1: { // Application (L1)
+        bodyFill: 'rgba(139, 92, 246, 0.08)',  // Purple tint
+        bodyStroke: '#8b5cf6',
+        strokeWidth: 2.5,
+        headerFill: '#6d28d9',
+        fontSize: 15,
+        minSize: { width: 600, height: 450 }
+      },
+      2: { // Module (L2)
+        bodyFill: 'rgba(16, 185, 129, 0.08)',  // Green tint
+        bodyStroke: '#10b981',
+        strokeWidth: 2,
+        headerFill: '#047857',
+        fontSize: 14,
+        minSize: { width: 450, height: 350 }
+      },
+      3: { // Page (L3)
+        bodyFill: 'rgba(245, 158, 11, 0.08)',  // Amber tint
+        bodyStroke: '#f59e0b',
+        strokeWidth: 2,
+        headerFill: '#b45309',
+        fontSize: 13,
+        minSize: { width: 350, height: 250 }
+      },
+      4: { // Section (L4)
+        bodyFill: 'rgba(239, 68, 68, 0.08)',  // Red tint
+        bodyStroke: '#ef4444',
+        strokeWidth: 1.5,
+        headerFill: '#b91c1c',
+        fontSize: 12,
+        minSize: { width: 250, height: 180 }
+      }
+    }
+    
+    // Return style for level, defaulting to L0 if level is out of range
+    return styles[level as keyof typeof styles] || styles[0]
+  }
+}, {
+  /**
+   * Apply hierarchy-level styling to this container
+   */
+  applyHierarchyStyle(this: dia.Element): void {
+    const style = (this as any).getStyleForLevel()
+    
+    this.attr({
+      body: {
+        fill: style.bodyFill,
+        stroke: style.bodyStroke,
+        strokeWidth: style.strokeWidth
+      },
+      header: {
+        fill: style.headerFill,
+        stroke: style.bodyStroke,
+        strokeWidth: style.strokeWidth
+      },
+      label: {
+        fontSize: style.fontSize
+      }
+    })
   }
 })

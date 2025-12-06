@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState } from 'react'
+import { useEffect, useRef, useMemo, useState, useCallback } from 'react'
 import { dia } from '@joint/plus'
 import { observer } from 'mobx-react-lite'
 import { dnaPlatformTenant } from '../../../data'
@@ -14,6 +14,7 @@ import { GraphToolbar } from '../toolbar/GraphToolbar'
 import { GraphModel } from '../../../models'
 import { getThemedColors } from '../../../types/theme'
 import type { GraphCanvasProps } from '../utils/types'
+import type { LayoutType } from '../features/layout/types'
 import { BadgeTooltip } from './BadgeTooltip'
 
 export type { GraphCanvasProps }
@@ -221,6 +222,21 @@ export const GraphCanvas = observer(function GraphCanvas({
     })
   }, [tenantConfig.theme, model])
 
+  // Handle layout changes that require graph rebuild
+  const handleLayoutChange = useCallback(async (layoutType: LayoutType, requiresRebuild: boolean) => {
+    if (!requiresRebuild) {
+      // Simple layout change without rebuild - already handled by LayoutManager
+      return
+    }
+
+    // For nested layout or switching from nested, need to rebuild graph with proper cell types
+    const graphData = resourceToGraph(stableConfig.data)
+    const layoutMode = layoutType === 'nested' ? 'nested' : 'tree'
+    const shapesFactory = new ShapesFactory(stableConfig, layoutMode)
+    
+    await model.rebuildWithLayout(layoutType, graphData, shapesFactory, populateGraph)
+  }, [stableConfig, model])
+
   return (
     <div 
       style={{ 
@@ -236,6 +252,7 @@ export const GraphCanvas = observer(function GraphCanvas({
         layoutManager={model.layoutManager}
         scale={model.scale}
         onScaleChange={(scale) => model.setScale(scale)}
+        onLayoutChange={handleLayoutChange}
         theme={tenantConfig.theme}
       />
       <div 

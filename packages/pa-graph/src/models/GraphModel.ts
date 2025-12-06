@@ -181,6 +181,39 @@ export class GraphModel {
   }
 
   /**
+   * Rebuild graph with new layout type
+   * Coordinates the full graph rebuild when switching layouts
+   */
+  async rebuildWithLayout(
+    layoutType: string,
+    graphData: any,
+    shapesFactory: any,
+    populateGraphFn: any
+  ): Promise<void> {
+    if (!this.layoutManager) {
+      console.warn('LayoutManager not initialized')
+      return
+    }
+
+    await this.layoutManager.rebuildGraphWithLayout(
+      layoutType as any,
+      graphData,
+      shapesFactory,
+      populateGraphFn
+    )
+
+    // Refresh overlays after rebuild
+    if (this.overlayManager) {
+      this.overlayManager.refreshDecorators()
+    }
+
+    // Update hierarchy visibility if enabled
+    if (this.hierarchyVisibilityManager) {
+      this.hierarchyVisibilityManager.updateVisibility(this.scale)
+    }
+  }
+
+  /**
    * Get all elements in the graph
    */
   get elements() {

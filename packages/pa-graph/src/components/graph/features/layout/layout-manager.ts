@@ -1,14 +1,28 @@
 import { dia, layout as jointLayout } from '@joint/plus'
 import { makeObservable, observable, action, computed } from 'mobx'
+import { applyNestedLayout as applyNestedLayoutAlgorithm } from './nested-layout-algorithm'
 
 /**
  * Available layout algorithms
  */
 export type LayoutType = 
+  | 'nested'      // Nested containers (NEW)
   | 'tree'        // TreeLayout (primary)
   | 'dagre'       // DirectedGraph (future)
   | 'force'       // ForceDirected (future)
   | 'msagl'       // MSAGL (future)
+
+/**
+ * Nested layout configuration
+ */
+export interface NestedLayoutOptions {
+  containerPadding?: number      // Padding inside containers
+  levelSpacing?: number          // Vertical space between levels
+  siblingSpacing?: number        // Horizontal space between siblings
+  autoResize?: boolean           // Auto-resize containers to fit children
+  collapsible?: boolean          // Allow container collapse/expand
+  minContainerSize?: { width: number; height: number }
+}
 
 /**
  * Tree layout configuration
@@ -33,12 +47,22 @@ export interface CommonLayoutOptions {
  * Combined layout configuration
  */
 export interface LayoutOptions extends CommonLayoutOptions {
+  nested?: NestedLayoutOptions
   tree?: TreeLayoutOptions
 }
 
 /**
  * Default layout configurations
  */
+const DEFAULT_NESTED_OPTIONS: Required<NestedLayoutOptions> = {
+  containerPadding: 50,
+  levelSpacing: 40,
+  siblingSpacing: 30,
+  autoResize: true,
+  collapsible: false,
+  minContainerSize: { width: 300, height: 200 },
+}
+
 const DEFAULT_TREE_OPTIONS: Required<TreeLayoutOptions> = {
   direction: 'R',
   parentGap: 40,
@@ -73,6 +97,7 @@ export class LayoutManager {
   private graph: dia.Graph
   currentType: LayoutType
   layoutMode: LayoutMode
+  nestedOptions: NestedLayoutOptions
   treeOptions: TreeLayoutOptions
   commonOptions: CommonLayoutOptions
   private treeLayoutInstance: jointLayout.TreeLayout | null = null
@@ -82,16 +107,19 @@ export class LayoutManager {
     this.graph = graph
     this.currentType = initialType
     this.layoutMode = layoutMode
+    this.nestedOptions = { ...DEFAULT_NESTED_OPTIONS }
     this.treeOptions = { ...DEFAULT_TREE_OPTIONS }
     this.commonOptions = { ...DEFAULT_COMMON_OPTIONS }
 
     makeObservable(this, {
       currentType: observable,
       layoutMode: observable,
+      nestedOptions: observable,
       treeOptions: observable,
       commonOptions: observable,
       setLayoutType: action,
       setLayoutMode: action,
+      setNestedOptions: action,
       setTreeOptions: action,
       setCommonOptions: action,
       applyLayout: action,
@@ -111,6 +139,7 @@ export class LayoutManager {
    */
   get layoutTypeName(): string {
     const names: Record<LayoutType, string> = {
+      nested: 'Nested (Containers)',
       tree: 'Tree (Hierarchical)',
       dagre: 'Directed Graph',
       force: 'Force-Directed',
@@ -124,6 +153,59 @@ export class LayoutManager {
    */
   setLayoutType(type: LayoutType): void {
     this.currentType = type
+  }
+
+  /**
+   * Rebuild graph with new layout type
+   * Required when switching to/from nested layout (different node types)
+   * 
+   * @param type - Target layout type
+   * @param graphData - Graph data to rebuild from
+   * @param shapesFactory - Factory for creating nodes
+   * @param populateGraphFn - Function to populate graph
+   * @returns Promise that resolves when rebuild is complete
+   */
+  async rebuildGraphWithLayout(
+    type: LayoutType,
+    graphData: any,
+    shapesFactory: any,
+    populateGraphFn: (graph: dia.Graph, data: any, factory: any, mode: LayoutMode) => void
+  ): Promise<void> {
+    console.log(`Rebuilding graph for layout type: ${type}`)
+    
+    // 1. Save current viewport state
+    const elements = this.graph.getElements()
+    const firstElement = elements[0]
+    const savedPosition = firstElement?.position() || { x: 0, y: 0 }
+    
+    // 2. Clear existing graph
+    this.graph.clear()
+    
+    // 3. Update layout mode based on type
+    const newMode: LayoutMode = type === 'nested' ? 'nested' : 'tree'
+    shapesFactory.setLayoutMode(newMode)
+    this.setLayoutMode(newMode)
+    
+    // 4. Rebuild graph with new node types
+    populateGraphFn(this.graph, graphData, shapesFactory, newMode)
+    
+    // 5. Apply layout
+    this.applyLayout(type)
+    
+    // 6. Small delay to ensure rendering is complete
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    console.log('Graph rebuild complete')
+  }
+
+  /**
+   * Check if layout switch requires re-render
+   */
+  requiresRerender(fromType: LayoutType, toType: LayoutType): boolean {
+    if (fromType === toType) return false
+    
+    // Any switch involving nested layout requires re-render
+    return fromType === 'nested' || toType === 'nested'
   }
 
   /**
@@ -233,13 +315,22 @@ export class LayoutManager {
   /**
    * Get layout-specific configuration
    */
-  getLayoutConfig(type: LayoutType): TreeLayoutOptions {
+  getLayoutConfig(type: LayoutType): NestedLayoutOptions | TreeLayoutOptions {
     switch (type) {
+      case 'nested':
+        return { ...this.nestedOptions }
       case 'tree':
         return { ...this.treeOptions }
       default:
-        return {} as TreeLayoutOptions
+        return {}
     }
+  }
+
+  /**
+   * Set nested layout options
+   */
+  setNestedOptions(options: Partial<NestedLayoutOptions>): void {
+    this.nestedOptions = { ...this.nestedOptions, ...options }
   }
 
   /**
@@ -263,6 +354,9 @@ export class LayoutManager {
     const layoutType = type || this.currentType
 
     // Update options if provided
+    if (options?.nested) {
+      this.setNestedOptions(options.nested)
+    }
     if (options?.tree) {
       this.setTreeOptions(options.tree)
     }
@@ -275,6 +369,9 @@ export class LayoutManager {
 
     // Apply layout based on type
     switch (layoutType) {
+      case 'nested':
+        this.applyNestedLayout()
+        break
       case 'tree':
         this.applyTreeLayout()
         break
@@ -284,6 +381,27 @@ export class LayoutManager {
 
     // Update current type
     this.currentType = layoutType
+  }
+
+  /**
+   * Apply nested layout algorithm
+   * Positions children within parent containers recursively
+   */
+  private applyNestedLayout(): void {
+    // Merge with defaults to ensure all required options are present
+    const fullOptions: Required<NestedLayoutOptions> = {
+      containerPadding: this.nestedOptions.containerPadding ?? 50,
+      levelSpacing: this.nestedOptions.levelSpacing ?? 40,
+      siblingSpacing: this.nestedOptions.siblingSpacing ?? 30,
+      autoResize: this.nestedOptions.autoResize ?? true,
+      collapsible: this.nestedOptions.collapsible ?? false,
+      minContainerSize: this.nestedOptions.minContainerSize ?? { width: 300, height: 200 }
+    }
+
+    // Apply layout (positions all containers and children)
+    applyNestedLayoutAlgorithm(this.graph, fullOptions)
+
+    console.log('Applied nested layout with options:', fullOptions)
   }
 
   /**
@@ -316,6 +434,7 @@ export class LayoutManager {
    * Reset layout to defaults
    */
   resetLayout(): void {
+    this.nestedOptions = { ...DEFAULT_NESTED_OPTIONS }
     this.treeOptions = { ...DEFAULT_TREE_OPTIONS }
     this.commonOptions = { ...DEFAULT_COMMON_OPTIONS }
     this.applyLayout()
@@ -324,8 +443,9 @@ export class LayoutManager {
   /**
    * Get all available layout types
    */
-  static getAvailableLayouts(): Array<{ value: LayoutType; label: string; available: boolean }> {
+  static getAvailableLayouts(): Array<{ value: LayoutType; label: string; available: boolean; requiresRerender?: boolean }> {
     return [
+      { value: 'nested', label: 'Nested (Containers)', available: true, requiresRerender: true },
       { value: 'tree', label: 'Tree (Hierarchical)', available: true },
       { value: 'dagre', label: 'Directed Graph', available: false },
       { value: 'force', label: 'Force-Directed', available: false },
