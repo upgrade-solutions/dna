@@ -27,9 +27,84 @@ Unlike general-purpose diagramming tools, PA Graph focuses on:
 
 ---
 
-## 2. Layout Philosophy
+## 2. Critical Design Constraint: Layout Re-rendering
 
-### Core Principles
+### 2.1 Why Full Re-renders Are Necessary
+
+**Fundamental Issue**: Different layouts require different node types in JointJS.
+
+- **Nested Layout**: Uses JointJS containers (`dia.Element` with embedding)
+  - Parents must be container-capable shapes
+  - Children are embedded cells, not linked
+  - No hierarchy links in graph
+  
+- **Tree/Dagre Layouts**: Uses standard nodes with links
+  - All nodes are standard shapes
+  - Hierarchy shown via explicit links
+  - No embedding relationships
+
+**Consequence**: Switching between nested and other layouts requires:
+1. Clearing the graph completely
+2. Recreating all nodes with appropriate types
+3. Re-establishing relationships (embedding OR links)
+4. Applying the new layout algorithm
+
+### 2.2 When Re-render is Triggered
+
+| From Layout | To Layout | Re-render Required? | Reason |
+|-------------|-----------|---------------------|---------|
+| Nested | Tree | ✅ Yes | Need to unembed + create links |
+| Nested | Grid | ✅ Yes | Need to unembed, remove containers |
+| Nested | Dagre | ✅ Yes | Need to unembed + create directed links |
+| Tree | Grid | ❌ No | Same node types, just reposition |
+| Tree | Dagre | ❌ No | Same structure, different algorithm |
+| Grid | Tree | ❌ No | Just apply tree algorithm |
+
+**Rule of Thumb**: Any switch involving nested layout requires full re-render. Switches between non-nested layouts only need re-positioning.
+
+### 2.3 User Experience Impact
+
+**What Users Will Experience**:
+- Brief loading state during rebuild (typically <500ms for 100 nodes)
+- Potential loss of manual node adjustments
+- Reset of viewport position (mitigated by state restoration)
+- Animation of new layout being applied
+
+**Mitigation Strategies**:
+1. **Warning Dialog**: Show confirmation before re-rendering
+2. **State Preservation**: Save and restore viewport, selections where possible
+3. **Loading Indicator**: Clear visual feedback during rebuild
+4. **Undo Support**: Allow reverting to previous layout
+5. **Layout Preview**: Optional preview mode before committing
+
+### 2.4 Toolbar Implementation Requirements
+
+**Toolbar must**:
+- Detect when layout switch requires re-render (`requiresRerender()` method)
+- Show warning indicator when hovering over re-render-triggering layouts
+- Provide confirmation dialog for destructive operations
+- Display loading state during graph rebuild
+- Update layout dropdown to reflect current state
+
+**Example Toolbar Flow**:
+```
+User clicks "Nested Layout" → 
+Toolbar detects re-render needed →
+Shows warning: "This will rebuild the graph. Continue?" →
+User confirms →
+Shows loading spinner →
+LayoutManager clears graph →
+LayoutManager rebuilds with containers →
+Applies nested layout algorithm →
+Hides loading spinner →
+Updates toolbar dropdown
+```
+
+---
+
+## 3. Layout Philosophy
+
+### 3.1 Core Principles
 
 1. **Configuration over code**: Layouts are user-selectable, not hardcoded
 2. **Preserve hierarchy**: All layouts must respect parent-child relationships
@@ -47,16 +122,91 @@ Any layout algorithm integrated into PA Graph must:
 
 ---
 
-## 3. Available Layouts
+## 4. Available Layouts
 
-### 3.1 Tree Layout (Primary)
+### 4.1 Nested Layout (New) ⭐
 
-**Purpose**: Hierarchical top-down organization showing clear parent-child relationships
+**Purpose**: Visual containment layout showing resources embedded within their parent containers
 
 **When to use**:
-- Exploring organizational structure
-- Understanding module/page hierarchies
+- Visualizing organizational hierarchies (Accounts → Applications → Modules)
+- Understanding physical containment relationships
+- Exploring multi-level nested structures
+- Viewing parent-child relationships spatially (inside/outside)
+
+**Implementation**:
+- Uses JointJS container/embedding features (`parent.embed(child)`)
+- Renders parent nodes as resizable containers
+- Children positioned inside parent boundaries
+- Automatic container sizing based on children
+- No hierarchy links needed (spatial containment shows relationships)
+
+**Data Source**: Account resources from `data/accounts/{account}/resources.ts`
+
+**Account Structure**:
+```
+Account (L0) - Container
+└── Application (L1) - Container
+    └── Module (L2) - Container
+        └── Page (L3) - Container
+            └── Section (L4) - Container
+                └── Block (L5) - Node
+```
+
+**Key Features**:
+- **Full Graph Re-render**: Switching to/from nested layout rebuilds entire graph
+- **Container Nodes**: Parents are rendered as JointJS containers (different cell type)
+- **Spatial Hierarchy**: Parent-child shown through visual containment, not links
+- **Auto-sizing**: Containers automatically resize to fit embedded children
+- **Layout Algorithm**: Custom positioning algorithm places children within parent bounds
+
+**JointJS API**: 
+- `element.embed(child)` - Embed child within parent
+- `element.fitToChildren(padding)` - Resize container to fit children
+- Container cell types with custom rendering
+
+**Characteristics**:
+- Natural representation of organizational structure
+- No need for hierarchy links (spatial containment is self-documenting)
+- Supports unlimited nesting depth
+- Best for account/org visualization
+- Requires graph rebuild when switching layouts (different node types)
+
+**Toolbar Integration**:
+- Layout switcher includes "Nested (Containers)" option
+- Switching to nested triggers full graph re-render
+- Layout manager coordinates rebuild with account data
+- Previous layout state preserved for quick switching back
+
+**Re-render Strategy**:
+```typescript
+// When switching to nested layout:
+1. Clear existing graph (remove all cells)
+2. Load account resources from data/accounts
+3. Create container nodes for each parent resource
+4. Create child nodes and embed in parents
+5. Apply nested positioning algorithm
+6. Auto-resize containers to fit children
+7. Update layout manager state
+```
+
+**Future Enhancements**:
+- Zoom-level based container expansion/collapse
+- Interactive drag-to-reparent
+- Container style customization per level
+- Minimap navigation for deeply nested views
+
+---
+
+### 4.2 Tree Layout (Primary)
+
+**Purpose**: Hierarchical top-down organization showing clear parent-child relationships with links
+
+**When to use**:
+- Exploring organizational structure with explicit connections
+- Understanding module/page hierarchies with flow arrows
 - Analyzing dependency flows
+- When link routing and direction matter
 
 **Configuration**:
 - Direction: Left-to-right, top-to-bottom, or diagonal variants
@@ -70,10 +220,11 @@ Any layout algorithm integrated into PA Graph must:
 - Best for strict hierarchies (single parent per node)
 - Handles mixed directions (different subtrees can have different orientations)
 - Supports sibling ranking for custom ordering
+- Uses links to show parent-child relationships
 
 ---
 
-### 3.2 Grid Layout
+### 4.3 Grid Layout
 
 **Purpose**: Regular grid arrangement for consistent visual rhythm
 
@@ -97,7 +248,7 @@ Any layout algorithm integrated into PA Graph must:
 
 ---
 
-### 3.3 Directed Graph (Future)
+### 4.4 Directed Graph (Future)
 
 **Purpose**: Layered layout optimized for directed flows
 
@@ -121,7 +272,7 @@ Any layout algorithm integrated into PA Graph must:
 
 ---
 
-### 3.4 Force-Directed (Future)
+### 4.5 Force-Directed (Future)
 
 **Purpose**: Physics-based organic layout
 
@@ -145,7 +296,7 @@ Any layout algorithm integrated into PA Graph must:
 
 ---
 
-### 3.5 MSAGL (Future)
+### 4.6 MSAGL (Future)
 
 **Purpose**: Microsoft Automatic Graph Layout (Sugiyama algorithm)
 
@@ -168,26 +319,74 @@ Any layout algorithm integrated into PA Graph must:
 
 ---
 
-## 4. Layout Manager Architecture
+## 5. Layout Manager Architecture
 
-### 4.1 Responsibility
+### 5.1 Responsibility
 
 The `LayoutManager` class:
 - Stores current layout configuration
 - Applies selected layout algorithm to graph
+- **Coordinates full graph re-renders when switching layout types**
 - Preserves layout settings in tenant config
 - Provides unified API for all layout types
 - Handles layout-specific options
+- Manages container vs. node rendering modes
 
-### 4.2 API Design
+### 5.2 Re-render Strategy for Layout Switching
+
+**Critical Design Decision**: Different layouts may require different node types (containers vs. standard nodes), necessitating full graph rebuilds.
+
+**When Re-render is Required**:
+- Switching TO nested layout (requires container nodes)
+- Switching FROM nested layout (requires standard nodes)
+- Changing between layouts with incompatible node types
+
+**Re-render Process**:
+```typescript
+// 1. Save current state (selection, zoom, pan)
+const state = saveGraphState()
+
+// 2. Clear existing graph
+graph.clear()
+
+// 3. Rebuild based on layout type
+if (newLayout === 'nested') {
+  // Create container nodes from account resources
+  buildNestedGraph(accountResources)
+} else {
+  // Create standard nodes with hierarchy links
+  buildTreeGraph(accountResources)
+}
+
+// 4. Apply layout algorithm
+applyLayout(newLayout)
+
+// 5. Restore state where possible
+restoreGraphState(state)
+```
+
+**Optimization Strategies**:
+- Cache resource data to avoid re-fetching
+- Maintain node ID consistency across rebuilds
+- Preserve user selections and viewport where possible
+- Animate transitions for visual continuity
+- Debounce rapid layout switches
+
+### 5.3 API Design
 
 ```typescript
 interface LayoutManager {
   // Current layout state
   getCurrentLayout(): LayoutType
   
-  // Apply layout
+  // Apply layout (may trigger re-render)
   applyLayout(type: LayoutType, options?: LayoutOptions): void
+  
+  // Check if layout switch requires re-render
+  requiresRerender(fromType: LayoutType, toType: LayoutType): boolean
+  
+  // Full graph rebuild with new layout
+  rebuildGraphWithLayout(type: LayoutType, resources: ResourceGraph): void
   
   // Layout-specific configuration
   getLayoutConfig(type: LayoutType): LayoutOptions
@@ -198,7 +397,8 @@ interface LayoutManager {
 }
 
 type LayoutType = 
-  | 'tree'          // TreeLayout (primary)
+  | 'nested'        // Container embedding (NEW)
+  | 'tree'          // TreeLayout with links
   | 'grid'          // GridLayout
   | 'dagre'         // DirectedGraph (future)
   | 'force'         // ForceDirected (future)
@@ -211,28 +411,47 @@ interface LayoutOptions {
   duration?: number
   
   // Layout-specific
+  nested?: NestedLayoutOptions
   tree?: TreeLayoutOptions
   grid?: GridLayoutOptions
   // ... etc
 }
+
+interface NestedLayoutOptions {
+  containerPadding?: number      // Padding inside containers
+  levelSpacing?: number          // Vertical space between levels
+  siblingSpacing?: number        // Horizontal space between siblings
+  autoResize?: boolean           // Auto-resize containers to fit children
+  collapsible?: boolean          // Allow container collapse/expand
+  minContainerSize?: { width: number; height: number }
+}
 ```
 
-### 4.3 Integration Points
+### 5.4 Integration Points
 
 **Toolbar Control**: 
 - Dropdown selector for layout type
 - Secondary panel for layout options
 - Preview mode before applying
+- **Warning UI when re-render is required** (e.g., "Switching layouts will rebuild the graph")
 
 **Tenant Config**:
 - Default layout per tenant
 - Layout-specific defaults
 - Persisted layout state
+- Account-to-layout associations (e.g., nested view for organizational accounts)
 
 **Graph Model**:
 - Trigger layout on demand
 - Auto-layout on graph changes (optional)
 - Layout invalidation on structure changes
+- **Re-render coordination** with resource loader
+
+**Resource Loader**:
+- Provides account resources for nested layout
+- Caches resource data for performance
+- Supports lazy loading of deep hierarchies
+- Validates resource structure before rendering
 
 ---
 
@@ -266,20 +485,280 @@ Managed by `HierarchyVisibilityManager` (existing):
 
 ---
 
-## 6. Hierarchy Relationships
+## 6. JointJS Container Implementation
 
-### 6.1 Parent-Child Encoding
+### 6.1 Container API Overview
+
+**Key JointJS Methods for Nested Layout**:
+
+```typescript
+// Embedding children
+parent.embed(child)              // Add child to parent's embedded list
+parent.unembed(child)            // Remove child from parent
+parent.getEmbeddedCells()        // Get all embedded children
+
+// Auto-sizing containers
+parent.fitToChildren({
+  padding: 50,                   // Internal padding
+  deep: true                     // Include grandchildren in calculation
+})
+
+// Parent-child queries
+child.getParentCell()            // Get immediate parent
+element.isEmbeddedIn(parent)     // Check if embedded
+```
+
+**Container Rendering**:
+```typescript
+// Container node with custom appearance
+const container = new shapes.standard.Rectangle({
+  markup: [{
+    tagName: 'rect',
+    selector: 'body',
+  }, {
+    tagName: 'text',
+    selector: 'label',
+  }, {
+    tagName: 'rect',
+    selector: 'headerBackground',
+  }, {
+    tagName: 'text',
+    selector: 'headerLabel',
+  }],
+  attrs: {
+    body: {
+      fill: 'rgba(255, 255, 255, 0.05)',
+      stroke: '#6366f1',
+      strokeWidth: 2,
+      strokeDasharray: '5 5',  // Dashed border for containers
+      rx: 8,
+      ry: 8,
+    },
+    headerBackground: {
+      fill: '#6366f1',
+      height: 30,
+      width: 'calc(w)',
+    },
+    headerLabel: {
+      text: 'Container Name',
+      fill: '#ffffff',
+      fontSize: 14,
+      fontWeight: 'bold',
+      refX: '50%',
+      refY: 15,
+      textAnchor: 'middle',
+    },
+    label: {
+      text: 'Description',
+      fontSize: 12,
+      fill: '#9ca3af',
+      refX: '50%',
+      refY: '100%',
+      refY2: -10,
+      textAnchor: 'middle',
+    }
+  }
+})
+```
+
+### 6.2 Hierarchy Traversal
+
+**Building Nested Structure from Account Resources**:
+
+```typescript
+function buildNestedGraph(resources: Resource[], graph: dia.Graph): void {
+  const nodeMap = new Map<string, dia.Element>()
+  
+  // Create all nodes first (breadth-first)
+  resources.forEach(resource => {
+    const isContainer = resource.children && resource.children.length > 0
+    const node = createNode(resource, isContainer)
+    graph.addCell(node)
+    nodeMap.set(resource.id, node)
+  })
+  
+  // Establish parent-child relationships (depth-first)
+  resources.forEach(resource => {
+    if (resource.children) {
+      const parent = nodeMap.get(resource.id)!
+      resource.children.forEach(child => {
+        buildNestedGraph([child], graph) // Recursive
+        const childNode = nodeMap.get(child.id)!
+        parent.embed(childNode)
+      })
+      
+      // Auto-resize after all children embedded
+      parent.fitToChildren({ padding: 50, deep: true })
+    }
+  })
+}
+```
+
+### 6.3 Positioning Algorithm
+
+**Nested Layout Strategy**:
+
+```typescript
+function layoutNestedContainers(
+  element: dia.Element, 
+  options: NestedLayoutOptions
+): void {
+  const children = element.getEmbeddedCells() as dia.Element[]
+  if (children.length === 0) return
+  
+  // Sort children by hierarchy level or custom order
+  children.sort((a, b) => {
+    const levelA = a.get('hierarchyLevel') || 0
+    const levelB = b.get('hierarchyLevel') || 0
+    return levelA - levelB
+  })
+  
+  const { containerPadding, siblingSpacing } = options
+  let currentX = containerPadding
+  let currentY = containerPadding + 40 // Account for header
+  let rowHeight = 0
+  
+  children.forEach((child, index) => {
+    const size = child.size()
+    
+    // Simple grid-like positioning within container
+    child.position(currentX, currentY, { parentRelative: true })
+    
+    // Track row height
+    rowHeight = Math.max(rowHeight, size.height)
+    
+    // Move to next position
+    currentX += size.width + siblingSpacing
+    
+    // Wrap to next row if exceeds container width
+    const parentSize = element.size()
+    if (currentX + size.width > parentSize.width - containerPadding) {
+      currentX = containerPadding
+      currentY += rowHeight + siblingSpacing
+      rowHeight = 0
+    }
+    
+    // Recursively layout nested children
+    if (child.get('isContainer')) {
+      layoutNestedContainers(child, options)
+    }
+  })
+  
+  // Resize container to fit all positioned children
+  element.fitToChildren({ 
+    padding: containerPadding,
+    deep: false  // We already laid out children recursively
+  })
+}
+```
+
+### 6.4 Container Types by Level
+
+**Account Hierarchy Mapping**:
+
+| Level | Resource Type | Container Type | Visual Style |
+|-------|---------------|----------------|--------------|
+| L0 | Account | Large Container | Thick border, distinct color |
+| L1 | Application | Medium Container | Solid border, brand color |
+| L2 | Module | Medium Container | Dashed border |
+| L3 | Page | Small Container | Thin border |
+| L4 | Section | Small Container | Dotted border |
+| L5 | Block | Standard Node | No container, solid shape |
+
+**Rendering Rules**:
+- Levels 0-4: Render as containers (can embed children)
+- Level 5 (Block): Render as standard nodes (no embedding)
+- Container size increases with hierarchy level
+- Header height/style varies by level
+- Border style distinguishes container types
+
+### 6.5 Interactive Features
+
+**Planned Container Interactions**:
+
+```typescript
+// Collapse/Expand
+container.set('collapsed', true)
+// Hides children, shows collapse indicator
+// Updates size to collapsed dimensions
+
+// Drag-to-Reparent
+paper.on('element:pointerup', (elementView) => {
+  const element = elementView.model
+  const newParent = findContainerUnder(element.position())
+  
+  if (newParent && newParent !== element.getParentCell()) {
+    const oldParent = element.getParentCell()
+    oldParent?.unembed(element)
+    newParent.embed(element)
+    
+    // Re-layout both containers
+    layoutNestedContainers(oldParent, options)
+    layoutNestedContainers(newParent, options)
+  }
+})
+
+// Zoom-based Detail Levels
+paper.on('scale', (sx, sy) => {
+  const zoomLevel = sx // Assuming uniform scaling
+  
+  if (zoomLevel < 0.5) {
+    // Hide deep nesting, show only top 2 levels
+    hideDeepContainers(3)
+  } else if (zoomLevel > 1.5) {
+    // Show all details
+    showAllContainers()
+  }
+})
+```
+
+### 6.6 Performance Considerations
+
+**Optimization for Nested Layout**:
+
+- **Virtual Rendering**: Only render containers in viewport
+- **Lazy Expansion**: Load children on-demand when expanding collapsed containers
+- **Level-of-Detail (LOD)**: Simplify container rendering at low zoom levels
+- **Batch Updates**: Use `graph.startBatch()` / `graph.stopBatch()` during layout
+- **Container Caching**: Cache computed container sizes to avoid recalculation
+
+```typescript
+// Efficient batch updates
+graph.startBatch('layout')
+
+// Perform all positioning and embedding
+resources.forEach(buildContainer)
+
+graph.stopBatch('layout')  // Single re-render
+```
+
+---
+
+## 7. Hierarchy Relationships
+
+### 7.1 Parent-Child Encoding
 
 **Data Model**: Resources have `children` array property
 
-**Graph Representation**:
-- JointJS embedding: `parent.embed(child)`
+**Graph Representation (varies by layout)**:
+
+**Nested Layout**:
+- JointJS embedding: `parent.embed(child)` (visual containment)
 - Custom property: `child.set('parentId', parent.id)`
 - Hierarchy level: `node.set('hierarchyLevel', level)`
+- No hierarchy links (containment shows relationship)
 
-### 6.2 Link Routing
+**Tree/Dagre Layouts**:
+- JointJS links: Parent → Child edges
+- Custom property: `child.set('parentId', parent.id)`
+- Hierarchy level: `node.set('hierarchyLevel', level)`
+- Links show explicit parent-child connections
 
-**Intra-container links**: Routes stay within parent bounds
+### 7.2 Link Routing (Tree/Dagre Layouts Only)
+
+**Note**: Nested layout doesn't use links for hierarchy—spatial containment replaces them.
+
+**Intra-container links**: Routes stay within parent bounds (for nested mode future enhancement)
 **Inter-container links**: Routes between containers, avoiding overlaps
 
 **Router Options**:
@@ -287,50 +766,115 @@ Managed by `HierarchyVisibilityManager` (existing):
 - Metro: Rounded corners, aligned paths
 - Straight: Direct lines (minimal, can overlap)
 
+### 7.3 Switching Between Representations
+
+**Key Challenge**: Hierarchy can be shown two ways:
+1. **Spatial (Nested)**: Children literally inside parent boxes
+2. **Explicit (Tree)**: Children connected by arrows/links
+
+**Conversion Process**:
+```typescript
+// Tree → Nested: Remove links, create embeddings
+treeToNested(graph) {
+  graph.getLinks()
+    .filter(link => link.get('isHierarchyLink'))
+    .forEach(link => link.remove())
+  
+  graph.getElements().forEach(element => {
+    const parentId = element.get('parentId')
+    if (parentId) {
+      const parent = graph.getCell(parentId) as dia.Element
+      parent.embed(element)
+    }
+  })
+}
+
+// Nested → Tree: Remove embeddings, create links
+nestedToTree(graph) {
+  graph.getElements().forEach(element => {
+    const parent = element.getParentCell()
+    if (parent) {
+      parent.unembed(element)
+      
+      // Create hierarchy link
+      const link = new shapes.standard.Link({
+        source: { id: parent.id },
+        target: { id: element.id },
+        attrs: { /* hierarchy link style */ }
+      })
+      link.set('isHierarchyLink', true)
+      graph.addCell(link)
+    }
+  })
+}
+```
+
 ---
 
-## 7. Implementation Phases
+## 8. Implementation Phases
 
-### Phase 1: Foundation (Week 1)
-- [ ] Create `LayoutManager` class
-- [ ] Add TreeLayout integration
-- [ ] Build layout dropdown in toolbar
-- [ ] Wire up apply layout action
+### Phase 1: Nested Layout Foundation (Week 1)
+- [ ] Update `LayoutManager` to support nested layout type
+- [ ] Add `requiresRerender()` method to detect layout type changes
+- [ ] Create `NestedLayoutOptions` interface
+- [ ] Add nested layout to toolbar dropdown
+- [ ] Implement re-render warning UI
 
-### Phase 2: Tree Layout (Week 2)
-- [ ] Configure TreeLayout for DNA hierarchy
-- [ ] Test with inaudio data (6 levels)
-- [ ] Add direction options (LR, TB, diagonal)
-- [ ] Implement layout options panel
+### Phase 2: Container Node Creation (Week 2)
+- [ ] Create `ContainerNode` shape class extending JointJS Element
+- [ ] Implement custom rendering for container boundaries
+- [ ] Add auto-resize logic (`fitToChildren()` wrapper)
+- [ ] Create container factory from resource data
+- [ ] Handle 6-level hierarchy (Account → Application → Module → Page → Section → Block)
 
-### Phase 3: Grid Fallback (Week 3)
-- [ ] Integrate GridLayout as alternative
-- [ ] Add grid configuration options
-- [ ] Handle flat structures gracefully
+### Phase 3: Nested Layout Algorithm (Week 3)
+- [ ] Build recursive layout algorithm for embedded children
+- [ ] Position children within parent bounds
+- [ ] Apply padding and spacing rules
+- [ ] Handle variable container sizes
+- [ ] Implement level-based spacing
 
-### Phase 4: Polish (Week 4)
-- [ ] Add layout animations
-- [ ] Persist layout preferences
-- [ ] Add layout preview mode
-- [ ] Performance optimization
+### Phase 4: Graph Rebuild Coordination (Week 4)
+- [ ] Implement `rebuildGraphWithLayout()` method
+- [ ] Save/restore graph state (viewport, selections)
+- [ ] Clear and rebuild logic
+- [ ] Resource data integration
+- [ ] Transition animations
 
-### Phase 5: Advanced Layouts (Future)
-- [ ] DirectedGraph (Dagre)
-- [ ] ForceDirected
-- [ ] MSAGL adapter
-- [ ] Custom layout algorithms
+### Phase 5: Polish & Optimization (Week 5)
+- [ ] Container collapse/expand interactions
+- [ ] Drag-to-reparent functionality
+- [ ] Performance optimization (virtual rendering for deep nests)
+- [ ] Persist nested layout preferences
+- [ ] Add nested layout preview mode
+
+### Phase 6: Existing Layouts (Ongoing)
+- [ ] Ensure tree/grid layouts work after refactor
+- [ ] Test layout switching (nested ↔ tree ↔ grid)
+- [ ] DirectedGraph (Dagre) integration (future)
+- [ ] ForceDirected layout (future)
+- [ ] MSAGL adapter (future)
 
 ---
 
-## 8. Configuration & Settings
+## 9. Configuration & Settings
 
-### 8.1 Tenant Config
+### 9.1 Tenant Config
 
 ```typescript
 interface TenantConfig {
   // ... existing properties
   layout: {
     defaultType: LayoutType
+    nested: {
+      containerPadding: number
+      levelSpacing: number
+      siblingSpacing: number
+      autoResize: boolean
+      collapsible: boolean
+      minContainerSize: { width: number; height: number }
+      defaultExpanded: boolean
+    }
     tree: {
       direction: 'L' | 'R' | 'T' | 'B' | 'TL' | 'TR' | 'BL' | 'BR'
       parentGap: number
@@ -355,19 +899,26 @@ interface TenantConfig {
 }
 ```
 
-### 8.2 Toolbar UI
+### 9.2 Toolbar UI
 
 ```tsx
 <Select 
   value={currentLayout} 
   onChange={handleLayoutChange}
 >
+  <option value="nested">Nested (Containers)</option>
   <option value="tree">Tree (Hierarchical)</option>
   <option value="grid">Grid (Uniform)</option>
   <option value="dagre">Directed Graph</option>
   <option value="force">Force-Directed</option>
   <option value="none">Manual</option>
 </Select>
+
+{requiresRerender && (
+  <Alert severity="info">
+    Switching layouts will rebuild the graph
+  </Alert>
+)}
 
 <Button onClick={openLayoutOptions}>
   Configure Layout
@@ -380,45 +931,68 @@ interface TenantConfig {
 
 ---
 
-## 9. Edge Cases & Considerations
+## 10. Edge Cases & Considerations
 
-### 9.1 Circular References
+### 10.1 Circular References
 **Problem**: Child references ancestor (e.g., Block calls Platform API)
 
 **Solution**: 
 - Layout treats as external link
-- Route outside container boundaries
+- Route outside container boundaries (nested mode)
 - Different visual style (dashed, different color)
+- Tree layout handles naturally with back-edges
 
-### 9.2 Orphan Nodes
+### 10.2 Orphan Nodes
 **Problem**: Resource without explicit parent
 
 **Solution**:
-- Create implicit root container
+- Create implicit root container (nested mode)
 - Allow drag-and-drop to reparent
 - Highlight orphans visually
+- Tree mode shows at root level
 
-### 9.3 Deep Nesting (>6 levels)
+### 10.3 Deep Nesting (>6 levels)
 **Problem**: Too many levels to visualize effectively
 
 **Solution**:
-- Automatic intermediate level collapsing
+- Automatic intermediate level collapsing (nested mode)
 - Breadcrumb navigation for deep paths
 - Minimap shows full tree structure
+- Zoom-based visibility filtering
 
-### 9.4 Mixed Structures
+### 10.4 Mixed Structures
 **Problem**: Some branches deeper than others
 
 **Solution**:
 - TreeLayout handles naturally
+- Nested containers auto-size per branch
 - Visibility manager adapts per branch
 - No forced symmetry
 
+### 10.5 Container Sizing Conflicts
+**Problem**: Children too large to fit in parent bounds (nested mode)
+
+**Solution**:
+- Auto-resize parent container (default behavior)
+- Set minimum container sizes in config
+- Allow container overflow with scroll indicators
+- Warn user about oversized nested structures
+
+### 10.6 Layout Switching Performance
+**Problem**: Re-rendering entire graph can be slow for large accounts
+
+**Solution**:
+- Show loading indicator during rebuild
+- Use web workers for layout calculation (future)
+- Implement progressive rendering (render visible nodes first)
+- Cache pre-computed layouts per account
+- Debounce rapid layout switches
+
 ---
 
-## 10. Performance Considerations
+## 11. Performance Considerations
 
-### 10.1 Large Graphs (>100 nodes)
+### 11.1 Large Graphs (>100 nodes)
 
 **Strategies**:
 - Virtual rendering (render visible nodes only)
@@ -426,7 +1000,7 @@ interface TenantConfig {
 - Lazy loading: Load children on expansion
 - Viewport culling: Don't render off-screen nodes
 
-### 10.2 Layout Calculation
+### 11.2 Layout Calculation
 
 **Optimization**:
 - Incremental layout (only affected nodes)
@@ -436,26 +1010,26 @@ interface TenantConfig {
 
 ---
 
-## 11. Testing Strategy
+## 12. Testing Strategy
 
-### 11.1 Unit Tests
+### 12.1 Unit Tests
 - Layout manager state transitions
 - Layout option validation
 - Hierarchy traversal algorithms
 
-### 11.2 Integration Tests
+### 12.2 Integration Tests
 - TreeLayout with 6-level hierarchy
 - GridLayout with variable node sizes
 - Layout switching preserves graph state
 
-### 11.3 Visual Regression Tests
+### 12.3 Visual Regression Tests
 - Screenshot comparison at standard zoom levels
 - Link routing correctness
 - Node positioning consistency
 
 ---
 
-## 12. Success Metrics
+## 13. Success Metrics
 
 ### Visual Clarity
 - ✅ Users identify parent-child relationships at a glance
@@ -474,7 +1048,7 @@ interface TenantConfig {
 
 ---
 
-## 13. References
+## 14. References
 
 ### JointJS Documentation
 - [Layout Overview](https://docs.jointjs.com/api/layout/)
@@ -494,10 +1068,21 @@ interface TenantConfig {
 
 PA Graph's layout system enables users to visualize application DNA through multiple lenses:
 
-1. **TreeLayout** (primary): Hierarchical visualization of the 6-level structure
-2. **GridLayout**: Uniform presentation for comparison and overview
-3. **Advanced layouts** (future): Dagre, Force-Directed, MSAGL for specialized needs
+1. **Nested Layout** (NEW): Container-based visualization with spatial hierarchy—children literally inside parents. Ideal for organizational/account views. Requires full graph re-render when switching.
 
-The `LayoutManager` provides a unified API for selecting and configuring layouts, with preferences persisted in tenant configuration. Combined with zoom-based visibility management, this creates a powerful system for navigating complex application structures.
+2. **TreeLayout**: Hierarchical visualization with explicit links showing parent-child relationships across the 6-level DNA structure.
 
-**Key Philosophy**: Layouts are tools for revealing different aspects of the same underlying DNA structure—not rigid constraints but flexible lenses.
+3. **GridLayout**: Uniform presentation for comparison and overview of flat structures.
+
+4. **Advanced layouts** (future): Dagre, Force-Directed, MSAGL for specialized analysis needs.
+
+The `LayoutManager` provides a unified API for selecting and configuring layouts, with preferences persisted in tenant configuration. **Critical architectural decision**: Different layouts may require different node types (containers vs. standard nodes), necessitating full graph rebuilds when switching between certain layout types.
+
+Combined with zoom-based visibility management, this creates a powerful system for navigating complex application structures.
+
+**Key Philosophy**: Layouts are tools for revealing different aspects of the same underlying DNA structure—not rigid constraints but flexible lenses. The nested layout adds a **spatial dimension** to hierarchy visualization, complementing the traditional tree-based approach.
+
+**JointJS Container Reference**: 
+- [Containers & Grouping Guide](https://docs.jointjs.com/learn/features/containers-and-grouping/#adding-an-embedded-child)
+- [Element.embed() API](https://docs.jointjs.com/api/dia/Element#dia.Element.prototype.embed)
+- [Element.fitToChildren() API](https://docs.jointjs.com/api/dia/Element#dia.Element.prototype.fitToChildren)
