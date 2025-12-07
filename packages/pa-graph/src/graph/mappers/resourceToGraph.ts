@@ -127,11 +127,13 @@ function mapRelationshipTypeToEdgeLabel(relType: Relationship['type']): string {
 
 /**
  * Flatten nested resource hierarchy into a flat list with parent tracking
+ * @param maxDepth - Maximum hierarchy level to include (undefined = include all levels)
  */
 function flattenResources(
   resources: Resource[], 
   parentId?: string, 
-  level: number = 0
+  level: number = 0,
+  maxDepth?: number
 ): Array<Resource & { parentId?: string; hierarchyLevel: number }> {
   const result: Array<Resource & { parentId?: string; hierarchyLevel: number }> = []
   
@@ -146,9 +148,9 @@ function flattenResources(
       children // Keep children for hasChildren check
     })
     
-    // Recursively process children
-    if (children && children.length > 0) {
-      const childResources = flattenResources(children, resource.id, level + 1)
+    // Recursively process children only if we haven't reached maxDepth
+    if (children && children.length > 0 && (maxDepth === undefined || level < maxDepth)) {
+      const childResources = flattenResources(children, resource.id, level + 1, maxDepth)
       result.push(...childResources)
     }
   }
@@ -158,10 +160,13 @@ function flattenResources(
 
 /**
  * Convert resource-based data to graph nodes and edges
+ * @param maxDepth - Maximum hierarchy level to include (undefined = all levels)
+ *                   Example: maxDepth=2 includes L0(Account), L1(Module), L2(Page)
+ *                   but excludes L3(Section) and L4(Block)
  */
-export function resourceToGraph(resourceGraph: ResourceGraph): GraphData {
+export function resourceToGraph(resourceGraph: ResourceGraph, maxDepth?: number): GraphData {
   // Flatten nested hierarchy into a list with parent tracking
-  const flatResources = flattenResources(resourceGraph.resources)
+  const flatResources = flattenResources(resourceGraph.resources, undefined, 0, maxDepth)
   
   // Calculate positions for all flattened resources
   const positions = calculateNodePositions(flatResources)

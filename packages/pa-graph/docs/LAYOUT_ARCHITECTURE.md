@@ -811,52 +811,6 @@ nestedToTree(graph) {
 
 ---
 
-## 8. Implementation Phases
-
-### Phase 1: Nested Layout Foundation (Week 1)
-- [ ] Update `LayoutManager` to support nested layout type
-- [ ] Add `requiresRerender()` method to detect layout type changes
-- [ ] Create `NestedLayoutOptions` interface
-- [ ] Add nested layout to toolbar dropdown
-- [ ] Implement re-render warning UI
-
-### Phase 2: Container Node Creation (Week 2)
-- [ ] Create `ContainerNode` shape class extending JointJS Element
-- [ ] Implement custom rendering for container boundaries
-- [ ] Add auto-resize logic (`fitToChildren()` wrapper)
-- [ ] Create container factory from resource data
-- [ ] Handle 6-level hierarchy (Account → Application → Module → Page → Section → Block)
-
-### Phase 3: Nested Layout Algorithm (Week 3)
-- [ ] Build recursive layout algorithm for embedded children
-- [ ] Position children within parent bounds
-- [ ] Apply padding and spacing rules
-- [ ] Handle variable container sizes
-- [ ] Implement level-based spacing
-
-### Phase 4: Graph Rebuild Coordination (Week 4)
-- [ ] Implement `rebuildGraphWithLayout()` method
-- [ ] Save/restore graph state (viewport, selections)
-- [ ] Clear and rebuild logic
-- [ ] Resource data integration
-- [ ] Transition animations
-
-### Phase 5: Polish & Optimization (Week 5)
-- [ ] Container collapse/expand interactions
-- [ ] Drag-to-reparent functionality
-- [ ] Performance optimization (virtual rendering for deep nests)
-- [ ] Persist nested layout preferences
-- [ ] Add nested layout preview mode
-
-### Phase 6: Existing Layouts (Ongoing)
-- [ ] Ensure tree/grid layouts work after refactor
-- [ ] Test layout switching (nested ↔ tree ↔ grid)
-- [ ] DirectedGraph (Dagre) integration (future)
-- [ ] ForceDirected layout (future)
-- [ ] MSAGL adapter (future)
-
----
-
 ## 9. Configuration & Settings
 
 ### 9.1 Tenant Config

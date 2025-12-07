@@ -230,7 +230,9 @@ export const GraphCanvas = observer(function GraphCanvas({
     }
 
     // For nested layout or switching from nested, need to rebuild graph with proper cell types
-    const graphData = resourceToGraph(stableConfig.data)
+    // For nested layout, only include nodes down to page level (L0-L2), excluding sections (L3) and blocks (L4)
+    const maxDepth = layoutType === 'nested' ? 2 : undefined
+    const graphData = resourceToGraph(stableConfig.data, maxDepth)
     const layoutMode = layoutType === 'nested' ? 'nested' : 'tree'
     const shapesFactory = new ShapesFactory(stableConfig, layoutMode)
     
