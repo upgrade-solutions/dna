@@ -36,9 +36,8 @@ export class ShapesFactory {
     
     // Determine if this should be a container node or resource node
     // In tree layout, all nodes are ResourceNodes (simpler, no containers)
-    // In nested layout, nodes with children become ContainerNodes
-    const hasChildren = node.hasChildren ?? false
-    const useContainer = this.layoutMode === 'nested' && hasChildren
+    // In nested layout, ALL nodes become ContainerNodes (for consistent positioning)
+    const useContainer = this.layoutMode === 'nested'
     
     if (useContainer) {
       // Create container node for resources with children

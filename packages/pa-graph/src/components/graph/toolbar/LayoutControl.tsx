@@ -42,8 +42,6 @@ export interface LayoutControlProps {
 
 export const LayoutControl = observer(function LayoutControl({ layoutManager, theme, onLayoutChange }: LayoutControlProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [showRebuildWarning, setShowRebuildWarning] = useState(false)
-  const [pendingLayoutType, setPendingLayoutType] = useState<LayoutType | null>(null)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 })
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -81,40 +79,14 @@ export const LayoutControl = observer(function LayoutControl({ layoutManager, th
     const currentLayout = layoutManager.getCurrentLayout()
     const needsRebuild = layoutManager.requiresRerender(currentLayout, type)
     
-    if (needsRebuild) {
-      // Show confirmation dialog for rebuild
-      setPendingLayoutType(type)
-      setShowRebuildWarning(true)
-      setIsOpen(false)
-    } else {
-      // Apply layout directly (no rebuild needed)
-      if (onLayoutChange) {
-        onLayoutChange(type, false)
-      } else {
-        layoutManager.applyLayout(type)
-      }
-      setIsOpen(false)
-    }
-  }, [layoutManager, onLayoutChange])
-
-  const handleConfirmRebuild = useCallback(() => {
-    if (!pendingLayoutType || !layoutManager) return
-    
+    // Apply layout directly (rebuild automatically if needed)
     if (onLayoutChange) {
-      onLayoutChange(pendingLayoutType, true)
+      onLayoutChange(type, needsRebuild)
     } else {
-      // Fallback: just apply layout (won't rebuild, but at least tries)
-      layoutManager.applyLayout(pendingLayoutType)
+      layoutManager.applyLayout(type)
     }
-    
-    setShowRebuildWarning(false)
-    setPendingLayoutType(null)
-  }, [pendingLayoutType, layoutManager, onLayoutChange])
-
-  const handleCancelRebuild = useCallback(() => {
-    setShowRebuildWarning(false)
-    setPendingLayoutType(null)
-  }, [])
+    setIsOpen(false)
+  }, [layoutManager, onLayoutChange])
 
   if (!layoutManager) return null
 
@@ -281,97 +253,6 @@ export const LayoutControl = observer(function LayoutControl({ layoutManager, th
           </div>
         )}
       </div>
-
-      {/* Rebuild Warning Dialog */}
-      {showRebuildWarning && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 10001
-          }}
-          onClick={handleCancelRebuild}
-        >
-        <div
-          style={{
-            background: themed.toolbar.background,
-            border: `1px solid ${themed.toolbar.borderColor}`,
-            borderRadius: '8px',
-            padding: '24px',
-            maxWidth: '400px',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)'
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            <div style={{ color: '#f59e0b' }}>
-              <AlertIcon />
-            </div>
-            <h3 style={{
-              margin: 0,
-              fontSize: '16px',
-              fontWeight: '600',
-              color: themed.toolbar.text
-            }}>
-              Rebuild Graph Required
-            </h3>
-          </div>
-
-          {/* Message */}
-          <p style={{
-            margin: '0 0 20px 0',
-            fontSize: '14px',
-            color: themed.toolbar.textSecondary,
-            lineHeight: '1.5'
-          }}>
-            Switching to <strong>{pendingLayoutType === 'nested' ? 'Nested (Containers)' : 'Tree (Hierarchical)'}</strong> layout requires rebuilding the entire graph with different node types.
-            {' '}This will reset the viewport and any manual node adjustments.
-          </p>
-
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-            <button
-              onClick={handleCancelRebuild}
-              style={{
-                padding: '8px 16px',
-                background: 'transparent',
-                border: `1px solid ${themed.toolbar.borderColor}`,
-                borderRadius: '4px',
-                color: themed.toolbar.text,
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleConfirmRebuild}
-              style={{
-                padding: '8px 16px',
-                background: '#3b82f6',
-                border: 'none',
-                borderRadius: '4px',
-                color: '#ffffff',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
-              Rebuild Graph
-            </button>
-          </div>
-        </div>
-      </div>
-      )}
     </>
   )
 })

@@ -56,8 +56,8 @@ export interface LayoutOptions extends CommonLayoutOptions {
  */
 const DEFAULT_NESTED_OPTIONS: Required<NestedLayoutOptions> = {
   containerPadding: 50,
-  levelSpacing: 40,
-  siblingSpacing: 30,
+  levelSpacing: 20,
+  siblingSpacing: 15,
   autoResize: true,
   collapsible: false,
   minContainerSize: { width: 300, height: 200 },
@@ -211,15 +211,11 @@ export class LayoutManager {
   /**
    * Set layout mode (nested vs tree)
    * Note: Switching modes requires rebuilding the graph with different node types
-   * For now, mode is set at initialization and shouldn't be changed dynamically
    */
   setLayoutMode(mode: LayoutMode): void {
     if (mode === this.layoutMode) return
     
-    console.warn('Dynamic layout mode switching requires graph rebuild - not yet implemented')
     this.layoutMode = mode
-    // TODO: Implement full graph rebuild with ShapesFactory.setLayoutMode()
-    // Future: this.rebuildGraphForMode()
   }
 
   /**

@@ -12,7 +12,7 @@
  * 5. Reposition parent to account for container resizing
  */
 
-import { dia } from '@joint/plus'
+import { dia, layout as jointLayout } from '@joint/plus'
 import type { NestedLayoutOptions } from './layout-manager'
 
 /**
@@ -35,10 +35,10 @@ export function applyNestedLayout(
   let currentY = gridSpacing
 
   rootElements.forEach((rootElement) => {
-    // Position root element
+    // Position root element (absolute)
     rootElement.position(currentX, currentY)
 
-    // Layout its children recursively
+    // Layout its children recursively (parent-relative positioning)
     if (rootElement.get('isContainer')) {
       layoutContainerChildren(rootElement, options)
     }
@@ -53,6 +53,8 @@ export function applyNestedLayout(
       currentY += 800
     }
   })
+  
+  console.log('[Nested Layout] Layout complete')
 }
 
 /**
@@ -66,68 +68,129 @@ function layoutContainerChildren(
   const children = embeddedCells.filter(cell => cell.isElement()) as dia.Element[]
 
   if (children.length === 0) {
-    // No children, use minimum container size
-    const style = (container as any).getStyleForLevel()
-    if (style && style.minSize) {
-      container.resize(style.minSize.width, style.minSize.height)
-    }
+    container.resize(options.minContainerSize.width, options.minContainerSize.height)
     return
   }
 
-  const {
-    containerPadding,
-    levelSpacing,
-    siblingSpacing,
-    minContainerSize
-  } = options
-
-  const headerHeight = 40 // Container header height
-
-  // Position children in grid layout within container
-  let currentX = containerPadding
-  let currentY = containerPadding + headerHeight
-  let rowHeight = 0
-  let maxWidth = minContainerSize.width
-
-  // Sort children by hierarchy level to ensure consistent ordering
-  const sortedChildren = [...children].sort((a, b) => {
-    const levelA = a.get('hierarchyLevel') || 0
-    const levelB = b.get('hierarchyLevel') || 0
-    return levelA - levelB
+  const padding = options.containerPadding
+  const headerHeight = 40
+  
+  // Pre-pass: Resize leaf containers to their minimum size before positioning
+  children.forEach(child => {
+    const embeddedCells = child.getEmbeddedCells()
+    const hasChildren = embeddedCells.filter(cell => cell.isElement()).length > 0
+    
+    if (!hasChildren && child.get('isContainer')) {
+      // Leaf container with no children - resize to minContainerSize
+      child.resize(options.minContainerSize.width, options.minContainerSize.height)
+    }
   })
-
-  sortedChildren.forEach((child) => {
-    // Recursively layout child containers first
+  
+  // Position children starting at (padding, headerHeight + padding) in parent-relative coordinates
+  const startX = padding
+  const startY = padding
+  const columns = 3
+  const marginX = options.siblingSpacing
+  const marginY = options.levelSpacing
+  
+  console.log(`[Nested Layout] Container ${container.id}: positioning ${children.length} children`)
+  console.log(`[Nested Layout]   startX: ${startX}, startY: ${startY}, padding: ${padding}`)
+  console.log(`[Nested Layout]   container position:`, container.position())
+  
+  // Get container's absolute position to understand coordinate space
+  const containerAbsPos = container.position()
+  
+  // Track current position for each row
+  const rowPositions: { x: number; y: number; maxHeight: number }[] = []
+  
+  // First pass: Position all children
+  children.forEach((child, index) => {
+    const col = index % columns
+    const row = Math.floor(index / columns)
+    
+    const childSize = child.size()
+    const childBBox = child.getBBox()
+    console.log(`[Nested Layout]   child ${index} size vs bbox: size=${childSize.width}x${childSize.height}, bbox=${childBBox.width}x${childBBox.height}`)
+    
+    // Initialize row if needed
+    if (!rowPositions[row]) {
+      const prevRow = row > 0 ? rowPositions[row - 1] : null
+      rowPositions[row] = {
+        x: startX,
+        y: prevRow ? prevRow.y + prevRow.maxHeight + marginY : startY,
+        maxHeight: 0
+      }
+    }
+    
+    const x = rowPositions[row].x
+    const y = rowPositions[row].y
+    
+    console.log(`[Nested Layout]   child ${index} (${child.id}): col=${col}, row=${row}, size=${childSize.width}x${childSize.height}, x=${x}, y=${y}`)
+    console.log(`[Nested Layout]   rowPositions[${row}].x = ${rowPositions[row].x} BEFORE positioning`)
+    
+    // Set position as parent-relative (JointJS will handle the coordinate conversion)
+    child.position(x, y, { parentRelative: true })
+    
+    const actualPos = child.position()
+    console.log(`[Nested Layout]   child ${index} actual position after setting (absolute):`, actualPos)
+    
+    // Update position for next child in row
+    console.log(`[Nested Layout]   Adding to rowPositions[${row}].x: ${childSize.width} + ${marginX} = ${childSize.width + marginX}`)
+    rowPositions[row].x += childSize.width + marginX
+    console.log(`[Nested Layout]   rowPositions[${row}].x = ${rowPositions[row].x} AFTER update`)
+    rowPositions[row].maxHeight = Math.max(rowPositions[row].maxHeight, childSize.height)
+  })
+  
+  // Second pass: Recursively layout child containers now that they're positioned
+  children.forEach(child => {
     if (child.get('isContainer')) {
       layoutContainerChildren(child, options)
     }
-
-    // Get child size
-    const childSize = child.size()
-
-    // Check if we need to wrap to next row
-    if (currentX > containerPadding && currentX + childSize.width > maxWidth - containerPadding) {
-      // Wrap to next row
-      currentX = containerPadding
-      currentY += rowHeight + levelSpacing
-      rowHeight = 0
-    }
-
-    // Position child relative to parent
-    child.position(currentX, currentY, { parentRelative: true })
-
-    // Update tracking variables
-    rowHeight = Math.max(rowHeight, childSize.height)
-    currentX += childSize.width + siblingSpacing
-    maxWidth = Math.max(maxWidth, currentX + containerPadding)
   })
 
-  // Calculate final container dimensions
-  const finalHeight = currentY + rowHeight + containerPadding
-  const finalWidth = Math.max(minContainerSize.width, maxWidth)
-
-  // Resize container to fit all children
-  container.resize(finalWidth, finalHeight)
+  // Calculate the required container size based on the PARENT-RELATIVE positions we set
+  // (not the absolute positions returned by position())
+  let maxX = startX
+  let maxY = startY
+  
+  rowPositions.forEach((row, rowIndex) => {
+    // For each row, the rightmost position is tracked in row.x (after all children)
+    // But we need to subtract the last margin we added
+    if (rowPositions[rowIndex]) {
+      maxY = Math.max(maxY, row.y + row.maxHeight)
+    }
+  })
+  
+  // Get the rightmost child's position in parent-relative coords
+  children.forEach((child, index) => {
+    const col = index % columns
+    const row = Math.floor(index / columns)
+    const size = child.size()
+    
+    // Recalculate the parent-relative position (same logic as above)
+    let childX = startX
+    for (let i = 0; i < col; i++) {
+      const prevChild = children[row * columns + i]
+      if (prevChild) {
+        childX += prevChild.size().width + marginX
+      }
+    }
+    
+    maxX = Math.max(maxX, childX + size.width)
+  })
+  
+  const width = Math.max(
+    options.minContainerSize.width,
+    maxX + padding
+  )
+  const height = Math.max(
+    options.minContainerSize.height,
+    maxY + padding
+  )
+  
+  console.log(`[Nested Layout] Container ${container.id}: resizing to ${width}x${height} (maxX: ${maxX}, maxY: ${maxY})`)
+  
+  container.resize(width, height)
 }
 
 /**

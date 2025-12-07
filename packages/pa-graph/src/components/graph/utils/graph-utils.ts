@@ -17,7 +17,12 @@ export function populateGraph(
   shapesFactory: ShapesFactory,
   layoutMode: LayoutMode = 'tree'
 ): void {
-  const nodeElements = shapesFactory.createNodes(graphData.nodes)
+  // In nested mode, reset all positions to (0, 0) since nested layout algorithm will position everything
+  const nodesToCreate = layoutMode === 'nested'
+    ? graphData.nodes.map(node => ({ ...node, position: { x: 0, y: 0 } }))
+    : graphData.nodes
+  
+  const nodeElements = shapesFactory.createNodes(nodesToCreate)
   const linkElements = shapesFactory.createLinks(graphData.edges)
   
   // Create a map of node IDs for quick lookup
@@ -87,16 +92,9 @@ export function populateGraph(
       }
     })
     
-    // Auto-resize container nodes to fit their children
-    // Do this after a short delay to ensure all children are positioned
-    nodeElements.forEach(element => {
-      const isContainer = element.get('isContainer')
-      if (isContainer && typeof (element as any).fitToChildren === 'function') {
-        setTimeout(() => {
-          (element as any).fitToChildren(50) // 50px padding for better spacing
-        }, 50)
-      }
-    })
+    // Note: Do NOT auto-resize containers here
+    // The nested layout algorithm (applyNestedLayout) will handle positioning
+    // and resizing of containers after this function completes
   }
 }
 
