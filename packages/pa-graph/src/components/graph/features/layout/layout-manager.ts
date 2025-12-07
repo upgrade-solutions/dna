@@ -171,8 +171,6 @@ export class LayoutManager {
     shapesFactory: any,
     populateGraphFn: (graph: dia.Graph, data: any, factory: any, mode: LayoutMode) => void
   ): Promise<void> {
-    console.log(`Rebuilding graph for layout type: ${type}`)
-    
     // 1. Save current viewport state
     const elements = this.graph.getElements()
     const firstElement = elements[0]
@@ -194,8 +192,6 @@ export class LayoutManager {
     
     // 6. Small delay to ensure rendering is complete
     await new Promise(resolve => setTimeout(resolve, 100))
-    
-    console.log('Graph rebuild complete')
   }
 
   /**
@@ -396,8 +392,6 @@ export class LayoutManager {
 
     // Apply layout (positions all containers and children)
     applyNestedLayoutAlgorithm(this.graph, fullOptions)
-
-    console.log('Applied nested layout with options:', fullOptions)
   }
 
   /**
