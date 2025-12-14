@@ -23,7 +23,22 @@ export const perfectedClaimsResources: ResourceGraph = {
       description: 'Mass tort case management platform',
       metadata: { 
         level: 0,
-        status: 'completed'
+        status: 'completed',
+        url: 'app.perfectedclaims.com',
+        tech: 'Next.js',
+        resourceType: 'organization',
+        language: 'typescript',
+        runtime: 'nodejs',
+        version: '1.0.0',
+        lifecycle: 'run',
+        owner: 'Perfected Claims Product Team',
+        avatarUrl: 'https://i.pravatar.cc/150?img=43',
+        team: 'Perfected Claims Engineering',
+        raci: 'accountable',
+        infrastructure: 'service',
+        dataClassification: 'pii',
+        compliance: ['hipaa', 'gdpr'],
+        riskLevel: 'high'
       },
       children: [
         // Level 1: Case Development
@@ -34,7 +49,20 @@ export const perfectedClaimsResources: ResourceGraph = {
           description: 'End-to-end case intake and development workflow',
           metadata: { 
             level: 1,
-            status: 'in-progress'
+            status: 'in-progress',
+            tech: 'Next.js',
+            resourceType: 'web-application',
+            language: 'typescript',
+            runtime: 'nodejs',
+            version: '1.2.0',
+            lifecycle: 'run',
+            owner: 'Case Development Team',
+            team: 'Perfected Claims Engineering',
+            raci: 'responsible',
+            infrastructure: 'service',
+            dataClassification: 'pii',
+            compliance: ['hipaa', 'gdpr'],
+            riskLevel: 'high'
           },
           children: [
             // Level 2: Quality Assurance
@@ -45,7 +73,18 @@ export const perfectedClaimsResources: ResourceGraph = {
               description: 'Case quality validation and verification processes',
               metadata: { 
                 level: 2,
-                status: 'in-progress'
+                status: 'in-progress',
+                resourceType: 'module',
+                language: 'typescript',
+                runtime: 'nodejs',
+                version: '1.1.5',
+                lifecycle: 'run',
+                owner: 'QA Team',
+                team: 'Perfected Claims Engineering',
+                raci: 'responsible',
+                dataClassification: 'pii',
+                compliance: ['hipaa'],
+                riskLevel: 'high'
               },
               children: [
                 // Level 3: QA Processes
@@ -57,7 +96,17 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/qa/cases'
+                    route: '/qa/cases',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.1.0',
+                    lifecycle: 'run',
+                    owner: 'QA Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'pii',
+                    riskLevel: 'high'
                   }
                 },
                 {
@@ -68,7 +117,17 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/qa/permissions'
+                    route: '/qa/permissions',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.0.5',
+                    lifecycle: 'run',
+                    owner: 'Security Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'accountable',
+                    dataClassification: 'internal',
+                    riskLevel: 'high'
                   }
                 },
                 {
@@ -79,7 +138,17 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/qa/assign'
+                    route: '/qa/assign',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.0.2',
+                    lifecycle: 'run',
+                    owner: 'QA Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'internal',
+                    riskLevel: 'medium'
                   }
                 },
                 {
@@ -90,7 +159,17 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/qa/damages'
+                    route: '/qa/damages',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.0.8',
+                    lifecycle: 'run',
+                    owner: 'QA Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'pii',
+                    riskLevel: 'high'
                   }
                 },
                 {
@@ -101,7 +180,17 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/qa/verify-docs'
+                    route: '/qa/verify-docs',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.3.1',
+                    lifecycle: 'run',
+                    owner: 'QA Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'pii',
+                    riskLevel: 'high'
                   }
                 },
                 {
@@ -112,7 +201,18 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/qa/governance'
+                    route: '/qa/governance',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.0.0',
+                    lifecycle: 'run',
+                    owner: 'Compliance Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'accountable',
+                    dataClassification: 'internal',
+                    compliance: ['hipaa', 'gdpr'],
+                    riskLevel: 'high'
                   }
                 },
                 {
@@ -123,7 +223,17 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/qa/deficiencies/v1'
+                    route: '/qa/deficiencies/v1',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.4.2',
+                    lifecycle: 'run',
+                    owner: 'QA Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'pii',
+                    riskLevel: 'medium'
                   }
                 },
                 {
@@ -134,7 +244,17 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'future',
-                    route: '/qa/deficiencies/v2'
+                    route: '/qa/deficiencies/v2',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '0.2.0',
+                    lifecycle: 'design',
+                    owner: 'QA Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'pii',
+                    riskLevel: 'medium'
                   }
                 },
                 {
@@ -145,7 +265,38 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/qa/verify-dnq'
+                    route: '/qa/verify-dnq',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.1.0',
+                    lifecycle: 'run',
+                    owner: 'QA Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'pii',
+                    riskLevel: 'medium'
+                  }
+                },
+                {
+                  id: 'automated-task-management',
+                  type: 'page',
+                  name: 'Automated Task Management',
+                  description: 'Workflow automation for case management',
+                  metadata: { 
+                    level: 3,
+                    status: 'in-progress',
+                    route: '/qa/tasks',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '0.7.5',
+                    lifecycle: 'build',
+                    owner: 'Automation Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'internal',
+                    riskLevel: 'medium'
                   }
                 }
               ]
@@ -158,7 +309,18 @@ export const perfectedClaimsResources: ResourceGraph = {
               description: 'Medical records retrieval and management',
               metadata: { 
                 level: 2,
-                status: 'in-progress'
+                status: 'in-progress',
+                resourceType: 'module',
+                language: 'typescript',
+                runtime: 'nodejs',
+                version: '1.0.8',
+                lifecycle: 'run',
+                owner: 'Medical Records Team',
+                team: 'Perfected Claims Engineering',
+                raci: 'responsible',
+                dataClassification: 'phi',
+                compliance: ['hipaa'],
+                riskLevel: 'critical'
               },
               children: [
                 // Level 3: Medical Records Processes
@@ -170,7 +332,18 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/medical/review-patterns'
+                    route: '/medical/review-patterns',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.2.0',
+                    lifecycle: 'run',
+                    owner: 'Medical Records Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'phi',
+                    compliance: ['hipaa'],
+                    riskLevel: 'critical'
                   }
                 },
                 {
@@ -181,7 +354,18 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/medical/retrieval-nrr'
+                    route: '/medical/retrieval-nrr',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.0.3',
+                    lifecycle: 'run',
+                    owner: 'Medical Records Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'phi',
+                    compliance: ['hipaa'],
+                    riskLevel: 'critical'
                   }
                 },
                 {
@@ -192,18 +376,18 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'future',
-                    route: '/medical/insurance'
-                  }
-                },
-                {
-                  id: 'automated-task-management',
-                  type: 'page',
-                  name: 'Automated Task Management',
-                  description: 'Workflow automation for medical records',
-                  metadata: { 
-                    level: 3,
-                    status: 'in-progress',
-                    route: '/medical/tasks'
+                    route: '/medical/insurance',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '0.1.0',
+                    lifecycle: 'design',
+                    owner: 'Medical Records Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'phi',
+                    compliance: ['hipaa'],
+                    riskLevel: 'high'
                   }
                 },
                 {
@@ -214,18 +398,18 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'future',
-                    route: '/medical/emr'
-                  }
-                },
-                {
-                  id: 'case-grouping',
-                  type: 'page',
-                  name: 'Case Grouping',
-                  description: 'Group related cases for batch processing',
-                  metadata: { 
-                    level: 3,
-                    status: 'in-progress',
-                    route: '/medical/grouping'
+                    route: '/medical/emr',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '0.2.0',
+                    lifecycle: 'design',
+                    owner: 'Medical Records Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'phi',
+                    compliance: ['hipaa'],
+                    riskLevel: 'critical'
                   }
                 }
               ]
@@ -238,7 +422,18 @@ export const perfectedClaimsResources: ResourceGraph = {
               description: 'Document processing and client intake',
               metadata: { 
                 level: 2,
-                status: 'completed'
+                status: 'completed',
+                resourceType: 'module',
+                language: 'typescript',
+                runtime: 'nodejs',
+                version: '1.2.3',
+                lifecycle: 'run',
+                owner: 'Document Management Team',
+                team: 'Perfected Claims Engineering',
+                raci: 'responsible',
+                dataClassification: 'pii',
+                compliance: ['hipaa', 'gdpr'],
+                riskLevel: 'high'
               },
               children: [
                 // Level 3: Document & Intake Processes
@@ -250,7 +445,18 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/docs/sync'
+                    route: '/docs/sync',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.5.0',
+                    lifecycle: 'run',
+                    owner: 'Document Management Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'pii',
+                    compliance: ['hipaa'],
+                    riskLevel: 'high'
                   }
                 },
                 {
@@ -261,7 +467,17 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/intake/pre-qual'
+                    route: '/intake/pre-qual',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.3.2',
+                    lifecycle: 'run',
+                    owner: 'Intake Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'pii',
+                    riskLevel: 'medium'
                   }
                 },
                 {
@@ -272,7 +488,18 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/intake/verify-identity'
+                    route: '/intake/verify-identity',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.1.0',
+                    lifecycle: 'run',
+                    owner: 'Security Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'pii',
+                    compliance: ['kyc'],
+                    riskLevel: 'high'
                   }
                 },
                 {
@@ -283,7 +510,17 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/docs/edms'
+                    route: '/docs/edms',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.0.0',
+                    lifecycle: 'run',
+                    owner: 'Document Management Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'pii',
+                    riskLevel: 'high'
                   }
                 },
                 {
@@ -294,7 +531,17 @@ export const perfectedClaimsResources: ResourceGraph = {
                   metadata: { 
                     level: 3,
                     status: 'completed',
-                    route: '/docs/requirements'
+                    route: '/docs/requirements',
+                    resourceType: 'page',
+                    language: 'typescript',
+                    runtime: 'nodejs',
+                    version: '1.2.1',
+                    lifecycle: 'run',
+                    owner: 'Document Management Team',
+                    team: 'Perfected Claims Engineering',
+                    raci: 'responsible',
+                    dataClassification: 'internal',
+                    riskLevel: 'medium'
                   }
                 }
               ]
@@ -308,7 +555,17 @@ export const perfectedClaimsResources: ResourceGraph = {
               metadata: { 
                 level: 2,
                 status: 'manual',
-                note: 'Manual kickoff process'
+                note: 'Manual kickoff process',
+                resourceType: 'module',
+                language: 'typescript',
+                runtime: 'nodejs',
+                version: '0.1.0',
+                lifecycle: 'design',
+                owner: 'Operations Team',
+                team: 'Perfected Claims Operations',
+                raci: 'consulted',
+                dataClassification: 'internal',
+                riskLevel: 'low'
               }
             },
             // Level 2: All of Yesenia's Team (Yellow sticky note)
@@ -320,7 +577,17 @@ export const perfectedClaimsResources: ResourceGraph = {
               metadata: { 
                 level: 2,
                 status: 'manual',
-                note: 'Manual team management'
+                note: 'Manual team management',
+                resourceType: 'module',
+                language: 'typescript',
+                runtime: 'nodejs',
+                version: '0.1.0',
+                lifecycle: 'design',
+                owner: 'Yesenia Garcia',
+                team: 'Case Management Team',
+                raci: 'accountable',
+                dataClassification: 'internal',
+                riskLevel: 'low'
               }
             },
             // Level 2: Medical Record Admin (Third Party - Partner with NRR)
@@ -332,7 +599,18 @@ export const perfectedClaimsResources: ResourceGraph = {
               metadata: { 
                 level: 2,
                 status: 'legacy',
-                vendor: 'National Record Retrieval (NRR)'
+                vendor: 'National Record Retrieval (NRR)',
+                resourceType: 'external-service',
+                language: 'n/a',
+                runtime: 'external',
+                version: 'external',
+                lifecycle: 'run',
+                owner: 'Medical Records Team',
+                team: 'External Vendor',
+                raci: 'consulted',
+                dataClassification: 'phi',
+                compliance: ['hipaa'],
+                riskLevel: 'critical'
               },
               children: [
                 {
@@ -378,7 +656,18 @@ export const perfectedClaimsResources: ResourceGraph = {
               description: 'Client messaging and notifications',
               metadata: { 
                 level: 2,
-                status: 'roadmap'
+                status: 'roadmap',
+                resourceType: 'module',
+                language: 'typescript',
+                runtime: 'nodejs',
+                version: '0.3.0',
+                lifecycle: 'design',
+                owner: 'Client Services Team',
+                team: 'Perfected Claims Engineering',
+                raci: 'responsible',
+                dataClassification: 'pii',
+                compliance: ['hipaa', 'gdpr'],
+                riskLevel: 'medium'
               },
               children: [
                 {
@@ -432,16 +721,16 @@ export const perfectedClaimsResources: ResourceGraph = {
       ]
     },
     // External Services
-    {
-      id: 'case-api',
-      type: 'api',
-      name: 'Case Management API',
-      description: 'REST API for case operations',
-      metadata: { 
-        tech: 'Node.js + Express',
-        status: 'completed'
-      }
-    },
+    // {
+    //   id: 'case-api',
+    //   type: 'api',
+    //   name: 'Case Management API',
+    //   description: 'REST API for case operations',
+    //   metadata: { 
+    //     tech: 'Node.js + Express',
+    //     status: 'completed'
+    //   }
+    // },
     // {
     //   id: 'case-database',
     //   type: 'database',
