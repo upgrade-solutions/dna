@@ -3,6 +3,7 @@ import type { TenantConfig } from '../../../data/tenant-config'
 import type { NodeData, EdgeData } from '../utils/types'
 import type { LayoutMode } from '../features/layout/layout-manager'
 import { getIconForResourceType } from '../../../utils/icon-mapper'
+import { getThemedColors } from '../../../types/theme'
 import { ResourceNode } from './ResourceNode'
 import { ContainerNode } from './ContainerNode'
 
@@ -30,6 +31,7 @@ export class ShapesFactory {
    */
   createNode(node: NodeData): dia.Element {
     const nodeStyle = this.tenantConfig.styles.nodes[node.type] || this.tenantConfig.styles.defaultNode
+    const themed = getThemedColors(this.tenantConfig.theme)
     
     // Get resource type from metadata (e.g., 'web-application', 'api', 'database')
     const resourceType = (node.metadata?.resourceType as string) || 'other'
@@ -114,7 +116,7 @@ export class ShapesFactory {
         size: { width: 160, height: 80 },
         attrs: {
           body: {
-            fill: 'none',
+            fill: themed.canvas.background,
             stroke: nodeStyle.stroke,
             strokeWidth: 2,
             strokeDasharray: isPreRelease ? '5,5' : undefined,
