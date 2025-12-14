@@ -8,7 +8,7 @@ import { baseNodeStyle, nodeTypeStyles } from '../../default-config'
 
 // Base theme colors derived from perfectedclaims.com
 export const perfectedClaimsTheme = {
-  primary: '#1a4d8f',        // Deep professional blue (main brand color)
+  primary: '#005761',        // Deep teal (main brand color)
   secondary: '#2c5aa0',      // Lighter blue variant
   accent: '#3d7a3f',         // Justice green (accountability)
   background: '#ffffff',     // Clean white
