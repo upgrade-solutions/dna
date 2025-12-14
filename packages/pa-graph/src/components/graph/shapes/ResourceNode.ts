@@ -287,7 +287,12 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       x: 80, // Center of 160px width
       y: 10,
       textAnchor: 'middle',
-      textVerticalAnchor: 'top'
+      textVerticalAnchor: 'top',
+      textWrap: {
+        width: 140, // 160px - 20px padding (10px each side)
+        height: 30, // Allow up to ~2 lines (12px * 2 + spacing)
+        ellipsis: true // Add ... if text overflows
+      }
     }
   }
 })
