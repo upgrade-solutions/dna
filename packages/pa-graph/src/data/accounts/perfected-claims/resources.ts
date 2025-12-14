@@ -81,6 +81,7 @@ export const perfectedClaimsResources: ResourceGraph = {
                 lifecycle: 'run',
                 owner: 'QA Team',
                 team: 'Perfected Claims Engineering',
+                avatarUrl: 'https://media.licdn.com/dms/image/v2/D5603AQEO_on7dopLLQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1725508217071?e=1767225600&v=beta&t=fWBI_UPFoQgc77ZDaRCbdxq_dxbMQMU2PwufsPPK0Wc',
                 raci: 'responsible',
                 dataClassification: 'pii',
                 compliance: ['hipaa'],
@@ -215,31 +216,31 @@ export const perfectedClaimsResources: ResourceGraph = {
                     riskLevel: 'high'
                   }
                 },
+                // {
+                //   id: 'deficiency-management-1',
+                //   type: 'page',
+                //   name: 'Deficiency Management 1.0',
+                //   description: 'Track and resolve case deficiencies',
+                //   metadata: { 
+                //     level: 3,
+                //     status: 'completed',
+                //     route: '/qa/deficiencies/v1',
+                //     resourceType: 'page',
+                //     language: 'typescript',
+                //     runtime: 'nodejs',
+                //     version: '1.4.2',
+                //     lifecycle: 'run',
+                //     owner: 'QA Team',
+                //     team: 'Perfected Claims Engineering',
+                //     raci: 'responsible',
+                //     dataClassification: 'pii',
+                //     riskLevel: 'medium'
+                //   }
+                // },
                 {
-                  id: 'deficiency-management-1',
+                  id: 'deficiency-management',
                   type: 'page',
-                  name: 'Deficiency Management 1.0',
-                  description: 'Track and resolve case deficiencies',
-                  metadata: { 
-                    level: 3,
-                    status: 'completed',
-                    route: '/qa/deficiencies/v1',
-                    resourceType: 'page',
-                    language: 'typescript',
-                    runtime: 'nodejs',
-                    version: '1.4.2',
-                    lifecycle: 'run',
-                    owner: 'QA Team',
-                    team: 'Perfected Claims Engineering',
-                    raci: 'responsible',
-                    dataClassification: 'pii',
-                    riskLevel: 'medium'
-                  }
-                },
-                {
-                  id: 'deficiency-management-2',
-                  type: 'page',
-                  name: 'Deficiency Management 2.0',
+                  name: 'Deficiency Management',
                   description: 'Enhanced deficiency tracking and workflow',
                   metadata: { 
                     level: 3,
@@ -248,7 +249,7 @@ export const perfectedClaimsResources: ResourceGraph = {
                     resourceType: 'page',
                     language: 'typescript',
                     runtime: 'nodejs',
-                    version: '0.2.0',
+                    version: '2.0.0',
                     lifecycle: 'design',
                     owner: 'QA Team',
                     team: 'Perfected Claims Engineering',
