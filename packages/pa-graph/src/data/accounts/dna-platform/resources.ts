@@ -57,7 +57,7 @@ export const dnaPlatformResources: ResourceGraph = {
                 status: 'up',
                 version: '1.4.2',
                 lifecycle: 'run',
-                owner: 'Sarah Chen',
+                owner: 'Donovan Swift',
                 team: 'Frontend Team',
                 raci: 'responsible',
                 infrastructure: 'service',
@@ -223,7 +223,14 @@ export const dnaPlatformResources: ResourceGraph = {
                 location: 'api-shell/core',
                 resourceType: 'service',
                 language: 'typescript',
-                runtime: 'deno'
+                runtime: 'deno',
+                status: 'up',
+                version: '0.9.0',
+                lifecycle: 'build',
+                owner: 'Jordan Lee',
+                avatarUrl: 'https://i.pravatar.cc/150?img=29',
+                team: 'Backend Team',
+                raci: 'accountable'
               }
             }
           ]

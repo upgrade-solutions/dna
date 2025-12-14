@@ -311,6 +311,10 @@ export class OwnerDecorator extends BaseConcernDecorator {
     cell.attr(`${selectors.circle}/opacity`, 1)
     cell.attr(`${selectors.circle}/data-tooltip`, value)
     
+    // Calculate position based on corner
+    const yPos = corner.includes('bottom') ? 65 : -15
+    const xPos = corner.includes('right') ? 145 : -15
+    
     // If avatar exists, make circle background transparent so image shows through
     // If no avatar, use pink background for UI Avatars initials
     if (hasAvatar) {
@@ -323,8 +327,8 @@ export class OwnerDecorator extends BaseConcernDecorator {
       cell.attr(`${selectors.badge}/data-tooltip`, value)
       cell.attr(`${selectors.badge}/width`, 30)
       cell.attr(`${selectors.badge}/height`, 30)
-      cell.attr(`${selectors.badge}/x`, -15)
-      cell.attr(`${selectors.badge}/y`, corner.includes('bottom') ? 65 : -15)
+      cell.attr(`${selectors.badge}/x`, xPos)
+      cell.attr(`${selectors.badge}/y`, yPos)
     } else {
       // No avatar - use UI Avatars with pink background and white initials
       cell.attr(`${selectors.circle}/fill`, 'transparent')
@@ -335,8 +339,8 @@ export class OwnerDecorator extends BaseConcernDecorator {
       cell.attr(`${selectors.badge}/data-tooltip`, value)
       cell.attr(`${selectors.badge}/width`, 30)
       cell.attr(`${selectors.badge}/height`, 30)
-      cell.attr(`${selectors.badge}/x`, -15)
-      cell.attr(`${selectors.badge}/y`, corner.includes('bottom') ? 65 : -15)
+      cell.attr(`${selectors.badge}/x`, xPos)
+      cell.attr(`${selectors.badge}/y`, yPos)
     }
     
     cell.attr(`${selectors.text}/opacity`, 0)

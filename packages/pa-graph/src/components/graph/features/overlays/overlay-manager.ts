@@ -20,8 +20,8 @@ import {
  * 
  * Categories are fixed to corners:
  * - Process (top-left)
- * - Technology (top-right)
- * - People (bottom-left)
+ * - People (top-right)
+ * - Technology (bottom-left)
  * - Security (bottom-right)
  * 
  * Each category can display one concern at a time from its available concerns.
@@ -95,11 +95,11 @@ export class OverlayManager {
       ]
     })
 
-    // Technology category (top-right)
+    // Technology category (bottom-left)
     this.categories.set('technology', {
       id: 'technology',
       name: 'Technology',
-      corner: 'top-right',
+      corner: 'bottom-left',
       enabled: false,
       activeConcern: null,
       concerns: [
@@ -121,11 +121,11 @@ export class OverlayManager {
       ]
     })
 
-    // People category (bottom-left)
+    // People category (top-right)
     this.categories.set('people', {
       id: 'people',
       name: 'People',
-      corner: 'bottom-left',
+      corner: 'top-right',
       enabled: false,
       activeConcern: null,
       concerns: [

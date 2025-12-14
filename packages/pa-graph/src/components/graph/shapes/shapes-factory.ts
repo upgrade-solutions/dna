@@ -104,15 +104,20 @@ export class ShapesFactory {
       // Create regular resource node for leaf nodes
       const iconUrl = getIconForResourceType(resourceType)
 
+      // Check if version is less than 1.0 for alpha/beta styling
+      const version = (node.metadata?.version as string) || ''
+      const isPreRelease = version && parseFloat(version) < 1.0
+      
       const element = new ResourceNode({
         id: node.id,
         position: node.position,
         size: { width: 160, height: 80 },
         attrs: {
           body: {
-            fill: nodeStyle.fill,
+            fill: 'none',
             stroke: nodeStyle.stroke,
-            strokeWidth: nodeStyle.strokeWidth || 1,
+            strokeWidth: 2,
+            strokeDasharray: isPreRelease ? '5,5' : undefined,
             rx: nodeStyle.rx || 8,
             ry: nodeStyle.ry || 8
           },

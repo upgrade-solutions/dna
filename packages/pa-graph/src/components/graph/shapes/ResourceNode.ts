@@ -10,8 +10,8 @@ import { dia } from '@joint/plus'
  * - body: Main rectangle
  * - icon: Resource type icon (center, always visible)
  * - topLeftBadgeCircle/topLeftBadge: Process category badge (top-left corner)
- * - topRightBadgeCircle/topRightBadge: Technology category badge (top-right corner)
- * - bottomLeftBadgeCircle/bottomLeftBadge: People category badge (bottom-left corner)
+ * - topRightBadgeCircle/topRightBadge: People category badge (top-right corner)
+ * - bottomLeftBadgeCircle/bottomLeftBadge: Technology category badge (bottom-left corner)
  * - bottomRightBadgeCircle/bottomRightBadge: Security category badge (bottom-right corner)
  * - label: Resource name (top edge)
  */
@@ -65,18 +65,45 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       tagName: 'text',
       selector: 'topRightBadgeText'
     },
-    // Bottom-left badge (People)
+    // Clipping paths for all badge corners
     {
       tagName: 'defs',
-      children: [{
-        tagName: 'clipPath',
-        attributes: { id: 'bottomLeftAvatarClip' },
-        children: [{
-          tagName: 'circle',
-          attributes: { cx: 0, cy: 80, r: 14 }
-        }]
-      }]
+      children: [
+        {
+          tagName: 'clipPath',
+          attributes: { id: 'topLeftAvatarClip' },
+          children: [{
+            tagName: 'circle',
+            attributes: { cx: 0, cy: 0, r: 14 }
+          }]
+        },
+        {
+          tagName: 'clipPath',
+          attributes: { id: 'topRightAvatarClip' },
+          children: [{
+            tagName: 'circle',
+            attributes: { cx: 160, cy: 0, r: 14 }
+          }]
+        },
+        {
+          tagName: 'clipPath',
+          attributes: { id: 'bottomLeftAvatarClip' },
+          children: [{
+            tagName: 'circle',
+            attributes: { cx: 0, cy: 80, r: 14 }
+          }]
+        },
+        {
+          tagName: 'clipPath',
+          attributes: { id: 'bottomRightAvatarClip' },
+          children: [{
+            tagName: 'circle',
+            attributes: { cx: 160, cy: 80, r: 14 }
+          }]
+        }
+      ]
     },
+    // Bottom-left badge (People)
     {
       tagName: 'circle',
       selector: 'bottomLeftBadgeCircle'
@@ -114,9 +141,9 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
     body: {
       width: 'calc(w)',
       height: 'calc(h)',
-      fill: '#1f2937',
+      fill: 'none',
       stroke: '#374151',
-      strokeWidth: 1,
+      strokeWidth: 2,
       rx: 8,
       ry: 8
     },
@@ -144,7 +171,9 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       x: -8, // Center icon within circle (-8 to 8)
       y: -8,
       opacity: 0, // Hidden by default
-      'xlink:href': ''
+      'xlink:href': '',
+      'preserveAspectRatio': 'xMidYMid slice',
+      'clip-path': 'url(#topLeftAvatarClip)'
     },
     topLeftBadgeText: {
       text: '',
@@ -157,12 +186,12 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       textVerticalAnchor: 'middle',
       opacity: 0
     },
-    // Top-right badge (Technology) - circle centered at corner
+    // Top-right badge (People) - circle centered at corner
     topRightBadgeCircle: {
       r: 14,
       cx: 160, // Circle center at right edge
       cy: 0,
-      fill: '#8b5cf6', // Purple theme for Technology
+      fill: '#10b981', // Green theme for People
       stroke: '#1f2937',
       strokeWidth: 2,
       opacity: 0
@@ -173,7 +202,9 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       x: 152, // 160 - 8
       y: -8,
       opacity: 0,
-      'xlink:href': ''
+      'xlink:href': '',
+      'preserveAspectRatio': 'xMidYMid slice',
+      'clip-path': 'url(#topRightAvatarClip)'
     },
     topRightBadgeText: {
       text: '',
@@ -186,12 +217,12 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       textVerticalAnchor: 'middle',
       opacity: 0
     },
-    // Bottom-left badge (People) - circle centered at corner
+    // Bottom-left badge (Technology) - circle centered at corner
     bottomLeftBadgeCircle: {
       r: 14,
       cx: 0,
       cy: 80, // Circle center at bottom edge
-      fill: '#10b981', // Green theme for People
+      fill: '#8b5cf6', // Purple theme for Technology
       stroke: '#1f2937',
       strokeWidth: 2,
       opacity: 0
@@ -202,7 +233,9 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       x: -8,
       y: 72, // 80 - 8
       opacity: 0,
-      'xlink:href': ''
+      'xlink:href': '',
+      'preserveAspectRatio': 'xMidYMid slice',
+      'clip-path': 'url(#bottomLeftAvatarClip)'
     },
     bottomLeftBadgeText: {
       text: '',
@@ -231,7 +264,9 @@ export const ResourceNode = dia.Element.define('dna.ResourceNode', {
       x: 152, // 160 - 8
       y: 72, // 80 - 8
       opacity: 0,
-      'xlink:href': ''
+      'xlink:href': '',
+      'preserveAspectRatio': 'xMidYMid slice',
+      'clip-path': 'url(#bottomRightAvatarClip)'
     },
     bottomRightBadgeText: {
       text: '',
