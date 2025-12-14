@@ -1,6 +1,15 @@
 /**
  * Perfected Claims Platform Resources
  * Mass tort case management system architecture
+ * 
+ * Legend Status Indicators:
+ * - doesnt-exist: No process (gray)
+ * - manual: Manual process (yellow + star)
+ * - legacy: Legacy system / Third party vendor (cyan + wrench)
+ * - completed: Completed feature (orange)
+ * - roadmap: On roadmap (green)
+ * - in-progress: In progress (magenta)
+ * - future: Future phase (purple)
  */
 
 import type { ResourceGraph } from '../../example-resources'
@@ -8,313 +17,413 @@ import type { ResourceGraph } from '../../example-resources'
 export const perfectedClaimsResources: ResourceGraph = {
   resources: [
     {
-      id: 'client-portal',
-      type: 'web-application',
-      name: 'Client Portal',
-      description: 'Claimant intake and case tracking',
-      metadata: { url: 'perfectedclaims.com/portal', tech: 'Next.js' },
+      id: 'perfected-claims-org',
+      type: 'organization',
+      name: 'Perfected Claims',
+      description: 'Mass tort case management platform',
+      metadata: { 
+        level: 0,
+        status: 'completed'
+      },
       children: [
-        // Dashboard Module
+        // Level 1: Case Development
         {
-          id: 'dashboard-module',
-          type: 'module',
-          name: 'Dashboard Module',
-          description: 'Main dashboard and case overview',
+          id: 'case-development',
+          type: 'application',
+          name: 'Case Development',
+          description: 'End-to-end case intake and development workflow',
+          metadata: { 
+            level: 1,
+            status: 'in-progress'
+          },
           children: [
+            // Level 2: Quality Assurance
             {
-              id: 'dashboard-page',
-              type: 'page',
-              name: 'Dashboard Page',
-              description: 'Case status overview and quick actions',
-              metadata: { route: '/dashboard' },
+              id: 'quality-assurance',
+              type: 'module',
+              name: 'Quality Assurance',
+              description: 'Case quality validation and verification processes',
+              metadata: { 
+                level: 2,
+                status: 'in-progress'
+              },
               children: [
+                // Level 3: QA Processes
                 {
-                  id: 'dashboard-hero-section',
-                  type: 'section',
-                  name: 'Hero Section',
-                  description: 'Welcome banner and case summary',
-                  children: [
-                    {
-                      id: 'dashboard-hero-greeting-block',
-                      type: 'block',
-                      name: 'Greeting Block',
-                      description: 'Personalized welcome message',
-                      metadata: { component: 'GreetingCard' }
-                    },
-                    {
-                      id: 'dashboard-hero-stats-block',
-                      type: 'block',
-                      name: 'Stats Block',
-                      description: 'Case statistics overview',
-                      metadata: { component: 'StatsGrid' }
-                    }
-                  ]
+                  id: 'case-tracking-all-status',
+                  type: 'page',
+                  name: 'Case Tracking - All Status',
+                  description: 'Track cases across all stages',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/qa/cases'
+                  }
                 },
                 {
-                  id: 'dashboard-actions-section',
-                  type: 'section',
-                  name: 'Quick Actions Section',
-                  description: 'Common user actions',
-                  children: [
-                    {
-                      id: 'dashboard-actions-cta-block',
-                      type: 'block',
-                      name: 'CTA Block',
-                      description: 'Primary action buttons',
-                      metadata: { component: 'CTAButtons' }
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        // Intake Module
-        {
-          id: 'intake-module',
-          type: 'module',
-          name: 'Intake Module',
-          description: 'Claimant registration and questionnaire',
-          children: [
-            {
-              id: 'intake-form-page',
-              type: 'page',
-              name: 'Intake Form Page',
-              description: 'Multi-step claimant intake form',
-              metadata: { route: '/intake' },
-              children: [
-                {
-                  id: 'intake-personal-section',
-                  type: 'section',
-                  name: 'Personal Information Section',
-                  description: 'Claimant personal details',
-                  metadata: { step: 1 },
-                  children: [
-                    {
-                      id: 'intake-personal-name-block',
-                      type: 'block',
-                      name: 'Name Fields Block',
-                      description: 'First, middle, last name inputs',
-                      metadata: { component: 'NameInputGroup' }
-                    },
-                    {
-                      id: 'intake-personal-contact-block',
-                      type: 'block',
-                      name: 'Contact Fields Block',
-                      description: 'Email and phone inputs',
-                      metadata: { component: 'ContactInputGroup' }
-                    }
-                  ]
+                  id: 'permissions-management',
+                  type: 'page',
+                  name: 'Permissions Management',
+                  description: 'User access control and permissions',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/qa/permissions'
+                  }
                 },
                 {
-                  id: 'intake-medical-section',
-                  type: 'section',
-                  name: 'Medical History Section',
-                  description: 'Injury and treatment details',
-                  metadata: { step: 2 },
-                  children: [
-                    {
-                      id: 'intake-medical-injury-block',
-                      type: 'block',
-                      name: 'Injury Details Block',
-                      description: 'Description of injury and symptoms',
-                      metadata: { component: 'InjuryForm' }
-                    },
-                    {
-                      id: 'intake-medical-timeline-block',
-                      type: 'block',
-                      name: 'Timeline Block',
-                      description: 'Treatment and exposure timeline',
-                      metadata: { component: 'TimelineBuilder' }
-                    }
-                  ]
+                  id: 'case-assignment',
+                  type: 'page',
+                  name: 'Case Assignment',
+                  description: 'Assign cases to team members',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/qa/assign'
+                  }
                 },
                 {
-                  id: 'intake-documents-section',
-                  type: 'section',
-                  name: 'Document Upload Section',
-                  description: 'Upload supporting documents',
-                  metadata: { step: 3 },
-                  children: [
-                    {
-                      id: 'intake-documents-uploader-block',
-                      type: 'block',
-                      name: 'File Uploader Block',
-                      description: 'Drag-and-drop file upload',
-                      metadata: { component: 'DocumentUploader' }
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        // Cases Module
-        {
-          id: 'cases-module',
-          type: 'module',
-          name: 'Cases Module',
-          description: 'Case management and tracking',
-          children: [
-            {
-              id: 'cases-list-page',
-              type: 'page',
-              name: 'Cases List Page',
-              description: 'View all cases',
-              metadata: { route: '/cases' },
-              children: [
-                {
-                  id: 'cases-list-filters-section',
-                  type: 'section',
-                  name: 'Filters Section',
-                  description: 'Search and filter controls',
-                  children: [
-                    {
-                      id: 'cases-list-search-block',
-                      type: 'block',
-                      name: 'Search Block',
-                      description: 'Case search input',
-                      metadata: { component: 'SearchBar' }
-                    },
-                    {
-                      id: 'cases-list-filter-block',
-                      type: 'block',
-                      name: 'Filter Block',
-                      description: 'Status and date filters',
-                      metadata: { component: 'FilterDropdowns' }
-                    }
-                  ]
+                  id: 'damage-assignments',
+                  type: 'page',
+                  name: 'Damage Assignments',
+                  description: 'Track and assign damage assessments',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/qa/damages'
+                  }
                 },
                 {
-                  id: 'cases-list-table-section',
-                  type: 'section',
-                  name: 'Cases Table Section',
-                  description: 'Paginated case list',
-                  children: [
-                    {
-                      id: 'cases-list-table-block',
-                      type: 'block',
-                      name: 'Data Table Block',
-                      description: 'Interactive cases table',
-                      metadata: { component: 'CasesDataTable' }
-                    }
-                  ]
+                  id: 'document-verification',
+                  type: 'page',
+                  name: 'Document Verification',
+                  description: 'Verify authenticity and completeness of documents',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/qa/verify-docs'
+                  }
+                },
+                {
+                  id: 'data-governance',
+                  type: 'page',
+                  name: 'Data Governance',
+                  description: 'Data quality and compliance oversight',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/qa/governance'
+                  }
+                },
+                {
+                  id: 'deficiency-management-1',
+                  type: 'page',
+                  name: 'Deficiency Management 1.0',
+                  description: 'Track and resolve case deficiencies',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/qa/deficiencies/v1'
+                  }
+                },
+                {
+                  id: 'deficiency-management-2',
+                  type: 'page',
+                  name: 'Deficiency Management 2.0',
+                  description: 'Enhanced deficiency tracking and workflow',
+                  metadata: { 
+                    level: 3,
+                    status: 'future',
+                    route: '/qa/deficiencies/v2'
+                  }
+                },
+                {
+                  id: 'post-case-intake-verification-dnq',
+                  type: 'page',
+                  name: 'Post Case Intake Verification for DNQ',
+                  description: 'Verify does-not-qualify cases',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/qa/verify-dnq'
+                  }
                 }
               ]
             },
+            // Level 2: Medical Record Admin
             {
-              id: 'case-detail-page',
-              type: 'page',
-              name: 'Case Detail Page',
-              description: 'Individual case details',
-              metadata: { route: '/cases/:id' },
+              id: 'medical-record-admin',
+              type: 'module',
+              name: 'Medical Record Admin',
+              description: 'Medical records retrieval and management',
+              metadata: { 
+                level: 2,
+                status: 'in-progress'
+              },
               children: [
+                // Level 3: Medical Records Processes
                 {
-                  id: 'case-detail-header-section',
-                  type: 'section',
-                  name: 'Case Header Section',
-                  description: 'Case title and status',
-                  children: [
-                    {
-                      id: 'case-detail-header-title-block',
-                      type: 'block',
-                      name: 'Title Block',
-                      description: 'Case number and title',
-                      metadata: { component: 'CaseHeader' }
-                    },
-                    {
-                      id: 'case-detail-header-badge-block',
-                      type: 'block',
-                      name: 'Status Badge Block',
-                      description: 'Current case status indicator',
-                      metadata: { component: 'StatusBadge' }
-                    }
-                  ]
+                  id: 'medical-record-review-patterns',
+                  type: 'page',
+                  name: 'Medical Record Review (Patterns)',
+                  description: 'Pattern-based medical record analysis',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/medical/review-patterns'
+                  }
                 },
                 {
-                  id: 'case-detail-timeline-section',
-                  type: 'section',
-                  name: 'Timeline Section',
-                  description: 'Case activity timeline',
-                  children: [
-                    {
-                      id: 'case-detail-timeline-events-block',
-                      type: 'block',
-                      name: 'Events Block',
-                      description: 'Chronological case events',
-                      metadata: { component: 'EventTimeline' }
-                    }
-                  ]
+                  id: 'medical-record-retrieval-nrr',
+                  type: 'page',
+                  name: 'Medical Record Retrieval (NRR)',
+                  description: 'National record retrieval integration',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/medical/retrieval-nrr'
+                  }
                 },
                 {
-                  id: 'case-detail-documents-section',
-                  type: 'section',
-                  name: 'Documents Section',
-                  description: 'Case documents and files',
-                  children: [
-                    {
-                      id: 'case-detail-documents-list-block',
-                      type: 'block',
-                      name: 'Documents List Block',
-                      description: 'Downloadable case documents',
-                      metadata: { component: 'DocumentsList' }
-                    }
-                  ]
+                  id: 'insurance-verification',
+                  type: 'page',
+                  name: 'Insurance Verification',
+                  description: 'Verify insurance coverage and benefits',
+                  metadata: { 
+                    level: 3,
+                    status: 'future',
+                    route: '/medical/insurance'
+                  }
+                },
+                {
+                  id: 'automated-task-management',
+                  type: 'page',
+                  name: 'Automated Task Management',
+                  description: 'Workflow automation for medical records',
+                  metadata: { 
+                    level: 3,
+                    status: 'in-progress',
+                    route: '/medical/tasks'
+                  }
+                },
+                {
+                  id: 'electronic-medical-records-retrievals',
+                  type: 'page',
+                  name: 'Electronic Medical Records Retrievals',
+                  description: 'EMR system integration and retrieval',
+                  metadata: { 
+                    level: 3,
+                    status: 'future',
+                    route: '/medical/emr'
+                  }
+                },
+                {
+                  id: 'case-grouping',
+                  type: 'page',
+                  name: 'Case Grouping',
+                  description: 'Group related cases for batch processing',
+                  metadata: { 
+                    level: 3,
+                    status: 'in-progress',
+                    route: '/medical/grouping'
+                  }
                 }
               ]
-            }
-          ]
-        },
-        // Communications Module
-        {
-          id: 'communications-module',
-          type: 'module',
-          name: 'Communications Module',
-          description: 'Messages and notifications',
-          children: [
+            },
+            // Level 2: Document Management & Intake
             {
-              id: 'messages-page',
-              type: 'page',
-              name: 'Messages Page',
-              description: 'Secure messaging with legal team',
-              metadata: { route: '/messages' },
+              id: 'document-management',
+              type: 'module',
+              name: 'Document Management & Intake',
+              description: 'Document processing and client intake',
+              metadata: { 
+                level: 2,
+                status: 'completed'
+              },
               children: [
+                // Level 3: Document & Intake Processes
                 {
-                  id: 'messages-inbox-section',
-                  type: 'section',
-                  name: 'Inbox Section',
-                  description: 'Message list',
-                  children: [
-                    {
-                      id: 'messages-inbox-list-block',
-                      type: 'block',
-                      name: 'Message List Block',
-                      description: 'Thread list with previews',
-                      metadata: { component: 'MessageThreadList' }
-                    }
-                  ]
+                  id: 'sync-store-documents',
+                  type: 'page',
+                  name: 'Sync and Store Documents',
+                  description: 'Document synchronization and storage',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/docs/sync'
+                  }
                 },
                 {
-                  id: 'messages-conversation-section',
-                  type: 'section',
-                  name: 'Conversation Section',
-                  description: 'Active message thread',
-                  children: [
-                    {
-                      id: 'messages-conversation-thread-block',
-                      type: 'block',
-                      name: 'Thread Block',
-                      description: 'Message history',
-                      metadata: { component: 'MessageThread' }
-                    },
-                    {
-                      id: 'messages-conversation-compose-block',
-                      type: 'block',
-                      name: 'Compose Block',
-                      description: 'Reply input and send button',
-                      metadata: { component: 'MessageComposer' }
-                    }
-                  ]
+                  id: 'pre-qualification',
+                  type: 'page',
+                  name: 'Pre-Qualification',
+                  description: 'Initial case eligibility screening',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/intake/pre-qual'
+                  }
+                },
+                {
+                  id: 'identity-verification-service',
+                  type: 'page',
+                  name: 'Identity Verification Service',
+                  description: 'Verify client identity and credentials',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/intake/verify-identity'
+                  }
+                },
+                {
+                  id: 'edms-features',
+                  type: 'page',
+                  name: 'Enhanced Document Management System (EDMS) Features',
+                  description: 'Advanced document management capabilities',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/docs/edms'
+                  }
+                },
+                {
+                  id: 'dynamic-document-requirements',
+                  type: 'page',
+                  name: 'Dynamic Document Requirements (per document)',
+                  description: 'Context-aware document requirements engine',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/docs/requirements'
+                  }
+                }
+              ]
+            },
+            // Level 2: Beginning of Mass Tort Management (Yellow sticky note)
+            {
+              id: 'mass-tort-initiation',
+              type: 'module',
+              name: 'Beginning of Mass Tort Management',
+              description: 'Initial case setup and team formation',
+              metadata: { 
+                level: 2,
+                status: 'manual',
+                note: 'Manual kickoff process'
+              }
+            },
+            // Level 2: All of Yesenia's Team (Yellow sticky note)
+            {
+              id: 'yesenias-team',
+              type: 'module',
+              name: "All of Yesenia's Team",
+              description: 'Team coordination and case assignment',
+              metadata: { 
+                level: 2,
+                status: 'manual',
+                note: 'Manual team management'
+              }
+            },
+            // Level 2: Medical Record Admin (Third Party - Partner with NRR)
+            {
+              id: 'medical-record-admin-partner',
+              type: 'module',
+              name: 'Medical Record Admin',
+              description: 'Partner with NRR for record retrieval',
+              metadata: { 
+                level: 2,
+                status: 'legacy',
+                vendor: 'National Record Retrieval (NRR)'
+              },
+              children: [
+                {
+                  id: 'medical-record-retrieval-partner',
+                  type: 'page',
+                  name: 'Medical Record Retrieval',
+                  description: 'External retrieval company integration',
+                  metadata: { 
+                    level: 3,
+                    status: 'legacy',
+                    route: '/medical/external-retrieval'
+                  }
+                },
+                {
+                  id: 'external-retrieval-company',
+                  type: 'page',
+                  name: 'External retrieval company',
+                  description: 'Third-party medical records service',
+                  metadata: { 
+                    level: 3,
+                    status: 'legacy',
+                    vendor: 'Multiple providers'
+                  }
+                },
+                {
+                  id: 'partner-with-nrr',
+                  type: 'page',
+                  name: 'Partner with NRR for this',
+                  description: 'National Record Retrieval partnership',
+                  metadata: { 
+                    level: 3,
+                    status: 'legacy',
+                    vendor: 'NRR'
+                  }
+                }
+              ]
+            },
+            // Level 2: Additional Workflows
+            {
+              id: 'client-communications',
+              type: 'module',
+              name: 'Client Communications',
+              description: 'Client messaging and notifications',
+              metadata: { 
+                level: 2,
+                status: 'roadmap'
+              },
+              children: [
+                {
+                  id: 'manage-medical-records-from-client',
+                  type: 'page',
+                  name: 'Manage Medical Records from Client',
+                  description: 'Client-submitted medical records processing',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/client/medical-records'
+                  }
+                },
+                {
+                  id: 'assign-proof',
+                  type: 'page',
+                  name: 'Assign Proof',
+                  description: 'Assign proof of injury verification tasks',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/client/assign-proof'
+                  }
+                },
+                {
+                  id: 'fmp-maui-questionnaire',
+                  type: 'page',
+                  name: 'FMP Maui Questionnaire',
+                  description: 'Fire Management Platform Maui intake form',
+                  metadata: { 
+                    level: 3,
+                    status: 'completed',
+                    route: '/client/fmp-maui'
+                  }
+                },
+                {
+                  id: 'question-proof',
+                  type: 'page',
+                  name: 'Question and Proof',
+                  description: 'Q&A and evidence submission workflow',
+                  metadata: { 
+                    level: 3,
+                    status: 'future',
+                    route: '/client/qa-proof'
+                  }
                 }
               ]
             }
@@ -322,36 +431,70 @@ export const perfectedClaimsResources: ResourceGraph = {
         }
       ]
     },
+    // External Services
     {
       id: 'case-api',
       type: 'api',
-      name: 'Case API',
-      description: 'Case management API',
-      metadata: { tech: 'Node.js + Express' }
+      name: 'Case Management API',
+      description: 'REST API for case operations',
+      metadata: { 
+        tech: 'Node.js + Express',
+        status: 'completed'
+      }
     },
-    {
-      id: 'case-database',
-      type: 'database',
-      name: 'Case DB',
-      description: 'PostgreSQL database',
-      metadata: { tech: 'PostgreSQL' }
-    }
+    // {
+    //   id: 'case-database',
+    //   type: 'database',
+    //   name: 'Case Database',
+    //   description: 'PostgreSQL database for case data',
+    //   metadata: { 
+    //     tech: 'PostgreSQL',
+    //     status: 'completed'
+    //   }
+    // },
+    // {
+    //   id: 'nrr-service',
+    //   type: 'external-service',
+    //   name: 'National Record Retrieval',
+    //   description: 'Third-party medical records retrieval service',
+    //   metadata: { 
+    //     vendor: 'NRR',
+    //     status: 'legacy'
+    //   }
+    // }
   ],
   relationships: [
-    // API relationships
-    {
-      id: 'rel-1',
-      type: 'communicates-with',
-      sourceId: 'client-portal',
-      targetId: 'case-api',
-      label: 'calls'
-    },
-    {
-      id: 'rel-2',
-      type: 'writes-to',
-      sourceId: 'case-api',
-      targetId: 'case-database',
-      label: 'persists'
-    }
+    // // Case Development to API
+    // {
+    //   id: 'rel-case-dev-api',
+    //   type: 'communicates-with',
+    //   sourceId: 'case-development',
+    //   targetId: 'case-api',
+    //   label: 'uses'
+    // },
+    // // API to Database
+    // {
+    //   id: 'rel-api-db',
+    //   type: 'writes-to',
+    //   sourceId: 'case-api',
+    //   targetId: 'case-database',
+    //   label: 'persists'
+    // },
+    // // Medical Records to NRR
+    // {
+    //   id: 'rel-medical-nrr',
+    //   type: 'integrates-with',
+    //   sourceId: 'medical-record-admin',
+    //   targetId: 'nrr-service',
+    //   label: 'retrieves via'
+    // },
+    // // Quality Assurance to Document Management
+    // {
+    //   id: 'rel-qa-docs',
+    //   type: 'depends-on',
+    //   sourceId: 'quality-assurance',
+    //   targetId: 'document-management',
+    //   label: 'validates'
+    // }
   ]
 }
