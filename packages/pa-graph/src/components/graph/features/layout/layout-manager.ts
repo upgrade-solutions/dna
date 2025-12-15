@@ -64,7 +64,7 @@ const DEFAULT_NESTED_OPTIONS: Required<NestedLayoutOptions> = {
 }
 
 const DEFAULT_TREE_OPTIONS: Required<TreeLayoutOptions> = {
-  direction: 'R',
+  direction: 'B',
   parentGap: 40,
   siblingGap: 40,
   firstChildGap: 20,
