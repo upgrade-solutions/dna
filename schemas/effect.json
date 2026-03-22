@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dna/effect",
+  "title": "Effect",
+  "description": "An Effect describes what changes when an operation successfully executes — state transitions, derived updates, and side effects like notifications or downstream operations.",
+  "type": "object",
+  "required": ["operation", "changes"],
+  "properties": {
+    "operation": {
+      "type": "string",
+      "description": "The operation this effect applies to, expressed as Resource.Action.",
+      "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
+      "examples": ["Loan.Approve", "Order.Cancel", "Employee.Terminate"]
+    },
+    "description": {
+      "type": "string",
+      "description": "A human-readable explanation of what this effect does.",
+      "examples": [
+        "Marks the loan as active and records the approval timestamp.",
+        "Cancels the order and initiates a payment refund."
+      ]
+    },
+    "changes": {
+      "type": "array",
+      "description": "Attribute changes applied to the resource after the operation executes.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["attribute", "set"],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "The attribute name to update.",
+            "examples": ["status", "approved_at", "shipped_at"]
+          },
+          "set": {
+            "description": "The value to assign to the attribute. Use 'now' for the current timestamp.",
+            "examples": ["active", "now", true, null]
+          }
+        }
+      }
+    },
+    "triggers": {
+      "type": "array",
+      "description": "Downstream operations to initiate after this operation completes.",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
+        "examples": ["Payment.Refund", "Notification.Send", "Audit.Log"]
+      }
+    }
+  },
+  "examples": [
+    {
+      "operation": "Loan.Approve",
+      "description": "Marks the loan as active and records the approval timestamp.",
+      "changes": [
+        { "attribute": "status", "set": "active" },
+        { "attribute": "approved_at", "set": "now" }
+      ]
+    },
+    {
+      "operation": "Order.Cancel",
+      "description": "Marks the order as cancelled and triggers a payment refund.",
+      "changes": [
+        { "attribute": "status", "set": "cancelled" },
+        { "attribute": "cancelled_at", "set": "now" }
+      ],
+      "triggers": ["Payment.Refund"]
+    },
+    {
+      "operation": "Employee.Terminate",
+      "description": "Marks the employee as inactive and records their end date.",
+      "changes": [
+        { "attribute": "status", "set": "inactive" },
+        { "attribute": "end_date", "set": "now" }
+      ]
+    }
+  ]
+}

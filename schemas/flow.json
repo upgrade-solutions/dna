@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dna/flow",
+  "title": "Flow",
+  "description": "A Flow describes the valid sequence of operations across the lifecycle of a Resource — which states it can move through and in what order.",
+  "type": "object",
+  "required": ["resource", "steps"],
+  "properties": {
+    "resource": {
+      "type": "string",
+      "description": "The Resource whose lifecycle this flow describes.",
+      "examples": ["Loan", "Order", "Claim", "Employee"]
+    },
+    "description": {
+      "type": "string",
+      "description": "A human-readable explanation of this lifecycle.",
+      "examples": [
+        "The standard lifecycle of a loan from application through repayment.",
+        "The fulfillment lifecycle of an e-commerce order."
+      ]
+    },
+    "steps": {
+      "type": "array",
+      "description": "The primary sequence of operations in this lifecycle, in order.",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
+        "examples": ["Loan.Apply", "Loan.Approve", "Loan.Disburse", "Loan.Repay"]
+      }
+    },
+    "branches": {
+      "type": "array",
+      "description": "Alternative paths that diverge from the primary sequence.",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "The operation after which this branch becomes available.",
+            "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
+            "examples": ["Loan.Disburse", "Order.Place"]
+          },
+          "to": {
+            "type": "string",
+            "description": "The operation this branch leads to.",
+            "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
+            "examples": ["Loan.Default", "Order.Cancel"]
+          },
+          "description": {
+            "type": "string",
+            "description": "A human-readable explanation of when this branch is taken.",
+            "examples": [
+              "Taken when a borrower fails to repay by the due date.",
+              "Taken when a customer cancels before fulfillment."
+            ]
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "resource": "Loan",
+      "description": "The standard lifecycle of a loan from application through repayment.",
+      "steps": ["Loan.Apply", "Loan.Approve", "Loan.Disburse", "Loan.Repay"],
+      "branches": [
+        {
+          "from": "Loan.Disburse",
+          "to": "Loan.Default",
+          "description": "Taken when a borrower fails to repay by the due date."
+        },
+        {
+          "from": "Loan.Apply",
+          "to": "Loan.Reject",
+          "description": "Taken when an underwriter determines the applicant is ineligible."
+        }
+      ]
+    },
+    {
+      "resource": "Order",
+      "description": "The fulfillment lifecycle of an e-commerce order.",
+      "steps": ["Order.Place", "Order.Fulfill", "Order.Ship", "Order.Deliver"],
+      "branches": [
+        {
+          "from": "Order.Place",
+          "to": "Order.Cancel",
+          "description": "Taken when a customer cancels before fulfillment begins."
+        }
+      ]
+    },
+    {
+      "resource": "Claim",
+      "description": "The review lifecycle of an insurance claim.",
+      "steps": ["Claim.Submit", "Claim.Review", "Claim.Approve"],
+      "branches": [
+        {
+          "from": "Claim.Review",
+          "to": "Claim.Deny",
+          "description": "Taken when the claim does not meet approval criteria."
+        },
+        {
+          "from": "Claim.Deny",
+          "to": "Claim.Appeal",
+          "description": "Taken when the claimant disputes the denial."
+        }
+      ]
+    }
+  ]
+}
