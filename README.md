@@ -1,7 +1,9 @@
 # Digital DNA
 Digital DNA unifies scattered business knowledge into a single source of truth. Once defined, your DNA can be used to generate documentation, workflows, and robust software automatically. It's your digital blueprint for building business applications. 
 
-More specifically, DNA is a language for expressing applications and their architectures. It's a DSL written in JSON/YAML with some core primitives and support for adapters. Any configuration written in JSON can be plugged into the DNA engine. Examples include: JSON Schema, JSON Logic, OpenAPI Specification, SAM Templates, MCP configuration. 
+More specifically, DNA is a language for expressing applications and their architectures. It can describe UI layouts and user journeys, API definitions, database schemas and mappings, infrastructure, and much more. 
+
+DNA is a DSL written in JSON/YAML with some core primitives and support for adapters. Any configuration written in JSON can be plugged into the DNA engine. Examples include: JSON Schema, JSON Logic, OpenAPI Specification, SAM Templates, MCP configuration. 
 
 Here's a simple example in a lending context:
 
