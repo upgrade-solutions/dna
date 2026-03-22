@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dna/namespace",
+  "title": "Namespace",
+  "description": "A Namespace is a grouping mechanism that organizes related Resources into a logical domain boundary. Namespaces can be multiple levels deep — e.g. organization → domain → module — with Resources at the leaves.",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The lowercase identifier for this namespace segment.",
+      "examples": ["acme", "billing", "invoicing", "identity", "auth"]
+    },
+    "description": {
+      "type": "string",
+      "description": "A human-readable explanation of what this namespace represents.",
+      "examples": [
+        "The top-level organization namespace.",
+        "All billing-related domains including invoicing and payments.",
+        "Authentication and session management resources."
+      ]
+    },
+    "path": {
+      "type": "string",
+      "description": "The fully qualified dot-separated path to this namespace from the root.",
+      "examples": ["acme", "acme.billing", "acme.billing.invoicing", "acme.identity.auth"]
+    },
+    "namespaces": {
+      "type": "array",
+      "description": "Child namespaces nested within this namespace.",
+      "items": { "$ref": "dna/namespace" }
+    },
+    "resources": {
+      "type": "array",
+      "description": "The Resources that live directly within this namespace.",
+      "items": { "$ref": "dna/resource" }
+    }
+  },
+  "examples": [
+    {
+      "name": "acme",
+      "description": "The top-level organization namespace for Acme Corp.",
+      "path": "acme",
+      "namespaces": [
+        {
+          "name": "billing",
+          "description": "All billing-related domains.",
+          "path": "acme.billing",
+          "namespaces": [
+            {
+              "name": "invoicing",
+              "description": "Invoice creation and management.",
+              "path": "acme.billing.invoicing",
+              "resources": [
+                { "name": "Invoice" },
+                { "name": "LineItem" }
+              ]
+            },
+            {
+              "name": "payments",
+              "description": "Payment processing and refunds.",
+              "path": "acme.billing.payments",
+              "resources": [
+                { "name": "Payment" },
+                { "name": "Refund" }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "content",
+          "description": "Content creation and publishing.",
+          "path": "acme.content",
+          "namespaces": [
+            {
+              "name": "publishing",
+              "description": "Articles, authors, and tags.",
+              "path": "acme.content.publishing",
+              "resources": [
+                { "name": "Post" },
+                { "name": "Author" },
+                { "name": "Tag" }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "identity",
+          "description": "User identity and access management.",
+          "path": "acme.identity",
+          "namespaces": [
+            {
+              "name": "auth",
+              "description": "Authentication and session management.",
+              "path": "acme.identity.auth",
+              "resources": [
+                { "name": "User" },
+                { "name": "Session" },
+                { "name": "Token" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
