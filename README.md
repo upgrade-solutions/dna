@@ -12,7 +12,7 @@ The structural elements of applications are critical. They express hierarchy, de
 * **Attribute** - The properties on a Resource
 * **Namespace** - A grouping mechanism for similar Resources
 
-### Resource
+### Resource — [schema](schemas/resource.json)
 A Resource is a core noun of a business domain — a named entity that the system tracks, manages, or operates on. Resources have identity (they can be referenced by ID), persist over time, and are the subject of Actions.
 
 **Examples:**
@@ -22,7 +22,7 @@ A Resource is a core noun of a business domain — a named entity that the syste
 - Publishing: `Post`, `Author`, `Comment`, `Tag`
 - HR: `Employee`, `Position`, `Review`, `Department`
 
-### Action
+### Action — [schema](schemas/action.json)
 An Action a the core verb of a business domain — something that can be performed on or by a Resource. Actions describe the operations that drive the business forward and produce meaningful state changes.
 
 **Examples:**
@@ -31,7 +31,7 @@ An Action a the core verb of a business domain — something that can be perform
 - `Employee` → `Hire`, `Promote`, `Terminate`, `Transfer`
 - `Claim` → `Submit`, `Review`, `Approve`, `Deny`, `Appeal`
 
-### Attribute
+### Attribute — [schema](schemas/attribute.json)
 An Attribute is a property that belongs to a Resource. Attributes describe the data shape of a Resource — its fields, their types, and any constraints.
 
 **Examples:**
@@ -39,7 +39,7 @@ An Attribute is a property that belongs to a Resource. Attributes describe the d
 - `Post` → `title` (string), `body` (text), `published_at` (datetime), `slug` (string)
 - `Employee` → `name` (string), `email` (string), `start_date` (date), `salary` (number)
 
-### Namespace
+### Namespace — [schema](schemas/namespace.json)
 A Namespace is a grouping mechanism that organizes related Resources into a logical domain boundary. Namespaces can be multiple levels deep — for example, the top level might be the organization, followed by a domain, then a module, with Resources at the leaves. This hierarchy prevents naming collisions and communicates ownership and bounded context at every level.
 
 **Examples:**
