@@ -1,0 +1,13 @@
+{
+  "name": "dna-workspace",
+  "private": true,
+  "workspaces": [
+    "packages/schemas",
+    "packages/core",
+    "packages/tools/to-markdown"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  }
+}
