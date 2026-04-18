@@ -116,16 +116,16 @@ A **Cell** is the unit of deployment — it consumes DNA from upper layers and g
 The pipeline is `[integration] → input-* → DNA → output-* → [integration]`:
 
 ```
-  ┌─────────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌─────────────┐
-  │integration-*│    │          │    │          │    │          │    │integration-*│
-──▶│  (reader)   │──▶│ input-*  │──▶│   DNA    │──▶│ output-* │──▶│  (writer)   │──▶
-  │             │    │          │    │          │    │          │    │             │
-  └─────────────┘    └──────────┘    └──────────┘    └──────────┘    └─────────────┘
-       [1]               [2]             [3]             [4]              [5]
+   +-------------+   +----------+   +----------+   +----------+   +-------------+
+   |integration-*|   |          |   |          |   |          |   |integration-*|
+-->|  (reader)   |-->| input-*  |-->|   DNA    |-->| output-* |-->|  (writer)   |-->
+   |             |   |          |   |          |   |          |   |             |
+   +-------------+   +----------+   +----------+   +----------+   +-------------+
+        [1]              [2]            [3]             [4]             [5]
 
   [1]  Reads from an external system (Jira, GitHub, Notion). Owns auth, rate limits, webhooks.
-  [2]  Parses a format into DNA. Deterministic (JSON, OpenAPI, DDL) or LLM-backed (prose, transcripts, images).
-  [3]  Canonical form. Three layers (operational → product → technical), validated by @dna-codes/core.
+  [2]  Parses a format into DNA. Deterministic (JSON, OpenAPI, DDL) or Probabilistic and LLM-backed (prose, transcripts, images).
+  [3]  Canonical form. Three layers (operational -> product -> technical), validated by @dna-codes/core.
   [4]  Renders DNA into a format. Pure, no I/O (markdown, Mermaid, HTML).
   [5]  Writes to an external system. Field mapping, API writes, change detection.
 
