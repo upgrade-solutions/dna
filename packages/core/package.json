@@ -4,6 +4,9 @@
   "description": "DNA — a JSON description language for business systems. Ships typed schema bindings, a JSON-schema manifest, and the cross-layer validator. Schemas themselves live in @dna-codes/schemas.",
   "keywords": ["dna", "json-schema", "dsl", "business-modeling", "cell-based-architecture"],
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -23,7 +26,7 @@
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
   "dependencies": {
-    "@dna-codes/schemas": "^0.0.1",
+    "@dna-codes/schemas": "^0.1.0",
     "ajv": "^8.17.1"
   },
   "devDependencies": {
