@@ -169,6 +169,63 @@ describe('@dna-codes/input-text', () => {
       expect(body.messages[1].content).toContain('Requested layers: operational')
       expect(body.messages[1].content).not.toContain('product')
     })
+
+    it('reports missingLayers when the model omits requested layers and warns by default', async () => {
+      const { fetchImpl } = mockFetch(openAiResponse(JSON.stringify(sampleDna)))
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const result = await parse('A lending business.', {
+        provider: 'openai',
+        apiKey: 'sk-test',
+        fetchImpl,
+      })
+      expect(result.missingLayers).toEqual(['product', 'technical'])
+      expect(warn).toHaveBeenCalledWith(expect.stringMatching(/Missing: product, technical/))
+      warn.mockRestore()
+    })
+
+    it('missingLayers is empty when every requested layer is returned', async () => {
+      const full = {
+        operational: sampleDna.operational,
+        product: { core: { resources: [] } },
+        technical: { cells: [] },
+      }
+      const { fetchImpl } = mockFetch(openAiResponse(JSON.stringify(full)))
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const result = await parse('Full.', {
+        provider: 'openai',
+        apiKey: 'sk-test',
+        fetchImpl,
+      })
+      expect(result.missingLayers).toEqual([])
+      expect(warn).not.toHaveBeenCalled()
+      warn.mockRestore()
+    })
+
+    it('throws when onMissingLayers is "throw" and the response is incomplete', async () => {
+      const { fetchImpl } = mockFetch(openAiResponse(JSON.stringify(sampleDna)))
+      await expect(
+        parse('A lending business.', {
+          provider: 'openai',
+          apiKey: 'sk-test',
+          fetchImpl,
+          onMissingLayers: 'throw',
+        }),
+      ).rejects.toThrow(/Missing: product, technical/)
+    })
+
+    it('silent mode populates missingLayers without warning or throwing', async () => {
+      const { fetchImpl } = mockFetch(openAiResponse(JSON.stringify(sampleDna)))
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const result = await parse('A lending business.', {
+        provider: 'openai',
+        apiKey: 'sk-test',
+        fetchImpl,
+        onMissingLayers: 'silent',
+      })
+      expect(result.missingLayers).toEqual(['product', 'technical'])
+      expect(warn).not.toHaveBeenCalled()
+      warn.mockRestore()
+    })
   })
 
   describe('validation', () => {

@@ -86,7 +86,7 @@ export function createClient(options: ClientOptions): Client {
     if (!text) {
       throw new Error(`integration-jira: epic ${key} has no summary or description to parse.`)
     }
-    const { raw, ...dna } = await parseText(text, {
+    const { raw, missingLayers, ...dna } = await parseText(text, {
       provider: pullOptions.provider,
       apiKey: pullOptions.apiKey,
       ...(pullOptions.model ? { model: pullOptions.model } : {}),
@@ -94,6 +94,7 @@ export function createClient(options: ClientOptions): Client {
       ...(pullOptions.instructions ? { instructions: pullOptions.instructions } : {}),
     })
     void raw
+    void missingLayers
     return dna as DnaInput
   }
 

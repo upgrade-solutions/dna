@@ -37,10 +37,20 @@ async function parse(text, options) {
         fetchImpl: options.fetchImpl ?? fetch,
     });
     const parsed = parseJson(raw);
+    const missingLayers = layers.filter((l) => !parsed[l]);
+    if (missingLayers.length) {
+        const mode = options.onMissingLayers ?? 'warn';
+        const message = `input-text.parse: model returned ${layers.length - missingLayers.length}/${layers.length} requested layers. Missing: ${missingLayers.join(', ')}.`;
+        if (mode === 'throw')
+            throw new Error(message);
+        if (mode === 'warn')
+            console.warn(message);
+    }
     return {
         ...(parsed.operational ? { operational: parsed.operational } : {}),
         ...(parsed.product ? { product: parsed.product } : {}),
         ...(parsed.technical ? { technical: parsed.technical } : {}),
+        missingLayers,
         raw,
     };
 }

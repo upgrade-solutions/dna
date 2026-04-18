@@ -62,6 +62,91 @@ const OPERATIONAL_SKELETON = `{
   }
 }`
 
+const PRODUCT_SKELETON = `{
+  "product": {
+    "core": {
+      "domain": { "name": "<domain-leaf>", "path": "<root>.<mid>.<leaf>" },
+      "resources": [
+        {
+          "name": "<ResourceInPascalCase>",
+          "noun": "<NounFromOperational>",
+          "fields": [
+            { "name": "<field>", "type": "<string|text|number|boolean|date|datetime|enum|reference>" }
+          ],
+          "actions": [
+            { "name": "<ActionInPascalCase>" }
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "resource": "<Resource>",
+          "action": "<Action>",
+          "name": "<Resource>.<Action>",
+          "capability": "<Noun>.<Verb>"
+        }
+      ]
+    },
+    "api": {
+      "namespace": {
+        "name": "<NamespaceInPascalCase>",
+        "path": "/<kebab-prefix>",
+        "domain": "<root>.<mid>.<leaf>"
+      },
+      "endpoints": [
+        {
+          "method": "GET | POST | PUT | PATCH | DELETE",
+          "path": "/<kebab>/:id",
+          "operation": "<Resource>.<Action>"
+        }
+      ]
+    },
+    "ui": {
+      "layout": {
+        "name": "<LayoutInPascalCase>",
+        "type": "sidebar | full-width | split-panel | centered | blank | universal | marketing"
+      },
+      "pages": [
+        { "name": "<PageInPascalCase>", "resource": "<Resource>" }
+      ],
+      "routes": [
+        { "path": "/<kebab>", "page": "<PageInPascalCase>" }
+      ]
+    }
+  }
+}`
+
+const TECHNICAL_SKELETON = `{
+  "technical": {
+    "environments": [
+      { "name": "dev | staging | prod" }
+    ],
+    "providers": [
+      {
+        "name": "<kebab-name>",
+        "type": "cloud | auth | payments | database | storage | messaging | monitoring | other"
+      }
+    ],
+    "constructs": [
+      {
+        "name": "<kebab-name>",
+        "category": "compute | storage | network",
+        "type": "function | container | server | worker | database | cache | filestore | queue | gateway | loadbalancer | cdn"
+      }
+    ],
+    "variables": [
+      { "name": "<SCREAMING_SNAKE_CASE>", "source": "env | secret | output | literal" }
+    ],
+    "cells": [
+      {
+        "name": "<kebab-name>",
+        "dna": "product/api | product/ui | operational/<noun>",
+        "adapter": { "type": "nestjs | express | nextjs | nuxt | rails | django | fastapi | spring | …" }
+      }
+    ]
+  }
+}`
+
 const LAYER_GUIDE: Record<Layer, string> = {
   operational: [
     'operational (required when the text describes a business):',
@@ -91,17 +176,26 @@ const LAYER_GUIDE: Record<Layer, string> = {
     '    — ALWAYS include processes when the text enumerates named workflows or end-to-end flows.',
   ].join('\n'),
   product: [
-    'product (INCLUDE ONLY IF the input text explicitly describes software being built — UI screens, API endpoints, resources, pages, fields at the UI/API level).',
-    'If the text describes only a business process or SOP without naming software, OMIT this layer entirely — do not guess endpoints, routes, or schemas.',
-    'When included:',
-    '  core: { resources, actions, operations, roles, fields }',
-    '  api:  { namespace, endpoints, schemas? }',
-    '  ui:   { layouts, pages, routes, blocks }',
+    'product (INCLUDE ONLY IF the input text explicitly describes software being built — UI screens, API endpoints, resources, pages, fields). Three sub-layers:',
+    '  core: { domain, resources: [{name, noun, fields, actions}], operations: [{resource, action, name: "Resource.Action", capability}] }',
+    '    — Resource is PascalCase singular and maps 1:1 to an Operational Noun.',
+    '    — Operation name is "Resource.Action" and should reference a Capability "Noun.Verb" from the operational layer.',
+    '  api:  { namespace: {name, path, domain}, endpoints: [{method, path, operation: "Resource.Action"}] }',
+    '    — method is one of GET | POST | PUT | PATCH | DELETE. Path is URL-style with :id placeholders.',
+    '    — Include an endpoint only if the text names an API surface or HTTP contract.',
+    '  ui:   { layout: {name, type}, pages: [{name, resource}], routes: [{path, page}] }',
+    '    — layout.type is one of: sidebar | full-width | split-panel | centered | blank | universal | marketing.',
+    '    — Include a page/route only if the text names a screen, URL, or user-facing view.',
+    'If the text describes only business process / SOP and names no software, OMIT this layer entirely. Do NOT invent endpoints, routes, or schemas to pad the response.',
   ].join('\n'),
   technical: [
-    'technical (INCLUDE ONLY IF the input text explicitly describes deployment — cloud provider, infrastructure, regions, pipelines, deploy scripts).',
-    'If the text does not describe deployment, OMIT this layer entirely — do not invent AWS/GCP/Azure values, regions, ARNs, or tooling.',
-    'When included: { cells, constructs, providers, environments, variables, outputs, scripts, views }',
+    'technical (INCLUDE ONLY IF the input text explicitly describes deployment — cloud, infrastructure, regions, pipelines, deploy scripts). Shape:',
+    '  environments: [{name: "dev" | "staging" | "prod"}]',
+    '  providers:    [{name (kebab-case), type: "cloud" | "auth" | "payments" | "database" | "storage" | "messaging" | "monitoring" | "other"}]',
+    '  constructs:   [{name (kebab-case), category: "compute" | "storage" | "network", type: "function" | "container" | "server" | "worker" | "database" | "cache" | "filestore" | "queue" | "gateway" | "loadbalancer" | "cdn"}]',
+    '  variables:    [{name (SCREAMING_SNAKE_CASE), source: "env" | "secret" | "output" | "literal"}]',
+    '  cells:        [{name (kebab-case), dna: "product/api" | "product/ui" | "operational/<noun>", adapter: {type: <framework>}}]',
+    'If the text does not describe deployment, OMIT this layer entirely. Do NOT invent AWS/GCP/Azure values, regions, ARNs, or tooling.',
   ].join('\n'),
 }
 
@@ -134,9 +228,27 @@ export function buildSystemPrompt(layers: Layer[], instructions?: string): strin
   if (layers.includes('operational')) {
     lines.push(
       '',
-      'Structural skeleton showing the shape of a valid operational response. Treat <placeholder> tokens as slots to fill from the input text — NEVER emit them literally:',
+      'Structural skeleton — operational layer. Treat <placeholder> tokens as slots to fill from the input text; never emit them literally:',
       '',
       OPERATIONAL_SKELETON,
+    )
+  }
+
+  if (layers.includes('product')) {
+    lines.push(
+      '',
+      'Structural skeleton — product layer (core / api / ui). Include only sub-sections the text describes; omit the layer entirely if no software is named:',
+      '',
+      PRODUCT_SKELETON,
+    )
+  }
+
+  if (layers.includes('technical')) {
+    lines.push(
+      '',
+      'Structural skeleton — technical layer. Include only if the text names deployment details; omit the layer entirely otherwise:',
+      '',
+      TECHNICAL_SKELETON,
     )
   }
 

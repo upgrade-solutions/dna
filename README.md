@@ -140,6 +140,22 @@ Full API reference and layer-specific authoring DNA contracts live in [`@dna-cod
 
 Packages are published to npm. Deno 2 can consume them directly via `npm:` specifiers (e.g. `import { validate } from "npm:@dna-codes/core"`); no JSR package is published.
 
+### Input coverage by layer
+
+Each `input-*` package has an authoritative scope — OpenAPI honestly knows about APIs, not deployment; a JSON sample knows about entities, not rules. That narrowness is a feature: it keeps deterministic adapters from inventing. `input-text` is the catch-all LLM path that can reach any layer.
+
+| Layer | Deterministic source(s) | Probabilistic source(s) | Status |
+|---|---|---|---|
+| **Operational** | `input-json` ✅ · `input-ddl` 🚧 | `input-text` ✅ | **Covered** |
+| **Product Core** | `input-prisma` 💡 | `input-text` ✅ | Probabilistic only |
+| **Product API** | `input-openapi` ✅ | `input-text` ✅ | **Covered** |
+| **Product UI** | `input-figma` 💡 · `input-nextjs-routes` 💡 | `input-text` ✅ | Probabilistic only |
+| **Technical** | `input-terraform` 💡 · `input-cdk` 💡 | `input-text` ✅ | Probabilistic only |
+
+Probabilistic-only layers rely on LLM inference from prose; they're the weakest link in the pipeline and the highest-leverage targets for new deterministic adapters.
+
+Legend: ✅ shipped · 🚧 planned (listed below) · 💡 candidate (natural fit, not yet committed)
+
 **Core**
 
 | Package | Purpose |

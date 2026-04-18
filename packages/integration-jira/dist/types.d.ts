@@ -10,10 +10,10 @@ import type { ParseResult } from '@dna-codes/input-text';
 import type { Style } from '@dna-codes/output-text';
 /**
  * The DNA shape consumed and emitted by this integration. Matches the
- * fields `@dna-codes/input-text` returns (minus `raw`) and the fields
- * `@dna-codes/output-text` reads.
+ * layer fields `@dna-codes/input-text` returns (minus transport metadata
+ * `raw` and `missingLayers`) and the fields `@dna-codes/output-text` reads.
  */
-export type DnaInput = Omit<ParseResult, 'raw'>;
+export type DnaInput = Omit<ParseResult, 'raw' | 'missingLayers'>;
 /** ADF node — we produce doc/paragraph/bulletList/listItem/text/hardBreak with marks. */
 export interface AdfMark {
     type: 'strong' | 'em' | 'code' | string;

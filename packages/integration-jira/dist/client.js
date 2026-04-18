@@ -67,7 +67,7 @@ function createClient(options) {
         if (!text) {
             throw new Error(`integration-jira: epic ${key} has no summary or description to parse.`);
         }
-        const { raw, ...dna } = await (0, input_text_1.parse)(text, {
+        const { raw, missingLayers, ...dna } = await (0, input_text_1.parse)(text, {
             provider: pullOptions.provider,
             apiKey: pullOptions.apiKey,
             ...(pullOptions.model ? { model: pullOptions.model } : {}),
@@ -75,6 +75,7 @@ function createClient(options) {
             ...(pullOptions.instructions ? { instructions: pullOptions.instructions } : {}),
         });
         void raw;
+        void missingLayers;
         return dna;
     }
     async function createIssue(fields) {

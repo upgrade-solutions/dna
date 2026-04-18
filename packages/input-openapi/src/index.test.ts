@@ -155,4 +155,22 @@ describe('@dna-codes/input-openapi', () => {
       expect(productApi.schemas).toBeUndefined()
     })
   })
+
+  /**
+   * Drift detection: validate parse() output against the canonical product.api
+   * JSON Schema from @dna-codes/schemas (loaded via @dna-codes/core). If the
+   * schema changes shape, this test fails until the adapter catches up.
+   */
+  describe('schema conformance', () => {
+    it('emits product.api DNA that validates against @dna-codes/schemas', () => {
+      const { DnaValidator } = require('@dna-codes/core') as typeof import('@dna-codes/core')
+      const { productApi } = parse(pets)
+      const result = new DnaValidator().validate(productApi, 'https://dna.local/product/api')
+      if (!result.valid) {
+        throw new Error(
+          `input-openapi output failed product.api schema validation:\n${JSON.stringify(result.errors, null, 2)}`,
+        )
+      }
+    })
+  })
 })

@@ -62,9 +62,14 @@ function walk(
         relationships.push(buildRelationship(nounName, childName, key, 'one-to-many'))
         const merged = mergeRecords(value)
         walk(merged, childName, nouns, relationships, options)
-      } else {
-        attrs.push({ name: key, type: 'array' })
       }
+      // Arrays of scalars (e.g. `tags: ["fantasy", "classic"]`) have no faithful
+      // representation as a single DNA Attribute — the canonical schema's
+      // type enum is string | text | number | boolean | date | datetime | enum
+      // | reference. The DNA way to model scalar collections is a child Noun
+      // plus a relationship, which requires more context than a JSON sample
+      // provides (the scalar's name, its own attributes, etc.). Rather than
+      // emit invalid DNA, drop these keys. Upgrade them manually if needed.
     } else {
       attrs.push({ name: key, type: inferScalarType(value) })
     }

@@ -42,11 +42,11 @@ describe('@dna-codes/input-json', () => {
       expect(attr?.type).toBe('date')
     })
 
-    it('represents arrays of scalars as array-typed attributes', () => {
+    it('drops arrays of scalars — no faithful single-attribute representation in DNA', () => {
       const { operational } = parse(bookSample, { name: 'Book' })
       const tags = operational.domain.nouns.find((n) => n.name === 'Book')!
         .attributes.find((a) => a.name === 'tags')
-      expect(tags?.type).toBe('array')
+      expect(tags).toBeUndefined()
     })
   })
 
@@ -164,6 +164,26 @@ describe('@dna-codes/input-json', () => {
     it('honors an explicit domain option', () => {
       const { operational } = parse(bookSample, { name: 'Book', domain: 'shop.books' })
       expect(operational.domain.name).toBe('shop.books')
+    })
+  })
+
+  /**
+   * Drift detection: validate parse() output against the canonical operational
+   * JSON Schema from @dna-codes/schemas (loaded via @dna-codes/core). If the
+   * schema adds a required field or tightens a constraint, this test fails —
+   * forcing the adapter to stay in sync.
+   */
+  describe('schema conformance', () => {
+    it('emits operational DNA that validates against @dna-codes/schemas', () => {
+      // Lazy require to keep @dna-codes/core a devDep (not a runtime dep).
+      const { DnaValidator } = require('@dna-codes/core') as typeof import('@dna-codes/core')
+      const { operational } = parse(bookSample, { name: 'Book' })
+      const result = new DnaValidator().validate(operational, 'https://dna.local/operational')
+      if (!result.valid) {
+        throw new Error(
+          `input-json output failed operational schema validation:\n${JSON.stringify(result.errors, null, 2)}`,
+        )
+      }
     })
   })
 })

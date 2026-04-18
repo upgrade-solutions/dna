@@ -19,6 +19,17 @@ export interface ParseOptions {
   temperature?: number
   /** Inject a fetch implementation — mainly for tests. Defaults to global fetch. */
   fetchImpl?: typeof fetch
+  /**
+   * How to behave when the model returns fewer layers than were requested.
+   *   - 'warn' (default) — log a `console.warn` listing the missing layers.
+   *   - 'throw'          — throw an Error instead.
+   *   - 'silent'         — no signal beyond the populated `missingLayers` field on the result.
+   *
+   * This only fires when layers are genuinely absent from the response.
+   * The model is still allowed to legitimately omit a layer that the text
+   * doesn't describe (e.g. no technical details in a prose SOP).
+   */
+  onMissingLayers?: 'warn' | 'throw' | 'silent'
 }
 
 /**
@@ -30,5 +41,7 @@ export interface ParseResult {
   operational?: Record<string, unknown>
   product?: Record<string, unknown>
   technical?: Record<string, unknown>
+  /** Layers that were requested but not returned by the model. Empty when complete. */
+  missingLayers: Layer[]
   raw: string
 }
