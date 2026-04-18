@@ -35,5 +35,10 @@
       "description": "The fields returned as a result of this action.",
       "items": { "$ref": "https://dna.local/product/core/field" }
     }
-  }
+  },
+  "examples": [
+    { "name": "Apply", "description": "Submit a new loan application.", "verb": "Apply", "method": "POST" },
+    { "name": "List", "description": "List all loans.", "method": "GET" },
+    { "name": "Approve", "description": "Approve a pending loan.", "verb": "Approve", "method": "POST" }
+  ]
 }

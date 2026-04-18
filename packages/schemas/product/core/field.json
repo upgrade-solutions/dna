@@ -48,5 +48,10 @@
     }
   },
   "if": { "properties": { "type": { "const": "enum" } } },
-  "then": { "required": ["values"] }
+  "then": { "required": ["values"] },
+  "examples": [
+    { "name": "amount", "label": "Amount", "type": "number", "required": true, "attribute": "amount" },
+    { "name": "status", "label": "Status", "type": "enum", "values": ["pending", "active", "repaid"], "attribute": "status" },
+    { "name": "email", "label": "Email", "type": "email", "required": true }
+  ]
 }

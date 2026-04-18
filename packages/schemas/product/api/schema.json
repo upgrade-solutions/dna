@@ -26,5 +26,17 @@
       "description": "The Resource this schema maps from, if applicable.",
       "examples": ["Loan", "Order"]
     }
-  }
+  },
+  "examples": [
+    {
+      "name": "LoanResponse",
+      "description": "Loan document returned by GET /loans/:id.",
+      "resource": "Loan",
+      "fields": [
+        { "name": "id", "type": "string" },
+        { "name": "amount", "type": "number" },
+        { "name": "status", "type": "enum", "values": ["pending", "active", "repaid"] }
+      ]
+    }
+  ]
 }

@@ -31,5 +31,14 @@
       "items": { "type": "string" },
       "examples": [["Loan", "Payment"], ["User", "Role", "Session"]]
     }
-  }
+  },
+  "examples": [
+    {
+      "name": "Lending",
+      "path": "/lending",
+      "description": "Loan lifecycle endpoints.",
+      "domain": "acme.finance.lending",
+      "resources": ["Loan", "Payment"]
+    }
+  ]
 }

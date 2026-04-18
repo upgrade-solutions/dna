@@ -115,6 +115,19 @@ A **Cell** is the unit of deployment — it consumes DNA from upper layers and g
 |---------|---------|
 | [`packages/schemas`](packages/schemas) (`@dna-codes/schemas`) | Canonical JSON Schema (Draft 2020-12) definitions for all three layers — language-agnostic, zero deps |
 | [`packages/core`](packages/core) (`@dna-codes/core`) | TypeScript bindings + per-layer and cross-layer validator; wraps `@dna-codes/schemas` |
-| [`packages/tools/to-markdown`](packages/tools/to-markdown) (`@dna-codes/to-markdown`) | Renders DNA documents as structured markdown documentation |
+| [`packages/input-json`](packages/input-json) (`@dna-codes/input-json`) | Infers Nouns, Attributes, and Relationships from a plain JSON data sample |
+| [`packages/input-openapi`](packages/input-openapi) (`@dna-codes/input-openapi`) | Parses an OpenAPI 3.x spec (JSON) into a DNA Product API document |
+| [`packages/output-markdown`](packages/output-markdown) (`@dna-codes/output-markdown`) | Renders DNA documents as structured markdown documentation |
+| [`packages/output-html`](packages/output-html) (`@dna-codes/output-html`) | Renders DNA documents as semantic HTML (same sections as output-markdown) |
+| [`packages/output-mermaid`](packages/output-mermaid) (`@dna-codes/output-mermaid`) | Renders DNA as Mermaid diagrams (ERDs from Nouns + Relationships, flowcharts from Processes) |
+
+### Naming convention
+
+Adapters follow the pipeline `[source] → input format → DNA → output format → [destination]`:
+
+- **`input-<format>`** / **`output-<format>`** — format converters (DNA ↔ JSON, YAML, markdown, …). Pure, deterministic, local — no credentials or network.
+- **`source-<system>`** / **`destination-<system>`** — system integrations (Google Meet, Notion, GitHub, …). Talk to external APIs; carry auth, rate limits, and their own release cadence. Lives outside `@dna-codes/*` for now.
+
+Rule of thumb: if you point it at a string or file, it's a format adapter; if it needs credentials or a network round-trip, it's a system adapter.
 
 Full API reference and layer-specific authoring contracts live in [`packages/core/docs/`](packages/core/docs/).

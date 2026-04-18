@@ -30,5 +30,10 @@
       "description": "When true, the route requires authentication.",
       "default": true
     }
-  }
+  },
+  "examples": [
+    { "path": "/loans", "page": "LoanList", "layout": "AdminLayout", "protected": true },
+    { "path": "/loans/:id", "page": "LoanDetail", "layout": "AdminLayout" },
+    { "path": "/login", "page": "Login", "layout": "PublicLayout", "protected": false }
+  ]
 }

@@ -4,7 +4,11 @@
   "workspaces": [
     "packages/schemas",
     "packages/core",
-    "packages/tools/to-markdown"
+    "packages/input-json",
+    "packages/input-openapi",
+    "packages/output-markdown",
+    "packages/output-html",
+    "packages/output-mermaid"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",

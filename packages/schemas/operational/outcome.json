@@ -48,5 +48,20 @@
         "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9]*)*\\.[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$"
       }
     }
-  }
+  },
+  "examples": [
+    {
+      "capability": "Loan.Approve",
+      "changes": [{ "attribute": "status", "set": "active" }],
+      "emits": ["lending.Loan.Approved"]
+    },
+    {
+      "capability": "Order.Cancel",
+      "changes": [
+        { "attribute": "status", "set": "cancelled" },
+        { "attribute": "cancelled_at", "set": "now" }
+      ],
+      "initiates": ["Payment.Refund"]
+    }
+  ]
 }

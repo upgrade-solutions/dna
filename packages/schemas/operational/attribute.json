@@ -42,5 +42,10 @@
     }
   },
   "if": { "properties": { "type": { "const": "enum" } } },
-  "then": { "required": ["values"] }
+  "then": { "required": ["values"] },
+  "examples": [
+    { "name": "amount", "type": "number", "required": true, "description": "Principal amount of the loan in dollars." },
+    { "name": "status", "type": "enum", "required": true, "values": ["pending", "active", "repaid", "defaulted"] },
+    { "name": "published_at", "type": "datetime", "description": "When the post was made public." }
+  ]
 }

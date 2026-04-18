@@ -47,5 +47,17 @@
         }
       }
     }
-  }
+  },
+  "examples": [
+    {
+      "name": "lending.Loan.Disbursed",
+      "capability": "Loan.Disburse",
+      "description": "Emitted when a loan is successfully disbursed to the borrower.",
+      "payload": [
+        { "name": "loan_id", "type": "string" },
+        { "name": "amount", "type": "number" },
+        { "name": "disbursed_at", "type": "datetime" }
+      ]
+    }
+  ]
 }

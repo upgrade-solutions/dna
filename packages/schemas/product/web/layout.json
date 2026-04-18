@@ -223,5 +223,20 @@
       "items": { "type": "string" },
       "examples": [["LoanList", "LoanDetail", "LoanApply"], ["Login", "Register"]]
     }
-  }
+  },
+  "examples": [
+    {
+      "name": "AdminLayout",
+      "type": "sidebar",
+      "description": "Authenticated admin shell with sidebar navigation.",
+      "features": { "sidebar": true, "profileDropdown": true },
+      "pages": ["LoanList", "LoanDetail", "LoanApply"]
+    },
+    {
+      "name": "PublicLayout",
+      "type": "centered",
+      "description": "Unauthenticated shell for login and signup.",
+      "pages": ["Login", "Register"]
+    }
+  ]
 }

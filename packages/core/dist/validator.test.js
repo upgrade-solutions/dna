@@ -1,43 +1,122 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
 const validator_1 = require("./validator");
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
 const validator = new validator_1.DnaValidator();
-const loadDna = (relativePath) => JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../', relativePath), 'utf-8'));
+// Shared inline fixtures for cross-layer tests. Intentionally minimal but
+// wired end-to-end so the baseline "passes for valid DNA" case holds; each
+// test spreads and overrides what it needs to exercise a specific error path.
+const operationalFixture = {
+    domain: {
+        name: 'lending',
+        path: 'acme.finance.lending',
+        nouns: [
+            {
+                name: 'Loan',
+                attributes: [
+                    { name: 'id', type: 'string', required: true },
+                    { name: 'borrower_id', type: 'reference', noun: 'Borrower' },
+                ],
+                verbs: [{ name: 'Apply' }, { name: 'Approve' }, { name: 'View' }, { name: 'List' }],
+            },
+            {
+                name: 'Borrower',
+                attributes: [{ name: 'id', type: 'string', required: true }],
+                verbs: [],
+            },
+        ],
+    },
+    capabilities: [
+        { noun: 'Loan', verb: 'Apply', name: 'Loan.Apply' },
+        { noun: 'Loan', verb: 'Approve', name: 'Loan.Approve' },
+        { noun: 'Loan', verb: 'View', name: 'Loan.View' },
+    ],
+    causes: [{ capability: 'Loan.Apply', source: 'user' }],
+    outcomes: [
+        {
+            capability: 'Loan.Approve',
+            changes: [{ attribute: 'loan.status', set: 'active' }],
+            emits: ['lending.Loan.Disbursed'],
+        },
+    ],
+    signals: [
+        {
+            name: 'lending.Loan.Disbursed',
+            capability: 'Loan.Approve',
+            payload: [{ name: 'loan_id', type: 'string' }],
+        },
+    ],
+    relationships: [
+        {
+            name: 'Loan.borrower',
+            from: 'Loan',
+            to: 'Borrower',
+            cardinality: 'many-to-one',
+            attribute: 'borrower_id',
+        },
+    ],
+};
+const productApiFixture = {
+    namespace: { name: 'Lending', path: '/lending' },
+    resources: [
+        {
+            name: 'Loan',
+            noun: 'Loan',
+            fields: [],
+            actions: [
+                { name: 'Approve', verb: 'Approve' },
+                { name: 'View', verb: 'View' },
+            ],
+        },
+    ],
+    operations: [
+        { name: 'Loan.Approve', resource: 'Loan', action: 'Approve', capability: 'Loan.Approve' },
+        { name: 'Loan.View', resource: 'Loan', action: 'View', capability: 'Loan.View' },
+    ],
+    endpoints: [
+        { method: 'POST', path: '/loans/:id/approve', operation: 'Loan.Approve' },
+        { method: 'GET', path: '/loans/:id', operation: 'Loan.View' },
+    ],
+};
+const productUiFixture = {
+    layout: { name: 'AppLayout', type: 'sidebar' },
+    pages: [
+        {
+            name: 'LoanList',
+            resource: 'Loan',
+            blocks: [{ name: 'LB', type: 'list', operation: 'Loan.View' }],
+        },
+    ],
+    routes: [{ path: '/loans', page: 'LoanList' }],
+};
+const technicalFixture = {
+    providers: [{ name: 'aws', type: 'cloud', region: 'us-east-1' }],
+    constructs: [
+        { name: 'primary-db', type: 'database', category: 'storage', provider: 'aws' },
+    ],
+    cells: [
+        {
+            name: 'api',
+            dna: 'product/api',
+            adapter: { type: 'node/express' },
+            constructs: ['primary-db'],
+        },
+    ],
+};
+const productCoreFixture = {
+    domain: { name: 'lending', path: 'acme.finance.lending' },
+    nouns: [
+        {
+            name: 'Loan',
+            attributes: [{ name: 'id', type: 'string' }],
+            verbs: [{ name: 'Approve' }, { name: 'View' }],
+        },
+        { name: 'Borrower', attributes: [{ name: 'id', type: 'string' }], verbs: [] },
+    ],
+    capabilities: [
+        { noun: 'Loan', verb: 'Approve', name: 'Loan.Approve' },
+        { noun: 'Loan', verb: 'View', name: 'Loan.View' },
+    ],
+};
 describe('DnaValidator — operational/noun', () => {
     it('validates a valid Noun document', () => {
         const doc = {
@@ -406,9 +485,8 @@ describe('DnaValidator — operational/relationship', () => {
     });
 });
 describe('DnaValidator — composite: operational', () => {
-    it('validates the lending operational DNA document', () => {
-        const doc = loadDna('dna/lending/operational.json');
-        const result = validator.validate(doc, 'operational');
+    it('validates the inline operational fixture', () => {
+        const result = validator.validate(operationalFixture, 'operational');
         expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
     });
@@ -463,9 +541,8 @@ describe('DnaValidator — composite: product/core', () => {
     });
 });
 describe('DnaValidator — composite: product/api', () => {
-    it('validates the lending product API DNA document', () => {
-        const doc = loadDna('dna/lending/product.api.json');
-        const result = validator.validate(doc, 'product/api');
+    it('validates the inline product/api fixture', () => {
+        const result = validator.validate(productApiFixture, 'product/api');
         expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
     });
@@ -478,9 +555,8 @@ describe('DnaValidator — composite: product/api', () => {
     });
 });
 describe('DnaValidator — composite: product/ui', () => {
-    it('validates the lending product UI DNA document', () => {
-        const doc = loadDna('dna/lending/product.ui.json');
-        const result = validator.validate(doc, 'product/ui');
+    it('validates the inline product/ui fixture', () => {
+        const result = validator.validate(productUiFixture, 'product/ui');
         expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
     });
@@ -494,9 +570,8 @@ describe('DnaValidator — composite: product/ui', () => {
     });
 });
 describe('DnaValidator — composite: technical', () => {
-    it('validates the lending technical DNA document', () => {
-        const doc = loadDna('dna/lending/technical.json');
-        const result = validator.validate(doc, 'technical');
+    it('validates the inline technical fixture', () => {
+        const result = validator.validate(technicalFixture, 'technical');
         expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
     });
@@ -551,10 +626,10 @@ describe('DnaValidator — availableSchemas', () => {
 });
 // ── Cross-layer validation ─────────────────────────────────────────────────
 describe('DnaValidator — cross-layer validation', () => {
-    const operational = loadDna('dna/lending/operational.json');
-    const productApi = loadDna('dna/lending/product.api.json');
-    const productUi = loadDna('dna/lending/product.ui.json');
-    const technical = loadDna('dna/lending/technical.json');
+    const operational = operationalFixture;
+    const productApi = productApiFixture;
+    const productUi = productUiFixture;
+    const technical = technicalFixture;
     it('passes for valid lending DNA', () => {
         const result = validator.validateCrossLayer({ operational, productApi, productUi, technical });
         expect(result.valid).toBe(true);
@@ -744,10 +819,10 @@ describe('DnaValidator — cross-layer validation', () => {
 });
 // ── Cross-layer: product.core ────────────────────────────────────────────────
 describe('DnaValidator — cross-layer with product.core', () => {
-    const operational = loadDna('dna/lending/operational.json');
-    const productApi = loadDna('dna/lending/product.api.json');
-    const productUi = loadDna('dna/lending/product.ui.json');
-    const productCore = loadDna('dna/lending/product.core.json');
+    const operational = operationalFixture;
+    const productApi = productApiFixture;
+    const productUi = productUiFixture;
+    const productCore = productCoreFixture;
     it('passes when core is consistent with operational', () => {
         const result = validator.validateCrossLayer({ operational, productCore });
         expect(result.valid).toBe(true);

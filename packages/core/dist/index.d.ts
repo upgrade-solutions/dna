@@ -73,4 +73,5 @@ export declare function resolveSchemaFile(family: 'operational' | 'product' | 't
 export declare function allSchemas(): JsonSchema[];
 export { DnaValidator } from './validator';
 export type { ValidationResult, CrossLayerResult, CrossLayerError } from './validator';
+export { bookshopInput } from './fixtures/bookshop';
 //# sourceMappingURL=index.d.ts.map

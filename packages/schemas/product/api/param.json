@@ -42,5 +42,10 @@
     }
   },
   "if": { "properties": { "type": { "const": "enum" } } },
-  "then": { "required": ["values"] }
+  "then": { "required": ["values"] },
+  "examples": [
+    { "name": "loan_id", "in": "path", "type": "string", "required": true, "attribute": "id" },
+    { "name": "status", "in": "query", "type": "enum", "values": ["pending", "active", "repaid"] },
+    { "name": "limit", "in": "query", "type": "number", "description": "Max rows returned (default 50)." }
+  ]
 }

@@ -31,5 +31,17 @@
       "description": "The Fields shown or collected in this block.",
       "items": { "$ref": "https://dna.local/product/core/field" }
     }
-  }
+  },
+  "examples": [
+    { "name": "LoanList", "type": "list", "operation": "Loan.List" },
+    {
+      "name": "ApplyForm",
+      "type": "form",
+      "operation": "Loan.Apply",
+      "fields": [
+        { "name": "amount", "type": "number", "required": true },
+        { "name": "term_months", "type": "number", "required": true }
+      ]
+    }
+  ]
 }

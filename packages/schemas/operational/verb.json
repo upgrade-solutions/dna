@@ -30,5 +30,10 @@
       "description": "The attributes returned or updated as a result of this verb.",
       "items": { "$ref": "https://dna.local/operational/attribute" }
     }
-  }
+  },
+  "examples": [
+    { "name": "Approve", "description": "Approve a pending loan application.", "noun": "Loan" },
+    { "name": "Publish", "description": "Publish a draft post to the storefront.", "noun": "Post" },
+    { "name": "Ship", "description": "Dispatch a fulfilled order to the carrier.", "noun": "Order" }
+  ]
 }

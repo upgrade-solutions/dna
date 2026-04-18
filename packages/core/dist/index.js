@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DnaValidator = exports.layerDirs = exports.documents = exports.schemas = exports.SCHEMA_ROOT = void 0;
+exports.bookshopInput = exports.DnaValidator = exports.layerDirs = exports.documents = exports.schemas = exports.SCHEMA_ROOT = void 0;
 exports.resolveSchemaFile = resolveSchemaFile;
 exports.allSchemas = allSchemas;
 const fs = __importStar(require("fs"));
@@ -134,4 +134,6 @@ function allSchemas() {
 }
 var validator_1 = require("./validator");
 Object.defineProperty(exports, "DnaValidator", { enumerable: true, get: function () { return validator_1.DnaValidator; } });
+var bookshop_1 = require("./fixtures/bookshop");
+Object.defineProperty(exports, "bookshopInput", { enumerable: true, get: function () { return bookshop_1.bookshopInput; } });
 //# sourceMappingURL=index.js.map

@@ -66,5 +66,11 @@
       "if": { "properties": { "source": { "const": "signal" } }, "required": ["source"] },
       "then": { "required": ["signal"] }
     }
+  ],
+  "examples": [
+    { "capability": "Loan.Apply", "source": "user", "description": "Borrower submits a loan application form." },
+    { "capability": "Loan.Default", "source": "schedule", "schedule": "0 0 * * *", "description": "Nightly sweep flags overdue loans." },
+    { "capability": "Payment.Confirm", "source": "webhook", "event": "payment.completed" },
+    { "capability": "Order.Ship", "source": "capability", "after": "Order.Fulfill" }
   ]
 }

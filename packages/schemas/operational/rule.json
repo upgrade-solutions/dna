@@ -63,5 +63,25 @@
         }
       }
     }
-  }
+  },
+  "examples": [
+    {
+      "capability": "Loan.Approve",
+      "type": "access",
+      "allow": [{ "role": "underwriter" }]
+    },
+    {
+      "capability": "Loan.Approve",
+      "type": "condition",
+      "conditions": [
+        { "attribute": "status", "operator": "eq", "value": "pending" },
+        { "attribute": "amount", "operator": "gt", "value": 0 }
+      ]
+    },
+    {
+      "capability": "Post.Delete",
+      "type": "access",
+      "allow": [{ "ownership": true }, { "role": "admin" }]
+    }
+  ]
 }
