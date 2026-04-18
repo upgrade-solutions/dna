@@ -6,6 +6,7 @@
     "packages/core",
     "packages/input-json",
     "packages/input-openapi",
+    "packages/input-text",
     "packages/output-markdown",
     "packages/output-html",
     "packages/output-mermaid"
