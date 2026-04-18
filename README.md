@@ -113,13 +113,32 @@ A **Cell** is the unit of deployment — it consumes DNA from upper layers and g
 
 ### Naming convention
 
-The pipeline is: `[integration] → input-* → DNA → output-* → [integration]`
+The pipeline is `[integration] → input-* → DNA → output-* → [integration]`:
+
+```
+  ┌─────────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌─────────────┐
+  │integration-*│    │          │    │          │    │          │    │integration-*│
+──▶│  (reader)   │──▶│ input-*  │──▶│   DNA    │──▶│ output-* │──▶│  (writer)   │──▶
+  │             │    │          │    │          │    │          │    │             │
+  └─────────────┘    └──────────┘    └──────────┘    └──────────┘    └─────────────┘
+       [1]               [2]             [3]             [4]              [5]
+
+  [1]  Reads from an external system (Jira, GitHub, Notion). Owns auth, rate limits, webhooks.
+  [2]  Parses a format into DNA. Deterministic (JSON, OpenAPI, DDL) or LLM-backed (prose, transcripts, images).
+  [3]  Canonical form. Three layers (operational → product → technical), validated by @dna-codes/core.
+  [4]  Renders DNA into a format. Pure, no I/O (markdown, Mermaid, HTML).
+  [5]  Writes to an external system. Field mapping, API writes, change detection.
+
+  The same integration-* package typically fills both [1] and [5] roles for its system.
+```
 
 - **`input-*`** — converts a format into DNA. Same input always produces same output (deterministic), unless the package requires an LLM, in which case it is probabilistic. Each probabilistic package documents its dependencies explicitly: required LLM provider, expected API keys, and non-determinism implications.
 - **`output-*`** — renders DNA into a format string. No system knowledge; pure and local.
 - **`integration-*`** — connects to an external system bidirectionally. Owns auth, field mapping, rate limits, and API versioning for that system. May use `input-*` or `output-*` packages internally.
 
 Full API reference and layer-specific authoring DNA contracts live in [`@dna-codes/core/docs/`](packages/core/docs/).
+
+Packages are published to npm. Deno 2 can consume them directly via `npm:` specifiers (e.g. `import { validate } from "npm:@dna-codes/core"`); no JSR package is published.
 
 **Core**
 
