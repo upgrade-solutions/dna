@@ -10,9 +10,11 @@
     "packages/output-markdown",
     "packages/output-html",
     "packages/output-mermaid",
+    "packages/output-text",
     "packages/input-example",
     "packages/output-example",
-    "packages/integration-example"
+    "packages/integration-example",
+    "packages/integration-jira"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",

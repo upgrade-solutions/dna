@@ -1,39 +1,63 @@
 import { Layer } from './types'
 
-const OPERATIONAL_EXAMPLE = `{
+/**
+ * Structural skeleton — NOT a concrete example.
+ *
+ * Early versions used a full lending/Loan example here; smaller local models
+ * in JSON mode would copy those literal names back verbatim instead of deriving
+ * new names from the user's text. Using angle-bracket placeholders forces the
+ * model to substitute, because `<Noun>` / `<Verb>` aren't valid output.
+ */
+const OPERATIONAL_SKELETON = `{
   "operational": {
     "domain": {
-      "name": "lending",
-      "path": "acme.finance.lending",
+      "name": "<domain-leaf>",
+      "path": "<root>.<mid>.<leaf>",
       "nouns": [
         {
-          "name": "Loan",
+          "name": "<NounInPascalCase>",
           "attributes": [
-            { "name": "amount", "type": "number", "required": true },
-            { "name": "status", "type": "enum", "values": ["pending", "active", "repaid"] }
+            { "name": "<attribute>", "type": "<string|text|number|boolean|date|datetime|enum|reference>", "required": true },
+            { "name": "<enumAttribute>", "type": "enum", "values": ["<valueA>", "<valueB>"] }
           ],
           "verbs": [
-            { "name": "Apply" },
-            { "name": "Approve" }
+            { "name": "<VerbInPascalCase>" }
           ]
         }
       ]
     },
     "capabilities": [
-      { "noun": "Loan", "verb": "Apply", "name": "Loan.Apply" },
-      { "noun": "Loan", "verb": "Approve", "name": "Loan.Approve" }
+      { "noun": "<Noun>", "verb": "<Verb>", "name": "<Noun>.<Verb>" }
     ],
     "causes": [
-      { "capability": "Loan.Apply", "source": "user" },
-      { "capability": "Loan.Approve", "source": "user" }
+      { "capability": "<Noun>.<Verb>", "source": "user | schedule | webhook | capability" }
     ],
     "rules": [
-      { "capability": "Loan.Approve", "type": "access", "allow": [{ "role": "underwriter" }] },
-      { "capability": "Loan.Approve", "type": "condition", "conditions": [{ "attribute": "loan.status", "operator": "eq", "value": "pending" }] }
+      { "capability": "<Noun>.<Verb>", "type": "access", "allow": [{ "role": "<role>" }] },
+      { "capability": "<Noun>.<Verb>", "type": "condition", "conditions": [{ "attribute": "<noun>.<attribute>", "operator": "eq", "value": "<value>" }] }
     ],
     "outcomes": [
-      { "capability": "Loan.Apply", "changes": [{ "attribute": "loan.status", "set": "pending" }] },
-      { "capability": "Loan.Approve", "changes": [{ "attribute": "loan.status", "set": "active" }] }
+      { "capability": "<Noun>.<Verb>", "changes": [{ "attribute": "<noun>.<attribute>", "set": "<value>" }] }
+    ],
+    "positions": [
+      { "name": "<PositionInPascalCase>", "description": "<role description>" }
+    ],
+    "persons": [
+      { "name": "<PersonFullName>", "position": "<PositionInPascalCase>" }
+    ],
+    "tasks": [
+      { "name": "<TaskInPascalCase>", "position": "<PositionInPascalCase>", "capability": "<Noun>.<Verb>" }
+    ],
+    "processes": [
+      {
+        "name": "<ProcessInPascalCase>",
+        "description": "<process description>",
+        "operator": "<PositionInPascalCase>",
+        "steps": [
+          { "id": "s1", "task": "<TaskInPascalCase>" },
+          { "id": "s2", "task": "<TaskInPascalCase>", "depends_on": ["s1"] }
+        ]
+      }
     ]
   }
 }`
@@ -48,20 +72,36 @@ const LAYER_GUIDE: Record<Layer, string> = {
     '    — one entry per Noun+Verb pair; noun/verb are single strings, NOT arrays',
     '  causes: ARRAY of { capability: "Noun.Verb", source: "user" | "schedule" | "webhook" | "capability" }',
     '    — source is one of those four literal strings ONLY; a role like "underwriter" is NOT a valid source',
+    '    — pick source from the text: a human doing it = "user"; a cron/timer = "schedule";',
+    '      an inbound HTTP event = "webhook"; triggered by another Capability finishing = "capability".',
+    '      Do NOT round-robin or distribute evenly across the four values. Default to "user" when unclear.',
     '  rules: ARRAY of { capability, type: "access" | "condition", allow?: [{role}], conditions?: [...] }',
     '    — "access" rules carry roles; "condition" rules carry attribute predicates',
     '  outcomes: ARRAY of { capability, changes: [{attribute, set}] }',
-    '  relationships (optional): ARRAY of { name, from, to, attribute, cardinality }',
+    '  relationships (optional): ARRAY of { name, from, to, attribute, cardinality: "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many" }',
+    '    — match cardinality to the text: "each X has many Y" → one-to-many from X to Y.',
+    '  positions (optional): ARRAY of { name, description?, roles?: [string] }',
+    '    — a Position is a job title ("Case Manager", "Underwriter"). ALWAYS include when the text names roles performing work.',
+    '  persons (optional): ARRAY of { name, position }',
+    '    — a Person is a named individual filling a Position.',
+    '  tasks (optional): ARRAY of { name, position, capability, description? }',
+    '    — a Task is "Position performs one Capability". Use when the text says who does what.',
+    '  processes (optional): ARRAY of { name, description?, operator?, steps: [{id, task, depends_on?: [id]}] }',
+    '    — a Process is a named, owned DAG of Tasks (an SOP / workflow).',
+    '    — ALWAYS include processes when the text enumerates named workflows or end-to-end flows.',
   ].join('\n'),
   product: [
-    'product (optional, only if the text clearly describes software being built):',
+    'product (INCLUDE ONLY IF the input text explicitly describes software being built — UI screens, API endpoints, resources, pages, fields at the UI/API level).',
+    'If the text describes only a business process or SOP without naming software, OMIT this layer entirely — do not guess endpoints, routes, or schemas.',
+    'When included:',
     '  core: { resources, actions, operations, roles, fields }',
-    '  api: { namespace, endpoints, schemas? }',
-    '  ui: { layouts, pages, routes, blocks }',
+    '  api:  { namespace, endpoints, schemas? }',
+    '  ui:   { layouts, pages, routes, blocks }',
   ].join('\n'),
   technical: [
-    'technical (optional, only if deployment is described):',
-    '  { cells, constructs, providers, environments, variables, outputs, scripts, views }',
+    'technical (INCLUDE ONLY IF the input text explicitly describes deployment — cloud provider, infrastructure, regions, pipelines, deploy scripts).',
+    'If the text does not describe deployment, OMIT this layer entirely — do not invent AWS/GCP/Azure values, regions, ARNs, or tooling.',
+    'When included: { cells, constructs, providers, environments, variables, outputs, scripts, views }',
   ].join('\n'),
 }
 
@@ -85,10 +125,19 @@ export function buildSystemPrompt(layers: Layer[], instructions?: string): strin
     '- Attributes have: name, type (string | text | number | boolean | date | datetime | enum | reference), optional required, optional values (for enums).',
     '- Domain path is dot-separated lowercase (acme.finance.lending).',
     '- Only include primitives implied by the text; do not invent.',
+    '- Derive EVERY name (nouns, verbs, attributes, roles, domain path) from the input text ONLY. Do not copy names from the structural skeleton below.',
+    '- The skeleton uses <placeholder> tokens to show shape, not content. Any `<...>` string in your response is an error.',
+    '- NEVER invent values to fill a layer. If the input text does not describe product/technical details, OMIT those layers from the response.',
+    '- An empty or partial section is always better than an invented one.',
   ]
 
   if (layers.includes('operational')) {
-    lines.push('', 'Full example of a valid response when operational is requested (note the outer "operational" wrapper):', '', OPERATIONAL_EXAMPLE)
+    lines.push(
+      '',
+      'Structural skeleton showing the shape of a valid operational response. Treat <placeholder> tokens as slots to fill from the input text — NEVER emit them literally:',
+      '',
+      OPERATIONAL_SKELETON,
+    )
   }
 
   if (instructions) {

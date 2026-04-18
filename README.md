@@ -170,12 +170,13 @@ Packages are published to npm. Deno 2 can consume them directly via `npm:` speci
 | `@dna-codes/output-markdown` | Renders DNA as structured markdown documentation |
 | `@dna-codes/output-mermaid` | Renders DNA as Mermaid diagrams (ERDs, flowcharts) |
 | `@dna-codes/output-html` | Renders DNA as semantic HTML |
+| `@dna-codes/output-text` | Renders DNA as plain prose — one combined document or one per unit (Capability/Noun/Process) for integration writers |
 
 **Integrations**
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/integration-jira` | Read/write DNA via Jira (Epics, Stories, webhooks) |
+| `@dna-codes/integration-jira` | Bidirectional Jira Cloud integration: Epic → `input-text` → DNA → `output-text` → Stories |
 | `@dna-codes/integration-github` | Read/write DNA via GitHub Issues and Projects |
 | `@dna-codes/integration-notion` | Read/write DNA via Notion pages and databases |
 
