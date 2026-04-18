@@ -9,7 +9,10 @@
     "packages/input-text",
     "packages/output-markdown",
     "packages/output-html",
-    "packages/output-mermaid"
+    "packages/output-mermaid",
+    "packages/input-example",
+    "packages/output-example",
+    "packages/integration-example"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",

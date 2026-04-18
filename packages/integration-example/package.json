@@ -1,0 +1,44 @@
+{
+  "name": "@dna-codes/integration-example",
+  "version": "0.0.1",
+  "description": "Template for building a DNA integration-* package. Connects an external system bidirectionally via API calls, inbound webhooks, and a CLI. Fork this to bootstrap a new integration (Jira, GitHub, Notion, Linear, ...).",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "integration-example": "./bin/integration-example.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.4.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ]
+  }
+}

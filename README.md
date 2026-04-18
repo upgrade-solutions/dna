@@ -111,24 +111,63 @@ A **Cell** is the unit of deployment — it consumes DNA from upper layers and g
 
 ## Packages
 
-| Package | Purpose |
-|---------|---------|
-| [`packages/schemas`](packages/schemas) (`@dna-codes/schemas`) | Canonical JSON Schema (Draft 2020-12) definitions for all three layers — language-agnostic, zero deps |
-| [`packages/core`](packages/core) (`@dna-codes/core`) | TypeScript bindings + per-layer and cross-layer validator; wraps `@dna-codes/schemas` |
-| [`packages/input-json`](packages/input-json) (`@dna-codes/input-json`) | Infers Nouns, Attributes, and Relationships from a plain JSON data sample |
-| [`packages/input-openapi`](packages/input-openapi) (`@dna-codes/input-openapi`) | Parses an OpenAPI 3.x spec (JSON) into a DNA Product API document |
-| [`packages/input-text`](packages/input-text) (`@dna-codes/input-text`) | Converts freeform prose into DNA via an LLM provider (OpenAI, OpenRouter, Anthropic). Requires an API key. |
-| [`packages/output-markdown`](packages/output-markdown) (`@dna-codes/output-markdown`) | Renders DNA documents as structured markdown documentation |
-| [`packages/output-html`](packages/output-html) (`@dna-codes/output-html`) | Renders DNA documents as semantic HTML (same sections as output-markdown) |
-| [`packages/output-mermaid`](packages/output-mermaid) (`@dna-codes/output-mermaid`) | Renders DNA as Mermaid diagrams (ERDs from Nouns + Relationships, flowcharts from Processes) |
-
 ### Naming convention
 
-Adapters follow the pipeline `[source] → input format → DNA → output format → [destination]`:
+The pipeline is: `[integration] → input-* → DNA → output-* → [integration]`
 
-- **`input-<format>`** / **`output-<format>`** — format adapters (DNA ↔ JSON, YAML, markdown, text, …). Format-first: you point them at a string or file and get DNA (or a rendered format) back. Most are pure/local; a few (like `input-text`) need an LLM provider and flag `requires: apiKey` in their README.
-- **`source-<system>`** / **`destination-<system>`** — system integrations (Google Meet, Notion, GitHub, …). Talk to a specific external system; carry auth, rate limits, and their own release cadence. Lives outside `@dna-codes/*` for now.
+- **`input-*`** — converts a format into DNA. Same input always produces same output (deterministic), unless the package requires an LLM, in which case it is probabilistic. Each probabilistic package documents its dependencies explicitly: required LLM provider, expected API keys, and non-determinism implications.
+- **`output-*`** — renders DNA into a format string. No system knowledge; pure and local.
+- **`integration-*`** — connects to an external system bidirectionally. Owns auth, field mapping, rate limits, and API versioning for that system. May use `input-*` or `output-*` packages internally.
 
-Rule of thumb: if the primary thing you hand it is content (a string, file, or blob), it's a format adapter — even if it dispatches to an LLM. If the primary thing is a *system* you're talking to, it's a system adapter.
+Full API reference and layer-specific authoring DNA contracts live in [`@dna-codes/core/docs/`](packages/core/docs/).
 
-Full API reference and layer-specific authoring contracts live in [`packages/core/docs/`](packages/core/docs/).
+**Core**
+
+| Package | Purpose |
+|---------|---------|
+| `@dna-codes/schemas` | Canonical JSON Schema (Draft 2020-12) definitions for all three layers — language-agnostic, zero deps |
+| `@dna-codes/core` | TypeScript bindings + per-layer and cross-layer validator; wraps `@dna-codes/schemas` |
+
+**Input — deterministic** (pure functions, no external dependencies)
+
+| Package | Purpose |
+|---------|---------|
+| `@dna-codes/input-json` | Infers Nouns, Attributes, and Relationships from a plain JSON data sample |
+| `@dna-codes/input-openapi` | Parses an OpenAPI 3.x spec into a DNA Product API document |
+| `@dna-codes/input-ddl` | Parses SQL DDL into DNA Nouns and Attributes |
+
+**Input — probabilistic** (requires an LLM provider and API key)
+
+| Package | Purpose |
+|---------|---------|
+| `@dna-codes/input-text` | Converts freeform prose into DNA |
+| `@dna-codes/input-transcript` | Converts a meeting or interview transcript into DNA |
+| `@dna-codes/input-image` | Infers DNA from an image (screenshot, whiteboard, diagram) |
+
+**Output**
+
+| Package | Purpose |
+|---------|---------|
+| `@dna-codes/output-markdown` | Renders DNA as structured markdown documentation |
+| `@dna-codes/output-mermaid` | Renders DNA as Mermaid diagrams (ERDs, flowcharts) |
+| `@dna-codes/output-html` | Renders DNA as semantic HTML |
+
+**Integrations**
+
+| Package | Purpose |
+|---------|---------|
+| `@dna-codes/integration-jira` | Read/write DNA via Jira (Epics, Stories, webhooks) |
+| `@dna-codes/integration-github` | Read/write DNA via GitHub Issues and Projects |
+| `@dna-codes/integration-notion` | Read/write DNA via Notion pages and databases |
+
+**Templates**
+
+Reference implementations for engineers and AI agents. Each ships an `AGENTS.md` with fork instructions.
+
+| Package | Purpose |
+|---------|---------|
+| `@dna-codes/input-example` | Template for a new `input-*` — shows deterministic and probabilistic modes side-by-side |
+| `@dna-codes/output-example` | Template for a new `output-*` renderer with a sections pattern |
+| `@dna-codes/integration-example` | Template for a new `integration-*` — outbound API, inbound webhook (HMAC), and a CLI |
+
+See the root [`AGENTS.md`](AGENTS.md) for overall repo orientation.
