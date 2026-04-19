@@ -19,7 +19,7 @@ export declare class DnaValidator {
     private registerSchemas;
     validate(doc: unknown, schemaId: string): ValidationResult;
     availableSchemas(): string[];
-    private collectNouns;
+    private collectResources;
     validateCrossLayer(layers: {
         operational?: unknown;
         productCore?: unknown;

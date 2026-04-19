@@ -11,7 +11,9 @@ A DSL written in JSON/YAML, it describes a business at three intentionally decou
 | **Product** | What gets built — resources, operations, endpoints, pages | OpenAPI + Atomic Design |
 | **Technical** | How it gets built — cells, constructs, providers, environments | Terraform / AWS SAM |
 
-Layers are one-way downstream: Operational → Product → Technical. Upper layers never depend on lower ones. Cross-layer references (e.g. a Product Resource pointing at an Operational Noun) are plain strings validated by `@dna-codes/core` rather than JSON Schema `$ref`s.
+Layers are one-way downstream: Operational → Product → Technical. Upper layers never depend on lower ones. Cross-layer references (e.g. a Product Resource pointing at an Operational Resource) are plain strings validated by `@dna-codes/core` rather than JSON Schema `$ref`s.
+
+Operational DNA is modeled around the **Actor > Action > Resource** triad: Resources are the things the business tracks (Loan, Invoice, Post); Actions are what gets performed on them (Apply, Approve, Publish); Actors — the humans or systems that perform them — are expressed through Positions, Roles, and Tasks rather than declared on the Capability itself. A Capability is always a `Resource.Action` pair.
 
 Here's a minimal Operational DNA document in a lending context:
 
@@ -28,14 +30,14 @@ Here's a minimal Operational DNA document in a lending context:
           {
             "name": "lending",
             "path": "acme.finance.lending",
-            "nouns": [
+            "resources": [
               {
                 "name": "Loan",
                 "attributes": [
                   { "name": "amount", "type": "number", "required": true },
                   { "name": "status", "type": "enum", "values": ["pending", "active", "repaid"] }
                 ],
-                "verbs": [
+                "actions": [
                   { "name": "Apply" },
                   { "name": "Approve" }
                 ]
@@ -47,8 +49,8 @@ Here's a minimal Operational DNA document in a lending context:
     ]
   },
   "capabilities": [
-    { "noun": "Loan", "verb": "Apply", "name": "Loan.Apply" },
-    { "noun": "Loan", "verb": "Approve", "name": "Loan.Approve" }
+    { "resource": "Loan", "action": "Apply", "name": "Loan.Apply" },
+    { "resource": "Loan", "action": "Approve", "name": "Loan.Approve" }
   ],
   "causes": [
     { "capability": "Loan.Apply", "source": "user" },
@@ -71,22 +73,22 @@ Here's a minimal Operational DNA document in a lending context:
 Operational DNA captures the pure business-logic layer — independent of any UI, API, or deployment technology.
 
 **Structure primitives:**
-- **Noun** — a core entity of the domain (`Loan`, `Invoice`, `Order`). Has Attributes and Verbs nested inside it.
-- **Verb** — an action that can be performed on a Noun (`Apply`, `Approve`, `Ship`)
-- **Capability** — a Noun:Verb pair; the atomic unit of business activity (`Loan.Approve`)
-- **Attribute** — a typed property on a Noun; types: `string`, `text`, `number`, `boolean`, `date`, `datetime`, `enum`, `reference`
-- **Domain** — a dot-separated hierarchy that organizes Nouns into bounded contexts (`acme.finance.lending`)
-- **Relationship** — a named, directed, typed connection between two Nouns (cardinality + reference attribute)
+- **Resource** — a core entity of the domain (`Loan`, `Invoice`, `Order`). Has Attributes and Actions nested inside it.
+- **Action** — an operation performed on a Resource (`Apply`, `Approve`, `Ship`). Every Action is paired with a Resource; there is no Action without a Resource.
+- **Capability** — a Resource:Action pair; the atomic unit of business activity (`Loan.Approve`)
+- **Attribute** — a typed property on a Resource; types: `string`, `text`, `number`, `boolean`, `date`, `datetime`, `enum`, `reference`
+- **Domain** — a dot-separated hierarchy that organizes Resources into bounded contexts (`acme.finance.lending`)
+- **Relationship** — a named, directed, typed connection between two Resources (cardinality + reference attribute)
 
 **Behavior primitives:**
 - **Cause** — what initiates a Capability; sources: `user`, `schedule`, `webhook`, `capability`
-- **Rule** — constraints on a Capability: `access` (who may perform it) or `condition` (what must be true first)
+- **Rule** — constraints on a Capability: `access` (who may perform it — the Actor) or `condition` (what must be true first)
 - **Outcome** — state changes and downstream triggers after a Capability executes
 - **Signal** — a named domain event published after a Capability; carries a typed payload contract
 - **Equation** — a named, technology-agnostic computation (implemented by a Technical Script)
 
 **SOP primitives:**
-- **Position** — an organizational job title; carries Roles (defined in Product Core)
+- **Position** — an organizational job title — the Actor in the Actor > Action > Resource triad; carries Roles (defined in Product Core)
 - **Person** — an individual filling a Position (the org roster)
 - **Task** — a Position performing exactly one Capability
 - **Process** — a named, owned DAG of Tasks (Standard Operating Procedure)
@@ -95,7 +97,7 @@ Operational DNA captures the pure business-logic layer — independent of any UI
 
 Product DNA describes what gets built. It is split into three sub-layers that can be authored independently.
 
-**Core** (`product.core.json`) — materializes Operational concepts into product primitives: `Resource`, `Action`, `Operation`, `Role`, `Field`
+**Core** (`product.core.json`) — materializes Operational concepts into product primitives: `Resource`, `Action`, `Operation`, `Role`, `Field`. Product `Resource` and `Action` are surface projections of their Operational counterparts — the same vocabulary is reused intentionally.
 
 **API** (`product.api.json`) — REST surface: `Endpoint`, `Namespace`, `Param`, `Schema`
 
@@ -167,9 +169,9 @@ Legend: ✅ shipped · 🚧 planned (listed below) · 💡 candidate (natural fi
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/input-json` | Infers Nouns, Attributes, and Relationships from a plain JSON data sample |
+| `@dna-codes/input-json` | Infers Resources, Attributes, and Relationships from a plain JSON data sample |
 | `@dna-codes/input-openapi` | Parses an OpenAPI 3.x spec into a DNA Product API document |
-| `@dna-codes/input-ddl` | Parses SQL DDL into DNA Nouns and Attributes |
+| `@dna-codes/input-ddl` | Parses SQL DDL into DNA Resources and Attributes |
 
 **Input — probabilistic** (requires an LLM provider and API key)
 
@@ -186,7 +188,7 @@ Legend: ✅ shipped · 🚧 planned (listed below) · 💡 candidate (natural fi
 | `@dna-codes/output-markdown` | Renders DNA as structured markdown documentation |
 | `@dna-codes/output-mermaid` | Renders DNA as Mermaid diagrams (ERDs, flowcharts) |
 | `@dna-codes/output-html` | Renders DNA as semantic HTML |
-| `@dna-codes/output-text` | Renders DNA as plain prose — one combined document or one per unit (Capability/Noun/Process) for integration writers |
+| `@dna-codes/output-text` | Renders DNA as plain prose — one combined document or one per unit (Capability/Resource/Process) for integration writers |
 
 **Integrations**
 

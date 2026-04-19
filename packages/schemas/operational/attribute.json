@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.local/operational/attribute",
   "title": "Attribute",
-  "description": "An Attribute is a property that belongs to a Noun. Attributes describe the data shape of a Noun — its fields, their types, and any constraints.",
+  "description": "An Attribute is a property that belongs to a Resource. Attributes describe the data shape of a Resource — its fields, their types, and any constraints.",
   "type": "object",
   "required": ["name", "type"],
   "properties": {
@@ -23,7 +23,7 @@
     },
     "required": {
       "type": "boolean",
-      "description": "Whether this attribute must be present on the noun.",
+      "description": "Whether this attribute must be present on the resource.",
       "default": false
     },
     "values": {
@@ -35,9 +35,9 @@
         ["draft", "published", "archived"]
       ]
     },
-    "noun": {
+    "resource": {
       "type": "string",
-      "description": "The referenced Noun name when type is 'reference'.",
+      "description": "The referenced Resource name when type is 'reference'.",
       "examples": ["Author", "Department", "Order"]
     }
   },

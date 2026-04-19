@@ -9,19 +9,20 @@
  * The key set determines which unit types are emitted; the value picks the
  * body template. Default is `{ capability: 'user-story' }`.
  *
- * `user-story` and `gherkin` are action-shaped and only fit Capability — Noun
- * and Process always render as `product-dna` regardless of the style requested.
+ * `user-story` and `gherkin` are action-shaped and only fit Capability —
+ * Resource and Process always render as `product-dna` regardless of the style
+ * requested.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DEFAULT_STYLES = void 0;
 exports.render = render;
 exports.renderMany = renderMany;
 const capability_1 = require("./capability");
-const noun_1 = require("./noun");
+const resource_1 = require("./resource");
 const process_1 = require("./process");
 const types_1 = require("./types");
 const util_1 = require("./util");
-const UNIT_ORDER = ['capability', 'noun', 'process'];
+const UNIT_ORDER = ['capability', 'resource', 'process'];
 function render(dna, options = {}) {
     const op = dna.operational;
     if (!op)
@@ -59,8 +60,8 @@ function unitDocs(unit, style, op) {
     switch (unit) {
         case 'capability':
             return (op.capabilities ?? []).map((c) => capabilityDoc(c, op, style));
-        case 'noun':
-            return collectNouns(op.domain).map((n) => nounDoc(n, op));
+        case 'resource':
+            return collectResources(op.domain).map((r) => resourceDoc(r, op));
         case 'process':
             return (op.processes ?? []).map((p) => processDoc(p, op));
     }
@@ -72,11 +73,11 @@ function capabilityDoc(cap, op, style) {
         body: (0, capability_1.renderCapability)(cap, op, style),
     };
 }
-function nounDoc(n, op) {
+function resourceDoc(r, op) {
     return {
-        id: `noun-${(0, util_1.slugify)(n.name)}`,
-        title: (0, noun_1.nounTitle)(n),
-        body: (0, noun_1.renderNoun)(n, op),
+        id: `resource-${(0, util_1.slugify)(r.name)}`,
+        title: (0, resource_1.resourceTitle)(r),
+        body: (0, resource_1.renderResource)(r, op),
     };
 }
 function processDoc(p, op) {
@@ -102,14 +103,14 @@ function renderUnitSection(unit, style, op) {
 function unitHeading(unit) {
     if (unit === 'capability')
         return 'Capabilities';
-    if (unit === 'noun')
+    if (unit === 'resource')
         return 'Domain model';
     return 'Processes';
 }
-function collectNouns(domain) {
-    const out = [...(domain.nouns ?? [])];
+function collectResources(domain) {
+    const out = [...(domain.resources ?? [])];
     for (const sub of domain.domains ?? [])
-        out.push(...collectNouns(sub));
+        out.push(...collectResources(sub));
     return out;
 }
 var types_2 = require("./types");

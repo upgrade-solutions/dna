@@ -1,39 +1,39 @@
-import { DnaInput, Noun, OperationalDomain, Relationship } from '../types'
+import { DnaInput, Resource, OperationalDomain } from '../types'
 import { hashes } from '../util'
 
 export function renderDomainModel(dna: DnaInput, h: number): string | null {
   const op = dna.operational
   if (!op) return null
 
-  const nouns = collectNouns(op.domain)
-  if (!nouns.length) return null
+  const resources = collectResources(op.domain)
+  if (!resources.length) return null
 
   const relsByFrom = groupBy(op.relationships ?? [], (r) => r.from)
 
   const lines: string[] = [`${hashes(h)} Domain Model`]
 
-  for (const noun of nouns) {
-    lines.push('', `${hashes(h + 1)} ${noun.name}`)
-    if (noun.description) lines.push('', noun.description)
+  for (const resource of resources) {
+    lines.push('', `${hashes(h + 1)} ${resource.name}`)
+    if (resource.description) lines.push('', resource.description)
 
-    if (noun.attributes?.length) {
+    if (resource.attributes?.length) {
       lines.push(
         '',
         '| Attribute | Type | Required | Description |',
         '| --- | --- | --- | --- |',
       )
-      for (const attr of noun.attributes) {
+      for (const attr of resource.attributes) {
         lines.push(
           `| \`${attr.name}\` | ${attr.type ?? '—'} | ${attr.required ? 'yes' : 'no'} | ${attr.description ?? ''} |`,
         )
       }
     }
 
-    if (noun.verbs?.length) {
-      lines.push('', `**Verbs:** ${noun.verbs.map((v) => `\`${v.name}\``).join(', ')}`)
+    if (resource.actions?.length) {
+      lines.push('', `**Actions:** ${resource.actions.map((a) => `\`${a.name}\``).join(', ')}`)
     }
 
-    const rels = relsByFrom.get(noun.name) ?? []
+    const rels = relsByFrom.get(resource.name) ?? []
     if (rels.length) {
       lines.push('', '**Relationships:**')
       for (const r of rels) {
@@ -47,9 +47,9 @@ export function renderDomainModel(dna: DnaInput, h: number): string | null {
   return lines.join('\n')
 }
 
-function collectNouns(domain: OperationalDomain): Noun[] {
-  const out = [...(domain.nouns ?? [])]
-  for (const sub of domain.domains ?? []) out.push(...collectNouns(sub))
+function collectResources(domain: OperationalDomain): Resource[] {
+  const out = [...(domain.resources ?? [])]
+  for (const sub of domain.domains ?? []) out.push(...collectResources(sub))
   return out
 }
 

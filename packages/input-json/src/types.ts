@@ -2,10 +2,10 @@ export interface ParsedAttribute {
   name: string
   type: string
   required?: boolean
-  noun?: string
+  resource?: string
 }
 
-export interface ParsedNoun {
+export interface ParsedResource {
   name: string
   attributes: ParsedAttribute[]
 }
@@ -21,7 +21,7 @@ export interface ParsedRelationship {
 export interface ParsedOperational {
   domain: {
     name: string
-    nouns: ParsedNoun[]
+    resources: ParsedResource[]
   }
   relationships?: ParsedRelationship[]
 }

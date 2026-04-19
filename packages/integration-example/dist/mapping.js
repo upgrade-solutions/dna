@@ -8,19 +8,19 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.itemsToDna = itemsToDna;
-exports.itemToNoun = itemToNoun;
+exports.itemToResource = itemToResource;
 exports.dnaToItems = dnaToItems;
 /** Collapse a flat list of external items into an operational DNA slice. */
 function itemsToDna(items, domain) {
     const leaf = domain.split('.').pop() ?? domain;
-    const nouns = items.map(itemToNoun);
+    const resources = items.map(itemToResource);
     return {
         operational: {
-            domain: { name: leaf, path: domain, nouns },
+            domain: { name: leaf, path: domain, resources },
         },
     };
 }
-function itemToNoun(item) {
+function itemToResource(item) {
     return {
         name: toPascalCase(item.title),
         ...(item.description ? { description: item.description } : {}),
@@ -30,13 +30,13 @@ function itemToNoun(item) {
         },
     };
 }
-/** Walk every Noun in a DNA document, ignoring nested sub-domains for brevity. */
+/** Walk every Resource in a DNA document, ignoring nested sub-domains for brevity. */
 function dnaToItems(dna) {
-    const nouns = dna.operational?.domain.nouns ?? [];
-    return nouns.map((n) => ({
-        title: n.name,
-        ...(n.description ? { description: n.description } : {}),
-        ...(n.metadata?.tags?.length ? { tags: n.metadata.tags } : {}),
+    const resources = dna.operational?.domain.resources ?? [];
+    return resources.map((r) => ({
+        title: r.name,
+        ...(r.description ? { description: r.description } : {}),
+        ...(r.metadata?.tags?.length ? { tags: r.metadata.tags } : {}),
     }));
 }
 function toPascalCase(s) {

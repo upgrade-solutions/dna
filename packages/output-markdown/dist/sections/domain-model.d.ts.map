@@ -1,1 +1,1 @@
-{"version":3,"file":"domain-model.d.ts","sourceRoot":"","sources":["../../src/sections/domain-model.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAyC,MAAM,UAAU,CAAA;AAG1E,wBAAgB,iBAAiB,CAAC,GAAG,EAAE,QAAQ,EAAE,CAAC,EAAE,MAAM,GAAG,MAAM,GAAG,IAAI,CA4CzE"}
+{"version":3,"file":"domain-model.d.ts","sourceRoot":"","sources":["../../src/sections/domain-model.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAA+B,MAAM,UAAU,CAAA;AAGhE,wBAAgB,iBAAiB,CAAC,GAAG,EAAE,QAAQ,EAAE,CAAC,EAAE,MAAM,GAAG,MAAM,GAAG,IAAI,CA4CzE"}

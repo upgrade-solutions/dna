@@ -7,7 +7,7 @@ const dna: DnaInput = {
       name: 'lending',
       path: 'acme.finance.lending',
       description: 'Consumer lending.',
-      nouns: [
+      resources: [
         {
           name: 'Loan',
           description: 'A loan applied for by a borrower.',
@@ -15,13 +15,13 @@ const dna: DnaInput = {
             { name: 'amount', type: 'number', required: true },
             { name: 'status', type: 'enum' },
           ],
-          verbs: [{ name: 'Apply' }, { name: 'Approve' }],
+          actions: [{ name: 'Apply' }, { name: 'Approve' }],
         },
       ],
     },
     capabilities: [
-      { name: 'Loan.Apply', noun: 'Loan', verb: 'Apply', description: 'Submit a loan application.' },
-      { name: 'Loan.Approve', noun: 'Loan', verb: 'Approve' },
+      { name: 'Loan.Apply', resource: 'Loan', action: 'Apply', description: 'Submit a loan application.' },
+      { name: 'Loan.Approve', resource: 'Loan', action: 'Approve' },
     ],
     causes: [{ capability: 'Loan.Apply', source: 'user' }],
     rules: [
@@ -68,7 +68,7 @@ describe('render — single combined document', () => {
 
   it('includes other units when their styles are set', () => {
     const out = render(dna, {
-      styles: { capability: 'user-story', noun: 'product-dna', process: 'product-dna' },
+      styles: { capability: 'user-story', resource: 'product-dna', process: 'product-dna' },
     })
     expect(out).toContain('## Capabilities')
     expect(out).toContain('## Domain model')
@@ -128,24 +128,24 @@ describe('renderMany — styles', () => {
 describe('renderMany — multi-unit', () => {
   it('returns docs for every unit in the styles map, in canonical order', () => {
     const docs = renderMany(dna, {
-      styles: { capability: 'product-dna', noun: 'product-dna', process: 'product-dna' },
+      styles: { capability: 'product-dna', resource: 'product-dna', process: 'product-dna' },
     })
     const ids = docs.map((d) => d.id)
     expect(ids).toEqual([
       'capability-loan-apply',
       'capability-loan-approve',
-      'noun-loan',
+      'resource-loan',
       'process-loan-onboarding',
     ])
   })
 
-  it('noun body uses product-dna vocabulary', () => {
-    const [n] = renderMany(dna, { styles: { noun: 'product-dna' } })
-    expect(n.id).toBe('noun-loan')
-    expect(n.body).toContain('**Resource:** `Loan`')
-    expect(n.body).toContain('**Fields:**')
-    expect(n.body).toContain('`amount`: number (required)')
-    expect(n.body).toContain('**Actions:**')
+  it('resource body uses product-dna vocabulary', () => {
+    const [r] = renderMany(dna, { styles: { resource: 'product-dna' } })
+    expect(r.id).toBe('resource-loan')
+    expect(r.body).toContain('**Resource:** `Loan`')
+    expect(r.body).toContain('**Fields:**')
+    expect(r.body).toContain('`amount`: number (required)')
+    expect(r.body).toContain('**Actions:**')
   })
 
   it('process body uses Operation / Role / Steps vocabulary', () => {

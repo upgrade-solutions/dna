@@ -21,14 +21,14 @@ export interface OperationalDomain {
     name: string;
     path?: string;
     description?: string;
-    nouns?: Noun[];
+    resources?: Resource[];
     domains?: OperationalDomain[];
 }
-export interface Noun {
+export interface Resource {
     name: string;
     description?: string;
     attributes?: Attribute[];
-    verbs?: Verb[];
+    actions?: Action[];
 }
 export interface Attribute {
     name: string;
@@ -36,14 +36,14 @@ export interface Attribute {
     required?: boolean;
     description?: string;
 }
-export interface Verb {
+export interface Action {
     name: string;
     description?: string;
 }
 export interface Capability {
     name: string;
-    noun: string;
-    verb: string;
+    resource: string;
+    action: string;
     description?: string;
 }
 export interface Rule {
@@ -112,7 +112,7 @@ export interface ProcessStep {
     depends_on?: string[];
 }
 /** Which DNA primitive becomes one text document. */
-export type Unit = 'capability' | 'noun' | 'process';
+export type Unit = 'capability' | 'resource' | 'process';
 /**
  * Body template applied to a unit's rendered text.
  *
@@ -121,7 +121,7 @@ export type Unit = 'capability' | 'noun' | 'process';
  *   - product-dna  Key:value blocks using Product-DNA vocabulary
  *                  (Actor, Resource, Action, Role, Field, Operation). Fits all units.
  *
- * Noun and Process always render as `product-dna` regardless of the style
+ * Resource and Process always render as `product-dna` regardless of the style
  * requested — user-story/gherkin are action-shaped and don't translate.
  */
 export type Style = 'user-story' | 'gherkin' | 'product-dna';

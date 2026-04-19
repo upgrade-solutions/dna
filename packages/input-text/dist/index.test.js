@@ -22,7 +22,7 @@ const anthropicResponse = (text) => ({
 });
 const sampleDna = {
     operational: {
-        domain: { name: 'acme', path: 'acme', nouns: [{ name: 'Loan', attributes: [], verbs: [] }] },
+        domain: { name: 'acme', path: 'acme', resources: [{ name: 'Loan', attributes: [], actions: [] }] },
     },
 };
 describe('@dna-codes/input-text', () => {

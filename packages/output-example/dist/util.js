@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectNouns = collectNouns;
+exports.collectResources = collectResources;
 exports.repeat = repeat;
 exports.indent = indent;
-/** Flatten a domain tree into a single list of Nouns. */
-function collectNouns(domain) {
-    const out = [...(domain.nouns ?? [])];
+/** Flatten a domain tree into a single list of Resources. */
+function collectResources(domain) {
+    const out = [...(domain.resources ?? [])];
     for (const sub of domain.domains ?? [])
-        out.push(...collectNouns(sub));
+        out.push(...collectResources(sub));
     return out;
 }
 /** Repeat a character n times, clamped to [min, max]. */

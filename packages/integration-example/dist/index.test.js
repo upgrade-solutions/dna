@@ -21,14 +21,14 @@ function mockFetch(handler) {
     return { fetchImpl, calls };
 }
 describe('mapping', () => {
-    it('maps external items to DNA Nouns with PascalCase names', () => {
+    it('maps external items to DNA Resources with PascalCase names', () => {
         const dna = (0, mapping_1.itemsToDna)([{ id: 'i1', title: 'loan application', tags: ['a', 'b'] }], 'acme.ops');
-        const [noun] = dna.operational.domain.nouns;
-        expect(noun.name).toBe('LoanApplication');
-        expect(noun.metadata?.externalId).toBe('i1');
-        expect(noun.metadata?.tags).toEqual(['a', 'b']);
+        const [resource] = dna.operational.domain.resources;
+        expect(resource.name).toBe('LoanApplication');
+        expect(resource.metadata?.externalId).toBe('i1');
+        expect(resource.metadata?.tags).toEqual(['a', 'b']);
     });
-    it('round-trips Nouns through dnaToItems', () => {
+    it('round-trips Resources through dnaToItems', () => {
         const dna = (0, mapping_1.itemsToDna)([{ id: 'i1', title: 'Loan', description: 'x' }], 'acme.ops');
         const [out] = (0, mapping_1.dnaToItems)(dna);
         expect(out.title).toBe('Loan');
@@ -48,9 +48,9 @@ describe('client', () => {
         expect(calls).toHaveLength(2);
         expect(calls[0].init.headers.authorization).toBe('Bearer tok');
         expect(calls[1].url).toContain('cursor=c2');
-        expect(dna.operational?.domain.nouns?.map((n) => n.name)).toEqual(['First', 'Second']);
+        expect(dna.operational?.domain.resources?.map((r) => r.name)).toEqual(['First', 'Second']);
     });
-    it('pushDna creates an item per Noun', async () => {
+    it('pushDna creates an item per Resource', async () => {
         const { fetchImpl, calls } = mockFetch((_url, init) => {
             const body = JSON.parse(init.body);
             return { body: { id: 'new', ...body } };
@@ -58,7 +58,7 @@ describe('client', () => {
         const client = (0, client_1.createClient)({ baseUrl: 'https://api.example.com', apiToken: 'tok', fetchImpl });
         const { created } = await client.pushDna({
             operational: {
-                domain: { name: 'ops', nouns: [{ name: 'Alpha' }, { name: 'Beta' }] },
+                domain: { name: 'ops', resources: [{ name: 'Alpha' }, { name: 'Beta' }] },
             },
         });
         expect(created).toBe(2);

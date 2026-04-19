@@ -29,19 +29,19 @@ export interface FieldInput {
     required?: boolean;
 }
 export interface ActionInput {
-    /** Name of the entity this action applies to. */
+    /** Name of the entity (Resource) this action applies to. */
     entity: string;
-    /** Verb to perform (e.g. "Create", "Approve", "Ship"). */
-    verb: string;
+    /** Action to perform (e.g. "Create", "Approve", "Ship"). */
+    action: string;
 }
 export interface ParseOptions {
-    /** Domain name wrapping the inferred nouns (e.g. "acme.finance.lending"). */
+    /** Domain name wrapping the inferred Resources (e.g. "acme.finance.lending"). */
     domain: string;
     /**
-     * Optional remap of an input entity name to a DNA Noun name.
+     * Optional remap of an input entity name to a DNA Resource name.
      * Defaults to PascalCase of the entity name.
      */
-    nounNameFromEntity?: (entity: string) => string;
+    resourceNameFromEntity?: (entity: string) => string;
 }
 export interface ParseResult {
     operational: ParsedOperational;
@@ -50,26 +50,26 @@ export interface ParsedOperational {
     domain: {
         name: string;
         path: string;
-        nouns: ParsedNoun[];
+        resources: ParsedResource[];
     };
     capabilities?: ParsedCapability[];
 }
-export interface ParsedNoun {
+export interface ParsedResource {
     name: string;
     attributes: ParsedAttribute[];
-    verbs?: ParsedVerb[];
+    actions?: ParsedAction[];
 }
 export interface ParsedAttribute {
     name: string;
     type: string;
     required?: boolean;
 }
-export interface ParsedVerb {
+export interface ParsedAction {
     name: string;
 }
 export interface ParsedCapability {
-    noun: string;
-    verb: string;
+    resource: string;
+    action: string;
     name: string;
 }
 export type Provider = 'openai' | 'openrouter' | 'anthropic';

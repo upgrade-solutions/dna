@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.local/operational/domain",
   "title": "Domain",
-  "description": "A Domain is a grouping mechanism that organizes related Nouns into a logical boundary. Domains can be multiple levels deep — e.g. organization → domain → subdomain — with Nouns at the leaves.",
+  "description": "A Domain is a grouping mechanism that organizes related Resources into a logical boundary. Domains can be multiple levels deep — e.g. organization → domain → subdomain — with Resources at the leaves.",
   "type": "object",
   "required": ["name"],
   "properties": {
@@ -25,10 +25,10 @@
       "description": "Child domains nested within this domain.",
       "items": { "$ref": "https://dna.local/operational/domain" }
     },
-    "nouns": {
+    "resources": {
       "type": "array",
-      "description": "The Nouns that live directly within this domain.",
-      "items": { "$ref": "https://dna.local/operational/noun" }
+      "description": "The Resources that live directly within this domain.",
+      "items": { "$ref": "https://dna.local/operational/resource" }
     }
   },
   "examples": [
@@ -43,7 +43,7 @@
             {
               "name": "lending",
               "path": "acme.finance.lending",
-              "nouns": [{ "name": "Loan" }]
+              "resources": [{ "name": "Loan" }]
             }
           ]
         }

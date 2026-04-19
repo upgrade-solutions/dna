@@ -55,7 +55,7 @@ describe('@dna-codes/output-markdown', () => {
   describe('section: summary', () => {
     it('lists primitive counts for populated collections only', () => {
       const md = render(bookshopInput, { sections: ['summary'] })
-      expect(md).toContain('- Nouns: 2')
+      expect(md).toContain('- Resources: 2')
       expect(md).toContain('- Capabilities: 2')
       expect(md).toContain('- Rules: 2')
       expect(md).toContain('- Processes: 1')
@@ -63,19 +63,19 @@ describe('@dna-codes/output-markdown', () => {
       expect(md).not.toContain('Equations:')
     })
 
-    it('names top-level nouns', () => {
+    it('names top-level resources', () => {
       const md = render(bookshopInput, { sections: ['summary'] })
-      expect(md).toContain('**Top-level nouns:** `Book`, `Author`')
+      expect(md).toContain('**Top-level resources:** `Book`, `Author`')
     })
   })
 
   describe('section: domain-model', () => {
-    it('renders a noun with attribute table, verbs, and relationships', () => {
+    it('renders a resource with attribute table, actions, and relationships', () => {
       const md = render(bookshopInput, { sections: ['domain-model'] })
       expect(md).toContain('### Book')
       expect(md).toContain('| Attribute | Type | Required | Description |')
       expect(md).toContain('| `id` | string | yes |')
-      expect(md).toContain('**Verbs:** `Publish`, `Retire`')
+      expect(md).toContain('**Actions:** `Publish`, `Retire`')
       expect(md).toContain('`Book.author`')
       expect(md).toContain('many-to-one → `Author`')
     })

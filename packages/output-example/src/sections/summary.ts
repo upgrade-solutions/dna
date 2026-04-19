@@ -1,5 +1,5 @@
 import { DnaInput } from '../types'
-import { collectNouns, repeat } from '../util'
+import { collectResources, repeat } from '../util'
 
 /**
  * Render a brief, counts-only summary of the DNA. Returns null when there's
@@ -9,9 +9,9 @@ export function renderSummary(dna: DnaInput, headingLevel: number): string | nul
   const op = dna.operational
   if (!op) return null
 
-  const nouns = collectNouns(op.domain)
+  const resources = collectResources(op.domain)
   const raw: [string, number][] = [
-    ['Nouns', nouns.length],
+    ['Resources', resources.length],
     ['Capabilities', op.capabilities?.length ?? 0],
     ['Relationships', op.relationships?.length ?? 0],
   ]

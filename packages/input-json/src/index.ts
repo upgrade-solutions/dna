@@ -1,17 +1,17 @@
 import {
   ParsedAttribute,
-  ParsedNoun,
+  ParsedResource,
   ParsedRelationship,
   ParseResult,
 } from './types'
 
 export interface ParseOptions {
-  /** Name for the root noun. Required — input JSON doesn't name itself. */
+  /** Name for the root Resource. Required — input JSON doesn't name itself. */
   name: string
-  /** Domain name wrapping the inferred nouns. Defaults to options.name lowercased. */
+  /** Domain name wrapping the inferred Resources. Defaults to options.name lowercased. */
   domain?: string
-  /** Map a property key to the noun name it references. Default: PascalCase, singularized. */
-  nounNameFromKey?: (key: string) => string
+  /** Map a property key to the Resource name it references. Default: PascalCase, singularized. */
+  resourceNameFromKey?: (key: string) => string
 }
 
 export function parse(data: unknown, options: ParseOptions): ParseResult {
@@ -19,16 +19,16 @@ export function parse(data: unknown, options: ParseOptions): ParseResult {
     throw new Error('input-json.parse: input must be a JSON object or array of objects.')
   }
 
-  const nouns = new Map<string, ParsedNoun>()
+  const resources = new Map<string, ParsedResource>()
   const relationships: ParsedRelationship[] = []
   const rootSample = Array.isArray(data) ? mergeRecords(data) : data
-  walk(rootSample, options.name, nouns, relationships, options)
+  walk(rootSample, options.name, resources, relationships, options)
 
   return {
     operational: {
       domain: {
         name: options.domain ?? options.name.toLowerCase(),
-        nouns: [...nouns.values()],
+        resources: [...resources.values()],
       },
       ...(relationships.length ? { relationships } : {}),
     },
@@ -37,12 +37,12 @@ export function parse(data: unknown, options: ParseOptions): ParseResult {
 
 function walk(
   data: Record<string, unknown>,
-  nounName: string,
-  nouns: Map<string, ParsedNoun>,
+  resourceName: string,
+  resources: Map<string, ParsedResource>,
   relationships: ParsedRelationship[],
   options: ParseOptions,
 ): void {
-  const existing = nouns.get(nounName)
+  const existing = resources.get(resourceName)
   const attrs: ParsedAttribute[] = existing?.attributes ? [...existing.attributes] : []
   const seen = new Set(attrs.map((a) => a.name))
 
@@ -51,22 +51,22 @@ function walk(
     seen.add(key)
 
     if (isRecord(value)) {
-      const childName = deriveNounName(key, options)
-      attrs.push({ name: key, type: 'reference', noun: childName })
-      relationships.push(buildRelationship(nounName, childName, key, 'one-to-one'))
-      walk(value, childName, nouns, relationships, options)
+      const childName = deriveResourceName(key, options)
+      attrs.push({ name: key, type: 'reference', resource: childName })
+      relationships.push(buildRelationship(resourceName, childName, key, 'one-to-one'))
+      walk(value, childName, resources, relationships, options)
     } else if (Array.isArray(value)) {
       if (value.length > 0 && isRecord(value[0])) {
-        const childName = deriveNounName(key, options)
-        attrs.push({ name: key, type: 'reference', noun: childName })
-        relationships.push(buildRelationship(nounName, childName, key, 'one-to-many'))
+        const childName = deriveResourceName(key, options)
+        attrs.push({ name: key, type: 'reference', resource: childName })
+        relationships.push(buildRelationship(resourceName, childName, key, 'one-to-many'))
         const merged = mergeRecords(value)
-        walk(merged, childName, nouns, relationships, options)
+        walk(merged, childName, resources, relationships, options)
       }
       // Arrays of scalars (e.g. `tags: ["fantasy", "classic"]`) have no faithful
       // representation as a single DNA Attribute — the canonical schema's
       // type enum is string | text | number | boolean | date | datetime | enum
-      // | reference. The DNA way to model scalar collections is a child Noun
+      // | reference. The DNA way to model scalar collections is a child Resource
       // plus a relationship, which requires more context than a JSON sample
       // provides (the scalar's name, its own attributes, etc.). Rather than
       // emit invalid DNA, drop these keys. Upgrade them manually if needed.
@@ -75,7 +75,7 @@ function walk(
     }
   }
 
-  nouns.set(nounName, { name: nounName, attributes: attrs })
+  resources.set(resourceName, { name: resourceName, attributes: attrs })
 }
 
 function buildRelationship(
@@ -93,8 +93,8 @@ function buildRelationship(
   }
 }
 
-function deriveNounName(key: string, options: ParseOptions): string {
-  if (options.nounNameFromKey) return options.nounNameFromKey(key)
+function deriveResourceName(key: string, options: ParseOptions): string {
+  if (options.resourceNameFromKey) return options.resourceNameFromKey(key)
   return pascalCase(singularize(key))
 }
 

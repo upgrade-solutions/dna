@@ -37,10 +37,10 @@ Every package has a matching `AGENTS.md` — check the relevant template before 
   - inputs:  `parse(data, options)` (deterministic) or `parseText(text, options)` (probabilistic, async)
   - outputs: `render(dna, options?)` returning a string
   - integrations: `createClient(options)` + `parseWebhook(...)` + `runCli(argv)`
-- **Return layered DNA** — always an object keyed by `operational` / `productCore` / `productApi` / `productUi` / `technical`. Never a bare noun / array.
+- **Return layered DNA** — always an object keyed by `operational` / `productCore` / `productApi` / `productUi` / `technical`. Never a bare resource / array.
 - **Layers are one-way downstream.** Operational → Product → Technical. Upper layers never import lower.
 - **Cross-layer references are strings.** Validated by `@dna-codes/core`, not by JSON Schema `$ref`.
-- **DNA naming:** Nouns are PascalCase singular. Verbs are PascalCase. Capability names are `Noun.Verb`.
+- **DNA naming:** Operational DNA uses the Actor > Action > Resource triad. Resources are PascalCase singular. Actions are PascalCase and must pair with a Resource. Capability names are `Resource.Action`.
 
 ## Creating a new package
 

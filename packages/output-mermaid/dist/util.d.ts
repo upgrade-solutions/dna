@@ -1,5 +1,5 @@
-import { Noun, OperationalDomain } from './types';
-export declare function collectNouns(domain: OperationalDomain): Noun[];
+import { Resource, OperationalDomain } from './types';
+export declare function collectResources(domain: OperationalDomain): Resource[];
 /** Sanitize a DNA name for use as a mermaid identifier (no quotes / spaces). */
 export declare function mermaidId(s: string): string;
 /** Escape a string for use inside a mermaid node label (quotes become &quot;). */

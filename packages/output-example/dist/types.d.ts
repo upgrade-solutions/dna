@@ -22,26 +22,26 @@ export interface OperationalDomain {
     name: string;
     path?: string;
     description?: string;
-    nouns?: Noun[];
+    resources?: Resource[];
     domains?: OperationalDomain[];
 }
-export interface Noun {
+export interface Resource {
     name: string;
     attributes?: Attribute[];
-    verbs?: Verb[];
+    actions?: Action[];
 }
 export interface Attribute {
     name: string;
     type: string;
     required?: boolean;
 }
-export interface Verb {
+export interface Action {
     name: string;
     description?: string;
 }
 export interface Capability {
-    noun: string;
-    verb: string;
+    resource: string;
+    action: string;
     name: string;
     description?: string;
 }

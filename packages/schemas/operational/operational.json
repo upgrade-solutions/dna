@@ -2,17 +2,17 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.local/operational",
   "title": "OperationalDNA",
-  "description": "A complete Operational DNA document for an application instance. Composes a domain hierarchy with the full behavior stack (capabilities, causes, rules, outcomes, equations) and the SOP stack (positions, persons, tasks, processes).",
+  "description": "A complete Operational DNA document for an application instance. Composes a domain hierarchy with the full behavior stack (capabilities, causes, rules, outcomes, equations) and the SOP stack (positions, persons, tasks, processes). Modeled around the Actor > Action > Resource triad: Resources live inside Domains, Actions apply to Resources, and Actors (expressed via Positions, Roles, and Tasks) perform Capabilities (Resource:Action pairs).",
   "type": "object",
   "required": ["domain"],
   "properties": {
     "domain": {
       "$ref": "https://dna.local/operational/domain",
-      "description": "The root domain, containing the full nested hierarchy of subdomains and nouns."
+      "description": "The root domain, containing the full nested hierarchy of subdomains and resources."
     },
     "capabilities": {
       "type": "array",
-      "description": "All Noun:Verb capability pairs defined in this domain.",
+      "description": "All Resource:Action capability pairs defined in this domain.",
       "items": { "$ref": "https://dna.local/operational/capability" }
     },
     "causes": {
@@ -42,12 +42,12 @@
     },
     "relationships": {
       "type": "array",
-      "description": "Named, directed connections between Nouns — formalizes the semantic link a reference Attribute implies, adding cardinality.",
+      "description": "Named, directed connections between Resources — formalizes the semantic link a reference Attribute implies, adding cardinality.",
       "items": { "$ref": "https://dna.local/operational/relationship" }
     },
     "positions": {
       "type": "array",
-      "description": "Organizational job titles. Each Position carries Roles (declared in Product Core DNA) and is referenced by Tasks and Persons.",
+      "description": "Organizational job titles — the Actors in the Actor > Action > Resource triad. Each Position carries Roles (declared in Product Core DNA) and is referenced by Tasks and Persons.",
       "items": { "$ref": "https://dna.local/operational/position" }
     },
     "persons": {
@@ -79,14 +79,14 @@
               {
                 "name": "lending",
                 "path": "acme.finance.lending",
-                "nouns": [
+                "resources": [
                   {
                     "name": "Loan",
                     "attributes": [
                       { "name": "amount", "type": "number", "required": true },
                       { "name": "status", "type": "enum", "values": ["pending", "active", "repaid"] }
                     ],
-                    "verbs": [
+                    "actions": [
                       { "name": "Apply" },
                       { "name": "Approve" }
                     ]
@@ -98,8 +98,8 @@
         ]
       },
       "capabilities": [
-        { "noun": "Loan", "verb": "Apply", "name": "Loan.Apply" },
-        { "noun": "Loan", "verb": "Approve", "name": "Loan.Approve" }
+        { "resource": "Loan", "action": "Apply", "name": "Loan.Apply" },
+        { "resource": "Loan", "action": "Approve", "name": "Loan.Approve" }
       ],
       "causes": [
         { "capability": "Loan.Apply", "source": "user" },

@@ -21,9 +21,9 @@ interface OperationalDNA {
   domain: {
     name: string
     domains?: OperationalDNA['domain'][]
-    nouns?: { name: string; verbs?: { name: string }[]; attributes?: { name: string }[] }[]
+    resources?: { name: string; actions?: { name: string }[]; attributes?: { name: string }[] }[]
   }
-  capabilities?: { name: string; noun: string; verb: string }[]
+  capabilities?: { name: string; resource: string; action: string }[]
   signals?: { name: string; capability: string }[]
   outcomes?: { capability: string; emits?: string[] }[]
   causes?: { capability: string; source: string; signal?: string }[]
@@ -37,8 +37,8 @@ interface OperationalDNA {
 
 interface ProductCoreDNA {
   domain: { name: string; path: string }
-  nouns?: { name: string; verbs?: { name: string }[]; attributes?: { name: string }[] }[]
-  capabilities?: { name: string; noun: string; verb: string }[]
+  resources?: { name: string; actions?: { name: string }[]; attributes?: { name: string }[] }[]
+  capabilities?: { name: string; resource: string; action: string }[]
   signals?: { name: string; capability: string }[]
   outcomes?: { capability: string; emits?: string[] }[]
   causes?: { capability: string; source: string; signal?: string }[]
@@ -48,7 +48,7 @@ interface ProductCoreDNA {
 
 interface ProductApiDNA {
   namespace?: { name: string; resources?: string[] }
-  resources?: { name: string; noun?: string; actions?: { name: string; verb?: string }[] }[]
+  resources?: { name: string; resource?: string; actions?: { name: string; action?: string }[] }[]
   operations?: { name: string; resource: string; action: string; capability?: string }[]
   endpoints?: { operation: string }[]
 }
@@ -83,7 +83,7 @@ export class DnaValidator {
     for (const schema of schemas) {
       const id = schema.$id as string
       this.validators.set(id, this.ajv.getSchema(id)!)
-      // Also register by short ID (e.g. "operational/noun") for convenience
+      // Also register by short ID (e.g. "operational/resource") for convenience
       const shortId = id.replace('https://dna.local/', '')
       this.validators.set(shortId, this.ajv.getSchema(id)!)
     }
@@ -104,12 +104,12 @@ export class DnaValidator {
 
   // ── Cross-layer validation ─────────────────────────────────────────────────
 
-  private collectNouns(domain: OperationalDNA['domain']): { name: string; verbs?: { name: string }[] }[] {
-    const nouns: { name: string; verbs?: { name: string }[] }[] = [...(domain.nouns ?? [])]
+  private collectResources(domain: OperationalDNA['domain']): { name: string; actions?: { name: string }[]; attributes?: { name: string }[] }[] {
+    const resources: { name: string; actions?: { name: string }[]; attributes?: { name: string }[] }[] = [...(domain.resources ?? [])]
     for (const sub of domain.domains ?? []) {
-      nouns.push(...this.collectNouns(sub))
+      resources.push(...this.collectResources(sub))
     }
-    return nouns
+    return resources
   }
 
   validateCrossLayer(layers: {
@@ -166,32 +166,32 @@ export class DnaValidator {
         }
       }
 
-      // Relationship validation: from/to must reference valid Nouns, attribute must exist on "from" Noun
-      const nouns = this.collectNouns(op.domain)
-      const nounNames = new Set(nouns.map(n => n.name))
+      // Relationship validation: from/to must reference valid Resources, attribute must exist on "from" Resource
+      const resources = this.collectResources(op.domain)
+      const resourceNames = new Set(resources.map(r => r.name))
       for (const rel of op.relationships ?? []) {
-        if (!nounNames.has(rel.from)) {
+        if (!resourceNames.has(rel.from)) {
           errors.push({
             layer: 'operational',
             path: `relationships/${rel.name}/from`,
-            message: `Relationship "${rel.name}" references Noun "${rel.from}" (from) which does not exist. Available: ${[...nounNames].join(', ')}`,
+            message: `Relationship "${rel.name}" references Resource "${rel.from}" (from) which does not exist. Available: ${[...resourceNames].join(', ')}`,
           })
         }
-        if (!nounNames.has(rel.to)) {
+        if (!resourceNames.has(rel.to)) {
           errors.push({
             layer: 'operational',
             path: `relationships/${rel.name}/to`,
-            message: `Relationship "${rel.name}" references Noun "${rel.to}" (to) which does not exist. Available: ${[...nounNames].join(', ')}`,
+            message: `Relationship "${rel.name}" references Resource "${rel.to}" (to) which does not exist. Available: ${[...resourceNames].join(', ')}`,
           })
         }
-        if (nounNames.has(rel.from)) {
-          const fromNoun = nouns.find(n => n.name === rel.from) as any
-          const attrNames = new Set(((fromNoun?.attributes as any[]) ?? []).map((a: any) => a.name))
+        if (resourceNames.has(rel.from)) {
+          const fromResource = resources.find(r => r.name === rel.from) as any
+          const attrNames = new Set(((fromResource?.attributes as any[]) ?? []).map((a: any) => a.name))
           if (!attrNames.has(rel.attribute)) {
             errors.push({
               layer: 'operational',
               path: `relationships/${rel.name}/attribute`,
-              message: `Relationship "${rel.name}" references Attribute "${rel.attribute}" which does not exist on Noun "${rel.from}". Available: ${[...attrNames].join(', ')}`,
+              message: `Relationship "${rel.name}" references Attribute "${rel.attribute}" which does not exist on Resource "${rel.from}". Available: ${[...attrNames].join(', ')}`,
             })
           }
         }
@@ -286,20 +286,20 @@ export class DnaValidator {
     }
 
     // ── Operational → Product Core (materializer consistency) ──────────────
-    // If both are present, every Noun/Capability/Signal in product.core must
+    // If both are present, every Resource/Capability/Signal in product.core must
     // also exist in operational — product core is a projection, never invents.
     if (op && core) {
-      const opNouns = this.collectNouns(op.domain)
-      const opNounNames = new Set(opNouns.map(n => n.name))
+      const opResources = this.collectResources(op.domain)
+      const opResourceNames = new Set(opResources.map(r => r.name))
       const opCapabilityNames = new Set((op.capabilities ?? []).map(c => c.name))
       const opSignalNames = new Set((op.signals ?? []).map(s => s.name))
 
-      for (const noun of core.nouns ?? []) {
-        if (!opNounNames.has(noun.name)) {
+      for (const resource of core.resources ?? []) {
+        if (!opResourceNames.has(resource.name)) {
           errors.push({
             layer: 'product/core',
-            path: `nouns/${noun.name}`,
-            message: `Product Core Noun "${noun.name}" is not present in Operational DNA. Re-run the materializer.`,
+            path: `resources/${resource.name}`,
+            message: `Product Core Resource "${resource.name}" is not present in Operational DNA. Re-run the materializer.`,
           })
         }
       }
@@ -359,34 +359,34 @@ export class DnaValidator {
     // otherwise fall back to walking operational directly. Technical layers
     // only ever see product.core, so the core path is the canonical one.
     if ((core || op) && api) {
-      const nouns = core
-        ? (core.nouns ?? [])
-        : this.collectNouns((op as OperationalDNA).domain)
-      const nounNames = new Set(nouns.map(n => n.name))
+      const resources = core
+        ? (core.resources ?? [])
+        : this.collectResources((op as OperationalDNA).domain)
+      const resourceNames = new Set(resources.map(r => r.name))
       const capabilities = core ? core.capabilities : (op as OperationalDNA).capabilities
       const capabilityNames = new Set((capabilities ?? []).map(c => c.name))
       const referenceLayer = core ? 'product/core' : 'operational'
 
-      // Resource noun references
+      // Resource → Operational Resource cross-layer reference
       for (const resource of api.resources ?? []) {
-        if (resource.noun && !nounNames.has(resource.noun)) {
+        if (resource.resource && !resourceNames.has(resource.resource)) {
           errors.push({
             layer: 'product/api',
-            path: `resources/${resource.name}/noun`,
-            message: `Resource "${resource.name}" references Noun "${resource.noun}" which does not exist in ${referenceLayer === 'product/core' ? 'Product Core' : 'Operational'} DNA. Available: ${[...nounNames].join(', ')}`,
+            path: `resources/${resource.name}/resource`,
+            message: `Resource "${resource.name}" references Resource "${resource.resource}" which does not exist in ${referenceLayer === 'product/core' ? 'Product Core' : 'Operational'} DNA. Available: ${[...resourceNames].join(', ')}`,
           })
         }
 
-        // Action verb references
-        if (resource.noun && nounNames.has(resource.noun)) {
-          const noun = nouns.find(n => n.name === resource.noun)
-          const verbNames = new Set((noun?.verbs ?? []).map(v => v.name))
+        // Action → Operational Action cross-layer reference
+        if (resource.resource && resourceNames.has(resource.resource)) {
+          const opResource = resources.find(r => r.name === resource.resource)
+          const actionNames = new Set((opResource?.actions ?? []).map(a => a.name))
           for (const action of resource.actions ?? []) {
-            if (action.verb && !verbNames.has(action.verb)) {
+            if (action.action && !actionNames.has(action.action)) {
               errors.push({
                 layer: 'product/api',
-                path: `resources/${resource.name}/actions/${action.name}/verb`,
-                message: `Action "${action.name}" on Resource "${resource.name}" references Verb "${action.verb}" which does not exist on Noun "${resource.noun}". Available: ${[...verbNames].join(', ')}`,
+                path: `resources/${resource.name}/actions/${action.name}/action`,
+                message: `Action "${action.name}" on Resource "${resource.name}" references Action "${action.action}" which does not exist on Resource "${resource.resource}". Available: ${[...actionNames].join(', ')}`,
               })
             }
           }

@@ -29,8 +29,8 @@ const dnaFixture: DnaInput = {
   operational: {
     domain: { name: 'lending', path: 'acme.lending' },
     capabilities: [
-      { name: 'Loan.Apply', noun: 'Loan', verb: 'Apply', description: 'Submit a loan.' },
-      { name: 'Loan.Approve', noun: 'Loan', verb: 'Approve' },
+      { name: 'Loan.Apply', resource: 'Loan', action: 'Apply', description: 'Submit a loan.' },
+      { name: 'Loan.Approve', resource: 'Loan', action: 'Approve' },
     ],
     rules: [
       { capability: 'Loan.Apply', type: 'access', allow: [{ role: 'borrower' }] },

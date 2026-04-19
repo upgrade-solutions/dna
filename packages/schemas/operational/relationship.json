@@ -2,33 +2,33 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.local/operational/relationship",
   "title": "Relationship",
-  "description": "A Relationship is a named, directed connection between two Nouns. It formalizes the semantic link that a reference Attribute implies — adding cardinality and a human-readable name. Relationships are declared at the Operational layer so that Product and Technical cells can derive foreign keys, join tables, nested routes, and navigation links.",
+  "description": "A Relationship is a named, directed connection between two Resources. It formalizes the semantic link that a reference Attribute implies — adding cardinality and a human-readable name. Relationships are declared at the Operational layer so that Product and Technical cells can derive foreign keys, join tables, nested routes, and navigation links.",
   "type": "object",
   "required": ["name", "from", "to", "cardinality", "attribute"],
   "properties": {
     "name": {
       "type": "string",
-      "description": "A unique name for the relationship, typically From.to_noun (e.g. Loan.borrower).",
+      "description": "A unique name for the relationship, typically From.to_resource (e.g. Loan.borrower).",
       "examples": ["Loan.borrower", "Loan.lender", "Order.customer", "Post.author"]
     },
     "from": {
       "type": "string",
-      "description": "The Noun that holds the reference Attribute.",
+      "description": "The Resource that holds the reference Attribute.",
       "examples": ["Loan", "Order", "Post"]
     },
     "to": {
       "type": "string",
-      "description": "The Noun being referenced.",
+      "description": "The Resource being referenced.",
       "examples": ["Borrower", "Customer", "Author"]
     },
     "cardinality": {
       "type": "string",
-      "description": "The cardinality of the relationship from the 'from' Noun's perspective.",
+      "description": "The cardinality of the relationship from the 'from' Resource's perspective.",
       "enum": ["one-to-one", "many-to-one", "one-to-many", "many-to-many"]
     },
     "attribute": {
       "type": "string",
-      "description": "The reference Attribute on the 'from' Noun that implements this relationship.",
+      "description": "The reference Attribute on the 'from' Resource that implements this relationship.",
       "examples": ["borrower_id", "lender_id", "author_id"]
     },
     "description": {

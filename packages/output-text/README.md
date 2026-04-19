@@ -21,7 +21,7 @@ Both `render` and `renderMany` accept a `styles` option:
 
 ```ts
 type Style = 'user-story' | 'gherkin' | 'product-dna'
-type Unit  = 'capability' | 'noun' | 'process'
+type Unit  = 'capability' | 'resource' | 'process'
 type StyleMap = Partial<Record<Unit, Style>>
 ```
 
@@ -33,9 +33,9 @@ The **keys** choose which DNA primitives get rendered; the **values** choose the
 |---|---|---|
 | `user-story` | Capability | `**As a** role` / `**I want to**` / `**So that**` + `Triggered by` + `Acceptance criteria` |
 | `gherkin` | Capability | `Feature:` / `Scenario:` / `Given` / `When` / `Then` |
-| `product-dna` | Capability, Noun, Process | Key-value blocks using Product-DNA vocabulary (`Resource`, `Action`, `Actor`, `Role`, `Field`, `Operation`) |
+| `product-dna` | Capability, Resource, Process | Key-value blocks using Product-DNA vocabulary (`Resource`, `Action`, `Actor`, `Role`, `Field`, `Operation`) |
 
-Noun and Process always render as `product-dna` regardless of the style requested — `user-story` and `gherkin` are action-shaped and don't translate to entities or workflows.
+Resource and Process always render as `product-dna` regardless of the style requested — `user-story` and `gherkin` are action-shaped and don't translate to entities or workflows.
 
 ## `render(dna, options?)`
 
@@ -48,7 +48,7 @@ const doc = render(dna, {
   title: 'Lending — Spec',
   styles: {
     capability: 'user-story',
-    noun: 'product-dna',
+    resource: 'product-dna',
     process: 'product-dna',
   },
 })
@@ -70,22 +70,22 @@ const docs = renderMany(dna, { styles: { capability: 'gherkin' } })
 
 ### Multi-unit output
 
-Request several units at once; results come back in canonical order (capability → noun → process):
+Request several units at once; results come back in canonical order (capability → resource → process):
 
 ```ts
 renderMany(dna, {
-  styles: { capability: 'product-dna', noun: 'product-dna', process: 'product-dna' },
+  styles: { capability: 'product-dna', resource: 'product-dna', process: 'product-dna' },
 })
 // → [
 //   { id: 'capability-…', … },
-//   { id: 'noun-…', … },
+//   { id: 'resource-…', … },
 //   { id: 'process-…', … },
 // ]
 ```
 
 ### IDs
 
-`id` is always `{unit}-{kebab-slug}`, e.g. `capability-loan-apply`, `noun-loan`, `process-loan-onboarding`. The unit prefix prevents collisions when multiple unit types are emitted in one call.
+`id` is always `{unit}-{kebab-slug}`, e.g. `capability-loan-apply`, `resource-loan`, `process-loan-onboarding`. The unit prefix prevents collisions when multiple unit types are emitted in one call.
 
 ## API surface
 

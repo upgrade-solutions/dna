@@ -9,26 +9,26 @@ const operationalFixture = {
   domain: {
     name: 'lending',
     path: 'acme.finance.lending',
-    nouns: [
+    resources: [
       {
         name: 'Loan',
         attributes: [
           { name: 'id', type: 'string', required: true },
-          { name: 'borrower_id', type: 'reference', noun: 'Borrower' },
+          { name: 'borrower_id', type: 'reference', resource: 'Borrower' },
         ],
-        verbs: [{ name: 'Apply' }, { name: 'Approve' }, { name: 'View' }, { name: 'List' }],
+        actions: [{ name: 'Apply' }, { name: 'Approve' }, { name: 'View' }, { name: 'List' }],
       },
       {
         name: 'Borrower',
         attributes: [{ name: 'id', type: 'string', required: true }],
-        verbs: [],
+        actions: [],
       },
     ],
   },
   capabilities: [
-    { noun: 'Loan', verb: 'Apply', name: 'Loan.Apply' },
-    { noun: 'Loan', verb: 'Approve', name: 'Loan.Approve' },
-    { noun: 'Loan', verb: 'View', name: 'Loan.View' },
+    { resource: 'Loan', action: 'Apply', name: 'Loan.Apply' },
+    { resource: 'Loan', action: 'Approve', name: 'Loan.Approve' },
+    { resource: 'Loan', action: 'View', name: 'Loan.View' },
   ],
   causes: [{ capability: 'Loan.Apply', source: 'user' }],
   outcomes: [
@@ -61,11 +61,11 @@ const productApiFixture = {
   resources: [
     {
       name: 'Loan',
-      noun: 'Loan',
+      resource: 'Loan',
       fields: [],
       actions: [
-        { name: 'Approve', verb: 'Approve' },
-        { name: 'View', verb: 'View' },
+        { name: 'Approve', action: 'Approve' },
+        { name: 'View', action: 'View' },
       ],
     },
   ],
@@ -108,22 +108,22 @@ const technicalFixture = {
 
 const productCoreFixture = {
   domain: { name: 'lending', path: 'acme.finance.lending' },
-  nouns: [
+  resources: [
     {
       name: 'Loan',
       attributes: [{ name: 'id', type: 'string' }],
-      verbs: [{ name: 'Approve' }, { name: 'View' }],
+      actions: [{ name: 'Approve' }, { name: 'View' }],
     },
-    { name: 'Borrower', attributes: [{ name: 'id', type: 'string' }], verbs: [] },
+    { name: 'Borrower', attributes: [{ name: 'id', type: 'string' }], actions: [] },
   ],
   capabilities: [
-    { noun: 'Loan', verb: 'Approve', name: 'Loan.Approve' },
-    { noun: 'Loan', verb: 'View', name: 'Loan.View' },
+    { resource: 'Loan', action: 'Approve', name: 'Loan.Approve' },
+    { resource: 'Loan', action: 'View', name: 'Loan.View' },
   ],
 } as any
 
-describe('DnaValidator — operational/noun', () => {
-  it('validates a valid Noun document', () => {
+describe('DnaValidator — operational/resource', () => {
+  it('validates a valid Resource document', () => {
     const doc = {
       name: 'Loan',
       description: 'A financial loan issued to a borrower.',
@@ -132,15 +132,15 @@ describe('DnaValidator — operational/noun', () => {
         { name: 'amount', type: 'number', required: true },
         { name: 'status', type: 'enum', required: true, values: ['pending', 'active', 'repaid', 'defaulted'] }
       ],
-      verbs: [{ name: 'Apply' }, { name: 'Approve' }]
+      actions: [{ name: 'Apply' }, { name: 'Approve' }]
     }
-    const result = validator.validate(doc, 'operational/noun')
+    const result = validator.validate(doc, 'operational/resource')
     expect(result.valid).toBe(true)
     expect(result.errors).toHaveLength(0)
   })
 
-  it('rejects a Noun missing required name field', () => {
-    const result = validator.validate({ domain: 'acme.finance' }, 'operational/noun')
+  it('rejects a Resource missing required name field', () => {
+    const result = validator.validate({ domain: 'acme.finance' }, 'operational/resource')
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.params?.missingProperty === 'name')).toBe(true)
   })
@@ -150,19 +150,19 @@ describe('DnaValidator — operational/noun', () => {
       name: 'Order',
       attributes: [{ name: 'status', type: 'enum' }]
     }
-    const result = validator.validate(doc, 'operational/noun')
+    const result = validator.validate(doc, 'operational/resource')
     expect(result.valid).toBe(false)
   })
 })
 
 describe('DnaValidator — operational/capability', () => {
   it('validates a valid Capability', () => {
-    const result = validator.validate({ noun: 'Loan', verb: 'Approve', name: 'Loan.Approve' }, 'operational/capability')
+    const result = validator.validate({ resource: 'Loan', action: 'Approve', name: 'Loan.Approve' }, 'operational/capability')
     expect(result.valid).toBe(true)
   })
 
-  it('rejects a Capability missing verb', () => {
-    const result = validator.validate({ noun: 'Loan' }, 'operational/capability')
+  it('rejects a Capability missing action', () => {
+    const result = validator.validate({ resource: 'Loan' }, 'operational/capability')
     expect(result.valid).toBe(false)
   })
 })
@@ -275,20 +275,20 @@ describe('DnaValidator — product/core/resource', () => {
   it('validates a valid Resource document', () => {
     const result = validator.validate({
       name: 'Loan',
-      noun: 'Loan',
+      resource: 'Loan',
       description: 'A financial loan.',
       fields: [
         { name: 'amount', type: 'number', label: 'Amount', required: true },
         { name: 'status', type: 'enum', label: 'Status', values: ['pending', 'active'] }
       ],
-      actions: [{ name: 'Apply', verb: 'Apply' }]
+      actions: [{ name: 'Apply', action: 'Apply' }]
     }, 'product/core/resource')
     expect(result.valid).toBe(true)
     expect(result.errors).toHaveLength(0)
   })
 
   it('rejects a Resource missing required name', () => {
-    const result = validator.validate({ noun: 'Loan' }, 'product/core/resource')
+    const result = validator.validate({ resource: 'Loan' }, 'product/core/resource')
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.params?.missingProperty === 'name')).toBe(true)
   })
@@ -549,19 +549,19 @@ describe('DnaValidator — composite: product/core', () => {
   it('validates a minimal product core document', () => {
     const doc = {
       domain: { name: 'lending', path: 'acme.finance.lending' },
-      nouns: [
+      resources: [
         {
           name: 'Loan',
           attributes: [
             { name: 'amount', type: 'number', required: true },
             { name: 'status', type: 'enum', values: ['pending', 'active'] }
           ],
-          verbs: [{ name: 'Apply' }, { name: 'Approve' }]
+          actions: [{ name: 'Apply' }, { name: 'Approve' }]
         }
       ],
       capabilities: [
-        { noun: 'Loan', verb: 'Apply', name: 'Loan.Apply' },
-        { noun: 'Loan', verb: 'Approve', name: 'Loan.Approve' }
+        { resource: 'Loan', action: 'Apply', name: 'Loan.Apply' },
+        { resource: 'Loan', action: 'Approve', name: 'Loan.Approve' }
       ]
     }
     const result = validator.validate(doc, 'product/core')
@@ -570,23 +570,23 @@ describe('DnaValidator — composite: product/core', () => {
   })
 
   it('rejects a product core document missing domain', () => {
-    const result = validator.validate({ nouns: [] }, 'product/core')
+    const result = validator.validate({ resources: [] }, 'product/core')
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.params?.missingProperty === 'domain')).toBe(true)
   })
 
-  it('rejects a product core document missing nouns', () => {
+  it('rejects a product core document missing resources', () => {
     const result = validator.validate({
       domain: { name: 'lending', path: 'acme.finance.lending' }
     }, 'product/core')
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.params?.missingProperty === 'nouns')).toBe(true)
+    expect(result.errors.some(e => e.params?.missingProperty === 'resources')).toBe(true)
   })
 
   it('rejects unknown top-level properties', () => {
     const result = validator.validate({
       domain: { name: 'lending', path: 'acme.finance.lending' },
-      nouns: [],
+      resources: [],
       bogus: true
     }, 'product/core')
     expect(result.valid).toBe(false)
@@ -643,8 +643,8 @@ describe('DnaValidator — composite: technical', () => {
 describe('DnaValidator — availableSchemas', () => {
   it('lists all registered schemas', () => {
     const schemas = validator.availableSchemas()
-    expect(schemas).toContain('operational/noun')
-    expect(schemas).toContain('operational/verb')
+    expect(schemas).toContain('operational/resource')
+    expect(schemas).toContain('operational/action')
     expect(schemas).toContain('operational/capability')
     expect(schemas).toContain('operational/attribute')
     expect(schemas).toContain('operational/domain')
@@ -698,27 +698,27 @@ describe('DnaValidator — cross-layer validation', () => {
     expect(result.errors).toHaveLength(0)
   })
 
-  it('detects invalid resource noun reference', () => {
+  it('detects invalid resource cross-layer reference', () => {
     const badApi = {
       ...productApi,
-      resources: [{ name: 'Widget', noun: 'NonExistentNoun', fields: [], actions: [] }],
+      resources: [{ name: 'Widget', resource: 'NonExistentResource', fields: [], actions: [] }],
     }
     const result = validator.validateCrossLayer({ operational, productApi: badApi })
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('NonExistentNoun'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('NonExistentResource'))).toBe(true)
     expect(result.errors.some(e => e.layer === 'product/api')).toBe(true)
   })
 
-  it('detects invalid action verb reference', () => {
+  it('detects invalid action cross-layer reference', () => {
     const badApi = {
       ...productApi,
       resources: [
-        { name: 'Loan', noun: 'Loan', fields: [], actions: [{ name: 'Fly', verb: 'Fly' }] },
+        { name: 'Loan', resource: 'Loan', fields: [], actions: [{ name: 'Fly', action: 'Fly' }] },
       ],
     }
     const result = validator.validateCrossLayer({ operational, productApi: badApi })
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('Verb "Fly"'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('Action "Fly"'))).toBe(true)
   })
 
   it('detects invalid operation capability reference', () => {
@@ -857,7 +857,7 @@ describe('DnaValidator — cross-layer validation', () => {
     expect(result.valid).toBe(true)
   })
 
-  it('detects invalid Relationship from noun reference', () => {
+  it('detects invalid Relationship from resource reference', () => {
     const badOp = {
       ...operational,
       relationships: [
@@ -866,10 +866,10 @@ describe('DnaValidator — cross-layer validation', () => {
     }
     const result = validator.validateCrossLayer({ operational: badOp })
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('Noun "Ghost"') && e.message.includes('(from)'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('Resource "Ghost"') && e.message.includes('(from)'))).toBe(true)
   })
 
-  it('detects invalid Relationship to noun reference', () => {
+  it('detects invalid Relationship to resource reference', () => {
     const badOp = {
       ...operational,
       relationships: [
@@ -878,7 +878,7 @@ describe('DnaValidator — cross-layer validation', () => {
     }
     const result = validator.validateCrossLayer({ operational: badOp })
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('Noun "Phantom"') && e.message.includes('(to)'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('Resource "Phantom"') && e.message.includes('(to)'))).toBe(true)
   })
 
   it('detects invalid Relationship attribute reference', () => {
@@ -904,7 +904,6 @@ describe('DnaValidator — cross-layer validation', () => {
 describe('DnaValidator — cross-layer with product.core', () => {
   const operational = operationalFixture
   const productApi = productApiFixture
-  const productUi = productUiFixture
   const productCore = productCoreFixture
 
   it('passes when core is consistent with operational', () => {
@@ -912,10 +911,10 @@ describe('DnaValidator — cross-layer with product.core', () => {
     expect(result.valid).toBe(true)
   })
 
-  it('detects a Noun in product.core that is not in operational', () => {
+  it('detects a Resource in product.core that is not in operational', () => {
     const badCore = {
       ...productCore,
-      nouns: [...(productCore.nouns ?? []), { name: 'Phantom', attributes: [], verbs: [] }],
+      resources: [...(productCore.resources ?? []), { name: 'Phantom', attributes: [], actions: [] }],
     }
     const result = validator.validateCrossLayer({ operational, productCore: badCore })
     expect(result.valid).toBe(false)
@@ -927,7 +926,7 @@ describe('DnaValidator — cross-layer with product.core', () => {
       ...productCore,
       capabilities: [
         ...(productCore.capabilities ?? []),
-        { noun: 'Loan', verb: 'Vanish', name: 'Loan.Vanish' },
+        { resource: 'Loan', action: 'Vanish', name: 'Loan.Vanish' },
       ],
     }
     const result = validator.validateCrossLayer({ operational, productCore: badCore })
@@ -935,8 +934,8 @@ describe('DnaValidator — cross-layer with product.core', () => {
     expect(result.errors.some(e => e.message.includes('Loan.Vanish'))).toBe(true)
   })
 
-  it('resolves product.api noun refs against product.core when present', () => {
-    // product.core has the same Noun set as operational, so valid api references
+  it('resolves product.api resource refs against product.core when present', () => {
+    // product.core has the same Resource set as operational, so valid api references
     // should still pass when only core is provided (no operational).
     const result = validator.validateCrossLayer({ productCore, productApi })
     expect(result.valid).toBe(true)
@@ -945,11 +944,11 @@ describe('DnaValidator — cross-layer with product.core', () => {
   it('detects product.api references against product.core (not operational)', () => {
     const minimalCore = {
       domain: { name: 'lending', path: 'acme.finance.lending' },
-      nouns: [{ name: 'Loan', verbs: [{ name: 'Apply' }] }],
+      resources: [{ name: 'Loan', actions: [{ name: 'Apply' }] }],
     }
     const badApi = {
       ...productApi,
-      resources: [{ name: 'Borrower', noun: 'Borrower', fields: [], actions: [] }],
+      resources: [{ name: 'Borrower', resource: 'Borrower', fields: [], actions: [] }],
     }
     const result = validator.validateCrossLayer({ productCore: minimalCore, productApi: badApi })
     expect(result.valid).toBe(false)
@@ -958,7 +957,7 @@ describe('DnaValidator — cross-layer with product.core', () => {
 
   it('falls back to operational when product.core is absent', () => {
     // With only operational (no core), cross-layer still works.
-    const result = validator.validateCrossLayer({ operational, productApi, productUi })
+    const result = validator.validateCrossLayer({ operational, productApi, productUi: productUiFixture })
     expect(result.valid).toBe(true)
   })
 })

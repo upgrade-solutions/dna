@@ -8,7 +8,7 @@
   "properties": {
     "capability": {
       "type": "string",
-      "description": "The Capability this cause initiates, expressed as Noun.Verb.",
+      "description": "The Capability this cause initiates, expressed as Resource.Action.",
       "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
       "examples": ["Loan.Apply", "Payment.Confirm", "Loan.Default"]
     },

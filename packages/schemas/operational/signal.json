@@ -8,13 +8,13 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Fully qualified signal name: domain.Noun.PastTenseVerb.",
+      "description": "Fully qualified signal name: domain.Resource.PastTenseAction.",
       "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9]*)*\\.[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
       "examples": ["lending.Loan.Disbursed", "lending.Loan.Defaulted", "payments.Payment.Completed"]
     },
     "capability": {
       "type": "string",
-      "description": "The Capability whose successful execution publishes this signal, expressed as Noun.Verb.",
+      "description": "The Capability whose successful execution publishes this signal, expressed as Resource.Action.",
       "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
       "examples": ["Loan.Disburse", "Loan.Default", "Payment.Complete"]
     },

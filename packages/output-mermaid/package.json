@@ -1,7 +1,7 @@
 {
   "name": "@dna-codes/output-mermaid",
   "version": "0.0.1",
-  "description": "Render DNA documents as Mermaid diagrams — ERDs from Nouns + Relationships, flowcharts from Processes. Zero runtime dependencies.",
+  "description": "Render DNA documents as Mermaid diagrams — ERDs from Resources + Relationships, flowcharts from Processes. Zero runtime dependencies.",
   "keywords": ["dna", "mermaid", "diagram", "erd", "flowchart", "output-mermaid"],
   "license": "MIT",
   "main": "dist/index.js",

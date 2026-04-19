@@ -7,20 +7,20 @@ const dna = {
             name: 'lending',
             path: 'acme.finance.lending',
             description: 'The lending desk.',
-            nouns: [
+            resources: [
                 {
                     name: 'Loan',
                     attributes: [
                         { name: 'amount', type: 'number', required: true },
                         { name: 'status', type: 'string' },
                     ],
-                    verbs: [{ name: 'Apply' }, { name: 'Approve' }],
+                    actions: [{ name: 'Apply' }, { name: 'Approve' }],
                 },
             ],
         },
         capabilities: [
-            { noun: 'Loan', verb: 'Apply', name: 'Loan.Apply' },
-            { noun: 'Loan', verb: 'Approve', name: 'Loan.Approve' },
+            { resource: 'Loan', action: 'Apply', name: 'Loan.Apply' },
+            { resource: 'Loan', action: 'Approve', name: 'Loan.Approve' },
         ],
     },
 };
@@ -34,14 +34,14 @@ describe('@dna-codes/output-example — render', () => {
     });
     it('emits summary counts', () => {
         const out = (0, index_1.render)(dna);
-        expect(out).toContain('- Nouns: 1');
+        expect(out).toContain('- Resources: 1');
         expect(out).toContain('- Capabilities: 2');
     });
     it('emits the domain-model outline', () => {
         const out = (0, index_1.render)(dna);
         expect(out).toContain('- Loan');
         expect(out).toContain('  - amount: number (required)');
-        expect(out).toContain('  - verb: Apply');
+        expect(out).toContain('  - action: Apply');
     });
     it('honors custom sections and ordering', () => {
         const out = (0, index_1.render)(dna, { sections: ['domain-model'] });

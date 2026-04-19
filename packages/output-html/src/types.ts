@@ -32,15 +32,15 @@ export interface OperationalDomain {
   name: string
   path?: string
   description?: string
-  nouns?: Noun[]
+  resources?: Resource[]
   domains?: OperationalDomain[]
 }
 
-export interface Noun {
+export interface Resource {
   name: string
   description?: string
   attributes?: Attribute[]
-  verbs?: Verb[]
+  actions?: Action[]
 }
 
 export interface Attribute {
@@ -50,15 +50,15 @@ export interface Attribute {
   description?: string
 }
 
-export interface Verb {
+export interface Action {
   name: string
   description?: string
 }
 
 export interface Capability {
   name: string
-  noun: string
-  verb: string
+  resource: string
+  action: string
   description?: string
 }
 

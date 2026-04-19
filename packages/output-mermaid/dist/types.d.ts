@@ -18,10 +18,10 @@ export interface OperationalDna {
 export interface OperationalDomain {
     name: string;
     path?: string;
-    nouns?: Noun[];
+    resources?: Resource[];
     domains?: OperationalDomain[];
 }
-export interface Noun {
+export interface Resource {
     name: string;
     attributes?: Attribute[];
 }

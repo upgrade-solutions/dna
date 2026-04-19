@@ -36,7 +36,7 @@ Guidance for AI agents forking this template into a new `input-*` package.
 
 - **Zero runtime dependencies.** Dev deps for test/build are fine. No SDKs, no parsers unless truly necessary (and if added, keep them small).
 - **Throw, do not return error objects.** Validation of the emitted DNA belongs to `@dna-codes/core`; your job is to fail fast on malformed source.
-- **Naming:** Nouns are PascalCase singular. Verbs are PascalCase. Capability names are always `Noun.Verb`.
+- **Naming:** Resources are PascalCase singular. Actions are PascalCase. Capability names are always `Resource.Action`.
 - **Return shape:** always a layered object — `{ operational: {...} }`, not `{...}` alone.
 
 ## Probabilistic-specific

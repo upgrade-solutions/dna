@@ -29,7 +29,7 @@ Owns authoring `technical.json` for a domain.
 
 ### Must not touch
 
-- **Operational or product layers** — if a noun/capability/endpoint is missing, that's an upstream fix. Do not paper over with technical config.
+- **Operational or product layers** — if a resource/capability/endpoint is missing, that's an upstream fix. Do not paper over with technical config.
 - **Generated cell output** — `output/<platform>-*/` is owned by per-cell agents during `cba develop`.
 
 ### Hand-off

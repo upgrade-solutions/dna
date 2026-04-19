@@ -34,8 +34,8 @@ const summaryOnly = render(dna, { sections: ['summary'] })
 
 ### Available sections
 
-- `summary` — counts of Nouns / Capabilities / Relationships
-- `domain-model` — outline of Nouns with Attributes and Verbs
+- `summary` — counts of Resources / Capabilities / Relationships
+- `domain-model` — outline of Resources with Attributes and Actions
 
 ## Section previews
 
@@ -46,7 +46,7 @@ const summaryOnly = render(dna, { sections: ['summary'] })
 
 Domain: acme.finance.lending
 
-- Nouns: 1
+- Resources: 1
 - Capabilities: 2
 ```
 
@@ -58,8 +58,8 @@ Domain: acme.finance.lending
 - Loan
   - amount: number (required)
   - status: string
-  - verb: Apply
-  - verb: Approve
+  - action: Apply
+  - action: Approve
 ```
 
 ## License

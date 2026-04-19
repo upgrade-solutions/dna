@@ -80,27 +80,27 @@ describe('@dna-codes/output-html', () => {
   describe('section: summary', () => {
     it('lists primitive counts for populated collections only', () => {
       const html = render(bookshopInput, { sections: ['summary'] })
-      expect(html).toContain('Nouns: 2')
+      expect(html).toContain('Resources: 2')
       expect(html).toContain('Capabilities: 2')
       expect(html).toContain('Rules: 2')
       expect(html).toContain('Processes: 1')
       expect(html).not.toContain('Equations:')
     })
 
-    it('names top-level nouns', () => {
+    it('names top-level resources', () => {
       const html = render(bookshopInput, { sections: ['summary'] })
-      expect(html).toContain('Top-level nouns:')
+      expect(html).toContain('Top-level resources:')
       expect(html).toContain('<code>Book</code>')
     })
   })
 
   describe('section: domain-model', () => {
-    it('renders a noun with attribute table, verbs, and relationships', () => {
+    it('renders a resource with attribute table, actions, and relationships', () => {
       const html = render(bookshopInput, { sections: ['domain-model'] })
       expect(html).toContain('<h3>Book</h3>')
       expect(html).toContain('<th>Attribute</th>')
       expect(html).toContain('<td><code>id</code></td>')
-      expect(html).toContain('<strong>Verbs:</strong>')
+      expect(html).toContain('<strong>Actions:</strong>')
       expect(html).toContain('<code>Publish</code>')
       expect(html).toContain('<code>Book.author</code>')
       expect(html).toContain('many-to-one')

@@ -1,6 +1,8 @@
 # Operational Layer Agents
 
-Agents scoped to the Operational DNA layer. Operational DNA is the pure business-logic layer: the Nouns, Verbs, Capabilities, Attributes, Domains, Relationships, Causes, Rules, Outcomes, Signals, Equations, and SOP primitives (Positions, Persons, Tasks, Processes) that describe *what the business does* — independent of how it's surfaced or deployed.
+Agents scoped to the Operational DNA layer. Operational DNA is the pure business-logic layer: the Resources, Actions, Capabilities, Attributes, Domains, Relationships, Causes, Rules, Outcomes, Signals, Equations, and SOP primitives (Positions, Persons, Tasks, Processes) that describe *what the business does* — independent of how it's surfaced or deployed.
+
+The layer is modeled around the **Actor > Action > Resource** triad. Resources are the things the business tracks (Loan, Invoice, Post); Actions are what gets performed on them (Approve, Issue, Publish); Actors are the humans or systems that perform them, expressed through Positions, Roles, and Tasks rather than declared inline on the Capability itself. A Capability is a Resource:Action pair; the Actor is supplied by Rule (access) and Task (assignment).
 
 ## Agent: `operational-dna-architect`
 
@@ -10,7 +12,7 @@ Owns authoring and evolving a domain's `operational.json`. Available as a Claude
 
 - Translating domain research (real-world processes, reference sources, stakeholder interviews) into Operational primitives
 - Producing a single `operational.json` that passes `cba validate --layer operational`
-- Iterating the primitive set as research reveals new Nouns/Capabilities/Rules/Signals
+- Iterating the primitive set as research reveals new Resources/Capabilities/Rules/Signals
 - Ensuring the domain hierarchy in `Domain.hierarchy` correctly nests under the platform root
 
 ### Inputs
@@ -29,7 +31,7 @@ Owns authoring and evolving a domain's `operational.json`. Available as a Claude
 
 All fifteen Operational primitives — see `@dna-codes/schemas/operational/*.json` for the canonical list:
 
-- **Structure**: `Noun`, `Verb`, `Capability`, `Attribute`, `Domain`, `Relationship`
+- **Structure**: `Resource`, `Action`, `Capability`, `Attribute`, `Domain`, `Relationship`
 - **Behavior**: `Cause`, `Rule`, `Outcome`, `Signal`, `Equation`
 - **SOP**: `Position`, `Person`, `Task`, `Process`
 
@@ -56,4 +58,4 @@ When `operational.json` is settled and validates, hand off to **`product-core-ma
 
 1. **Single source of truth**. `operational.json` is authoritative for business logic. Product core is derived from it, not the other way around.
 2. **No surface leakage**. Operational primitives never mention REST paths, React components, databases, or cloud resources.
-3. **Every Capability has a Verb**, every Verb belongs to a Noun, every Rule references a real Capability or Attribute. Cross-references must resolve.
+3. **Every Capability pairs a Resource with an Action**; every Action belongs to a Resource; every Rule references a real Capability or Attribute. An Action without a Resource is invalid — the atomic unit of business activity is always `Resource.Action`. Cross-references must resolve.

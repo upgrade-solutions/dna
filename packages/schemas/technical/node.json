@@ -19,7 +19,7 @@
     "type": {
       "type": "string",
       "description": "The kind of component this node represents. Drives visual styling.",
-      "enum": ["cell", "construct", "provider", "domain", "noun", "external", "custom"],
+      "enum": ["cell", "construct", "provider", "domain", "resource", "external", "custom"],
       "examples": ["cell", "construct", "provider"]
     },
     "status": {
@@ -31,7 +31,7 @@
     "source": {
       "type": "string",
       "description": "Reference to a DNA primitive in another layer. Format: `<layer>:<primitive-type>:<name>`. Used for cross-layer traceability and auto-derivation.",
-      "examples": ["technical:cell:api-cell", "technical:construct:primary-db", "technical:provider:aws", "operational:noun:Loan"]
+      "examples": ["technical:cell:api-cell", "technical:construct:primary-db", "technical:provider:aws", "operational:resource:Loan"]
     },
     "position": {
       "type": "object",

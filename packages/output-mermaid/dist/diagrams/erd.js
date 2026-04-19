@@ -6,19 +6,19 @@ function renderErd(dna) {
     const op = dna.operational;
     if (!op)
         return null;
-    const nouns = (0, util_1.collectNouns)(op.domain);
-    if (!nouns.length)
+    const resources = (0, util_1.collectResources)(op.domain);
+    if (!resources.length)
         return null;
     const lines = ['erDiagram'];
-    for (const noun of nouns) {
-        const id = (0, util_1.mermaidId)(noun.name);
-        if (!noun.attributes?.length) {
+    for (const resource of resources) {
+        const id = (0, util_1.mermaidId)(resource.name);
+        if (!resource.attributes?.length) {
             lines.push(`    ${id} {`);
             lines.push(`    }`);
             continue;
         }
         lines.push(`    ${id} {`);
-        for (const attr of noun.attributes) {
+        for (const attr of resource.attributes) {
             const type = (0, util_1.mermaidId)(attr.type ?? 'string');
             lines.push(`        ${type} ${(0, util_1.mermaidId)(attr.name)}`);
         }

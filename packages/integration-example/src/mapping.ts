@@ -6,21 +6,21 @@
  * rewriting the semantic translation — and vice-versa.
  */
 
-import { DnaInput, Noun } from './dna-types'
+import { DnaInput, Resource } from './dna-types'
 import { ExternalItem } from './types'
 
 /** Collapse a flat list of external items into an operational DNA slice. */
 export function itemsToDna(items: ExternalItem[], domain: string): DnaInput {
   const leaf = domain.split('.').pop() ?? domain
-  const nouns: Noun[] = items.map(itemToNoun)
+  const resources: Resource[] = items.map(itemToResource)
   return {
     operational: {
-      domain: { name: leaf, path: domain, nouns },
+      domain: { name: leaf, path: domain, resources },
     },
   }
 }
 
-export function itemToNoun(item: ExternalItem): Noun {
+export function itemToResource(item: ExternalItem): Resource {
   return {
     name: toPascalCase(item.title),
     ...(item.description ? { description: item.description } : {}),
@@ -31,13 +31,13 @@ export function itemToNoun(item: ExternalItem): Noun {
   }
 }
 
-/** Walk every Noun in a DNA document, ignoring nested sub-domains for brevity. */
+/** Walk every Resource in a DNA document, ignoring nested sub-domains for brevity. */
 export function dnaToItems(dna: DnaInput): Omit<ExternalItem, 'id'>[] {
-  const nouns = dna.operational?.domain.nouns ?? []
-  return nouns.map((n) => ({
-    title: n.name,
-    ...(n.description ? { description: n.description } : {}),
-    ...(n.metadata?.tags?.length ? { tags: n.metadata.tags } : {}),
+  const resources = dna.operational?.domain.resources ?? []
+  return resources.map((r) => ({
+    title: r.name,
+    ...(r.description ? { description: r.description } : {}),
+    ...(r.metadata?.tags?.length ? { tags: r.metadata.tags } : {}),
   }))
 }
 

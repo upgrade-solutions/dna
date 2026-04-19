@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.local/product/core/action",
   "title": "Action",
-  "description": "An Action is a product-level operation — it maps from an Operational Verb and is realized as a UI trigger and an API endpoint action.",
+  "description": "An Action is a product-level operation — it maps from an Operational Action and is realized as a UI trigger and an API endpoint action.",
   "type": "object",
   "required": ["name"],
   "properties": {
@@ -15,9 +15,9 @@
       "type": "string",
       "description": "A human-readable explanation of what this action does."
     },
-    "verb": {
+    "action": {
       "type": "string",
-      "description": "The Operational Verb this action maps from.",
+      "description": "The Operational Action this product action maps from. Defaults to matching `name` when omitted.",
       "examples": ["Apply", "Approve", "Disburse"]
     },
     "method": {
@@ -37,8 +37,8 @@
     }
   },
   "examples": [
-    { "name": "Apply", "description": "Submit a new loan application.", "verb": "Apply", "method": "POST" },
+    { "name": "Apply", "description": "Submit a new loan application.", "action": "Apply", "method": "POST" },
     { "name": "List", "description": "List all loans.", "method": "GET" },
-    { "name": "Approve", "description": "Approve a pending loan.", "verb": "Approve", "method": "POST" }
+    { "name": "Approve", "description": "Approve a pending loan.", "action": "Approve", "method": "POST" }
   ]
 }

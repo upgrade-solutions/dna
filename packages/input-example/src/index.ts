@@ -27,7 +27,7 @@ import {
   ParseOptions,
   ParseResult,
   ParsedCapability,
-  ParsedNoun,
+  ParsedResource,
   TextParseOptions,
   TextParseResult,
 } from './types'
@@ -44,27 +44,27 @@ export function parse(data: EntityListInput, options: ParseOptions): ParseResult
     throw new Error('input-example.parse: options.domain is required.')
   }
 
-  const nounName = options.nounNameFromEntity ?? defaultNounName
-  const nouns: ParsedNoun[] = data.entities.map((entity) => toNoun(entity, nounName))
-  const capabilities = (data.actions ?? []).map((action) => toCapability(action, nounName))
+  const resourceName = options.resourceNameFromEntity ?? defaultResourceName
+  const resources: ParsedResource[] = data.entities.map((entity) => toResource(entity, resourceName))
+  const capabilities = (data.actions ?? []).map((action) => toCapability(action, resourceName))
 
-  attachVerbs(nouns, capabilities)
+  attachActions(resources, capabilities)
 
   return {
     operational: {
       domain: {
         name: domainLeaf(options.domain),
         path: options.domain,
-        nouns,
+        resources,
       },
       ...(capabilities.length ? { capabilities } : {}),
     },
   }
 }
 
-function toNoun(entity: EntityInput, nounName: (s: string) => string): ParsedNoun {
+function toResource(entity: EntityInput, resourceName: (s: string) => string): ParsedResource {
   return {
-    name: nounName(entity.name),
+    name: resourceName(entity.name),
     attributes: (entity.fields ?? []).map((f) => ({
       name: f.name,
       type: f.type,
@@ -73,22 +73,22 @@ function toNoun(entity: EntityInput, nounName: (s: string) => string): ParsedNou
   }
 }
 
-function toCapability(action: ActionInput, nounName: (s: string) => string): ParsedCapability {
-  const noun = nounName(action.entity)
-  const verb = toPascalCase(action.verb)
-  return { noun, verb, name: `${noun}.${verb}` }
+function toCapability(action: ActionInput, resourceName: (s: string) => string): ParsedCapability {
+  const resource = resourceName(action.entity)
+  const actionName = toPascalCase(action.action)
+  return { resource, action: actionName, name: `${resource}.${actionName}` }
 }
 
-function attachVerbs(nouns: ParsedNoun[], capabilities: ParsedCapability[]): void {
+function attachActions(resources: ParsedResource[], capabilities: ParsedCapability[]): void {
   for (const cap of capabilities) {
-    const noun = nouns.find((n) => n.name === cap.noun)
-    if (!noun) continue
-    noun.verbs ??= []
-    if (!noun.verbs.some((v) => v.name === cap.verb)) noun.verbs.push({ name: cap.verb })
+    const resource = resources.find((r) => r.name === cap.resource)
+    if (!resource) continue
+    resource.actions ??= []
+    if (!resource.actions.some((a) => a.name === cap.action)) resource.actions.push({ name: cap.action })
   }
 }
 
-function defaultNounName(entity: string): string {
+function defaultResourceName(entity: string): string {
   return toPascalCase(entity)
 }
 

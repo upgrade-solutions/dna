@@ -98,7 +98,7 @@ For each Operational Capability, one Story is created:
 
 | Jira field | Source |
 |---|---|
-| `summary` | `{Verb} {Noun}` derived from the Capability (e.g. `Approve Loan`) |
+| `summary` | `{Action} {Resource}` derived from the Capability (e.g. `Approve Loan`) |
 | `description` | Markdown rendered by `output-text`, wrapped in ADF on write |
 | `project.key` | `JIRA_PROJECT_KEY` |
 | `issuetype.name` | `Story` (configurable via `JIRA_STORY_ISSUE_TYPE`) |

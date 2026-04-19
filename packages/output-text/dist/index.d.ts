@@ -8,8 +8,9 @@
  * The key set determines which unit types are emitted; the value picks the
  * body template. Default is `{ capability: 'user-story' }`.
  *
- * `user-story` and `gherkin` are action-shaped and only fit Capability — Noun
- * and Process always render as `product-dna` regardless of the style requested.
+ * `user-story` and `gherkin` are action-shaped and only fit Capability —
+ * Resource and Process always render as `product-dna` regardless of the style
+ * requested.
  */
 import { DnaInput, RenderManyOptions, RenderOptions, TextDocument } from './types';
 export declare function render(dna: DnaInput, options?: RenderOptions): string;

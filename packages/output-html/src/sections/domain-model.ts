@@ -1,22 +1,22 @@
-import { DnaInput, Noun, OperationalDomain } from '../types'
+import { DnaInput, Resource, OperationalDomain } from '../types'
 import { code, escape, groupBy, heading } from '../util'
 
 export function renderDomainModel(dna: DnaInput, h: number): string | null {
   const op = dna.operational
   if (!op) return null
 
-  const nouns = collectNouns(op.domain)
-  if (!nouns.length) return null
+  const resources = collectResources(op.domain)
+  if (!resources.length) return null
 
   const relsByFrom = groupBy(op.relationships ?? [], (r) => r.from)
   const parts: string[] = [heading(h, 'Domain Model')]
 
-  for (const noun of nouns) {
-    const inner: string[] = [heading(h + 1, escape(noun.name))]
-    if (noun.description) inner.push(`<p>${escape(noun.description)}</p>`)
+  for (const resource of resources) {
+    const inner: string[] = [heading(h + 1, escape(resource.name))]
+    if (resource.description) inner.push(`<p>${escape(resource.description)}</p>`)
 
-    if (noun.attributes?.length) {
-      const rows = noun.attributes
+    if (resource.attributes?.length) {
+      const rows = resource.attributes
         .map(
           (a) =>
             `<tr><td>${code(a.name)}</td><td>${escape(a.type ?? '—')}</td><td>${a.required ? 'yes' : 'no'}</td><td>${escape(a.description ?? '')}</td></tr>`,
@@ -27,12 +27,12 @@ export function renderDomainModel(dna: DnaInput, h: number): string | null {
       )
     }
 
-    if (noun.verbs?.length) {
-      const tags = noun.verbs.map((v) => code(v.name)).join(', ')
-      inner.push(`<p><strong>Verbs:</strong> ${tags}</p>`)
+    if (resource.actions?.length) {
+      const tags = resource.actions.map((a) => code(a.name)).join(', ')
+      inner.push(`<p><strong>Actions:</strong> ${tags}</p>`)
     }
 
-    const rels = relsByFrom.get(noun.name) ?? []
+    const rels = relsByFrom.get(resource.name) ?? []
     if (rels.length) {
       const items = rels
         .map(
@@ -49,8 +49,8 @@ export function renderDomainModel(dna: DnaInput, h: number): string | null {
   return `<section>${parts.join('')}</section>`
 }
 
-function collectNouns(domain: OperationalDomain): Noun[] {
-  const out = [...(domain.nouns ?? [])]
-  for (const sub of domain.domains ?? []) out.push(...collectNouns(sub))
+function collectResources(domain: OperationalDomain): Resource[] {
+  const out = [...(domain.resources ?? [])]
+  for (const sub of domain.domains ?? []) out.push(...collectResources(sub))
   return out
 }

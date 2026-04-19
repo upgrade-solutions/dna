@@ -6,26 +6,26 @@ function renderDomainModel(dna, h) {
     const op = dna.operational;
     if (!op)
         return null;
-    const nouns = collectNouns(op.domain);
-    if (!nouns.length)
+    const resources = collectResources(op.domain);
+    if (!resources.length)
         return null;
     const relsByFrom = (0, util_1.groupBy)(op.relationships ?? [], (r) => r.from);
     const parts = [(0, util_1.heading)(h, 'Domain Model')];
-    for (const noun of nouns) {
-        const inner = [(0, util_1.heading)(h + 1, (0, util_1.escape)(noun.name))];
-        if (noun.description)
-            inner.push(`<p>${(0, util_1.escape)(noun.description)}</p>`);
-        if (noun.attributes?.length) {
-            const rows = noun.attributes
+    for (const resource of resources) {
+        const inner = [(0, util_1.heading)(h + 1, (0, util_1.escape)(resource.name))];
+        if (resource.description)
+            inner.push(`<p>${(0, util_1.escape)(resource.description)}</p>`);
+        if (resource.attributes?.length) {
+            const rows = resource.attributes
                 .map((a) => `<tr><td>${(0, util_1.code)(a.name)}</td><td>${(0, util_1.escape)(a.type ?? '—')}</td><td>${a.required ? 'yes' : 'no'}</td><td>${(0, util_1.escape)(a.description ?? '')}</td></tr>`)
                 .join('');
             inner.push(`<table><thead><tr><th>Attribute</th><th>Type</th><th>Required</th><th>Description</th></tr></thead><tbody>${rows}</tbody></table>`);
         }
-        if (noun.verbs?.length) {
-            const tags = noun.verbs.map((v) => (0, util_1.code)(v.name)).join(', ');
-            inner.push(`<p><strong>Verbs:</strong> ${tags}</p>`);
+        if (resource.actions?.length) {
+            const tags = resource.actions.map((a) => (0, util_1.code)(a.name)).join(', ');
+            inner.push(`<p><strong>Actions:</strong> ${tags}</p>`);
         }
-        const rels = relsByFrom.get(noun.name) ?? [];
+        const rels = relsByFrom.get(resource.name) ?? [];
         if (rels.length) {
             const items = rels
                 .map((r) => `<li>${(0, util_1.code)(r.name)} — ${(0, util_1.escape)(r.cardinality)} → ${(0, util_1.code)(r.to)} (via ${(0, util_1.code)(r.attribute)})</li>`)
@@ -36,10 +36,10 @@ function renderDomainModel(dna, h) {
     }
     return `<section>${parts.join('')}</section>`;
 }
-function collectNouns(domain) {
-    const out = [...(domain.nouns ?? [])];
+function collectResources(domain) {
+    const out = [...(domain.resources ?? [])];
     for (const sub of domain.domains ?? [])
-        out.push(...collectNouns(sub));
+        out.push(...collectResources(sub));
     return out;
 }
 //# sourceMappingURL=domain-model.js.map

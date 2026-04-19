@@ -43,7 +43,7 @@ describe('@dna-codes/output-mermaid', () => {
   })
 
   describe('diagram: erd', () => {
-    it('emits an entity block per noun with attributes', () => {
+    it('emits an entity block per resource with attributes', () => {
       const out = render(bookshopInput, { diagrams: ['erd'] })
       expect(out).toContain('Book {')
       expect(out).toContain('string id')
@@ -59,11 +59,11 @@ describe('@dna-codes/output-mermaid', () => {
       expect(out).toContain('Book }o--|| Author : "Book.author"')
     })
 
-    it('emits an empty entity block for nouns without attributes', () => {
+    it('emits an empty entity block for resources without attributes', () => {
       const out = render(
         {
           operational: {
-            domain: { name: 'd', nouns: [{ name: 'Empty' }] },
+            domain: { name: 'd', resources: [{ name: 'Empty' }] },
           },
         },
         { diagrams: ['erd'] },

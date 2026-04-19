@@ -1,6 +1,6 @@
 # `@dna-codes/output-mermaid`
 
-Render DNA documents as [Mermaid](https://mermaid.js.org/) diagrams — ERDs from Nouns + Relationships, flowcharts from Processes. Zero runtime dependencies.
+Render DNA documents as [Mermaid](https://mermaid.js.org/) diagrams — ERDs from Resources + Relationships, flowcharts from Processes. Zero runtime dependencies.
 
 ## Install
 
@@ -49,7 +49,7 @@ Returns a string of concatenated Mermaid source blocks (or `''` if nothing appli
 
 | Diagram | What it renders |
 |---------|-----------------|
-| `erd` | One `erDiagram` block with every Noun as an entity (attributes inside) and every Relationship as an edge (cardinality preserved) |
+| `erd` | One `erDiagram` block with every Resource as an entity (attributes inside) and every Relationship as an edge (cardinality preserved) |
 | `flowchart` | One `flowchart` block per Process — steps as nodes (labeled with each Task's Capability), `depends_on` as arrows, `branch.when` / `branch.else` as edge labels |
 
 The default set is `['erd', 'flowchart']`, exported as `DEFAULT_DIAGRAMS`.
@@ -71,9 +71,9 @@ Unknown cardinalities fall back to `one-to-one`.
 
 Planned diagrams, not yet shipped:
 
-- `class` — UML class diagram (Nouns + Verbs as methods, Attributes as fields)
+- `class` — UML class diagram (Resources + Actions as methods, Attributes as fields)
 - `sequence` — Signal choreography (Cause → Capability → Outcome → Signal → Cause…)
-- `state` — state machines for Nouns whose Outcomes change a single status Attribute
+- `state` — state machines for Resources whose Outcomes change a single status Attribute
 
 ## License
 

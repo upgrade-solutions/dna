@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.local/product/core/resource",
   "title": "Resource",
-  "description": "A Resource is the product-level entity — it maps from an Operational Noun and is realized as a Page in UI and a REST resource in API.",
+  "description": "A Resource is the product-level entity — it maps from an Operational Resource and is realized as a Page in UI and a REST resource in API.",
   "type": "object",
   "required": ["name"],
   "properties": {
@@ -15,9 +15,9 @@
       "type": "string",
       "description": "A human-readable explanation of what this resource represents."
     },
-    "noun": {
+    "resource": {
       "type": "string",
-      "description": "The Operational Noun this resource maps from.",
+      "description": "The Operational Resource this product resource maps from. Defaults to matching `name` when omitted.",
       "examples": ["Loan", "Order", "Employee"]
     },
     "fields": {
@@ -35,14 +35,14 @@
     {
       "name": "Loan",
       "description": "A financial loan visible to borrowers and underwriters.",
-      "noun": "Loan",
+      "resource": "Loan",
       "fields": [
         { "name": "amount", "label": "Amount", "type": "number", "required": true },
         { "name": "status", "label": "Status", "type": "enum", "values": ["pending", "active", "repaid", "defaulted"] }
       ],
       "actions": [
-        { "name": "Apply", "verb": "Apply" },
-        { "name": "Approve", "verb": "Approve" }
+        { "name": "Apply", "action": "Apply" },
+        { "name": "Approve", "action": "Approve" }
       ]
     }
   ]

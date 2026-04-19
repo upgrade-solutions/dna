@@ -65,8 +65,8 @@ v1 only consumes the operational layer; the other slots are reserved for future 
 
 | Section | What it renders |
 |---------|-----------------|
-| `summary` | Domain header, primitive counts, top-level nouns |
-| `domain-model` | Each Noun with attribute table, verbs, outgoing relationships |
+| `summary` | Domain header, primitive counts, top-level resources |
+| `domain-model` | Each Resource with attribute table, actions, outgoing relationships |
 | `capabilities` | For every Capability: triggers (Causes), Rules, Outcomes, emitted Signals |
 | `sops` | Each Process as a numbered playbook with resolved Position + Capability per step |
 | `process-flow` | ASCII outline of each Process DAG with branch markers and dep arrows |
@@ -84,7 +84,7 @@ The default set is `['summary', 'domain-model', 'capabilities', 'sops', 'process
 
 **Primitive counts:**
 
-- Nouns: 1
+- Resources: 1
 - Capabilities: 2
 - Rules: 2
 - Outcomes: 1
@@ -94,7 +94,7 @@ The default set is `['summary', 'domain-model', 'capabilities', 'sops', 'process
 - Tasks: 3
 - Processes: 1
 
-**Top-level nouns:** `Book`
+**Top-level resources:** `Book`
 ```
 
 ### `domain-model`
@@ -112,7 +112,7 @@ A book for sale.
 | `title` | string | yes | Book title |
 | `status` | enum | yes | draft | active | retired |
 
-**Verbs:** `Publish`, `Retire`
+**Actions:** `Publish`, `Retire`
 
 **Relationships:**
 - `Book.author` — many-to-one → `Author` (via `author_id`)

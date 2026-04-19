@@ -24,7 +24,7 @@ Every schema has a stable `$id` of the form `https://dna.local/<layer>/<primitiv
 ## Usage from JavaScript
 
 ```ts
-import noun from '@dna-codes/schemas/operational/noun.json'
+import resource from '@dna-codes/schemas/operational/resource.json'
 ```
 
 For a batteries-included JS/TS experience (typed bindings + a cross-layer validator), use [`@dna-codes/core`](../core/), which depends on this package.

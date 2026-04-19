@@ -12,7 +12,7 @@ exports.bookshopInput = {
             name: 'shop',
             path: 'shop.books',
             description: 'Tiny bookshop domain — canonical fixture for adapter tests.',
-            nouns: [
+            resources: [
                 {
                     name: 'Book',
                     description: 'A book for sale.',
@@ -26,7 +26,7 @@ exports.bookshopInput = {
                             description: 'draft | active | retired',
                         },
                     ],
-                    verbs: [
+                    actions: [
                         { name: 'Publish', description: 'Publish a draft book.' },
                         { name: 'Retire', description: 'Retire an active book.' },
                     ],
@@ -44,14 +44,14 @@ exports.bookshopInput = {
         capabilities: [
             {
                 name: 'Book.Publish',
-                noun: 'Book',
-                verb: 'Publish',
+                resource: 'Book',
+                action: 'Publish',
                 description: 'Publish a draft book to the storefront.',
             },
             {
                 name: 'Book.Retire',
-                noun: 'Book',
-                verb: 'Retire',
+                resource: 'Book',
+                action: 'Retire',
                 description: 'Remove an active book from sale.',
             },
         ],

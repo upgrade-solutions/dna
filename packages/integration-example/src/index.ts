@@ -15,7 +15,7 @@
 
 export { createClient } from './client'
 export { createNodeHandler, parseWebhook, verifySignature, WebhookError } from './webhook'
-export { dnaToItems, itemsToDna, itemToNoun } from './mapping'
+export { dnaToItems, itemsToDna, itemToResource } from './mapping'
 export { runCli } from './cli'
 
 export * from './types'

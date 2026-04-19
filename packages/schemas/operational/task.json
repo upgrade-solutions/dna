@@ -24,7 +24,7 @@
     },
     "capability": {
       "type": "string",
-      "description": "The Capability (Noun.Verb) this task invokes. Must reference a declared Capability. One Task = one Capability.",
+      "description": "The Capability (Resource.Action) this task invokes. Must reference a declared Capability. One Task = one Capability.",
       "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
       "examples": ["Loan.Apply", "Loan.Underwrite", "Loan.Close"]
     },

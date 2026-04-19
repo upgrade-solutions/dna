@@ -37,7 +37,7 @@ Both are `@dna-codes/*` packages, not third-party SDKs. An integration legitimat
 
 - **Basic auth only.** No OAuth flow (Atlassian OAuth 2.0 is separate and requires an Atlassian-approved app). Users supply an email + API token.
 - **Transport separate from mapping.** Don't import `mapping.ts` from `adf.ts` or vice versa. Client is the only module that does HTTP.
-- **One Capability → one Story.** If you add other units later (Nouns → Stories, Processes → Epics-within-Epic), do it as a separate mapping function, not by mutating `dnaToStoryFields`.
+- **One Capability → one Story.** If you add other units later (Resources → Stories, Processes → Epics-within-Epic), do it as a separate mapping function, not by mutating `dnaToStoryFields`.
 - **Epic Link field:** Jira Cloud uses `customfield_10014`. Document clearly if you parameterize this; don't silently rewrite.
 - **No webhook.** Jira Cloud's native outbound webhooks aren't safely verifiable by an external consumer. The `serve` subcommand is intentionally absent — see README for the reasoning.
 

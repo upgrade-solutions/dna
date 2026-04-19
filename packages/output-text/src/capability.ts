@@ -21,7 +21,7 @@ import {
 import { groupBy, pascalToWords } from './util'
 
 export function capabilityTitle(cap: Capability): string {
-  return `${pascalToWords(cap.verb)} ${pascalToWords(cap.noun)}`.trim()
+  return `${pascalToWords(cap.action)} ${pascalToWords(cap.resource)}`.trim()
 }
 
 export function renderCapability(cap: Capability, op: OperationalDna, style: Style): string {
@@ -41,10 +41,10 @@ function renderUserStory(cap: Capability, op: OperationalDna): string {
   if (cap.description) parts.push(cap.description)
 
   const role = roles[0] ?? 'user'
-  const verb = pascalToWords(cap.verb).toLowerCase()
-  const noun = pascalToWords(cap.noun).toLowerCase()
+  const action = pascalToWords(cap.action).toLowerCase()
+  const resource = pascalToWords(cap.resource).toLowerCase()
   parts.push(
-    `**As a** ${role}\n**I want to** ${verb} a ${noun}\n**So that** the business outcome of \`${cap.name}\` is achieved.`,
+    `**As a** ${role}\n**I want to** ${action} a ${resource}\n**So that** the business outcome of \`${cap.name}\` is achieved.`,
   )
 
   const triggers = renderTriggerList(causes)
@@ -63,14 +63,14 @@ function renderUserStory(cap: Capability, op: OperationalDna): string {
 function renderGherkin(cap: Capability, op: OperationalDna): string {
   const { rules, causes, outcomes, roles } = collect(cap, op)
   const actor = roles[0] ?? 'user'
-  const verb = pascalToWords(cap.verb).toLowerCase()
-  const noun = pascalToWords(cap.noun).toLowerCase()
+  const action = pascalToWords(cap.action).toLowerCase()
+  const resource = pascalToWords(cap.resource).toLowerCase()
 
   const lines: string[] = []
   lines.push(`Feature: ${capabilityTitle(cap)}`)
   if (cap.description) lines.push(`  ${cap.description}`)
   lines.push('')
-  lines.push(`  Scenario: ${actor} ${verb}s a ${noun}`)
+  lines.push(`  Scenario: ${actor} ${action}s a ${resource}`)
 
   const conditionRules = rules.filter((r) => r.type === 'condition')
   if (causes.length || conditionRules.length || roles.length) {
@@ -88,7 +88,7 @@ function renderGherkin(cap: Capability, op: OperationalDna): string {
     }
   }
 
-  lines.push(`    When they ${verb} the ${noun}`)
+  lines.push(`    When they ${action} the ${resource}`)
 
   const thens = outcomeLines(outcomes)
   if (thens.length === 0) {
@@ -113,8 +113,8 @@ function renderProductDna(cap: Capability, op: OperationalDna): string {
   if (cap.description) parts.push(cap.description)
 
   const kv: string[] = []
-  kv.push(`**Resource:** \`${cap.noun}\``)
-  kv.push(`**Action:** \`${cap.verb}\``)
+  kv.push(`**Resource:** \`${cap.resource}\``)
+  kv.push(`**Action:** \`${cap.action}\``)
   if (roles.length) kv.push(`**Actor:** ${roles.map((r) => `\`${r}\``).join(', ')}`)
   if (causes.length) kv.push(`**Trigger:** ${causes.map((c) => c.source).join(', ')}`)
   parts.push(kv.join('\n'))

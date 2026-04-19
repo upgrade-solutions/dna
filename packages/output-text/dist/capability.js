@@ -14,7 +14,7 @@ exports.capabilityTitle = capabilityTitle;
 exports.renderCapability = renderCapability;
 const util_1 = require("./util");
 function capabilityTitle(cap) {
-    return `${(0, util_1.pascalToWords)(cap.verb)} ${(0, util_1.pascalToWords)(cap.noun)}`.trim();
+    return `${(0, util_1.pascalToWords)(cap.action)} ${(0, util_1.pascalToWords)(cap.resource)}`.trim();
 }
 function renderCapability(cap, op, style) {
     if (style === 'gherkin')
@@ -32,9 +32,9 @@ function renderUserStory(cap, op) {
     if (cap.description)
         parts.push(cap.description);
     const role = roles[0] ?? 'user';
-    const verb = (0, util_1.pascalToWords)(cap.verb).toLowerCase();
-    const noun = (0, util_1.pascalToWords)(cap.noun).toLowerCase();
-    parts.push(`**As a** ${role}\n**I want to** ${verb} a ${noun}\n**So that** the business outcome of \`${cap.name}\` is achieved.`);
+    const action = (0, util_1.pascalToWords)(cap.action).toLowerCase();
+    const resource = (0, util_1.pascalToWords)(cap.resource).toLowerCase();
+    parts.push(`**As a** ${role}\n**I want to** ${action} a ${resource}\n**So that** the business outcome of \`${cap.name}\` is achieved.`);
     const triggers = renderTriggerList(causes);
     if (triggers)
         parts.push(`**Triggered by:**\n${triggers}`);
@@ -49,14 +49,14 @@ function renderUserStory(cap, op) {
 function renderGherkin(cap, op) {
     const { rules, causes, outcomes, roles } = collect(cap, op);
     const actor = roles[0] ?? 'user';
-    const verb = (0, util_1.pascalToWords)(cap.verb).toLowerCase();
-    const noun = (0, util_1.pascalToWords)(cap.noun).toLowerCase();
+    const action = (0, util_1.pascalToWords)(cap.action).toLowerCase();
+    const resource = (0, util_1.pascalToWords)(cap.resource).toLowerCase();
     const lines = [];
     lines.push(`Feature: ${capabilityTitle(cap)}`);
     if (cap.description)
         lines.push(`  ${cap.description}`);
     lines.push('');
-    lines.push(`  Scenario: ${actor} ${verb}s a ${noun}`);
+    lines.push(`  Scenario: ${actor} ${action}s a ${resource}`);
     const conditionRules = rules.filter((r) => r.type === 'condition');
     if (causes.length || conditionRules.length || roles.length) {
         const givens = [];
@@ -76,7 +76,7 @@ function renderGherkin(cap, op) {
             lines.push(`    ${i === 0 ? 'Given' : 'And'} ${givens[i]}`);
         }
     }
-    lines.push(`    When they ${verb} the ${noun}`);
+    lines.push(`    When they ${action} the ${resource}`);
     const thens = outcomeLines(outcomes);
     if (thens.length === 0) {
         lines.push(`    Then the capability \`${cap.name}\` succeeds`);
@@ -97,8 +97,8 @@ function renderProductDna(cap, op) {
     if (cap.description)
         parts.push(cap.description);
     const kv = [];
-    kv.push(`**Resource:** \`${cap.noun}\``);
-    kv.push(`**Action:** \`${cap.verb}\``);
+    kv.push(`**Resource:** \`${cap.resource}\``);
+    kv.push(`**Action:** \`${cap.action}\``);
     if (roles.length)
         kv.push(`**Actor:** ${roles.map((r) => `\`${r}\``).join(', ')}`);
     if (causes.length)

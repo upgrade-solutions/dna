@@ -1,24 +1,24 @@
 import { DnaInput } from '../types'
-import { collectNouns, mermaidId } from '../util'
+import { collectResources, mermaidId } from '../util'
 
 export function renderErd(dna: DnaInput): string | null {
   const op = dna.operational
   if (!op) return null
 
-  const nouns = collectNouns(op.domain)
-  if (!nouns.length) return null
+  const resources = collectResources(op.domain)
+  if (!resources.length) return null
 
   const lines: string[] = ['erDiagram']
 
-  for (const noun of nouns) {
-    const id = mermaidId(noun.name)
-    if (!noun.attributes?.length) {
+  for (const resource of resources) {
+    const id = mermaidId(resource.name)
+    if (!resource.attributes?.length) {
       lines.push(`    ${id} {`)
       lines.push(`    }`)
       continue
     }
     lines.push(`    ${id} {`)
-    for (const attr of noun.attributes) {
+    for (const attr of resource.attributes) {
       const type = mermaidId(attr.type ?? 'string')
       lines.push(`        ${type} ${mermaidId(attr.name)}`)
     }

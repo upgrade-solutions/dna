@@ -1,8 +1,8 @@
-import { Noun, OperationalDomain } from './types'
+import { Resource, OperationalDomain } from './types'
 
-export function collectNouns(domain: OperationalDomain): Noun[] {
-  const out = [...(domain.nouns ?? [])]
-  for (const sub of domain.domains ?? []) out.push(...collectNouns(sub))
+export function collectResources(domain: OperationalDomain): Resource[] {
+  const out = [...(domain.resources ?? [])]
+  for (const sub of domain.domains ?? []) out.push(...collectResources(sub))
   return out
 }
 

@@ -26,15 +26,15 @@ function mockFetch(
 }
 
 describe('mapping', () => {
-  it('maps external items to DNA Nouns with PascalCase names', () => {
+  it('maps external items to DNA Resources with PascalCase names', () => {
     const dna = itemsToDna([{ id: 'i1', title: 'loan application', tags: ['a', 'b'] }], 'acme.ops')
-    const [noun] = dna.operational!.domain.nouns!
-    expect(noun.name).toBe('LoanApplication')
-    expect(noun.metadata?.externalId).toBe('i1')
-    expect(noun.metadata?.tags).toEqual(['a', 'b'])
+    const [resource] = dna.operational!.domain.resources!
+    expect(resource.name).toBe('LoanApplication')
+    expect(resource.metadata?.externalId).toBe('i1')
+    expect(resource.metadata?.tags).toEqual(['a', 'b'])
   })
 
-  it('round-trips Nouns through dnaToItems', () => {
+  it('round-trips Resources through dnaToItems', () => {
     const dna = itemsToDna([{ id: 'i1', title: 'Loan', description: 'x' }], 'acme.ops')
     const [out] = dnaToItems(dna)
     expect(out.title).toBe('Loan')
@@ -57,10 +57,10 @@ describe('client', () => {
     expect(calls).toHaveLength(2)
     expect((calls[0].init.headers as Record<string, string>).authorization).toBe('Bearer tok')
     expect(calls[1].url).toContain('cursor=c2')
-    expect(dna.operational?.domain.nouns?.map((n) => n.name)).toEqual(['First', 'Second'])
+    expect(dna.operational?.domain.resources?.map((r) => r.name)).toEqual(['First', 'Second'])
   })
 
-  it('pushDna creates an item per Noun', async () => {
+  it('pushDna creates an item per Resource', async () => {
     const { fetchImpl, calls } = mockFetch((_url, init) => {
       const body = JSON.parse(init.body as string)
       return { body: { id: 'new', ...body } }
@@ -69,7 +69,7 @@ describe('client', () => {
     const client = createClient({ baseUrl: 'https://api.example.com', apiToken: 'tok', fetchImpl })
     const { created } = await client.pushDna({
       operational: {
-        domain: { name: 'ops', nouns: [{ name: 'Alpha' }, { name: 'Beta' }] },
+        domain: { name: 'ops', resources: [{ name: 'Alpha' }, { name: 'Beta' }] },
       },
     })
 

@@ -6,38 +6,38 @@ import { Layer } from './types'
  * Early versions used a full lending/Loan example here; smaller local models
  * in JSON mode would copy those literal names back verbatim instead of deriving
  * new names from the user's text. Using angle-bracket placeholders forces the
- * model to substitute, because `<Noun>` / `<Verb>` aren't valid output.
+ * model to substitute, because `<Resource>` / `<Action>` aren't valid output.
  */
 const OPERATIONAL_SKELETON = `{
   "operational": {
     "domain": {
       "name": "<domain-leaf>",
       "path": "<root>.<mid>.<leaf>",
-      "nouns": [
+      "resources": [
         {
-          "name": "<NounInPascalCase>",
+          "name": "<ResourceInPascalCase>",
           "attributes": [
             { "name": "<attribute>", "type": "<string|text|number|boolean|date|datetime|enum|reference>", "required": true },
             { "name": "<enumAttribute>", "type": "enum", "values": ["<valueA>", "<valueB>"] }
           ],
-          "verbs": [
-            { "name": "<VerbInPascalCase>" }
+          "actions": [
+            { "name": "<ActionInPascalCase>" }
           ]
         }
       ]
     },
     "capabilities": [
-      { "noun": "<Noun>", "verb": "<Verb>", "name": "<Noun>.<Verb>" }
+      { "resource": "<Resource>", "action": "<Action>", "name": "<Resource>.<Action>" }
     ],
     "causes": [
-      { "capability": "<Noun>.<Verb>", "source": "user | schedule | webhook | capability" }
+      { "capability": "<Resource>.<Action>", "source": "user | schedule | webhook | capability" }
     ],
     "rules": [
-      { "capability": "<Noun>.<Verb>", "type": "access", "allow": [{ "role": "<role>" }] },
-      { "capability": "<Noun>.<Verb>", "type": "condition", "conditions": [{ "attribute": "<noun>.<attribute>", "operator": "eq", "value": "<value>" }] }
+      { "capability": "<Resource>.<Action>", "type": "access", "allow": [{ "role": "<role>" }] },
+      { "capability": "<Resource>.<Action>", "type": "condition", "conditions": [{ "attribute": "<resource>.<attribute>", "operator": "eq", "value": "<value>" }] }
     ],
     "outcomes": [
-      { "capability": "<Noun>.<Verb>", "changes": [{ "attribute": "<noun>.<attribute>", "set": "<value>" }] }
+      { "capability": "<Resource>.<Action>", "changes": [{ "attribute": "<resource>.<attribute>", "set": "<value>" }] }
     ],
     "positions": [
       { "name": "<PositionInPascalCase>", "description": "<role description>" }
@@ -46,7 +46,7 @@ const OPERATIONAL_SKELETON = `{
       { "name": "<PersonFullName>", "position": "<PositionInPascalCase>" }
     ],
     "tasks": [
-      { "name": "<TaskInPascalCase>", "position": "<PositionInPascalCase>", "capability": "<Noun>.<Verb>" }
+      { "name": "<TaskInPascalCase>", "position": "<PositionInPascalCase>", "capability": "<Resource>.<Action>" }
     ],
     "processes": [
       {
@@ -69,7 +69,7 @@ const PRODUCT_SKELETON = `{
       "resources": [
         {
           "name": "<ResourceInPascalCase>",
-          "noun": "<NounFromOperational>",
+          "resource": "<OperationalResource>",
           "fields": [
             { "name": "<field>", "type": "<string|text|number|boolean|date|datetime|enum|reference>" }
           ],
@@ -83,7 +83,7 @@ const PRODUCT_SKELETON = `{
           "resource": "<Resource>",
           "action": "<Action>",
           "name": "<Resource>.<Action>",
-          "capability": "<Noun>.<Verb>"
+          "capability": "<Resource>.<Action>"
         }
       ]
     },
@@ -140,7 +140,7 @@ const TECHNICAL_SKELETON = `{
     "cells": [
       {
         "name": "<kebab-name>",
-        "dna": "product/api | product/ui | operational/<noun>",
+        "dna": "product/api | product/ui | operational/<resource>",
         "adapter": { "type": "nestjs | express | nextjs | nuxt | rails | django | fastapi | spring | …" }
       }
     ]
@@ -150,23 +150,28 @@ const TECHNICAL_SKELETON = `{
 const LAYER_GUIDE: Record<Layer, string> = {
   operational: [
     'operational (required when the text describes a business):',
-    '  domain: { name, path, domains?, nouns }',
-    '    — nouns is an ARRAY of { name, attributes: [{name,type,required?,values?}], verbs: [{name}] }',
-    '    — ALWAYS include nouns when the text mentions entities; do not leave it empty',
-    '  capabilities: ARRAY of { noun: "<singular>", verb: "<singular>", name: "Noun.Verb" }',
-    '    — one entry per Noun+Verb pair; noun/verb are single strings, NOT arrays',
-    '  causes: ARRAY of { capability: "Noun.Verb", source: "user" | "schedule" | "webhook" | "capability" }',
+    '  The operational layer is modeled around the Actor > Action > Resource triad:',
+    '    — a Resource is a thing the business tracks (Loan, Invoice, Post)',
+    '    — an Action is what gets performed on a Resource (Approve, Issue, Publish)',
+    '    — the Actor (who does it) is expressed through Positions, Roles, and Tasks — never inline on the Capability itself.',
+    '  domain: { name, path, domains?, resources }',
+    '    — resources is an ARRAY of { name, attributes: [{name,type,required?,values?}], actions: [{name}] }',
+    '    — ALWAYS include resources when the text mentions entities; do not leave it empty',
+    '  capabilities: ARRAY of { resource: "<singular>", action: "<singular>", name: "Resource.Action" }',
+    '    — one entry per Resource+Action pair; resource/action are single strings, NOT arrays',
+    '    — every Action MUST be paired with a Resource; an Action without a Resource is invalid',
+    '  causes: ARRAY of { capability: "Resource.Action", source: "user" | "schedule" | "webhook" | "capability" }',
     '    — source is one of those four literal strings ONLY; a role like "underwriter" is NOT a valid source',
     '    — pick source from the text: a human doing it = "user"; a cron/timer = "schedule";',
     '      an inbound HTTP event = "webhook"; triggered by another Capability finishing = "capability".',
     '      Do NOT round-robin or distribute evenly across the four values. Default to "user" when unclear.',
     '  rules: ARRAY of { capability, type: "access" | "condition", allow?: [{role}], conditions?: [...] }',
-    '    — "access" rules carry roles; "condition" rules carry attribute predicates',
+    '    — "access" rules carry roles (the Actor); "condition" rules carry attribute predicates',
     '  outcomes: ARRAY of { capability, changes: [{attribute, set}] }',
     '  relationships (optional): ARRAY of { name, from, to, attribute, cardinality: "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many" }',
     '    — match cardinality to the text: "each X has many Y" → one-to-many from X to Y.',
     '  positions (optional): ARRAY of { name, description?, roles?: [string] }',
-    '    — a Position is a job title ("Case Manager", "Underwriter"). ALWAYS include when the text names roles performing work.',
+    '    — a Position is a job title ("Case Manager", "Underwriter") — the Actor in the triad. ALWAYS include when the text names roles performing work.',
     '  persons (optional): ARRAY of { name, position }',
     '    — a Person is a named individual filling a Position.',
     '  tasks (optional): ARRAY of { name, position, capability, description? }',
@@ -177,9 +182,9 @@ const LAYER_GUIDE: Record<Layer, string> = {
   ].join('\n'),
   product: [
     'product (INCLUDE ONLY IF the input text explicitly describes software being built — UI screens, API endpoints, resources, pages, fields). Three sub-layers:',
-    '  core: { domain, resources: [{name, noun, fields, actions}], operations: [{resource, action, name: "Resource.Action", capability}] }',
-    '    — Resource is PascalCase singular and maps 1:1 to an Operational Noun.',
-    '    — Operation name is "Resource.Action" and should reference a Capability "Noun.Verb" from the operational layer.',
+    '  core: { domain, resources: [{name, resource, fields, actions}], operations: [{resource, action, name: "Resource.Action", capability}] }',
+    '    — Resource is PascalCase singular and maps 1:1 to an Operational Resource (same name by convention; the `resource` field is the explicit cross-layer reference).',
+    '    — Operation name is "Resource.Action" and should reference a Capability with the same "Resource.Action" form from the operational layer.',
     '  api:  { namespace: {name, path, domain}, endpoints: [{method, path, operation: "Resource.Action"}] }',
     '    — method is one of GET | POST | PUT | PATCH | DELETE. Path is URL-style with :id placeholders.',
     '    — Include an endpoint only if the text names an API surface or HTTP contract.',
@@ -194,7 +199,7 @@ const LAYER_GUIDE: Record<Layer, string> = {
     '  providers:    [{name (kebab-case), type: "cloud" | "auth" | "payments" | "database" | "storage" | "messaging" | "monitoring" | "other"}]',
     '  constructs:   [{name (kebab-case), category: "compute" | "storage" | "network", type: "function" | "container" | "server" | "worker" | "database" | "cache" | "filestore" | "queue" | "gateway" | "loadbalancer" | "cdn"}]',
     '  variables:    [{name (SCREAMING_SNAKE_CASE), source: "env" | "secret" | "output" | "literal"}]',
-    '  cells:        [{name (kebab-case), dna: "product/api" | "product/ui" | "operational/<noun>", adapter: {type: <framework>}}]',
+    '  cells:        [{name (kebab-case), dna: "product/api" | "product/ui" | "operational/<resource>", adapter: {type: <framework>}}]',
     'If the text does not describe deployment, OMIT this layer entirely. Do NOT invent AWS/GCP/Azure values, regions, ARNs, or tooling.',
   ].join('\n'),
 }
@@ -213,13 +218,13 @@ export function buildSystemPrompt(layers: Layer[], instructions?: string): strin
     layers.map((l) => LAYER_GUIDE[l]).join('\n\n'),
     '',
     'Hard rules:',
-    '- Nouns use PascalCase singular (Loan, Invoice, Borrower). Verbs use PascalCase (Apply, Approve).',
-    '- Capability name is always "Noun.Verb" — e.g. { "noun": "Loan", "verb": "Apply", "name": "Loan.Apply" }.',
-    '- Every Noun mentioned in the text MUST appear in domain.nouns with its attributes and verbs.',
+    '- Operational DNA is modeled as Actor > Action > Resource. Resources use PascalCase singular (Loan, Invoice, Borrower). Actions use PascalCase (Apply, Approve). Every Action must be paired with a Resource.',
+    '- Capability name is always "Resource.Action" — e.g. { "resource": "Loan", "action": "Apply", "name": "Loan.Apply" }.',
+    '- Every Resource mentioned in the text MUST appear in domain.resources with its attributes and actions.',
     '- Attributes have: name, type (string | text | number | boolean | date | datetime | enum | reference), optional required, optional values (for enums).',
     '- Domain path is dot-separated lowercase (acme.finance.lending).',
     '- Only include primitives implied by the text; do not invent.',
-    '- Derive EVERY name (nouns, verbs, attributes, roles, domain path) from the input text ONLY. Do not copy names from the structural skeleton below.',
+    '- Derive EVERY name (resources, actions, attributes, roles, domain path) from the input text ONLY. Do not copy names from the structural skeleton below.',
     '- The skeleton uses <placeholder> tokens to show shape, not content. Any `<...>` string in your response is an error.',
     '- NEVER invent values to fill a layer. If the input text does not describe product/technical details, OMIT those layers from the response.',
     '- An empty or partial section is always better than an invented one.',

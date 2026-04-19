@@ -26,7 +26,7 @@ const { operational } = parse(
       { name: 'loan', fields: [{ name: 'amount', type: 'number', required: true }] },
       { name: 'borrower', fields: [{ name: 'email', type: 'string' }] },
     ],
-    actions: [{ entity: 'loan', verb: 'Apply' }],
+    actions: [{ entity: 'loan', action: 'Apply' }],
   },
   { domain: 'acme.finance.lending' },
 )
@@ -50,7 +50,7 @@ const { operational, raw } = await parseText(
 | Option | Type | Default | Notes |
 |---|---|---|---|
 | `domain` | `string` | — (required) | Dot-separated domain path, e.g. `acme.finance.lending` |
-| `nounNameFromEntity` | `(s: string) => string` | PascalCase | Override how entity names map to Noun names |
+| `resourceNameFromEntity` | `(s: string) => string` | PascalCase | Override how entity names map to Resource names |
 
 ### `parseText(text, options)` — probabilistic
 

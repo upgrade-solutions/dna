@@ -28,7 +28,7 @@
     },
     "capability": {
       "type": "string",
-      "description": "The Operational Capability this operation maps from, expressed as Noun.Verb.",
+      "description": "The Operational Capability this operation maps from, expressed as Resource.Action.",
       "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
       "examples": ["Loan.Apply", "Order.Ship"]
     }

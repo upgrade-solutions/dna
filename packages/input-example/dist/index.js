@@ -47,24 +47,24 @@ function parse(data, options) {
     if (!options.domain) {
         throw new Error('input-example.parse: options.domain is required.');
     }
-    const nounName = options.nounNameFromEntity ?? defaultNounName;
-    const nouns = data.entities.map((entity) => toNoun(entity, nounName));
-    const capabilities = (data.actions ?? []).map((action) => toCapability(action, nounName));
-    attachVerbs(nouns, capabilities);
+    const resourceName = options.resourceNameFromEntity ?? defaultResourceName;
+    const resources = data.entities.map((entity) => toResource(entity, resourceName));
+    const capabilities = (data.actions ?? []).map((action) => toCapability(action, resourceName));
+    attachActions(resources, capabilities);
     return {
         operational: {
             domain: {
                 name: domainLeaf(options.domain),
                 path: options.domain,
-                nouns,
+                resources,
             },
             ...(capabilities.length ? { capabilities } : {}),
         },
     };
 }
-function toNoun(entity, nounName) {
+function toResource(entity, resourceName) {
     return {
-        name: nounName(entity.name),
+        name: resourceName(entity.name),
         attributes: (entity.fields ?? []).map((f) => ({
             name: f.name,
             type: f.type,
@@ -72,22 +72,22 @@ function toNoun(entity, nounName) {
         })),
     };
 }
-function toCapability(action, nounName) {
-    const noun = nounName(action.entity);
-    const verb = toPascalCase(action.verb);
-    return { noun, verb, name: `${noun}.${verb}` };
+function toCapability(action, resourceName) {
+    const resource = resourceName(action.entity);
+    const actionName = toPascalCase(action.action);
+    return { resource, action: actionName, name: `${resource}.${actionName}` };
 }
-function attachVerbs(nouns, capabilities) {
+function attachActions(resources, capabilities) {
     for (const cap of capabilities) {
-        const noun = nouns.find((n) => n.name === cap.noun);
-        if (!noun)
+        const resource = resources.find((r) => r.name === cap.resource);
+        if (!resource)
             continue;
-        noun.verbs ?? (noun.verbs = []);
-        if (!noun.verbs.some((v) => v.name === cap.verb))
-            noun.verbs.push({ name: cap.verb });
+        resource.actions ?? (resource.actions = []);
+        if (!resource.actions.some((a) => a.name === cap.action))
+            resource.actions.push({ name: cap.action });
     }
 }
-function defaultNounName(entity) {
+function defaultResourceName(entity) {
     return toPascalCase(entity);
 }
 function toPascalCase(s) {

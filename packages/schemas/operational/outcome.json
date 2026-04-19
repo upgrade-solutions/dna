@@ -8,7 +8,7 @@
   "properties": {
     "capability": {
       "type": "string",
-      "description": "The Capability this outcome applies to, expressed as Noun.Verb.",
+      "description": "The Capability this outcome applies to, expressed as Resource.Action.",
       "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
       "examples": ["Loan.Approve", "Order.Cancel", "Employee.Terminate"]
     },
@@ -18,7 +18,7 @@
     },
     "changes": {
       "type": "array",
-      "description": "Attribute changes applied to the noun after the capability executes.",
+      "description": "Attribute changes applied to the Resource after the capability executes.",
       "minItems": 1,
       "items": {
         "type": "object",

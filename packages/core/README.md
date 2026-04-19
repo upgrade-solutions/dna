@@ -30,7 +30,7 @@ Nested object of every per-primitive JSON schema, keyed by layer:
 ```ts
 import { schemas } from '@dna-codes/core'
 
-schemas.operational.noun           // 15 operational primitives
+schemas.operational.resource       // 15 operational primitives
 schemas.product.core.role          // 5 product-core primitives
 schemas.product.api.endpoint       // 4 product-api primitives
 schemas.product.web.page           // 4 product-web (UI) primitives
@@ -40,8 +40,8 @@ schemas.technical.cell             // 11 technical primitives
 Each schema is a JSON Schema Draft 2020-12 document with a stable `$id`:
 
 ```ts
-schemas.operational.noun.$id
-// → 'https://dna.local/operational/noun'
+schemas.operational.resource.$id
+// → 'https://dna.local/operational/resource'
 ```
 
 ### `documents`
@@ -69,7 +69,7 @@ import { allSchemas } from '@dna-codes/core'
 const ajv = new Ajv({ strict: false, allErrors: true })
 for (const s of allSchemas()) ajv.addSchema(s)
 
-const validate = ajv.getSchema('https://dna.local/operational/noun')
+const validate = ajv.getSchema('https://dna.local/operational/resource')
 validate({ name: 'Loan' })         // → true
 ```
 
@@ -80,8 +80,8 @@ Returns the on-disk path of a schema file, or `null` if it doesn't exist. Useful
 ```ts
 import { resolveSchemaFile } from '@dna-codes/core'
 
-resolveSchemaFile('operational', 'noun')
-// → '/abs/.../node_modules/@dna-codes/schemas/operational/noun.json'
+resolveSchemaFile('operational', 'resource')
+// → '/abs/.../node_modules/@dna-codes/schemas/operational/resource.json'
 
 resolveSchemaFile('product', 'api/endpoint')      // nested path
 // → '/abs/.../schemas/product/api/endpoint.json'
@@ -108,7 +108,7 @@ layerDirs.technical                // .../schemas/technical
 To import an individual schema directly, depend on [`@dna-codes/schemas`](../schemas/):
 
 ```ts
-import nounSchema from '@dna-codes/schemas/operational/noun.json'
+import resourceSchema from '@dna-codes/schemas/operational/resource.json'
 ```
 
 ## `DnaValidator`
@@ -125,7 +125,7 @@ if (!result.valid) {
   for (const err of result.errors) console.error(err.instancePath, err.message)
 }
 
-// Cross-layer: verify Product references valid Operational Nouns, etc.
+// Cross-layer: verify Product references valid Operational Resources, etc.
 const cross = validator.validateCrossLayer({ operational, productApi })
 if (!cross.valid) for (const err of cross.errors) console.error(err)
 ```
@@ -150,11 +150,11 @@ Schemas cross-reference each other by absolute URI (e.g. `https://dna.local/oper
 
 | Layer | Primitives |
 |-------|-----------|
-| Operational | `Noun`, `Verb`, `Capability`, `Attribute`, `Domain`, `Relationship`, `Cause`, `Rule`, `Outcome`, `Signal`, `Equation`, `Position`, `Person`, `Task`, `Process` |
+| Operational | `Resource`, `Action`, `Capability`, `Attribute`, `Domain`, `Relationship`, `Cause`, `Rule`, `Outcome`, `Signal`, `Equation`, `Position`, `Person`, `Task`, `Process` |
 | Product | `Resource`, `Action`, `Operation`, `Role`, `Layout`, `Page`, `Route`, `Block`, `Field`, `Namespace`, `Endpoint`, `Schema`, `Param` |
 | Technical | `Environment`, `Cell`, `Construct`, `Provider`, `Variable`, `Output`, `Script`, `View`, `Node`, `Connection`, `Zone` |
 
-No primitive name is shared across layers. See each layer's doc in [`docs/`](./docs/) for full semantics.
+Operational is modeled around the **Actor > Action > Resource** triad. `Resource` and `Action` appear at both the Operational and Product layers by design — a Product `Resource` is the surface projection of an Operational `Resource`, and likewise for `Action`. The Actor is expressed via `Position`, `Role`, and `Task` rather than declared on the Capability itself. See each layer's doc in [`docs/`](./docs/) for full semantics.
 
 ## What this package does *not* include
 

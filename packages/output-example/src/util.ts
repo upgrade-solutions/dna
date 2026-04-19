@@ -1,9 +1,9 @@
-import { Noun, OperationalDomain } from './types'
+import { Resource, OperationalDomain } from './types'
 
-/** Flatten a domain tree into a single list of Nouns. */
-export function collectNouns(domain: OperationalDomain): Noun[] {
-  const out = [...(domain.nouns ?? [])]
-  for (const sub of domain.domains ?? []) out.push(...collectNouns(sub))
+/** Flatten a domain tree into a single list of Resources. */
+export function collectResources(domain: OperationalDomain): Resource[] {
+  const out = [...(domain.resources ?? [])]
+  for (const sub of domain.domains ?? []) out.push(...collectResources(sub))
   return out
 }
 

@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectNouns = collectNouns;
+exports.collectResources = collectResources;
 exports.mermaidId = mermaidId;
 exports.labelEscape = labelEscape;
-function collectNouns(domain) {
-    const out = [...(domain.nouns ?? [])];
+function collectResources(domain) {
+    const out = [...(domain.resources ?? [])];
     for (const sub of domain.domains ?? [])
-        out.push(...collectNouns(sub));
+        out.push(...collectResources(sub));
     return out;
 }
 /** Sanitize a DNA name for use as a mermaid identifier (no quotes / spaces). */

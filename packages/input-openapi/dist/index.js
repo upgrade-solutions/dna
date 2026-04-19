@@ -133,9 +133,9 @@ function toPascalDot(id) {
     const parts = id.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(/\s+/);
     if (parts.length < 2)
         return toPascalCase(id) + '.Do';
-    const verb = parts[0];
-    const noun = parts.slice(1).join(' ');
-    return `${toPascalCase(noun)}.${toPascalCase(verb)}`;
+    const action = parts[0];
+    const resource = parts.slice(1).join(' ');
+    return `${toPascalCase(resource)}.${toPascalCase(action)}`;
 }
 function mapType(t) {
     switch (t) {

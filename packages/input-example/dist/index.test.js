@@ -16,31 +16,31 @@ const sample = {
         },
     ],
     actions: [
-        { entity: 'loan', verb: 'Apply' },
-        { entity: 'loan', verb: 'approve' },
+        { entity: 'loan', action: 'Apply' },
+        { entity: 'loan', action: 'approve' },
     ],
 };
 describe('@dna-codes/input-example — parse (deterministic)', () => {
-    it('PascalCases entity names into Nouns', () => {
+    it('PascalCases entity names into Resources', () => {
         const { operational } = (0, index_1.parse)(sample, { domain: 'acme.finance.lending' });
-        expect(operational.domain.nouns.map((n) => n.name)).toEqual(['Loan', 'Borrower']);
+        expect(operational.domain.resources.map((r) => r.name)).toEqual(['Loan', 'Borrower']);
     });
     it('preserves attribute types and required flags', () => {
         const { operational } = (0, index_1.parse)(sample, { domain: 'acme.finance.lending' });
-        const loan = operational.domain.nouns.find((n) => n.name === 'Loan');
+        const loan = operational.domain.resources.find((r) => r.name === 'Loan');
         expect(loan?.attributes).toEqual([
             { name: 'amount', type: 'number', required: true },
             { name: 'status', type: 'string' },
         ]);
     });
-    it('emits capabilities and attaches verbs to the matching Noun', () => {
+    it('emits capabilities and attaches actions to the matching Resource', () => {
         const { operational } = (0, index_1.parse)(sample, { domain: 'acme.finance.lending' });
         expect(operational.capabilities).toEqual([
-            { noun: 'Loan', verb: 'Apply', name: 'Loan.Apply' },
-            { noun: 'Loan', verb: 'Approve', name: 'Loan.Approve' },
+            { resource: 'Loan', action: 'Apply', name: 'Loan.Apply' },
+            { resource: 'Loan', action: 'Approve', name: 'Loan.Approve' },
         ]);
-        const loan = operational.domain.nouns.find((n) => n.name === 'Loan');
-        expect(loan?.verbs).toEqual([{ name: 'Apply' }, { name: 'Approve' }]);
+        const loan = operational.domain.resources.find((r) => r.name === 'Loan');
+        expect(loan?.actions).toEqual([{ name: 'Apply' }, { name: 'Approve' }]);
     });
     it('uses the domain leaf as name and full path as path', () => {
         const { operational } = (0, index_1.parse)(sample, { domain: 'acme.finance.lending' });
@@ -70,7 +70,7 @@ function mockFetch(body, status = 200) {
 const openAiBody = (content) => ({ choices: [{ message: { content } }] });
 describe('@dna-codes/input-example — parseText (probabilistic)', () => {
     it('sends an OpenAI chat completion and parses the returned JSON', async () => {
-        const dna = { operational: { domain: { name: 'x', path: 'x', nouns: [] } } };
+        const dna = { operational: { domain: { name: 'x', path: 'x', resources: [] } } };
         const { fetchImpl, calls } = mockFetch(openAiBody(JSON.stringify(dna)));
         const result = await (0, index_1.parseText)('A lending business.', {
             provider: 'openai',

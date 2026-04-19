@@ -8,7 +8,7 @@
   "properties": {
     "capability": {
       "type": "string",
-      "description": "The Capability this rule applies to, expressed as Noun.Verb.",
+      "description": "The Capability this rule applies to, expressed as Resource.Action.",
       "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
       "examples": ["Loan.Approve", "Order.Ship", "Employee.Promote"]
     },
@@ -23,7 +23,7 @@
     },
     "allow": {
       "type": "array",
-      "description": "The actors permitted to perform this capability. Used when type is 'access'. An actor matching any entry is allowed; all properties within a single entry must match together (AND). Cross-entry semantics is OR.",
+      "description": "The Actors permitted to perform this capability. Used when type is 'access'. An Actor matching any entry is allowed; all properties within a single entry must match together (AND). Cross-entry semantics is OR.",
       "minItems": 1,
       "items": {
         "type": "object",
@@ -35,7 +35,7 @@
           },
           "ownership": {
             "type": "boolean",
-            "description": "When true, the actor must be the owner of the noun instance."
+            "description": "When true, the Actor must be the owner of the Resource instance."
           },
           "flags": {
             "type": "array",

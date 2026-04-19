@@ -10,9 +10,9 @@ function renderSummary(dna, headingLevel) {
     const op = dna.operational;
     if (!op)
         return null;
-    const nouns = (0, util_1.collectNouns)(op.domain);
+    const resources = (0, util_1.collectResources)(op.domain);
     const raw = [
-        ['Nouns', nouns.length],
+        ['Resources', resources.length],
         ['Capabilities', op.capabilities?.length ?? 0],
         ['Relationships', op.relationships?.length ?? 0],
     ];

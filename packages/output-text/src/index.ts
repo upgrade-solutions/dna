@@ -8,18 +8,19 @@
  * The key set determines which unit types are emitted; the value picks the
  * body template. Default is `{ capability: 'user-story' }`.
  *
- * `user-story` and `gherkin` are action-shaped and only fit Capability — Noun
- * and Process always render as `product-dna` regardless of the style requested.
+ * `user-story` and `gherkin` are action-shaped and only fit Capability —
+ * Resource and Process always render as `product-dna` regardless of the style
+ * requested.
  */
 
 import { capabilityTitle, renderCapability } from './capability'
-import { nounTitle, renderNoun } from './noun'
+import { resourceTitle, renderResource } from './resource'
 import { processTitle, renderProcess } from './process'
 import {
   Capability,
   DEFAULT_STYLES,
   DnaInput,
-  Noun,
+  Resource,
   OperationalDna,
   OperationalDomain,
   Process,
@@ -32,7 +33,7 @@ import {
 } from './types'
 import { joinSections, slugify } from './util'
 
-const UNIT_ORDER: Unit[] = ['capability', 'noun', 'process']
+const UNIT_ORDER: Unit[] = ['capability', 'resource', 'process']
 
 export function render(dna: DnaInput, options: RenderOptions = {}): string {
   const op = dna.operational
@@ -77,8 +78,8 @@ function unitDocs(unit: Unit, style: Style, op: OperationalDna): TextDocument[] 
   switch (unit) {
     case 'capability':
       return (op.capabilities ?? []).map((c) => capabilityDoc(c, op, style))
-    case 'noun':
-      return collectNouns(op.domain).map((n) => nounDoc(n, op))
+    case 'resource':
+      return collectResources(op.domain).map((r) => resourceDoc(r, op))
     case 'process':
       return (op.processes ?? []).map((p) => processDoc(p, op))
   }
@@ -92,11 +93,11 @@ function capabilityDoc(cap: Capability, op: OperationalDna, style: Style): TextD
   }
 }
 
-function nounDoc(n: Noun, op: OperationalDna): TextDocument {
+function resourceDoc(r: Resource, op: OperationalDna): TextDocument {
   return {
-    id: `noun-${slugify(n.name)}`,
-    title: nounTitle(n),
-    body: renderNoun(n, op),
+    id: `resource-${slugify(r.name)}`,
+    title: resourceTitle(r),
+    body: renderResource(r, op),
   }
 }
 
@@ -122,13 +123,13 @@ function renderUnitSection(unit: Unit, style: Style, op: OperationalDna): string
 
 function unitHeading(unit: Unit): string {
   if (unit === 'capability') return 'Capabilities'
-  if (unit === 'noun') return 'Domain model'
+  if (unit === 'resource') return 'Domain model'
   return 'Processes'
 }
 
-function collectNouns(domain: OperationalDomain): Noun[] {
-  const out = [...(domain.nouns ?? [])]
-  for (const sub of domain.domains ?? []) out.push(...collectNouns(sub))
+function collectResources(domain: OperationalDomain): Resource[] {
+  const out = [...(domain.resources ?? [])]
+  for (const sub of domain.domains ?? []) out.push(...collectResources(sub))
   return out
 }
 

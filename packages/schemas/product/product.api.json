@@ -12,7 +12,7 @@
     },
     "resources": {
       "type": "array",
-      "description": "The product-level resources exposed by this API, mapped from Operational Nouns.",
+      "description": "The product-level resources exposed by this API, mapped from Operational Resources.",
       "items": { "$ref": "https://dna.local/product/core/resource" }
     },
     "operations": {
@@ -38,15 +38,15 @@
       "resources": [
         {
           "name": "Loan",
-          "noun": "Loan",
+          "resource": "Loan",
           "fields": [
             { "name": "id", "label": "ID", "type": "string" },
             { "name": "amount", "label": "Amount", "type": "number" },
             { "name": "status", "label": "Status", "type": "string" }
           ],
           "actions": [
-            { "name": "Apply", "verb": "Apply" },
-            { "name": "Approve", "verb": "Approve" }
+            { "name": "Apply", "action": "Apply" },
+            { "name": "Approve", "action": "Approve" }
           ]
         }
       ],

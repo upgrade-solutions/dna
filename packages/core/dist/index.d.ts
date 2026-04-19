@@ -10,21 +10,21 @@ export type JsonSchema = {
 export type Layer = 'operational' | 'product.core' | 'product.api' | 'product.ui' | 'technical';
 export declare const schemas: {
     readonly operational: {
+        readonly action: JsonSchema;
         readonly attribute: JsonSchema;
         readonly capability: JsonSchema;
         readonly cause: JsonSchema;
         readonly domain: JsonSchema;
         readonly equation: JsonSchema;
-        readonly noun: JsonSchema;
         readonly outcome: JsonSchema;
         readonly person: JsonSchema;
         readonly position: JsonSchema;
         readonly process: JsonSchema;
         readonly relationship: JsonSchema;
+        readonly resource: JsonSchema;
         readonly rule: JsonSchema;
         readonly signal: JsonSchema;
         readonly task: JsonSchema;
-        readonly verb: JsonSchema;
     };
     readonly product: {
         readonly core: {

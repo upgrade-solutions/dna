@@ -31,7 +31,7 @@ If your target system lacks one (e.g. no webhooks), delete the file and mention 
    - `description` — one sentence stating the target system.
 3. Rename `bin/integration-example.js` → `bin/integration-<system>.js` (keep it executable).
 4. Replace `ExternalItem` / `ExternalListResponse` in `types.ts` with the real API's record shapes.
-5. Replace `itemsToDna` / `dnaToItems` in `mapping.ts` with semantic translation that's actually meaningful for the target system (issues↔Nouns, epics↔Processes, whatever fits).
+5. Replace `itemsToDna` / `dnaToItems` in `mapping.ts` with semantic translation that's actually meaningful for the target system (issues↔Resources, epics↔Processes, whatever fits).
 6. In `client.ts`:
    - Set real endpoints, real auth (Bearer, OAuth, API key headers, …).
    - Implement real pagination (cursor, page, link headers).

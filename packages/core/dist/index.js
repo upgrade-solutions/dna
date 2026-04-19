@@ -45,21 +45,21 @@ function load(rel) {
 }
 exports.schemas = {
     operational: {
+        action: load('operational/action.json'),
         attribute: load('operational/attribute.json'),
         capability: load('operational/capability.json'),
         cause: load('operational/cause.json'),
         domain: load('operational/domain.json'),
         equation: load('operational/equation.json'),
-        noun: load('operational/noun.json'),
         outcome: load('operational/outcome.json'),
         person: load('operational/person.json'),
         position: load('operational/position.json'),
         process: load('operational/process.json'),
         relationship: load('operational/relationship.json'),
+        resource: load('operational/resource.json'),
         rule: load('operational/rule.json'),
         signal: load('operational/signal.json'),
         task: load('operational/task.json'),
-        verb: load('operational/verb.json'),
     },
     product: {
         core: {

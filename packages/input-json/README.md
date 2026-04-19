@@ -1,6 +1,6 @@
 # `@dna-codes/input-json`
 
-Infer a DNA operational slice from a **plain JSON data sample** — not JSON Schema. Given a record (or an array of records), it produces Nouns, Attributes, and Relationships by walking the structure. Zero runtime dependencies.
+Infer a DNA operational slice from a **plain JSON data sample** — not JSON Schema. Given a record (or an array of records), it produces Resources, Attributes, and Relationships by walking the structure. Zero runtime dependencies.
 
 Useful for bootstrapping DNA from:
 - A sample API response
@@ -34,7 +34,7 @@ const sample = {
 
 const { operational } = parse(sample, { name: 'Book' })
 // → {
-//     domain: { name: 'book', nouns: [Book, Author, Review] },
+//     domain: { name: 'book', resources: [Book, Author, Review] },
 //     relationships: [
 //       { name: 'Book.author', from: 'Book', to: 'Author', attribute: 'author', cardinality: 'one-to-one' },
 //       { name: 'Book.reviews', from: 'Book', to: 'Review', attribute: 'reviews', cardinality: 'one-to-many' },
@@ -48,9 +48,9 @@ const { operational } = parse(sample, { name: 'Book' })
 
 | Option | Default | Meaning |
 |--------|---------|---------|
-| `name` (required) | — | Name for the root noun. Input JSON doesn't name itself. |
+| `name` (required) | — | Name for the root Resource. Input JSON doesn't name itself. |
 | `domain` | lowercased `name` | Name of the wrapping domain in the result. |
-| `nounNameFromKey` | PascalCase + singularize | Maps a property key (e.g. `authors`) to the noun name (`Author`). |
+| `resourceNameFromKey` | PascalCase + singularize | Maps a property key (e.g. `authors`) to the Resource name (`Author`). |
 
 ## Inference rules
 
@@ -59,20 +59,20 @@ const { operational } = parse(sample, { name: 'Book' })
 | scalar value (string, number, boolean, date-ish string) | Attribute with inferred type |
 | ISO 8601 date string (`2026-12-31`) | Attribute with type `date` |
 | ISO 8601 datetime string (`2026-12-31T00:00:00Z`) | Attribute with type `datetime` |
-| array of scalars | Attribute with type `array` |
-| nested object | child Noun + **one-to-one** Relationship |
-| array of objects | child Noun + **one-to-many** Relationship (schema merged across items) |
+| array of scalars | dropped (no faithful single-Attribute representation) |
+| nested object | child Resource + **one-to-one** Relationship |
+| array of objects | child Resource + **one-to-many** Relationship (schema merged across items) |
 
-Default key-to-noun naming:
+Default key-to-resource naming:
 - `author` → `Author`
 - `reviews` → `Review`
 - `categories` → `Category`
 - `address` → `Address` (doesn't strip `-ss`)
-- Override via `nounNameFromKey` if you need control.
+- Override via `resourceNameFromKey` if you need control.
 
 ## Top-level arrays
 
-Pass an array and the items get shallow-merged into a single sample for the root noun — useful when you have a list of records with partial fields:
+Pass an array and the items get shallow-merged into a single sample for the root Resource — useful when you have a list of records with partial fields:
 
 ```ts
 parse([{ id: 1, title: 'a' }, { id: 2, title: 'b', subtitle: 'bb' }], { name: 'Book' })

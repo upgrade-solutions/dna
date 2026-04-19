@@ -1,15 +1,15 @@
-import { DnaInput, Noun, OperationalDomain } from '../types'
+import { DnaInput, Resource, OperationalDomain } from '../types'
 import { code, escape, heading } from '../util'
 
 export function renderSummary(dna: DnaInput, h: number): string | null {
   const op = dna.operational
   if (!op) return null
 
-  const allNouns = collectNouns(op.domain)
-  const topLevel = (op.domain.nouns ?? []).map((n) => n.name)
+  const allResources = collectResources(op.domain)
+  const topLevel = (op.domain.resources ?? []).map((r) => r.name)
 
   const rawCounts: [string, number][] = [
-    ['Nouns', allNouns.length],
+    ['Resources', allResources.length],
     ['Capabilities', op.capabilities?.length ?? 0],
     ['Rules', op.rules?.length ?? 0],
     ['Outcomes', op.outcomes?.length ?? 0],
@@ -35,14 +35,14 @@ export function renderSummary(dna: DnaInput, h: number): string | null {
 
   if (topLevel.length) {
     const tags = topLevel.map((n) => code(n)).join(', ')
-    parts.push(`<p><strong>Top-level nouns:</strong> ${tags}</p>`)
+    parts.push(`<p><strong>Top-level resources:</strong> ${tags}</p>`)
   }
 
   return `<section>${parts.join('')}</section>`
 }
 
-function collectNouns(domain: OperationalDomain): Noun[] {
-  const out = [...(domain.nouns ?? [])]
-  for (const sub of domain.domains ?? []) out.push(...collectNouns(sub))
+function collectResources(domain: OperationalDomain): Resource[] {
+  const out = [...(domain.resources ?? [])]
+  for (const sub of domain.domains ?? []) out.push(...collectResources(sub))
   return out
 }

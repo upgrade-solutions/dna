@@ -6,10 +6,10 @@ function renderSummary(dna, h) {
     const op = dna.operational;
     if (!op)
         return null;
-    const allNouns = collectNouns(op.domain);
-    const topLevel = (op.domain.nouns ?? []).map((n) => n.name);
+    const allResources = collectResources(op.domain);
+    const topLevel = (op.domain.resources ?? []).map((r) => r.name);
     const rawCounts = [
-        ['Nouns', allNouns.length],
+        ['Resources', allResources.length],
         ['Capabilities', op.capabilities?.length ?? 0],
         ['Rules', op.rules?.length ?? 0],
         ['Outcomes', op.outcomes?.length ?? 0],
@@ -30,14 +30,14 @@ function renderSummary(dna, h) {
             lines.push(`- ${label}: ${n}`);
     }
     if (topLevel.length) {
-        lines.push('', `**Top-level nouns:** ${topLevel.map((n) => `\`${n}\``).join(', ')}`);
+        lines.push('', `**Top-level resources:** ${topLevel.map((r) => `\`${r}\``).join(', ')}`);
     }
     return lines.join('\n');
 }
-function collectNouns(domain) {
-    const out = [...(domain.nouns ?? [])];
+function collectResources(domain) {
+    const out = [...(domain.resources ?? [])];
     for (const sub of domain.domains ?? [])
-        out.push(...collectNouns(sub));
+        out.push(...collectResources(sub));
     return out;
 }
 //# sourceMappingURL=summary.js.map

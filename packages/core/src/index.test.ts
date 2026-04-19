@@ -14,21 +14,21 @@ describe('@dna-codes/core', () => {
     it('loads all 15 operational primitive schemas', () => {
       const op = schemas.operational
       expect(Object.keys(op).sort()).toEqual([
+        'action',
         'attribute',
         'capability',
         'cause',
         'domain',
         'equation',
-        'noun',
         'outcome',
         'person',
         'position',
         'process',
         'relationship',
+        'resource',
         'rule',
         'signal',
         'task',
-        'verb',
       ])
       for (const s of Object.values(op)) {
         expect(typeof s.$id).toBe('string')
@@ -88,10 +88,10 @@ describe('@dna-codes/core', () => {
 
   describe('resolveSchemaFile', () => {
     it('resolves a top-level primitive file', () => {
-      const p = resolveSchemaFile('operational', 'noun')
+      const p = resolveSchemaFile('operational', 'resource')
       expect(p).not.toBeNull()
       expect(fs.existsSync(p!)).toBe(true)
-      expect(path.basename(p!)).toBe('noun.json')
+      expect(path.basename(p!)).toBe('resource.json')
     })
 
     it('resolves a nested product primitive via subpath', () => {
