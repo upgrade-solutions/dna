@@ -21,8 +21,8 @@ export interface OperationalDna {
     signals?: Signal[];
     equations?: Equation[];
     relationships?: Relationship[];
-    positions?: Position[];
-    persons?: Person[];
+    roles?: Role[];
+    users?: User[];
     tasks?: Task[];
     processes?: Process[];
 }
@@ -111,19 +111,23 @@ export interface Relationship {
     cardinality: string;
     description?: string;
 }
-export interface Position {
+export interface Role {
     name: string;
     description?: string;
-    roles?: string[];
-    reports_to?: string;
+    domain?: string;
+    parent?: string;
 }
-export interface Person {
+export interface User {
     name: string;
-    position: string;
+    display_name?: string;
+    roles: string[];
+    email?: string;
+    domain?: string;
+    active?: boolean;
 }
 export interface Task {
     name: string;
-    position: string;
+    role: string;
     capability: string;
     description?: string;
 }

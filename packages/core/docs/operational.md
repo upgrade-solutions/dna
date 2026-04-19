@@ -1,8 +1,8 @@
 # Operational Layer Agents
 
-Agents scoped to the Operational DNA layer. Operational DNA is the pure business-logic layer: the Resources, Actions, Capabilities, Attributes, Domains, Relationships, Causes, Rules, Outcomes, Signals, Equations, and SOP primitives (Positions, Persons, Tasks, Processes) that describe *what the business does* — independent of how it's surfaced or deployed.
+Agents scoped to the Operational DNA layer. Operational DNA is the pure business-logic layer: the Resources, Actions, Capabilities, Attributes, Domains, Relationships, Causes, Rules, Outcomes, Signals, Equations, and Actor primitives (Roles, Users, Tasks, Processes) that describe *what the business does* — independent of how it's surfaced or deployed.
 
-The layer is modeled around the **Actor > Action > Resource** triad. Resources are the things the business tracks (Loan, Invoice, Post); Actions are what gets performed on them (Approve, Issue, Publish); Actors are the humans or systems that perform them, expressed through Positions, Roles, and Tasks rather than declared inline on the Capability itself. A Capability is a Resource:Action pair; the Actor is supplied by Rule (access) and Task (assignment).
+The layer is modeled around the **Actor > Action > Resource** triad. Resources are the things the business tracks (Loan, Invoice, Post); Actions are what gets performed on them (Approve, Issue, Publish); Actors are Roles (LoanOfficer, Underwriter, Borrower) referenced by Rules (access), Tasks (assignment), Users (who holds which role), and Processes (operator) rather than declared inline on the Capability itself. A Capability is a Resource:Action pair; the Actor is supplied by Rule (access) and Task (assignment).
 
 ## Agent: `operational-dna-architect`
 
@@ -33,7 +33,7 @@ All fifteen Operational primitives — see `@dna-codes/schemas/operational/*.jso
 
 - **Structure**: `Resource`, `Action`, `Capability`, `Attribute`, `Domain`, `Relationship`
 - **Behavior**: `Cause`, `Rule`, `Outcome`, `Signal`, `Equation`
-- **SOP**: `Position`, `Person`, `Task`, `Process`
+- **Actor**: `Role`, `User`, `Task`, `Process`
 
 `Lifecycle` was removed in favor of explicit `Capability` state transitions expressed through `Outcome.changes`.
 

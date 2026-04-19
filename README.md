@@ -13,7 +13,7 @@ A DSL written in JSON/YAML, it describes a business at three intentionally decou
 
 Layers are one-way downstream: Operational → Product → Technical. Upper layers never depend on lower ones. Cross-layer references (e.g. a Product Resource pointing at an Operational Resource) are plain strings validated by `@dna-codes/core` rather than JSON Schema `$ref`s.
 
-Operational DNA is modeled around the **Actor > Action > Resource** triad: Resources are the things the business tracks (Loan, Invoice, Post); Actions are what gets performed on them (Apply, Approve, Publish); Actors — the humans or systems that perform them — are expressed through Positions, Roles, and Tasks rather than declared on the Capability itself. A Capability is always a `Resource.Action` pair.
+Operational DNA is modeled around the **Actor > Action > Resource** triad: Resources are the things the business tracks (Loan, Invoice, Post); Actions are what gets performed on them (Apply, Approve, Publish); Actors — the humans or systems that perform them — are Roles (LoanOfficer, Underwriter, Borrower) referenced by Rules (access), Tasks (assignment), Users (who holds which role), and Processes (operator) rather than declared on the Capability itself. A Capability is always a `Resource.Action` pair.
 
 Here's a minimal Operational DNA document in a lending context:
 
@@ -57,8 +57,8 @@ Here's a minimal Operational DNA document in a lending context:
     { "capability": "Loan.Approve", "source": "user" }
   ],
   "rules": [
-    { "capability": "Loan.Apply", "type": "access", "allow": [{ "role": "borrower" }] },
-    { "capability": "Loan.Approve", "type": "access", "allow": [{ "role": "underwriter" }] },
+    { "capability": "Loan.Apply", "type": "access", "allow": [{ "role": "Borrower" }] },
+    { "capability": "Loan.Approve", "type": "access", "allow": [{ "role": "Underwriter" }] },
     { "capability": "Loan.Approve", "type": "condition", "conditions": [{ "attribute": "loan.status", "operator": "eq", "value": "pending" }] }
   ],
   "outcomes": [
@@ -82,22 +82,22 @@ Operational DNA captures the pure business-logic layer — independent of any UI
 
 **Behavior primitives:**
 - **Cause** — what initiates a Capability; sources: `user`, `schedule`, `webhook`, `capability`
-- **Rule** — constraints on a Capability: `access` (who may perform it — the Actor) or `condition` (what must be true first)
+- **Rule** — constraints on a Capability: `access` (which Role(s) may perform it) or `condition` (what must be true first)
 - **Outcome** — state changes and downstream triggers after a Capability executes
 - **Signal** — a named domain event published after a Capability; carries a typed payload contract
 - **Equation** — a named, technology-agnostic computation (implemented by a Technical Script)
 
-**SOP primitives:**
-- **Position** — an organizational job title — the Actor in the Actor > Action > Resource triad; carries Roles (defined in Product Core)
-- **Person** — an individual filling a Position (the org roster)
-- **Task** — a Position performing exactly one Capability
+**Actor primitives:**
+- **Role** — the Actor in the Actor > Action > Resource triad. A PascalCase job title or permission bundle (`LoanOfficer`, `Underwriter`, `Admin`, `Borrower`). Referenced by Rules (access), Tasks (assignment), Users (who holds which role), and Processes (operator). Supports `parent` for org-chart hierarchy.
+- **User** — a named individual or service account holding one or more Roles (the business directory; documentation-grade, not authentication identity)
+- **Task** — a Role performing exactly one Capability
 - **Process** — a named, owned DAG of Tasks (Standard Operating Procedure)
 
 ## Product Layer
 
 Product DNA describes what gets built. It is split into three sub-layers that can be authored independently.
 
-**Core** (`product.core.json`) — materializes Operational concepts into product primitives: `Resource`, `Action`, `Operation`, `Role`, `Field`. Product `Resource` and `Action` are surface projections of their Operational counterparts — the same vocabulary is reused intentionally.
+**Core** (`product.core.json`) — materializes Operational concepts into product primitives: `Resource`, `Action`, `Operation`, `Field`. It also carries the surfaced `Role` slice (Roles live in Operational and are referenced by product/api cells for auth middleware and product/ui cells for permission guards). Product `Resource` and `Action` are surface projections of their Operational counterparts — the same vocabulary is reused intentionally.
 
 **API** (`product.api.json`) — REST surface: `Endpoint`, `Namespace`, `Param`, `Schema`
 

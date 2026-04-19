@@ -55,7 +55,7 @@ export const bookshopInput: DnaInput = {
       },
     ],
     rules: [
-      { capability: 'Book.Publish', type: 'access', allow: [{ role: 'editor' }] },
+      { capability: 'Book.Publish', type: 'access', allow: [{ role: 'Editor' }] },
       {
         capability: 'Book.Publish',
         type: 'condition',
@@ -93,30 +93,29 @@ export const bookshopInput: DnaInput = {
         cardinality: 'many-to-one',
       },
     ],
-    positions: [
+    roles: [
       {
         name: 'Editor',
         description: 'Reviews and publishes books.',
-        roles: ['editor'],
       },
     ],
-    persons: [{ name: 'Ada', position: 'Editor' }],
+    users: [{ name: 'ada', display_name: 'Ada', roles: ['Editor'] }],
     tasks: [
       {
         name: 'ReviewBook',
-        position: 'Editor',
+        role: 'Editor',
         capability: 'Book.Publish',
         description: 'Editor reviews the draft.',
       },
       {
         name: 'ApproveBook',
-        position: 'Editor',
+        role: 'Editor',
         capability: 'Book.Publish',
         description: 'Editor approves and publishes.',
       },
       {
         name: 'RejectBook',
-        position: 'Editor',
+        role: 'Editor',
         capability: 'Book.Retire',
         description: 'Editor rejects the draft.',
       },

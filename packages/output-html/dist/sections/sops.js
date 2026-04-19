@@ -21,7 +21,7 @@ function renderSops(dna, h) {
             const items = proc.steps
                 .map((step) => {
                 const task = tasksByName.get(step.task);
-                const position = task?.position ? (0, util_1.code)(task.position) : '—';
+                const role = task?.role ? (0, util_1.code)(task.role) : '—';
                 const capability = task?.capability ? (0, util_1.code)(task.capability) : (0, util_1.code)(step.task);
                 const branch = step.branch?.when
                     ? ` (when: ${(0, util_1.escape)(step.branch.when)})`
@@ -30,7 +30,7 @@ function renderSops(dna, h) {
                         : '';
                 const deps = step.depends_on?.length ? ` — after: ${step.depends_on.map(util_1.code).join(', ')}` : '';
                 const desc = task?.description ? `<br/>${(0, util_1.escape)(task.description)}` : '';
-                return `<li><strong>${(0, util_1.escape)(step.id)}</strong> — ${position} does ${capability}${branch}${deps}${desc}</li>`;
+                return `<li><strong>${(0, util_1.escape)(step.id)}</strong> — ${role} does ${capability}${branch}${deps}${desc}</li>`;
             })
                 .join('');
             inner.push(`<ol>${items}</ol>`);

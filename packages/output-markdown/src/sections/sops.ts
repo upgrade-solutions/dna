@@ -22,7 +22,7 @@ export function renderSops(dna: DnaInput, h: number): string | null {
       lines.push('')
       steps.forEach((step, i) => {
         const task = tasksByName.get(step.task)
-        const actor = task?.position ?? '—'
+        const actor = task?.role ?? '—'
         const cap = task?.capability ?? step.task
         const branch = step.branch?.else
           ? ' (else)'

@@ -17,14 +17,14 @@ export declare const schemas: {
         readonly domain: JsonSchema;
         readonly equation: JsonSchema;
         readonly outcome: JsonSchema;
-        readonly person: JsonSchema;
-        readonly position: JsonSchema;
         readonly process: JsonSchema;
         readonly relationship: JsonSchema;
         readonly resource: JsonSchema;
+        readonly role: JsonSchema;
         readonly rule: JsonSchema;
         readonly signal: JsonSchema;
         readonly task: JsonSchema;
+        readonly user: JsonSchema;
     };
     readonly product: {
         readonly core: {
@@ -32,7 +32,6 @@ export declare const schemas: {
             readonly field: JsonSchema;
             readonly operation: JsonSchema;
             readonly resource: JsonSchema;
-            readonly role: JsonSchema;
         };
         readonly api: {
             readonly endpoint: JsonSchema;

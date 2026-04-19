@@ -12,7 +12,7 @@ DNA is a **description**, not a program. It describes a business at three intent
 | **Product** | What gets built — resources, operations, endpoints, pages | `product.{core,api,ui}.json` |
 | **Technical** | How it gets built — cells, constructs, providers, environments | `technical.json` |
 
-`Resource` and `Action` appear at both the Operational and Product layers on purpose — Operational is the source of truth for the Actor > Action > Resource triad, and Product projects those same concepts onto API and UI surfaces. All other primitive names are unique per layer. If you're unsure which layer a concept belongs to, read [`docs/<layer>.md`](./docs/) before editing.
+`Resource` and `Action` appear at both the Operational and Product layers on purpose — Operational is the source of truth for the Actor > Action > Resource triad, and Product projects those same concepts onto API and UI surfaces. `Role` is also declared in Operational (as the canonical Actor primitive) and is referenced by both Operational and Product. All other primitive names are unique per layer. If you're unsure which layer a concept belongs to, read [`docs/<layer>.md`](./docs/) before editing.
 
 ## When to invoke which agent
 
@@ -30,7 +30,7 @@ This package-level agent is the **dispatcher**: it holds the cross-layer picture
 ## Rules of the contract
 
 1. **Schemas are language-agnostic.** JSON Schema Draft 2020-12 only. Never embed TS/JS runtime behavior into a schema.
-2. **Primitive names are unique per layer, except the Actor > Action > Resource triad.** Operational `Resource` and `Action` intentionally share names with Product `Resource` and `Action` — the product layer projects the same concepts onto API and UI surfaces. Don't overload other names (e.g. `Role`) across layers.
+2. **Primitive names are unique per layer, except the Actor > Action > Resource triad.** Operational `Resource`, `Action`, and `Role` intentionally share names across layers — the product layer projects the same concepts onto API and UI surfaces. `Role` lives only in Operational; Product Core carries the surfaced Roles as a string reference via its `roles` array.
 3. **Cross-layer references are strings, validated externally.** A `Product.Resource.resource` is a string referencing an `Operational.Resource.name`. Schemas don't enforce this; `@dna-codes/core` does. Don't introduce JSON-Schema-level refs across layers.
 4. **`$id` URIs are stable.** `https://dna.local/<layer>/<primitive>` identifiers survive renames and refactors. Never change one without a deprecation path.
 5. **Layer boundaries are one-way downstream.** Operational → Product → Technical. Upper layers never read lower-layer DNA; lower layers read exactly what they need and no more.

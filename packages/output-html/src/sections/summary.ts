@@ -16,7 +16,7 @@ export function renderSummary(dna: DnaInput, h: number): string | null {
     ['Signals', op.signals?.length ?? 0],
     ['Equations', op.equations?.length ?? 0],
     ['Relationships', op.relationships?.length ?? 0],
-    ['Positions', op.positions?.length ?? 0],
+    ['Roles', op.roles?.length ?? 0],
     ['Tasks', op.tasks?.length ?? 0],
     ['Processes', op.processes?.length ?? 0],
   ]

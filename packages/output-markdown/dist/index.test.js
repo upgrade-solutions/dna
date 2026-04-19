@@ -79,7 +79,7 @@ describe('@dna-codes/output-markdown', () => {
             expect(md).toContain('### Book.Publish');
             expect(md).toContain('**Triggered by:**');
             expect(md).toContain('- user');
-            expect(md).toContain('*Access:* role `editor`');
+            expect(md).toContain('*Access:* role `Editor`');
             expect(md).toContain('*Condition:* book.status == "draft"');
             expect(md).toContain('Sets `book.status`');
             expect(md).toContain('Emits `shop.Book.Published`');
@@ -88,7 +88,7 @@ describe('@dna-codes/output-markdown', () => {
         });
     });
     describe('section: sops', () => {
-        it('renders numbered steps that resolve task → position + capability', () => {
+        it('renders numbered steps that resolve task → role + capability', () => {
             const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['sops'] });
             expect(md).toContain('### PublishFlow');
             expect(md).toContain('**Operator:** `Editor`');

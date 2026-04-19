@@ -150,11 +150,11 @@ Schemas cross-reference each other by absolute URI (e.g. `https://dna.local/oper
 
 | Layer | Primitives |
 |-------|-----------|
-| Operational | `Resource`, `Action`, `Capability`, `Attribute`, `Domain`, `Relationship`, `Cause`, `Rule`, `Outcome`, `Signal`, `Equation`, `Position`, `Person`, `Task`, `Process` |
-| Product | `Resource`, `Action`, `Operation`, `Role`, `Layout`, `Page`, `Route`, `Block`, `Field`, `Namespace`, `Endpoint`, `Schema`, `Param` |
+| Operational | `Resource`, `Action`, `Capability`, `Attribute`, `Domain`, `Relationship`, `Cause`, `Rule`, `Outcome`, `Signal`, `Equation`, `Role`, `User`, `Task`, `Process` |
+| Product | `Resource`, `Action`, `Operation`, `Layout`, `Page`, `Route`, `Block`, `Field`, `Namespace`, `Endpoint`, `Schema`, `Param` |
 | Technical | `Environment`, `Cell`, `Construct`, `Provider`, `Variable`, `Output`, `Script`, `View`, `Node`, `Connection`, `Zone` |
 
-Operational is modeled around the **Actor > Action > Resource** triad. `Resource` and `Action` appear at both the Operational and Product layers by design — a Product `Resource` is the surface projection of an Operational `Resource`, and likewise for `Action`. The Actor is expressed via `Position`, `Role`, and `Task` rather than declared on the Capability itself. See each layer's doc in [`docs/`](./docs/) for full semantics.
+Operational is modeled around the **Actor > Action > Resource** triad. `Resource` and `Action` appear at both the Operational and Product layers by design — a Product `Resource` is the surface projection of an Operational `Resource`, and likewise for `Action`. The Actor is a `Role` referenced by `Rule` (access), `Task` (assignment), `User` (who holds which role), and `Process` (operator), rather than declared on the Capability itself. `Role` lives in Operational as the canonical Actor primitive; Product Core surfaces the subset transitively referenced by API and UI cells. See each layer's doc in [`docs/`](./docs/) for full semantics.
 
 ## What this package does *not* include
 

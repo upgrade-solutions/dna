@@ -13,7 +13,7 @@ export interface OperationalDna {
     causes?: Cause[];
     signals?: Signal[];
     relationships?: Relationship[];
-    positions?: Position[];
+    roles?: Role[];
     tasks?: Task[];
     processes?: Process[];
 }
@@ -89,14 +89,14 @@ export interface Relationship {
     cardinality: string;
     description?: string;
 }
-export interface Position {
+export interface Role {
     name: string;
     description?: string;
-    roles?: string[];
+    parent?: string;
 }
 export interface Task {
     name: string;
-    position: string;
+    role: string;
     capability: string;
     description?: string;
 }

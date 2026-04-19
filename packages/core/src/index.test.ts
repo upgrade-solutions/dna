@@ -21,14 +21,14 @@ describe('@dna-codes/core', () => {
         'domain',
         'equation',
         'outcome',
-        'person',
-        'position',
         'process',
         'relationship',
         'resource',
+        'role',
         'rule',
         'signal',
         'task',
+        'user',
       ])
       for (const s of Object.values(op)) {
         expect(typeof s.$id).toBe('string')
@@ -37,7 +37,7 @@ describe('@dna-codes/core', () => {
     })
 
     it('loads product core/api/web schemas under the right namespaces', () => {
-      expect(Object.keys(schemas.product.core).sort()).toEqual(['action', 'field', 'operation', 'resource', 'role'])
+      expect(Object.keys(schemas.product.core).sort()).toEqual(['action', 'field', 'operation', 'resource'])
       expect(Object.keys(schemas.product.api).sort()).toEqual(['endpoint', 'namespace', 'param', 'schema'])
       expect(Object.keys(schemas.product.web).sort()).toEqual(['block', 'layout', 'page', 'route'])
     })
@@ -80,9 +80,9 @@ describe('@dna-codes/core', () => {
       const ids = all.map((s) => s.$id)
       expect(new Set(ids).size).toBe(ids.length)
 
-      // 15 op + 5 product-core + 4 product-api + 4 product-web + 11 technical = 39 primitives
-      // + 5 aggregates = 44 schemas total
-      expect(all.length).toBe(44)
+      // 15 op + 4 product-core + 4 product-api + 4 product-web + 11 technical = 38 primitives
+      // + 5 aggregates = 43 schemas total
+      expect(all.length).toBe(43)
     })
   })
 

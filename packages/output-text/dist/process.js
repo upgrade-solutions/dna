@@ -24,7 +24,7 @@ function renderProcess(p, op) {
         for (const step of p.steps) {
             const task = tasksByName.get(step.task);
             const title = task
-                ? `${task.name} — \`${task.position}\` performs \`${task.capability}\``
+                ? `${task.name} — \`${task.role}\` performs \`${task.capability}\``
                 : step.task;
             const deps = step.depends_on?.length ? ` (after: ${step.depends_on.join(', ')})` : '';
             lines.push(`- \`${step.id}\` ${title}${deps}`);

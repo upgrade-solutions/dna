@@ -105,7 +105,7 @@ describe('@dna-codes/output-html', () => {
             expect(html).toContain('<strong>Triggered by:</strong>');
             expect(html).toContain('user');
             expect(html).toContain('<em>Access:</em>');
-            expect(html).toContain('role <code>editor</code>');
+            expect(html).toContain('role <code>Editor</code>');
             expect(html).toContain('<em>Condition:</em>');
             expect(html).toContain('book.status == &quot;draft&quot;');
             expect(html).toContain('<code>book.status</code>');
@@ -115,7 +115,7 @@ describe('@dna-codes/output-html', () => {
         });
     });
     describe('section: sops', () => {
-        it('renders numbered steps that resolve task → position + capability', () => {
+        it('renders numbered steps that resolve task → role + capability', () => {
             const html = (0, index_1.render)(core_1.bookshopInput, { sections: ['sops'] });
             expect(html).toContain('<h3>PublishFlow</h3>');
             expect(html).toContain('<strong>Operator:</strong>');

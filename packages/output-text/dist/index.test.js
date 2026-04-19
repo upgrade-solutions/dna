@@ -25,8 +25,8 @@ const dna = {
         ],
         causes: [{ capability: 'Loan.Apply', source: 'user' }],
         rules: [
-            { capability: 'Loan.Apply', type: 'access', allow: [{ role: 'borrower' }] },
-            { capability: 'Loan.Approve', type: 'access', allow: [{ role: 'underwriter' }] },
+            { capability: 'Loan.Apply', type: 'access', allow: [{ role: 'Borrower' }] },
+            { capability: 'Loan.Approve', type: 'access', allow: [{ role: 'Underwriter' }] },
             {
                 capability: 'Loan.Approve',
                 type: 'condition',
@@ -49,10 +49,10 @@ const dna = {
             },
         ],
         tasks: [
-            { name: 'SubmitApplication', position: 'Borrower', capability: 'Loan.Apply' },
-            { name: 'UnderwriteLoan', position: 'Underwriter', capability: 'Loan.Approve' },
+            { name: 'SubmitApplication', role: 'Borrower', capability: 'Loan.Apply' },
+            { name: 'UnderwriteLoan', role: 'Underwriter', capability: 'Loan.Approve' },
         ],
-        positions: [{ name: 'Borrower' }, { name: 'Underwriter' }],
+        roles: [{ name: 'Borrower' }, { name: 'Underwriter' }],
     },
 };
 describe('render — single combined document', () => {
@@ -61,7 +61,7 @@ describe('render — single combined document', () => {
         expect(out).toContain('# acme.finance.lending');
         expect(out).toContain('## Capabilities');
         expect(out).toContain('### Apply Loan');
-        expect(out).toContain('**As a** borrower');
+        expect(out).toContain('**As a** Borrower');
         expect(out).not.toContain('## Domain model');
     });
     it('includes other units when their styles are set', () => {
@@ -90,7 +90,7 @@ describe('renderMany — defaults', () => {
 describe('renderMany — styles', () => {
     it('user-story puts As a / I want / So that + acceptance criteria in the body', () => {
         const [apply] = (0, index_1.renderMany)(dna, { styles: { capability: 'user-story' } });
-        expect(apply.body).toContain('**As a** borrower');
+        expect(apply.body).toContain('**As a** Borrower');
         expect(apply.body).toContain('**I want to** apply a loan');
         expect(apply.body).toContain('**Triggered by:**');
         expect(apply.body).toContain('**Acceptance criteria:**');
@@ -100,7 +100,7 @@ describe('renderMany — styles', () => {
         const [, approve] = (0, index_1.renderMany)(dna, { styles: { capability: 'gherkin' } });
         expect(approve.body).toContain('Feature: Approve Loan');
         expect(approve.body).toContain('Scenario:');
-        expect(approve.body).toContain('Given an actor with role `underwriter`');
+        expect(approve.body).toContain('Given an actor with role `Underwriter`');
         expect(approve.body).toContain('And loan.status is pending');
         expect(approve.body).toContain('When they approve the loan');
         expect(approve.body).toContain('Then Sets `loan.status` to `"active"`');
@@ -109,7 +109,7 @@ describe('renderMany — styles', () => {
         const [, approve] = (0, index_1.renderMany)(dna, { styles: { capability: 'product-dna' } });
         expect(approve.body).toContain('**Resource:** `Loan`');
         expect(approve.body).toContain('**Action:** `Approve`');
-        expect(approve.body).toContain('**Actor:** `underwriter`');
+        expect(approve.body).toContain('**Actor:** `Underwriter`');
         expect(approve.body).toContain('**Preconditions:**');
         expect(approve.body).toContain('- loan.status is pending');
         expect(approve.body).toContain('**Postconditions:**');

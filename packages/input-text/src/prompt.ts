@@ -39,20 +39,20 @@ const OPERATIONAL_SKELETON = `{
     "outcomes": [
       { "capability": "<Resource>.<Action>", "changes": [{ "attribute": "<resource>.<attribute>", "set": "<value>" }] }
     ],
-    "positions": [
-      { "name": "<PositionInPascalCase>", "description": "<role description>" }
+    "roles": [
+      { "name": "<RoleInPascalCase>", "description": "<what this role does or grants>" }
     ],
-    "persons": [
-      { "name": "<PersonFullName>", "position": "<PositionInPascalCase>" }
+    "users": [
+      { "name": "<user-kebab-id>", "display_name": "<Full Name>", "roles": ["<RoleInPascalCase>"] }
     ],
     "tasks": [
-      { "name": "<TaskInPascalCase>", "position": "<PositionInPascalCase>", "capability": "<Resource>.<Action>" }
+      { "name": "<TaskInPascalCase>", "role": "<RoleInPascalCase>", "capability": "<Resource>.<Action>" }
     ],
     "processes": [
       {
         "name": "<ProcessInPascalCase>",
         "description": "<process description>",
-        "operator": "<PositionInPascalCase>",
+        "operator": "<RoleInPascalCase>",
         "steps": [
           { "id": "s1", "task": "<TaskInPascalCase>" },
           { "id": "s2", "task": "<TaskInPascalCase>", "depends_on": ["s1"] }
@@ -153,7 +153,7 @@ const LAYER_GUIDE: Record<Layer, string> = {
     '  The operational layer is modeled around the Actor > Action > Resource triad:',
     '    — a Resource is a thing the business tracks (Loan, Invoice, Post)',
     '    — an Action is what gets performed on a Resource (Approve, Issue, Publish)',
-    '    — the Actor (who does it) is expressed through Positions, Roles, and Tasks — never inline on the Capability itself.',
+    '    — the Actor (who does it) is a Role, referenced by Rules (access), Tasks (assignment), Users (who holds which role), and Processes (operator) — never inline on the Capability itself.',
     '  domain: { name, path, domains?, resources }',
     '    — resources is an ARRAY of { name, attributes: [{name,type,required?,values?}], actions: [{name}] }',
     '    — ALWAYS include resources when the text mentions entities; do not leave it empty',
@@ -166,16 +166,17 @@ const LAYER_GUIDE: Record<Layer, string> = {
     '      an inbound HTTP event = "webhook"; triggered by another Capability finishing = "capability".',
     '      Do NOT round-robin or distribute evenly across the four values. Default to "user" when unclear.',
     '  rules: ARRAY of { capability, type: "access" | "condition", allow?: [{role}], conditions?: [...] }',
-    '    — "access" rules carry roles (the Actor); "condition" rules carry attribute predicates',
+    '    — "access" rules carry roles (the Actor); "condition" rules carry attribute predicates.',
+    '    — role values here are Role names, PascalCase (e.g. "Underwriter", "Borrower").',
     '  outcomes: ARRAY of { capability, changes: [{attribute, set}] }',
     '  relationships (optional): ARRAY of { name, from, to, attribute, cardinality: "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many" }',
     '    — match cardinality to the text: "each X has many Y" → one-to-many from X to Y.',
-    '  positions (optional): ARRAY of { name, description?, roles?: [string] }',
-    '    — a Position is a job title ("Case Manager", "Underwriter") — the Actor in the triad. ALWAYS include when the text names roles performing work.',
-    '  persons (optional): ARRAY of { name, position }',
-    '    — a Person is a named individual filling a Position.',
-    '  tasks (optional): ARRAY of { name, position, capability, description? }',
-    '    — a Task is "Position performs one Capability". Use when the text says who does what.',
+    '  roles (optional): ARRAY of { name, description?, domain?, parent? }',
+    '    — a Role is a PascalCase job title or permission bundle (ClosingSpecialist, Underwriter, Admin) — the Actor in the triad. ALWAYS include when the text names roles or job titles performing work. `parent` captures org-chart hierarchy (ClosingSpecialist parent LendingManager).',
+    '  users (optional): ARRAY of { name, display_name?, roles: [string], email?, active? }',
+    '    — a User is a named individual or service account holding one or more Roles.',
+    '  tasks (optional): ARRAY of { name, role, capability, description? }',
+    '    — a Task is "Role performs one Capability". Use when the text says who does what.',
     '  processes (optional): ARRAY of { name, description?, operator?, steps: [{id, task, depends_on?: [id]}] }',
     '    — a Process is a named, owned DAG of Tasks (an SOP / workflow).',
     '    — ALWAYS include processes when the text enumerates named workflows or end-to-end flows.',

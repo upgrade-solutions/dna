@@ -28,14 +28,14 @@ export const schemas = {
     domain: load('operational/domain.json'),
     equation: load('operational/equation.json'),
     outcome: load('operational/outcome.json'),
-    person: load('operational/person.json'),
-    position: load('operational/position.json'),
     process: load('operational/process.json'),
     relationship: load('operational/relationship.json'),
     resource: load('operational/resource.json'),
+    role: load('operational/role.json'),
     rule: load('operational/rule.json'),
     signal: load('operational/signal.json'),
     task: load('operational/task.json'),
+    user: load('operational/user.json'),
   },
   product: {
     core: {
@@ -43,7 +43,6 @@ export const schemas = {
       field: load('product/core/field.json'),
       operation: load('product/core/operation.json'),
       resource: load('product/core/resource.json'),
-      role: load('product/core/role.json'),
     },
     api: {
       endpoint: load('product/api/endpoint.json'),

@@ -54,8 +54,8 @@
     },
     "roles": {
       "type": "array",
-      "description": "Named access-control grants. Referenced by Operational Rules (type: access) and Positions. Consumed by api-cell for auth middleware and ui-cell for permission guards.",
-      "items": { "$ref": "https://dna.local/product/core/role" }
+      "description": "Roles surfaced in the product layer — the transitive closure of Roles referenced by surfaced Capabilities' access Rules and by any User in `users[]`. Consumed by api-cell for auth middleware and ui-cell for permission guards.",
+      "items": { "$ref": "https://dna.local/operational/role" }
     },
     "equations": {
       "type": "array",

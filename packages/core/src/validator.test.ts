@@ -167,41 +167,58 @@ describe('DnaValidator — operational/capability', () => {
   })
 })
 
-describe('DnaValidator — operational/position', () => {
-  it('validates a valid Position', () => {
+describe('DnaValidator — operational/role', () => {
+  it('validates a valid Role', () => {
     const result = validator.validate({
       name: 'ClosingSpecialist',
       description: 'Closes approved loans.',
       domain: 'acme.finance.lending',
-      reports_to: 'LendingManager',
-      roles: ['closer', 'editor']
-    }, 'operational/position')
+      parent: 'LendingManager'
+    }, 'operational/role')
     expect(result.valid).toBe(true)
   })
 
-  it('rejects a Position missing required name', () => {
-    const result = validator.validate({ roles: ['closer'] }, 'operational/position')
+  it('rejects a Role missing required name', () => {
+    const result = validator.validate({ description: 'x' }, 'operational/role')
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.params?.missingProperty === 'name')).toBe(true)
   })
+
+  it('rejects a Role with lowercase name (pattern now PascalCase)', () => {
+    const result = validator.validate({ name: 'closer' }, 'operational/role')
+    expect(result.valid).toBe(false)
+  })
 })
 
-describe('DnaValidator — operational/person', () => {
-  it('validates a valid Person', () => {
+describe('DnaValidator — operational/user', () => {
+  it('validates a valid User', () => {
     const result = validator.validate({
       name: 'jane-smith',
       display_name: 'Jane Smith',
-      position: 'ClosingSpecialist',
+      roles: ['ClosingSpecialist'],
       email: 'jane@acme.finance',
       active: true
-    }, 'operational/person')
+    }, 'operational/user')
     expect(result.valid).toBe(true)
   })
 
-  it('rejects a Person missing required position', () => {
-    const result = validator.validate({ name: 'jane-smith' }, 'operational/person')
+  it('rejects a User missing required roles', () => {
+    const result = validator.validate({ name: 'jane-smith' }, 'operational/user')
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.params?.missingProperty === 'position')).toBe(true)
+    expect(result.errors.some(e => e.params?.missingProperty === 'roles')).toBe(true)
+  })
+
+  it('rejects a User with an empty roles array', () => {
+    const result = validator.validate({ name: 'jane-smith', roles: [] }, 'operational/user')
+    expect(result.valid).toBe(false)
+  })
+
+  it('accepts a User with multiple Roles', () => {
+    const result = validator.validate({
+      name: 'carlos-vega',
+      roles: ['Underwriter', 'Editor']
+    }, 'operational/user')
+    expect(result.valid).toBe(true)
   })
 })
 
@@ -209,7 +226,7 @@ describe('DnaValidator — operational/task', () => {
   it('validates a valid Task', () => {
     const result = validator.validate({
       name: 'close-loan',
-      position: 'ClosingSpecialist',
+      role: 'ClosingSpecialist',
       capability: 'Loan.Close',
       description: 'Closing specialist closes an approved loan.'
     }, 'operational/task')
@@ -217,7 +234,7 @@ describe('DnaValidator — operational/task', () => {
   })
 
   it('rejects a Task missing required capability', () => {
-    const result = validator.validate({ name: 'close-loan', position: 'ClosingSpecialist' }, 'operational/task')
+    const result = validator.validate({ name: 'close-loan', role: 'ClosingSpecialist' }, 'operational/task')
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.params?.missingProperty === 'capability')).toBe(true)
   })
@@ -253,21 +270,6 @@ describe('DnaValidator — operational/process', () => {
     }, 'operational/process')
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.params?.missingProperty === 'operator')).toBe(true)
-  })
-})
-
-describe('DnaValidator — product/core/role', () => {
-  it('validates a valid Role', () => {
-    const result = validator.validate({
-      name: 'closer',
-      description: 'May close approved loans.'
-    }, 'product/core/role')
-    expect(result.valid).toBe(true)
-  })
-
-  it('rejects a Role with invalid name pattern', () => {
-    const result = validator.validate({ name: 'CloserRole' }, 'product/core/role')
-    expect(result.valid).toBe(false)
   })
 })
 
@@ -652,11 +654,10 @@ describe('DnaValidator — availableSchemas', () => {
     expect(schemas).toContain('operational/rule')
     expect(schemas).toContain('operational/outcome')
     expect(schemas).toContain('operational/equation')
-    expect(schemas).toContain('operational/position')
-    expect(schemas).toContain('operational/person')
+    expect(schemas).toContain('operational/role')
+    expect(schemas).toContain('operational/user')
     expect(schemas).toContain('operational/task')
     expect(schemas).toContain('operational/process')
-    expect(schemas).toContain('product/core/role')
     expect(schemas).toContain('operational/signal')
     expect(schemas).toContain('operational/relationship')
     expect(schemas).toContain('product/core/resource')
@@ -681,6 +682,13 @@ describe('DnaValidator — availableSchemas', () => {
     expect(schemas).toContain('product/api')
     expect(schemas).toContain('product/ui')
     expect(schemas).toContain('technical')
+  })
+
+  it('no longer registers product/core/role, operational/position, or operational/person', () => {
+    const schemas = validator.availableSchemas()
+    expect(schemas).not.toContain('product/core/role')
+    expect(schemas).not.toContain('operational/position')
+    expect(schemas).not.toContain('operational/person')
   })
 })
 
@@ -897,6 +905,51 @@ describe('DnaValidator — cross-layer validation', () => {
     const result = validator.validateCrossLayer({ operational })
     expect(result.valid).toBe(true)
   })
+
+  it('detects invalid Task role reference', () => {
+    const badOp = {
+      ...operational,
+      roles: [{ name: 'Underwriter' }],
+      tasks: [{ name: 'phantom-task', role: 'PhantomRole', capability: 'Loan.Apply' }],
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.message.includes('Role "PhantomRole"'))).toBe(true)
+  })
+
+  it('detects invalid User role reference', () => {
+    const badOp = {
+      ...operational,
+      roles: [{ name: 'Underwriter' }],
+      users: [{ name: 'jane-smith', roles: ['GhostRole'] }],
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.message.includes('Role "GhostRole"'))).toBe(true)
+  })
+
+  it('detects invalid Role parent reference', () => {
+    const badOp = {
+      ...operational,
+      roles: [{ name: 'ClosingSpecialist', parent: 'PhantomRole' }],
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.message.includes('parent "PhantomRole"'))).toBe(true)
+  })
+
+  it('detects invalid Rule role reference when roles are declared', () => {
+    const badOp = {
+      ...operational,
+      roles: [{ name: 'Underwriter' }],
+      rules: [
+        { capability: 'Loan.Approve', type: 'access', allow: [{ role: 'PhantomRole' }] },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.message.includes('Role "PhantomRole"'))).toBe(true)
+  })
 })
 
 // ── Cross-layer: product.core ────────────────────────────────────────────────
@@ -932,6 +985,16 @@ describe('DnaValidator — cross-layer with product.core', () => {
     const result = validator.validateCrossLayer({ operational, productCore: badCore })
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.message.includes('Loan.Vanish'))).toBe(true)
+  })
+
+  it('detects a Role in product.core that is not in operational', () => {
+    const badCore = {
+      ...productCore,
+      roles: [{ name: 'Phantom' }],
+    }
+    const result = validator.validateCrossLayer({ operational, productCore: badCore })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.layer === 'product/core' && e.message.includes('Phantom'))).toBe(true)
   })
 
   it('resolves product.api resource refs against product.core when present', () => {

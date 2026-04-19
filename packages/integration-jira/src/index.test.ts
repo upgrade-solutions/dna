@@ -33,7 +33,7 @@ const dnaFixture: DnaInput = {
       { name: 'Loan.Approve', resource: 'Loan', action: 'Approve' },
     ],
     rules: [
-      { capability: 'Loan.Apply', type: 'access', allow: [{ role: 'borrower' }] },
+      { capability: 'Loan.Apply', type: 'access', allow: [{ role: 'Borrower' }] },
     ],
     outcomes: [
       { capability: 'Loan.Apply', changes: [{ attribute: 'loan.status', set: 'pending' }] },
@@ -95,7 +95,7 @@ describe('mapping — dnaToStoryFields', () => {
     })
     expect(stories[0].labels).toContain('dna:capability-loan-apply')
     expect(typeof stories[0].description).toBe('string')
-    expect(stories[0].description as string).toContain('**As a** borrower')
+    expect(stories[0].description as string).toContain('**As a** Borrower')
   })
 
   it('merges extra labels', () => {

@@ -118,36 +118,55 @@ class DnaValidator {
                 }
             }
             // ── SOP: intra-operational references ─────────────────────────────
-            const positionNames = new Set((op.positions ?? []).map(p => p.name));
+            const roleNames = new Set((op.roles ?? []).map(r => r.name));
             const taskNames = new Set((op.tasks ?? []).map(t => t.name));
-            // Position.reports_to must reference a declared Position
-            for (const pos of op.positions ?? []) {
-                if (pos.reports_to && !positionNames.has(pos.reports_to)) {
+            // Role.parent must reference a declared Role
+            for (const role of op.roles ?? []) {
+                if (role.parent && !roleNames.has(role.parent)) {
                     errors.push({
                         layer: 'operational',
-                        path: `positions/${pos.name}/reports_to`,
-                        message: `Position "${pos.name}" reports_to "${pos.reports_to}" which does not exist. Available: ${[...positionNames].join(', ')}`,
+                        path: `roles/${role.name}/parent`,
+                        message: `Role "${role.name}" parent "${role.parent}" does not reference a declared Role. Available: ${[...roleNames].join(', ')}`,
                     });
                 }
             }
-            // Person.position must reference a declared Position
-            for (const person of op.persons ?? []) {
-                if (!positionNames.has(person.position)) {
-                    errors.push({
-                        layer: 'operational',
-                        path: `persons/${person.name}/position`,
-                        message: `Person "${person.name}" references Position "${person.position}" which does not exist. Available: ${[...positionNames].join(', ')}`,
-                    });
+            // Rule.allow[].role must reference a declared Role (skip validation when
+            // no Roles are declared — some fixtures only exercise non-access rules).
+            if (roleNames.size > 0) {
+                for (const rule of op.rules ?? []) {
+                    if (rule.type !== 'access')
+                        continue;
+                    for (const entry of rule.allow ?? []) {
+                        if (entry.role && !roleNames.has(entry.role)) {
+                            errors.push({
+                                layer: 'operational',
+                                path: `rules/${rule.capability}/allow/role/${entry.role}`,
+                                message: `Rule for "${rule.capability}" references Role "${entry.role}" which does not exist. Available: ${[...roleNames].join(', ')}`,
+                            });
+                        }
+                    }
                 }
             }
-            // Task.position must reference a declared Position
+            // User.roles[] must reference declared Roles
+            for (const user of op.users ?? []) {
+                for (const roleName of user.roles ?? []) {
+                    if (!roleNames.has(roleName)) {
+                        errors.push({
+                            layer: 'operational',
+                            path: `users/${user.name}/roles/${roleName}`,
+                            message: `User "${user.name}" references Role "${roleName}" which does not exist. Available: ${[...roleNames].join(', ')}`,
+                        });
+                    }
+                }
+            }
+            // Task.role must reference a declared Role
             // Task.capability must reference a declared Capability
             for (const task of op.tasks ?? []) {
-                if (!positionNames.has(task.position)) {
+                if (!roleNames.has(task.role)) {
                     errors.push({
                         layer: 'operational',
-                        path: `tasks/${task.name}/position`,
-                        message: `Task "${task.name}" references Position "${task.position}" which does not exist. Available: ${[...positionNames].join(', ')}`,
+                        path: `tasks/${task.name}/role`,
+                        message: `Task "${task.name}" references Role "${task.role}" which does not exist. Available: ${[...roleNames].join(', ')}`,
                     });
                 }
                 if (!capabilityNames.has(task.capability)) {
@@ -158,16 +177,16 @@ class DnaValidator {
                     });
                 }
             }
-            // Process.operator must reference a declared Position
+            // Process.operator must reference a declared Role
             // Process.steps[].task must reference a declared Task
             // Process.steps[].depends_on[] must reference sibling step IDs
             // Process.emits[] must reference declared Signals
             for (const proc of op.processes ?? []) {
-                if (!positionNames.has(proc.operator)) {
+                if (!roleNames.has(proc.operator)) {
                     errors.push({
                         layer: 'operational',
                         path: `processes/${proc.name}/operator`,
-                        message: `Process "${proc.name}" operator "${proc.operator}" does not reference a declared Position. Available: ${[...positionNames].join(', ')}`,
+                        message: `Process "${proc.name}" operator "${proc.operator}" does not reference a declared Role. Available: ${[...roleNames].join(', ')}`,
                     });
                 }
                 const stepIds = new Set((proc.steps ?? []).map(s => s.id));
@@ -235,34 +254,17 @@ class DnaValidator {
                     });
                 }
             }
-            // ── Operational → Product Core: Role references ───────────────────
-            const coreRoleNames = new Set((core.roles ?? []).map(r => r.name));
-            if (coreRoleNames.size > 0) {
-                // Position.roles[] must reference declared Product Core Roles
-                for (const pos of op.positions ?? []) {
-                    for (const roleName of pos.roles ?? []) {
-                        if (!coreRoleNames.has(roleName)) {
-                            errors.push({
-                                layer: 'operational',
-                                path: `positions/${pos.name}/roles/${roleName}`,
-                                message: `Position "${pos.name}" references Role "${roleName}" which does not exist in Product Core DNA. Available: ${[...coreRoleNames].join(', ')}`,
-                            });
-                        }
-                    }
-                }
-                // Rule.allow[].role must reference declared Product Core Roles
-                for (const rule of op.rules ?? []) {
-                    if (rule.type !== 'access')
-                        continue;
-                    for (const entry of rule.allow ?? []) {
-                        if (entry.role && !coreRoleNames.has(entry.role)) {
-                            errors.push({
-                                layer: 'operational',
-                                path: `rules/${rule.capability}/allow/role/${entry.role}`,
-                                message: `Rule for "${rule.capability}" references Role "${entry.role}" which does not exist in Product Core DNA. Available: ${[...coreRoleNames].join(', ')}`,
-                            });
-                        }
-                    }
+            // ── Operational → Product Core: Role materialization check ────────
+            // Every Role surfaced in product core must exist in operational — core
+            // is a projection, never invents.
+            const opRoleNames = new Set((op.roles ?? []).map(r => r.name));
+            for (const role of core.roles ?? []) {
+                if (!opRoleNames.has(role.name)) {
+                    errors.push({
+                        layer: 'product/core',
+                        path: `roles/${role.name}`,
+                        message: `Product Core Role "${role.name}" is not present in Operational DNA. Re-run the materializer.`,
+                    });
                 }
             }
         }
