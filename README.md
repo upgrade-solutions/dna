@@ -113,7 +113,7 @@ A **Cell** is the unit of deployment — it consumes DNA from upper layers and g
 
 ## Packages
 
-### Naming convention
+### Pipeline
 
 The pipeline is `[integration] → input-* → DNA → output-* → [integration]`:
 
@@ -134,6 +134,7 @@ The pipeline is `[integration] → input-* → DNA → output-* → [integration
   The same integration-* package typically fills both [1] and [5] roles for its system.
 ```
 
+### Naming convention
 - **`input-*`** — converts a format into DNA. Same input always produces same output (deterministic), unless the package requires an LLM, in which case it is probabilistic. Each probabilistic package documents its dependencies explicitly: required LLM provider, expected API keys, and non-determinism implications.
 - **`output-*`** — renders DNA into a format string. No system knowledge; pure and local.
 - **`integration-*`** — connects to an external system bidirectionally. Owns auth, field mapping, rate limits, and API versioning for that system. May use `input-*` or `output-*` packages internally.
