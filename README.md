@@ -3,6 +3,11 @@ DNA is a description language for business systems — your digital DNA. Once de
 
 A DSL written in JSON/YAML, it describes a business at three intentionally decoupled layers — what the business does, what gets built, and how it gets built — and provides tooling to validate those descriptions and render them as documentation.
 
+As documented below, it's incredibly flexible with input/output adapters and integrations, but it's particularly useful in conjunction with [cell-based architecture](https://github.com/upgrade-solutions/cell-based-architecture). Below is a visual that represents the general scope of DNA.
+
+<img width="2700" height="1490" alt="image" src="https://github.com/user-attachments/assets/6e8fbacf-ff04-4bca-be89-8142f021bcf2" />
+
+
 ## The Three Layers
 
 | Layer | What it captures | Analogous to |
