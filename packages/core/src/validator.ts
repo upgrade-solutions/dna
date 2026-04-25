@@ -142,6 +142,16 @@ function kindLabelsFor(characteristic: Characteristic, joiner: 'or' | 'nor'): st
   return `${labels.slice(0, -1).join(', ')}, ${joiner} ${labels[labels.length - 1]}`
 }
 
+function quoteList(names: Iterable<string>): string {
+  return [...names].sort().map(n => `"${n}"`).join(', ')
+}
+
+function availability(label: string, names: Iterable<string>): string {
+  const list = [...names]
+  if (list.length === 0) return `no ${label} declared`
+  return `available ${label}: ${list.sort().map(n => `"${n}"`).join(', ')}`
+}
+
 interface PrimitiveEntry {
   kind: PrimitiveKind
   noun: NounShape | PersonShape | RoleShape | ProcessShape
@@ -299,7 +309,7 @@ export class DnaValidator {
       const actorablePool = primitives.pool('actorable')
       const scopeablePool = primitives.pool('scopeable')
       const targetableKinds = kindLabelsFor('targetable', 'or')
-      const actorableKinds = kindLabelsFor('actorable', 'nor')
+      const actorableKinds = kindLabelsFor('actorable', 'or')
       const scopeableKinds = kindLabelsFor('scopeable', 'or')
 
       // Operation.target must reference a targetable primitive.
@@ -309,7 +319,7 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `operations/${operation.name}/target`,
-            message: `Operation "${operation.name}" references target "${operation.target}" which does not exist as a ${targetableKinds}. Available: ${[...targetablePool].sort().join(', ')}`,
+            message: `Operation "${operation.name}" target "${operation.target}" is not a declared ${targetableKinds}; ${availability('targets', targetablePool)}`,
           })
         } else {
           const entry = primitives.byName.get(operation.target)!
@@ -319,7 +329,7 @@ export class DnaValidator {
             errors.push({
               layer: 'operational',
               path: `operations/${operation.name}/action`,
-              message: `Operation "${operation.name}" references action "${operation.action}" which is not declared in ${entry.kind} "${operation.target}".actions[]. Available: ${[...actionNames].join(', ')}`,
+              message: `Operation "${operation.name}" action "${operation.action}" is not declared on ${KIND_LABEL[entry.kind]} "${operation.target}"; available actions: ${quoteList(actionNames)}`,
             })
           }
         }
@@ -331,7 +341,7 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `signals/${signal.name}/operation`,
-            message: `Signal "${signal.name}" references Operation "${signal.operation}" which does not exist. Available: ${[...operationNames].join(', ')}`,
+            message: `Signal "${signal.name}" emitted by Operation "${signal.operation}" which is not declared; ${availability('operations', operationNames)}`,
           })
         }
       }
@@ -342,7 +352,7 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `outcomes/${outcome.operation}/operation`,
-            message: `Outcome references Operation "${outcome.operation}" which does not exist. Available: ${[...operationNames].join(', ')}`,
+            message: `Outcome attached to Operation "${outcome.operation}" which is not declared; ${availability('operations', operationNames)}`,
           })
         }
         for (const signalRef of outcome.emits ?? []) {
@@ -350,7 +360,7 @@ export class DnaValidator {
             errors.push({
               layer: 'operational',
               path: `outcomes/${outcome.operation}/emits/${signalRef}`,
-              message: `Outcome for "${outcome.operation}" emits Signal "${signalRef}" which does not exist. Available: ${[...signalNames].join(', ')}`,
+              message: `Outcome on "${outcome.operation}" emits Signal "${signalRef}" which is not declared; ${availability('signals', signalNames)}`,
             })
           }
         }
@@ -359,7 +369,7 @@ export class DnaValidator {
             errors.push({
               layer: 'operational',
               path: `outcomes/${outcome.operation}/initiates/${opRef}`,
-              message: `Outcome for "${outcome.operation}" initiates Operation "${opRef}" which does not exist. Available: ${[...operationNames].join(', ')}`,
+              message: `Outcome on "${outcome.operation}" initiates Operation "${opRef}" which is not declared; ${availability('operations', operationNames)}`,
             })
           }
         }
@@ -372,42 +382,42 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `triggers/${target}`,
-            message: `Trigger must target either an Operation or a Process; both are missing.`,
+            message: `Trigger must target either an Operation or a Process; both are missing`,
           })
         }
         if (trigger.operation && trigger.process) {
           errors.push({
             layer: 'operational',
             path: `triggers/${target}`,
-            message: `Trigger may target either an Operation or a Process, not both.`,
+            message: `Trigger must target either an Operation or a Process, not both`,
           })
         }
         if (trigger.operation && !operationNames.has(trigger.operation)) {
           errors.push({
             layer: 'operational',
             path: `triggers/${target}/operation`,
-            message: `Trigger references Operation "${trigger.operation}" which does not exist. Available: ${[...operationNames].join(', ')}`,
+            message: `Trigger fires Operation "${trigger.operation}" which is not declared; ${availability('operations', operationNames)}`,
           })
         }
         if (trigger.process && !processNames.has(trigger.process)) {
           errors.push({
             layer: 'operational',
             path: `triggers/${target}/process`,
-            message: `Trigger references Process "${trigger.process}" which does not exist. Available: ${[...processNames].join(', ')}`,
+            message: `Trigger starts Process "${trigger.process}" which is not declared; ${availability('processes', processNames)}`,
           })
         }
         if (trigger.source === 'signal' && trigger.signal && !signalNames.has(trigger.signal)) {
           errors.push({
             layer: 'operational',
             path: `triggers/${target}/signal`,
-            message: `Trigger references Signal "${trigger.signal}" which does not exist. Available: ${[...signalNames].join(', ')}`,
+            message: `Trigger listens for Signal "${trigger.signal}" which is not declared; ${availability('signals', signalNames)}`,
           })
         }
         if (trigger.source === 'operation' && trigger.after && !operationNames.has(trigger.after)) {
           errors.push({
             layer: 'operational',
             path: `triggers/${target}/after`,
-            message: `Trigger references upstream Operation "${trigger.after}" which does not exist. Available: ${[...operationNames].join(', ')}`,
+            message: `Trigger waits on upstream Operation "${trigger.after}" which is not declared; ${availability('operations', operationNames)}`,
           })
         }
       }
@@ -415,11 +425,12 @@ export class DnaValidator {
       // Rule.operation must reference a declared Operation
       // Rule.allow[].role must reference an actorable primitive (Role or Person)
       for (const rule of op.rules ?? []) {
+        const ruleId = rule.name ?? rule.operation
         if (!operationNames.has(rule.operation)) {
           errors.push({
             layer: 'operational',
-            path: `rules/${rule.name ?? rule.operation}/operation`,
-            message: `Rule references Operation "${rule.operation}" which does not exist. Available: ${[...operationNames].join(', ')}`,
+            path: `rules/${ruleId}/operation`,
+            message: `Rule "${ruleId}" governs Operation "${rule.operation}" which is not declared; ${availability('operations', operationNames)}`,
           })
         }
         if (rule.type === 'access') {
@@ -428,8 +439,8 @@ export class DnaValidator {
               if (entry.role && !actorablePool.has(entry.role)) {
                 errors.push({
                   layer: 'operational',
-                  path: `rules/${rule.name ?? rule.operation}/allow/role/${entry.role}`,
-                  message: `Rule for "${rule.operation}" references actor "${entry.role}" which is neither a declared ${actorableKinds}. Available: ${[...actorablePool].sort().join(', ')}`,
+                  path: `rules/${ruleId}/allow/role/${entry.role}`,
+                  message: `Rule "${ruleId}" allows actor "${entry.role}" which is not a declared ${actorableKinds}; ${availability('actors', actorablePool)}`,
                 })
               }
             }
@@ -443,7 +454,7 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `resources/${r.name}/parent`,
-            message: `Resource "${r.name}" parent "${r.parent}" does not reference a declared Resource. Available: ${[...primitives.resourceNames].join(', ')}`,
+            message: `Resource "${r.name}" parent "${r.parent}" is not a declared Resource; ${availability('resources', primitives.resourceNames)}`,
           })
         }
       }
@@ -452,14 +463,14 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `persons/${p.name}/parent`,
-            message: `Person "${p.name}" parent "${p.parent}" does not reference a declared Person. Available: ${[...primitives.personNames].join(', ')}`,
+            message: `Person "${p.name}" parent "${p.parent}" is not a declared Person; ${availability('persons', primitives.personNames)}`,
           })
         }
         if (p.resource && !primitives.resourceNames.has(p.resource)) {
           errors.push({
             layer: 'operational',
             path: `persons/${p.name}/resource`,
-            message: `Person "${p.name}" resource "${p.resource}" does not reference a declared Resource. Available: ${[...primitives.resourceNames].join(', ')}`,
+            message: `Person "${p.name}" resource "${p.resource}" is not a declared Resource; ${availability('resources', primitives.resourceNames)}`,
           })
         }
       }
@@ -468,7 +479,7 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `groups/${g.name}/parent`,
-            message: `Group "${g.name}" parent "${g.parent}" does not reference a declared Group. Available: ${[...primitives.groupNames].join(', ')}`,
+            message: `Group "${g.name}" parent "${g.parent}" is not a declared Group; ${availability('groups', primitives.groupNames)}`,
           })
         }
       }
@@ -482,7 +493,7 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `roles/${role.name}/parent`,
-            message: `Role "${role.name}" parent "${role.parent}" does not reference a declared Role. Available: ${[...primitives.roleNames].join(', ')}`,
+            message: `Role "${role.name}" parent "${role.parent}" is not a declared Role; ${availability('roles', primitives.roleNames)}`,
           })
         }
         const scopes = role.scope === undefined ? [] : Array.isArray(role.scope) ? role.scope : [role.scope]
@@ -491,7 +502,7 @@ export class DnaValidator {
             errors.push({
               layer: 'operational',
               path: `roles/${role.name}/scope`,
-              message: `Role "${role.name}" scope "${s}" does not reference a declared ${scopeableKinds}. Available: ${[...scopeablePool].sort().join(', ')}`,
+              message: `Role "${role.name}" scope "${s}" is not a declared ${scopeableKinds}; ${availability('scopes', scopeablePool)}`,
             })
           }
         }
@@ -499,7 +510,7 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `roles/${role.name}/resource`,
-            message: `Role "${role.name}" resource "${role.resource}" does not reference a declared Resource. Available: ${[...primitives.resourceNames].join(', ')}`,
+            message: `Role "${role.name}" resource "${role.resource}" is not a declared Resource; ${availability('resources', primitives.resourceNames)}`,
           })
         }
       }
@@ -510,21 +521,21 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `memberships/${m.name}/person`,
-            message: `Membership "${m.name}" references Person "${m.person}" which does not exist. Available: ${[...primitives.personNames].join(', ')}`,
+            message: `Membership "${m.name}" pins Person "${m.person}" which is not declared; ${availability('persons', primitives.personNames)}`,
           })
         }
         if (!primitives.hasCharacteristic(m.role, 'memberable')) {
           errors.push({
             layer: 'operational',
             path: `memberships/${m.name}/role`,
-            message: `Membership "${m.name}" references Role "${m.role}" which does not exist. Available: ${[...primitives.roleNames].join(', ')}`,
+            message: `Membership "${m.name}" pins Role "${m.role}" which is not declared; ${availability('roles', primitives.roleNames)}`,
           })
         }
         if (m.group && !scopeablePool.has(m.group)) {
           errors.push({
             layer: 'operational',
             path: `memberships/${m.name}/group`,
-            message: `Membership "${m.name}" references "${m.group}" which is not a declared ${scopeableKinds} (the valid Role.scope targets). Available: ${[...scopeablePool].sort().join(', ')}`,
+            message: `Membership "${m.name}" group "${m.group}" is not a declared ${scopeableKinds}; ${availability('scopes', scopeablePool)}`,
           })
         }
         if (m.group && primitives.roleNames.has(m.role)) {
@@ -534,7 +545,7 @@ export class DnaValidator {
             errors.push({
               layer: 'operational',
               path: `memberships/${m.name}/group`,
-              message: `Membership "${m.name}" pins Role "${m.role}" in "${m.group}", but Role "${m.role}" declares scope "${scopes.join(' | ')}".`,
+              message: `Membership "${m.name}" pins Role "${m.role}" in group "${m.group}", but Role "${m.role}" declares scope ${quoteList(scopes)}`,
             })
           }
         }
@@ -545,7 +556,7 @@ export class DnaValidator {
             errors.push({
               layer: 'operational',
               path: `memberships/${m.name}/group`,
-              message: `Membership "${m.name}" references multi-scope Role "${m.role}" (scope: ${role.scope.join(' | ')}) but does not specify a group; Membership.group is required to disambiguate.`,
+              message: `Membership "${m.name}" pins multi-scope Role "${m.role}" (scopes: ${quoteList(role.scope)}) without a group; specify Membership.group to disambiguate`,
             })
           }
         }
@@ -558,14 +569,14 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `relationships/${rel.name}/from`,
-            message: `Relationship "${rel.name}" references "${rel.from}" (from) which does not exist as any noun primitive. Available: ${[...primitives.allNounNames].sort().join(', ')}`,
+            message: `Relationship "${rel.name}" (from) "${rel.from}" is not a declared noun; ${availability('nouns', primitives.allNounNames)}`,
           })
         }
         if (!primitives.allNounNames.has(rel.to)) {
           errors.push({
             layer: 'operational',
             path: `relationships/${rel.name}/to`,
-            message: `Relationship "${rel.name}" references "${rel.to}" (to) which does not exist as any noun primitive. Available: ${[...primitives.allNounNames].sort().join(', ')}`,
+            message: `Relationship "${rel.name}" (to) "${rel.to}" is not a declared noun; ${availability('nouns', primitives.allNounNames)}`,
           })
         }
         if (primitives.allNounNames.has(rel.from)) {
@@ -575,7 +586,7 @@ export class DnaValidator {
             errors.push({
               layer: 'operational',
               path: `relationships/${rel.name}/attribute`,
-              message: `Relationship "${rel.name}" references Attribute "${rel.attribute}" which does not exist on "${rel.from}". Available: ${[...attrNames].join(', ')}`,
+              message: `Relationship "${rel.name}" Attribute "${rel.attribute}" is not declared on "${rel.from}"; ${availability('attributes', attrNames)}`,
             })
           }
         }
@@ -588,14 +599,14 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `tasks/${task.name}/actor`,
-            message: `Task "${task.name}" references actor "${task.actor}" which is neither a declared ${actorableKinds}. Available: ${[...actorablePool].sort().join(', ')}`,
+            message: `Task "${task.name}" actor "${task.actor}" is not a declared ${actorableKinds}; ${availability('actors', actorablePool)}`,
           })
         }
         if (!operationNames.has(task.operation)) {
           errors.push({
             layer: 'operational',
             path: `tasks/${task.name}/operation`,
-            message: `Task "${task.name}" references Operation "${task.operation}" which does not exist. Available: ${[...operationNames].join(', ')}`,
+            message: `Task "${task.name}" operation "${task.operation}" is not declared; ${availability('operations', operationNames)}`,
           })
         }
       }
@@ -608,7 +619,7 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `processes/${proc.name}/operator`,
-            message: `Process "${proc.name}" operator "${proc.operator}" is neither a declared ${actorableKinds}. Available: ${[...actorablePool].sort().join(', ')}`,
+            message: `Process "${proc.name}" operator "${proc.operator}" is not a declared ${actorableKinds}; ${availability('actors', actorablePool)}`,
           })
         }
         const stepIds = new Set((proc.steps ?? []).map(s => s.id))
@@ -616,7 +627,7 @@ export class DnaValidator {
           errors.push({
             layer: 'operational',
             path: `processes/${proc.name}/startStep`,
-            message: `Process "${proc.name}" startStep "${proc.startStep}" is not a defined Step. Available: ${[...stepIds].join(', ')}`,
+            message: `Process "${proc.name}" startStep "${proc.startStep}" is not a defined Step; ${availability('steps', stepIds)}`,
           })
         }
         for (const step of proc.steps ?? []) {
@@ -624,7 +635,7 @@ export class DnaValidator {
             errors.push({
               layer: 'operational',
               path: `processes/${proc.name}/steps/${step.id}/task`,
-              message: `Step "${step.id}" in Process "${proc.name}" references Task "${step.task}" which does not exist. Available: ${[...taskNames].join(', ')}`,
+              message: `Process "${proc.name}" Step "${step.id}" task "${step.task}" is not a declared Task; ${availability('tasks', taskNames)}`,
             })
           }
           for (const dep of step.depends_on ?? []) {
@@ -632,7 +643,7 @@ export class DnaValidator {
               errors.push({
                 layer: 'operational',
                 path: `processes/${proc.name}/steps/${step.id}/depends_on/${dep}`,
-                message: `Step "${step.id}" in Process "${proc.name}" depends_on "${dep}" which is not a sibling step ID. Available: ${[...stepIds].join(', ')}`,
+                message: `Process "${proc.name}" Step "${step.id}" depends_on "${dep}" which is not a sibling Step; ${availability('steps', stepIds)}`,
               })
             }
           }
@@ -641,7 +652,7 @@ export class DnaValidator {
               errors.push({
                 layer: 'operational',
                 path: `processes/${proc.name}/steps/${step.id}/conditions/${cond}`,
-                message: `Step "${step.id}" in Process "${proc.name}" references Rule "${cond}" which does not exist or has no name. Available: ${[...ruleNames].join(', ')}`,
+                message: `Process "${proc.name}" Step "${step.id}" condition "${cond}" is not a named Rule; ${availability('rules', ruleNames)}`,
               })
             }
           }
@@ -649,7 +660,7 @@ export class DnaValidator {
             errors.push({
               layer: 'operational',
               path: `processes/${proc.name}/steps/${step.id}/else`,
-              message: `Step "${step.id}" in Process "${proc.name}" else "${step.else}" is neither "abort" nor a sibling step ID. Available: ${[...stepIds].join(', ')}, abort`,
+              message: `Process "${proc.name}" Step "${step.id}" else "${step.else}" must be "abort" or a sibling Step; ${availability('steps', stepIds)}`,
             })
           }
         }
@@ -658,7 +669,7 @@ export class DnaValidator {
             errors.push({
               layer: 'operational',
               path: `processes/${proc.name}/emits/${sig}`,
-              message: `Process "${proc.name}" emits Signal "${sig}" which does not exist. Available: ${[...signalNames].join(', ')}`,
+              message: `Process "${proc.name}" emits Signal "${sig}" which is not declared; ${availability('signals', signalNames)}`,
             })
           }
         }
@@ -678,7 +689,7 @@ export class DnaValidator {
           errors.push({
             layer: 'product/core',
             path: `resources/${resource.name}`,
-            message: `Product Core Resource "${resource.name}" is not present in Operational DNA. Re-run the materializer.`,
+            message: `Product Core Resource "${resource.name}" is not present in Operational DNA; re-run the materializer`,
           })
         }
       }
@@ -687,7 +698,7 @@ export class DnaValidator {
           errors.push({
             layer: 'product/core',
             path: `operations/${op2.name}`,
-            message: `Product Core Operation "${op2.name}" is not present in Operational DNA. Re-run the materializer.`,
+            message: `Product Core Operation "${op2.name}" is not present in Operational DNA; re-run the materializer`,
           })
         }
       }
@@ -696,7 +707,7 @@ export class DnaValidator {
           errors.push({
             layer: 'product/core',
             path: `signals/${sig.name}`,
-            message: `Product Core Signal "${sig.name}" is not present in Operational DNA. Re-run the materializer.`,
+            message: `Product Core Signal "${sig.name}" is not present in Operational DNA; re-run the materializer`,
           })
         }
       }
@@ -712,13 +723,15 @@ export class DnaValidator {
       const operationNames = new Set((operations ?? []).map(o => o.name))
       const referenceLayer = core ? 'product/core' : 'operational'
 
+      const upstreamLabel = referenceLayer === 'product/core' ? 'Product Core' : 'Operational'
+
       // Resource → Operational Resource cross-layer reference
       for (const resource of api.resources ?? []) {
         if (resource.resource && !resourceNames.has(resource.resource)) {
           errors.push({
             layer: 'product/api',
             path: `resources/${resource.name}/resource`,
-            message: `Resource "${resource.name}" references Resource "${resource.resource}" which does not exist in ${referenceLayer === 'product/core' ? 'Product Core' : 'Operational'} DNA. Available: ${[...resourceNames].join(', ')}`,
+            message: `API Resource "${resource.name}" references Resource "${resource.resource}" which is not declared in ${upstreamLabel} DNA; ${availability('resources', resourceNames)}`,
           })
         }
 
@@ -731,7 +744,7 @@ export class DnaValidator {
               errors.push({
                 layer: 'product/api',
                 path: `resources/${resource.name}/actions/${action.name}/action`,
-                message: `Action "${action.name}" on Resource "${resource.name}" references Action "${action.action}" which does not exist on Resource "${resource.resource}". Available: ${[...actionNames].join(', ')}`,
+                message: `API Action "${action.name}" on Resource "${resource.name}" maps to Action "${action.action}" which is not declared on Resource "${resource.resource}"; ${availability('actions', actionNames)}`,
               })
             }
           }
@@ -744,7 +757,7 @@ export class DnaValidator {
           errors.push({
             layer: 'product/api',
             path: `operations/${operation.name}`,
-            message: `Operation "${operation.name}" is not present in ${referenceLayer === 'product/core' ? 'Product Core' : 'Operational'} DNA. Available: ${[...operationNames].join(', ')}`,
+            message: `API Operation "${operation.name}" is not present in ${upstreamLabel} DNA; ${availability('operations', operationNames)}`,
           })
         }
       }
@@ -756,7 +769,7 @@ export class DnaValidator {
           errors.push({
             layer: 'product/api',
             path: `endpoints/${endpoint.operation}/operation`,
-            message: `Endpoint references Operation "${endpoint.operation}" which is not defined in operations. Available: ${[...apiOperationNames].join(', ')}`,
+            message: `Endpoint serves Operation "${endpoint.operation}" which is not defined in API operations; ${availability('operations', apiOperationNames)}`,
           })
         }
       }
@@ -773,7 +786,7 @@ export class DnaValidator {
           errors.push({
             layer: 'product/ui',
             path: `pages/${page.name}/resource`,
-            message: `Page "${page.name}" references Resource "${page.resource}" which does not exist in Product API DNA. Available: ${[...resourceNames].join(', ')}`,
+            message: `Page "${page.name}" binds Resource "${page.resource}" which is not declared in Product API DNA; ${availability('resources', resourceNames)}`,
           })
         }
 
@@ -783,7 +796,7 @@ export class DnaValidator {
             errors.push({
               layer: 'product/ui',
               path: `pages/${page.name}/blocks/${block.name}/operation`,
-              message: `Block "${block.name}" on Page "${page.name}" references Operation "${block.operation}" which does not exist in Product API DNA. Available: ${[...operationNames].join(', ')}`,
+              message: `Page "${page.name}" Block "${block.name}" calls Operation "${block.operation}" which is not declared in Product API DNA; ${availability('operations', operationNames)}`,
             })
           }
         }
@@ -796,7 +809,7 @@ export class DnaValidator {
           errors.push({
             layer: 'product/ui',
             path: `routes/${route.page}/page`,
-            message: `Route references Page "${route.page}" which is not defined in pages. Available: ${[...pageNames].join(', ')}`,
+            message: `Route serves Page "${route.page}" which is not defined; ${availability('pages', pageNames)}`,
           })
         }
       }
@@ -813,7 +826,7 @@ export class DnaValidator {
           errors.push({
             layer: 'technical',
             path: `constructs/${construct.name}/provider`,
-            message: `Construct "${construct.name}" references Provider "${construct.provider}" which does not exist. Available: ${[...providerNames].join(', ')}`,
+            message: `Construct "${construct.name}" runs on Provider "${construct.provider}" which is not declared; ${availability('providers', providerNames)}`,
           })
         }
       }
@@ -825,7 +838,7 @@ export class DnaValidator {
             errors.push({
               layer: 'technical',
               path: `cells/${cell.name}/constructs/${constructRef}`,
-              message: `Cell "${cell.name}" references Construct "${constructRef}" which does not exist. Available: ${[...constructNames].join(', ')}`,
+              message: `Cell "${cell.name}" uses Construct "${constructRef}" which is not declared; ${availability('constructs', constructNames)}`,
             })
           }
         }
