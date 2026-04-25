@@ -150,7 +150,7 @@ Concept-by-concept mappings under [`docs/frameworks/`](./docs/frameworks), each 
 | [ArchiMate 3](./docs/frameworks/archimate.md) | Shipped |
 | [C4 Model](./docs/frameworks/c4.md) | Shipped |
 | [Event Storming](./docs/frameworks/event-storming.md) | Shipped |
-| TOGAF | Deferred (broad scope; defer until concrete sub-scope is needed) |
+| [TOGAF](./docs/frameworks/togaf.md) | Shipped |
 | ER / IDEF1X | Deferred (trivial Resource/Attribute/Relationship mapping) |
 
 ## Open questions

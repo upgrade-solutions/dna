@@ -90,7 +90,7 @@ Canonical end-to-end DNA documents demonstrating the model across different busi
 
 ## Framework comparisons
 
-If you already model your domain in DDD, BPMN, ArchiMate, C4, or Event Storming, see [`docs/frameworks/`](./docs/frameworks) for concept-by-concept mappings, where DNA intentionally differs, and concrete translations using the examples above. Currently covered: [BPMN](./docs/frameworks/bpmn.md), [Domain-Driven Design](./docs/frameworks/ddd.md), [ArchiMate](./docs/frameworks/archimate.md), [C4 Model](./docs/frameworks/c4.md), [Event Storming](./docs/frameworks/event-storming.md).
+If you already model your domain in DDD, BPMN, ArchiMate, C4, Event Storming, or run a TOGAF practice, see [`docs/frameworks/`](./docs/frameworks) for concept-by-concept mappings, where DNA intentionally differs, and concrete translations using the examples above. Currently covered: [BPMN](./docs/frameworks/bpmn.md), [Domain-Driven Design](./docs/frameworks/ddd.md), [ArchiMate](./docs/frameworks/archimate.md), [C4 Model](./docs/frameworks/c4.md), [Event Storming](./docs/frameworks/event-storming.md), [TOGAF](./docs/frameworks/togaf.md).
 
 ## Operational Layer
 

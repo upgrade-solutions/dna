@@ -9,6 +9,7 @@ DNA is a description language, not a methodology. Most teams that adopt DNA alre
 | [ArchiMate 3](./archimate.md) | Enterprise architecture across business, application, and technology layers | Business layer ≈ Operational; Application ≈ Product; Technology ≈ Technical. Motivation/strategy stay out of scope |
 | [C4 Model](./c4.md) | Software-architecture diagrams (Context / Container / Component / Code) | Context ≈ Operational `Domain`; Container ≈ Technical `Cell`; Component is implicit; Code is generated. Strongest at the Product/Technical boundary |
 | [Event Storming](./event-storming.md) | Workshop output → DNA translation | Sticky-color → primitive mapping. Aggregate (tan) = `Resource`; Command (blue) = `Operation`; Event (orange) = `Signal`; Policy (purple) = `Trigger`; Actor (yellow) = `Resource`-as-Role |
+| [TOGAF](./togaf.md) | Enterprise architecture method (ADM phases, content framework, governance) | Positioning, not translation — DNA is what you produce in Phases B/C/D; the rest of ADM (vision, governance, change) sits around DNA, not inside it |
 
 ## How to read each comparison
 
@@ -25,7 +26,6 @@ These comparisons are starting points, not exhaustive treatments. Each is meant 
 
 **Deferred:**
 
-- TOGAF — process/governance overlay; too broad to map cleanly without a defined sub-scope
 - ER / IDEF1X — straightforward Resource/Attribute/Relationship mapping; trivial enough to defer
 
 If you'd find one of these useful, open an issue or PR — defer means "not yet motivated by a real need," not "won't ever do."
