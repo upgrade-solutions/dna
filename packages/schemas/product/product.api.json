@@ -17,7 +17,7 @@
     },
     "operations": {
       "type": "array",
-      "description": "The Resource:Action pairs available in this API, mapped from Operational Capabilities.",
+      "description": "The Resource:Action pairs available in this API, surfacing Operational Operations.",
       "items": { "$ref": "https://dna.codes/schemas/product/core/operation" }
     },
     "endpoints": {
@@ -51,8 +51,8 @@
         }
       ],
       "operations": [
-        { "resource": "Loan", "action": "Apply", "name": "Loan.Apply", "capability": "Loan.Apply" },
-        { "resource": "Loan", "action": "Approve", "name": "Loan.Approve", "capability": "Loan.Approve" }
+        { "resource": "Loan", "action": "Apply", "name": "Loan.Apply" },
+        { "resource": "Loan", "action": "Approve", "name": "Loan.Approve" }
       ],
       "endpoints": [
         {

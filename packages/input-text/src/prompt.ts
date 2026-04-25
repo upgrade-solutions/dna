@@ -23,39 +23,37 @@ const OPERATIONAL_SKELETON = `{
           "actions": [
             { "name": "<ActionInPascalCase>" }
           ]
-        }
+        },
+        { "name": "<RoleInPascalCase>", "description": "<what this role does>" },
+        { "name": "<UserInPascalCase>", "memberships": [{ "role": "<RoleInPascalCase>", "in": "<GroupInPascalCase>" }] },
+        { "name": "<GroupInPascalCase>", "description": "<scoping unit>" }
       ]
     },
-    "capabilities": [
+    "operations": [
       { "resource": "<Resource>", "action": "<Action>", "name": "<Resource>.<Action>" }
     ],
-    "causes": [
-      { "capability": "<Resource>.<Action>", "source": "user | schedule | webhook | capability" }
+    "triggers": [
+      { "operation": "<Resource>.<Action>", "source": "user | schedule | webhook | operation | signal" }
     ],
     "rules": [
-      { "capability": "<Resource>.<Action>", "type": "access", "allow": [{ "role": "<role>" }] },
-      { "capability": "<Resource>.<Action>", "type": "condition", "conditions": [{ "attribute": "<resource>.<attribute>", "operator": "eq", "value": "<value>" }] }
+      { "operation": "<Resource>.<Action>", "type": "access", "allow": [{ "role": "<RoleInPascalCase>" }] },
+      { "name": "<RuleInPascalCase>", "operation": "<Resource>.<Action>", "type": "condition", "conditions": [{ "attribute": "<resource>.<attribute>", "operator": "eq", "value": "<value>" }] }
     ],
     "outcomes": [
-      { "capability": "<Resource>.<Action>", "changes": [{ "attribute": "<resource>.<attribute>", "set": "<value>" }] }
-    ],
-    "roles": [
-      { "name": "<RoleInPascalCase>", "description": "<what this role does or grants>" }
-    ],
-    "users": [
-      { "name": "<user-kebab-id>", "display_name": "<Full Name>", "roles": ["<RoleInPascalCase>"] }
+      { "operation": "<Resource>.<Action>", "changes": [{ "attribute": "<resource>.<attribute>", "set": "<value>" }] }
     ],
     "tasks": [
-      { "name": "<TaskInPascalCase>", "role": "<RoleInPascalCase>", "capability": "<Resource>.<Action>" }
+      { "name": "<task-kebab-id>", "actor": "<RoleInPascalCase>", "operation": "<Resource>.<Action>" }
     ],
     "processes": [
       {
         "name": "<ProcessInPascalCase>",
         "description": "<process description>",
         "operator": "<RoleInPascalCase>",
+        "startStep": "s1",
         "steps": [
-          { "id": "s1", "task": "<TaskInPascalCase>" },
-          { "id": "s2", "task": "<TaskInPascalCase>", "depends_on": ["s1"] }
+          { "id": "s1", "task": "<task-kebab-id>" },
+          { "id": "s2", "task": "<task-kebab-id>", "depends_on": ["s1"], "conditions": ["<RuleInPascalCase>"], "else": "abort" }
         ]
       }
     ]
@@ -82,8 +80,7 @@ const PRODUCT_SKELETON = `{
         {
           "resource": "<Resource>",
           "action": "<Action>",
-          "name": "<Resource>.<Action>",
-          "capability": "<Resource>.<Action>"
+          "name": "<Resource>.<Action>"
         }
       ]
     },
@@ -151,41 +148,40 @@ const LAYER_GUIDE: Record<Layer, string> = {
   operational: [
     'operational (required when the text describes a business):',
     '  The operational layer is modeled around the Actor > Action > Resource triad:',
-    '    — a Resource is a thing the business tracks (Loan, Invoice, Post)',
+    '    — a Resource is anything the business tracks: an entity (Loan, Invoice, Post), an Actor that performs work (Underwriter, Borrower, JoeKleier), or a Group that scopes Role assignments (Family, Account, Workspace). All are Resources — there is NO separate Role/User/Group/Actor primitive. The semantic role is implied by how the Resource is referenced.',
     '    — an Action is what gets performed on a Resource (Approve, Issue, Publish)',
-    '    — the Actor (who does it) is a Role, referenced by Rules (access), Tasks (assignment), Users (who holds which role), and Processes (operator) — never inline on the Capability itself.',
+    '    — the Actor (who does it) is a Resource referenced by Rules (access via Rule.allow[].role), Tasks (assignment via Task.actor), and Processes (operator) — never inline on the Operation itself.',
     '  domain: { name, path, domains?, resources }',
-    '    — resources is an ARRAY of { name, attributes: [{name,type,required?,values?}], actions: [{name}] }',
-    '    — ALWAYS include resources when the text mentions entities; do not leave it empty',
-    '  capabilities: ARRAY of { resource: "<singular>", action: "<singular>", name: "Resource.Action" }',
+    '    — resources is an ARRAY of { name, attributes?, actions?, parent?, scope?, memberships? }',
+    '    — Resources representing entities have attributes and actions.',
+    '    — Resources acting as Roles may declare optional `scope` naming the Group-Resource they must be exercised within (e.g. Father.scope = Family).',
+    '    — Resources acting as Users carry `memberships`: [{role, in}] pairing a Role-Resource with a Group-Resource.',
+    '    — ALWAYS include resources when the text mentions entities, actors, or groups; do not leave it empty',
+    '  operations: ARRAY of { resource: "<singular>", action: "<singular>", name: "Resource.Action" }',
     '    — one entry per Resource+Action pair; resource/action are single strings, NOT arrays',
     '    — every Action MUST be paired with a Resource; an Action without a Resource is invalid',
-    '  causes: ARRAY of { capability: "Resource.Action", source: "user" | "schedule" | "webhook" | "capability" }',
-    '    — source is one of those four literal strings ONLY; a role like "underwriter" is NOT a valid source',
-    '    — pick source from the text: a human doing it = "user"; a cron/timer = "schedule";',
-    '      an inbound HTTP event = "webhook"; triggered by another Capability finishing = "capability".',
-    '      Do NOT round-robin or distribute evenly across the four values. Default to "user" when unclear.',
-    '  rules: ARRAY of { capability, type: "access" | "condition", allow?: [{role}], conditions?: [...] }',
-    '    — "access" rules carry roles (the Actor); "condition" rules carry attribute predicates.',
-    '    — role values here are Role names, PascalCase (e.g. "Underwriter", "Borrower").',
-    '  outcomes: ARRAY of { capability, changes: [{attribute, set}] }',
+    '  triggers: ARRAY of { operation: "Resource.Action" | process: "ProcessName", source: "user" | "schedule" | "webhook" | "operation" | "signal" }',
+    '    — A Trigger targets EITHER an Operation (ad-hoc invocation) OR a Process (SOP kickoff), not both.',
+    '    — source is one of those literal strings ONLY; pick it from the text. Default to "user" when unclear.',
+    '  rules: ARRAY of { name?, operation, type: "access" | "condition", allow?: [{role}], conditions?: [...] }',
+    '    — "access" rules carry roles (the Actor — names of Resources used as Roles); "condition" rules carry attribute predicates.',
+    '    — role values here are Resource names, PascalCase (e.g. "Underwriter", "Borrower").',
+    '    — condition rules SHOULD have a PascalCase `name` so Steps can reference them via `step.conditions[]`.',
+    '  outcomes: ARRAY of { operation, changes: [{attribute, set}], initiates?: [...], emits?: [...] }',
     '  relationships (optional): ARRAY of { name, from, to, attribute, cardinality: "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many" }',
     '    — match cardinality to the text: "each X has many Y" → one-to-many from X to Y.',
-    '  roles (optional): ARRAY of { name, description?, domain?, parent? }',
-    '    — a Role is a PascalCase job title or permission bundle (ClosingSpecialist, Underwriter, Admin) — the Actor in the triad. ALWAYS include when the text names roles or job titles performing work. `parent` captures org-chart hierarchy (ClosingSpecialist parent LendingManager).',
-    '  users (optional): ARRAY of { name, display_name?, roles: [string], email?, active? }',
-    '    — a User is a named individual or service account holding one or more Roles.',
-    '  tasks (optional): ARRAY of { name, role, capability, description? }',
-    '    — a Task is "Role performs one Capability". Use when the text says who does what.',
-    '  processes (optional): ARRAY of { name, description?, operator?, steps: [{id, task, depends_on?: [id]}] }',
-    '    — a Process is a named, owned DAG of Tasks (an SOP / workflow).',
+    '  tasks (optional): ARRAY of { name, actor, operation, description? }',
+    '    — a Task is "Actor performs one Operation". Actor references a Resource (typically one acting as a Role). Use when the text says who does what.',
+    '  processes (optional): ARRAY of { name, description?, operator, startStep, steps: [{id, task, depends_on?, conditions?, else?}] }',
+    '    — a Process is a named, owned DAG of Steps (an SOP / workflow). `startStep` names the first Step (ASL `StartAt` convention).',
+    '    — Each Step references exactly one Task. `conditions` is an array of Rule names (referencing condition Rules). `else` is a sibling step id or "abort".',
     '    — ALWAYS include processes when the text enumerates named workflows or end-to-end flows.',
   ].join('\n'),
   product: [
     'product (INCLUDE ONLY IF the input text explicitly describes software being built — UI screens, API endpoints, resources, pages, fields). Three sub-layers:',
-    '  core: { domain, resources: [{name, resource, fields, actions}], operations: [{resource, action, name: "Resource.Action", capability}] }',
+    '  core: { domain, resources: [{name, resource, fields, actions}], operations: [{resource, action, name: "Resource.Action"}] }',
     '    — Resource is PascalCase singular and maps 1:1 to an Operational Resource (same name by convention; the `resource` field is the explicit cross-layer reference).',
-    '    — Operation name is "Resource.Action" and should reference a Capability with the same "Resource.Action" form from the operational layer.',
+    '    — Operation name is "Resource.Action" and is a surface projection of the same-named Operational Operation.',
     '  api:  { namespace: {name, path, domain}, endpoints: [{method, path, operation: "Resource.Action"}] }',
     '    — method is one of GET | POST | PUT | PATCH | DELETE. Path is URL-style with :id placeholders.',
     '    — Include an endpoint only if the text names an API surface or HTTP contract.',
@@ -220,7 +216,8 @@ export function buildSystemPrompt(layers: Layer[], instructions?: string): strin
     '',
     'Hard rules:',
     '- Operational DNA is modeled as Actor > Action > Resource. Resources use PascalCase singular (Loan, Invoice, Borrower). Actions use PascalCase (Apply, Approve). Every Action must be paired with a Resource.',
-    '- Capability name is always "Resource.Action" — e.g. { "resource": "Loan", "action": "Apply", "name": "Loan.Apply" }.',
+    '- Operation name is always "Resource.Action" — e.g. { "resource": "Loan", "action": "Apply", "name": "Loan.Apply" }.',
+    '- Roles, Users, and Groups are NOT separate primitives — they are Resources. Their semantic role is implied by how they are referenced (Rule.allow[].role, Task.actor, memberships[], scope, etc.).',
     '- Every Resource mentioned in the text MUST appear in domain.resources with its attributes and actions.',
     '- Attributes have: name, type (string | text | number | boolean | date | datetime | enum | reference), optional required, optional values (for enums).',
     '- Domain path is dot-separated lowercase (acme.finance.lending).',

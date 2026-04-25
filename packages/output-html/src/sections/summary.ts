@@ -10,13 +10,13 @@ export function renderSummary(dna: DnaInput, h: number): string | null {
 
   const rawCounts: [string, number][] = [
     ['Resources', allResources.length],
-    ['Capabilities', op.capabilities?.length ?? 0],
+    ['Operations', op.operations?.length ?? 0],
+    ['Triggers', op.triggers?.length ?? 0],
     ['Rules', op.rules?.length ?? 0],
     ['Outcomes', op.outcomes?.length ?? 0],
     ['Signals', op.signals?.length ?? 0],
     ['Equations', op.equations?.length ?? 0],
     ['Relationships', op.relationships?.length ?? 0],
-    ['Roles', op.roles?.length ?? 0],
     ['Tasks', op.tasks?.length ?? 0],
     ['Processes', op.processes?.length ?? 0],
   ]

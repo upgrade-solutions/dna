@@ -1,54 +1,54 @@
 /**
- * Render a single Capability as prose, styled three ways:
+ * Render a single Operation as prose, styled three ways:
  *
  *   - user-story   As a / I want / So that + triggers + acceptance criteria
  *   - gherkin      Feature / Scenario / Given / When / Then
  *   - product-dna  Actor / Resource / Action / Trigger / Preconditions / Postconditions
  *
  * Each helper returns the body only; the title is stable across styles and
- * produced by `capabilityTitle`.
+ * produced by `operationTitle`.
  */
 
 import {
-  Capability,
-  Cause,
+  Operation,
   OperationalDna,
   Outcome,
   Rule,
   RuleAllow,
   Style,
+  Trigger,
 } from './types'
 import { groupBy, pascalToWords } from './util'
 
-export function capabilityTitle(cap: Capability): string {
-  return `${pascalToWords(cap.action)} ${pascalToWords(cap.resource)}`.trim()
+export function operationTitle(op: Operation): string {
+  return `${pascalToWords(op.action)} ${pascalToWords(op.resource)}`.trim()
 }
 
-export function renderCapability(cap: Capability, op: OperationalDna, style: Style): string {
-  if (style === 'gherkin') return renderGherkin(cap, op)
-  if (style === 'product-dna') return renderProductDna(cap, op)
-  return renderUserStory(cap, op)
+export function renderOperation(op: Operation, dna: OperationalDna, style: Style): string {
+  if (style === 'gherkin') return renderGherkin(op, dna)
+  if (style === 'product-dna') return renderProductDna(op, dna)
+  return renderUserStory(op, dna)
 }
 
 // ---------------------------------------------------------------------------
 // user-story
 // ---------------------------------------------------------------------------
 
-function renderUserStory(cap: Capability, op: OperationalDna): string {
-  const { rules, causes, outcomes, roles } = collect(cap, op)
+function renderUserStory(op: Operation, dna: OperationalDna): string {
+  const { rules, triggers, outcomes, roles } = collect(op, dna)
   const parts: string[] = []
 
-  if (cap.description) parts.push(cap.description)
+  if (op.description) parts.push(op.description)
 
   const role = roles[0] ?? 'user'
-  const action = pascalToWords(cap.action).toLowerCase()
-  const resource = pascalToWords(cap.resource).toLowerCase()
+  const action = pascalToWords(op.action).toLowerCase()
+  const resource = pascalToWords(op.resource).toLowerCase()
   parts.push(
-    `**As a** ${role}\n**I want to** ${action} a ${resource}\n**So that** the business outcome of \`${cap.name}\` is achieved.`,
+    `**As a** ${role}\n**I want to** ${action} a ${resource}\n**So that** the business outcome of \`${op.name}\` is achieved.`,
   )
 
-  const triggers = renderTriggerList(causes)
-  if (triggers) parts.push(`**Triggered by:**\n${triggers}`)
+  const triggerList = renderTriggerList(triggers)
+  if (triggerList) parts.push(`**Triggered by:**\n${triggerList}`)
 
   const criteria = renderCriteriaList(rules, outcomes)
   if (criteria) parts.push(`**Acceptance criteria:**\n${criteria}`)
@@ -60,26 +60,27 @@ function renderUserStory(cap: Capability, op: OperationalDna): string {
 // gherkin
 // ---------------------------------------------------------------------------
 
-function renderGherkin(cap: Capability, op: OperationalDna): string {
-  const { rules, causes, outcomes, roles } = collect(cap, op)
+function renderGherkin(op: Operation, dna: OperationalDna): string {
+  const { rules, triggers, outcomes, roles } = collect(op, dna)
   const actor = roles[0] ?? 'user'
-  const action = pascalToWords(cap.action).toLowerCase()
-  const resource = pascalToWords(cap.resource).toLowerCase()
+  const action = pascalToWords(op.action).toLowerCase()
+  const resource = pascalToWords(op.resource).toLowerCase()
 
   const lines: string[] = []
-  lines.push(`Feature: ${capabilityTitle(cap)}`)
-  if (cap.description) lines.push(`  ${cap.description}`)
+  lines.push(`Feature: ${operationTitle(op)}`)
+  if (op.description) lines.push(`  ${op.description}`)
   lines.push('')
   lines.push(`  Scenario: ${actor} ${action}s a ${resource}`)
 
   const conditionRules = rules.filter((r) => r.type === 'condition')
-  if (causes.length || conditionRules.length || roles.length) {
+  if (triggers.length || conditionRules.length || roles.length) {
     const givens: string[] = []
     if (roles.length) givens.push(`an actor with role \`${roles.join('`, `')}\``)
-    for (const c of causes) {
-      if (c.source === 'schedule') givens.push('a scheduled trigger fires')
-      else if (c.source === 'webhook') givens.push('an inbound webhook is received')
-      else if (c.source === 'capability') givens.push(`capability \`${c.signal ?? 'previous'}\` has completed`)
+    for (const t of triggers) {
+      if (t.source === 'schedule') givens.push('a scheduled trigger fires')
+      else if (t.source === 'webhook') givens.push('an inbound webhook is received')
+      else if (t.source === 'operation') givens.push(`operation \`${t.after ?? 'previous'}\` has completed`)
+      else if (t.source === 'signal') givens.push(`signal \`${t.signal ?? 'event'}\` is received`)
     }
     for (const r of conditionRules) givens.push(conditionPhrase(r))
 
@@ -92,7 +93,7 @@ function renderGherkin(cap: Capability, op: OperationalDna): string {
 
   const thens = outcomeLines(outcomes)
   if (thens.length === 0) {
-    lines.push(`    Then the capability \`${cap.name}\` succeeds`)
+    lines.push(`    Then the operation \`${op.name}\` succeeds`)
   } else {
     for (let i = 0; i < thens.length; i++) {
       lines.push(`    ${i === 0 ? 'Then' : 'And'} ${thens[i]}`)
@@ -106,17 +107,17 @@ function renderGherkin(cap: Capability, op: OperationalDna): string {
 // product-dna
 // ---------------------------------------------------------------------------
 
-function renderProductDna(cap: Capability, op: OperationalDna): string {
-  const { rules, causes, outcomes, roles } = collect(cap, op)
+function renderProductDna(op: Operation, dna: OperationalDna): string {
+  const { rules, triggers, outcomes, roles } = collect(op, dna)
   const parts: string[] = []
 
-  if (cap.description) parts.push(cap.description)
+  if (op.description) parts.push(op.description)
 
   const kv: string[] = []
-  kv.push(`**Resource:** \`${cap.resource}\``)
-  kv.push(`**Action:** \`${cap.action}\``)
+  kv.push(`**Resource:** \`${op.resource}\``)
+  kv.push(`**Action:** \`${op.action}\``)
   if (roles.length) kv.push(`**Actor:** ${roles.map((r) => `\`${r}\``).join(', ')}`)
-  if (causes.length) kv.push(`**Trigger:** ${causes.map((c) => c.source).join(', ')}`)
+  if (triggers.length) kv.push(`**Trigger:** ${triggers.map((t) => t.source).join(', ')}`)
   parts.push(kv.join('\n'))
 
   const preconditions = rules
@@ -134,30 +135,30 @@ function renderProductDna(cap: Capability, op: OperationalDna): string {
 // Shared helpers
 // ---------------------------------------------------------------------------
 
-function collect(cap: Capability, op: OperationalDna): {
+function collect(op: Operation, dna: OperationalDna): {
   rules: Rule[]
-  causes: Cause[]
+  triggers: Trigger[]
   outcomes: Outcome[]
   roles: string[]
 } {
-  const rules = groupBy(op.rules ?? [], (r) => r.capability).get(cap.name) ?? []
-  const causes = groupBy(op.causes ?? [], (c) => c.capability).get(cap.name) ?? []
-  const outcomes = groupBy(op.outcomes ?? [], (o) => o.capability).get(cap.name) ?? []
+  const rules = groupBy(dna.rules ?? [], (r) => r.operation).get(op.name) ?? []
+  const triggers = groupBy(dna.triggers ?? [], (t) => t.operation ?? '').get(op.name) ?? []
+  const outcomes = groupBy(dna.outcomes ?? [], (o) => o.operation).get(op.name) ?? []
   const roles: string[] = []
   for (const r of rules) {
     if (r.type !== 'access') continue
     for (const a of r.allow ?? []) if (a.role && !roles.includes(a.role)) roles.push(a.role)
   }
-  return { rules, causes, outcomes, roles }
+  return { rules, triggers, outcomes, roles }
 }
 
-function renderTriggerList(causes: Cause[]): string | null {
-  if (!causes.length) return null
-  return causes
-    .map((c) => {
-      const signal = c.signal ? ` — signal \`${c.signal}\`` : ''
-      const desc = c.description ? ` (${c.description})` : ''
-      return `- ${c.source}${signal}${desc}`
+function renderTriggerList(triggers: Trigger[]): string | null {
+  if (!triggers.length) return null
+  return triggers
+    .map((t) => {
+      const signal = t.signal ? ` — signal \`${t.signal}\`` : ''
+      const desc = t.description ? ` (${t.description})` : ''
+      return `- ${t.source}${signal}${desc}`
     })
     .join('\n')
 }
@@ -165,7 +166,7 @@ function renderTriggerList(causes: Cause[]): string | null {
 function renderCriteriaList(rules: Rule[], outcomes: Outcome[]): string | null {
   const lines: string[] = []
   for (const r of rules) {
-    if (r.type === 'condition') lines.push(`- Only when ${r.condition ?? r.description ?? 'condition is met'}`)
+    if (r.type === 'condition') lines.push(`- Only when ${conditionPhrase(r)}`)
     else if (r.type === 'access') {
       const allowed = renderAllow(r.allow ?? [])
       if (allowed) lines.push(`- Restricted to ${allowed}`)
@@ -183,14 +184,22 @@ function outcomeLines(outcomes: Outcome[]): string[] {
       const set = c.set === undefined ? '' : ` to \`${JSON.stringify(c.set)}\``
       lines.push(`Sets \`${c.attribute}\`${set}`)
     }
-    for (const next of o.initiate ?? []) lines.push(`Initiates \`${next}\``)
+    for (const next of o.initiates ?? []) lines.push(`Initiates \`${next}\``)
     for (const sig of o.emits ?? []) lines.push(`Emits \`${sig}\``)
   }
   return lines
 }
 
 function conditionPhrase(r: Rule): string {
-  return r.condition ?? r.description ?? 'a condition is met'
+  if (r.conditions?.length) {
+    return r.conditions
+      .map((c) => {
+        const v = c.value === undefined ? '' : ` ${JSON.stringify(c.value)}`
+        return `\`${c.attribute}\` ${c.operator}${v}`
+      })
+      .join(' AND ')
+  }
+  return r.description ?? r.name ?? 'a condition is met'
 }
 
 function renderAllow(allow: RuleAllow[]): string {
@@ -199,7 +208,7 @@ function renderAllow(allow: RuleAllow[]): string {
     .map((a) => {
       const parts: string[] = []
       if (a.role) parts.push(`role \`${a.role}\``)
-      if (a.ownership) parts.push(`ownership \`${a.ownership}\``)
+      if (a.ownership) parts.push(`ownership`)
       if (a.flags?.length) parts.push(`flags \`[${a.flags.join(', ')}]\``)
       return parts.join(' + ')
     })

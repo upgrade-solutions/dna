@@ -14,15 +14,13 @@ export interface DnaInput {
 }
 export interface OperationalDna {
     domain: OperationalDomain;
-    capabilities?: Capability[];
+    operations?: Operation[];
     rules?: Rule[];
     outcomes?: Outcome[];
-    causes?: Cause[];
+    triggers?: Trigger[];
     signals?: Signal[];
     equations?: Equation[];
     relationships?: Relationship[];
-    roles?: Role[];
-    users?: User[];
     tasks?: Task[];
     processes?: Process[];
 }
@@ -38,6 +36,14 @@ export interface Resource {
     description?: string;
     attributes?: Attribute[];
     actions?: Action[];
+    parent?: string;
+    scope?: string;
+    memberships?: Membership[];
+}
+export interface Membership {
+    role: string;
+    in: string;
+    description?: string;
 }
 export interface Attribute {
     name: string;
@@ -49,7 +55,7 @@ export interface Action {
     name: string;
     description?: string;
 }
-export interface Capability {
+export interface Operation {
     name: string;
     resource: string;
     action: string;
@@ -57,37 +63,46 @@ export interface Capability {
 }
 export interface Rule {
     name?: string;
-    capability: string;
+    operation: string;
     type?: 'access' | 'condition';
     description?: string;
     allow?: RuleAllow[];
-    condition?: string;
+    conditions?: RuleCondition[];
 }
 export interface RuleAllow {
     role?: string;
-    ownership?: string;
+    ownership?: boolean;
     flags?: string[];
 }
+export interface RuleCondition {
+    attribute: string;
+    operator: string;
+    value?: unknown;
+}
 export interface Outcome {
-    capability: string;
+    operation: string;
     description?: string;
     changes?: OutcomeChange[];
-    initiate?: string[];
+    initiates?: string[];
     emits?: string[];
 }
 export interface OutcomeChange {
     attribute: string;
     set?: unknown;
 }
-export interface Cause {
-    capability: string;
+export interface Trigger {
+    operation?: string;
+    process?: string;
     source: string;
     description?: string;
+    schedule?: string;
+    event?: string;
+    after?: string;
     signal?: string;
 }
 export interface Signal {
     name: string;
-    capability: string;
+    operation: string;
     description?: string;
     payload?: Field[];
 }
@@ -111,42 +126,27 @@ export interface Relationship {
     cardinality: string;
     description?: string;
 }
-export interface Role {
-    name: string;
-    description?: string;
-    domain?: string;
-    parent?: string;
-}
-export interface User {
-    name: string;
-    display_name?: string;
-    roles: string[];
-    email?: string;
-    domain?: string;
-    active?: boolean;
-}
 export interface Task {
     name: string;
-    role: string;
-    capability: string;
+    actor: string;
+    operation: string;
     description?: string;
 }
 export interface Process {
     name: string;
     description?: string;
     operator?: string;
+    startStep?: string;
     emits?: string[];
     steps?: ProcessStep[];
 }
 export interface ProcessStep {
     id: string;
     task: string;
+    description?: string;
     depends_on?: string[];
-    branch?: ProcessBranch;
-}
-export interface ProcessBranch {
-    when?: string;
-    else?: boolean;
+    conditions?: string[];
+    else?: string;
 }
 export type ProductCoreDna = Record<string, unknown>;
 export type ProductApiDna = Record<string, unknown>;

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/operational",
   "title": "OperationalDNA",
-  "description": "A complete Operational DNA document for an application instance. Composes a domain hierarchy with the full behavior stack (capabilities, causes, rules, outcomes, equations) and the Actor stack (roles, users, tasks, processes). Modeled around the Actor > Action > Resource triad: Resources live inside Domains, Actions apply to Resources, and Roles (referenced by Rules, Tasks, Users, and Processes) perform Capabilities (Resource:Action pairs).",
+  "description": "A complete Operational DNA document for a business. Operational DNA expresses pure business logic — what the business does, independent of UI, API, or deployment technology. Modeled around the Actor > Action > Resource triad.\n\nResources are the only noun collection. Roles, Users, and Groups are all Resources — distinguished by how they are referenced (structural typing), not by a declared type field. A Resource that is referenced from `Membership.role` or `Task.actor` is acting as a Role; a Resource with `memberships[]` is acting as a User; a Resource referenced from `Membership.in` or another Resource's `scope` is acting as a Group.",
   "type": "object",
   "required": ["domain"],
   "properties": {
@@ -10,24 +10,24 @@
       "$ref": "https://dna.codes/schemas/operational/domain",
       "description": "The root domain, containing the full nested hierarchy of subdomains and resources."
     },
-    "capabilities": {
+    "operations": {
       "type": "array",
-      "description": "All Resource:Action capability pairs defined in this domain.",
-      "items": { "$ref": "https://dna.codes/schemas/operational/capability" }
+      "description": "All Resource.Action operation pairs defined in this domain — the atomic units of business activity.",
+      "items": { "$ref": "https://dna.codes/schemas/operational/operation" }
     },
-    "causes": {
+    "triggers": {
       "type": "array",
-      "description": "What initiates each capability — user actions, schedules, webhooks, or chained capabilities.",
-      "items": { "$ref": "https://dna.codes/schemas/operational/cause" }
+      "description": "What initiates each Operation or Process — user actions, schedules, webhooks, chained operations, or signals.",
+      "items": { "$ref": "https://dna.codes/schemas/operational/trigger" }
     },
     "rules": {
       "type": "array",
-      "description": "Constraints on capabilities — who may perform them (access rules) and what conditions must be satisfied (condition rules).",
+      "description": "Constraints on operations — who may perform them (access rules) and what conditions must be satisfied (condition rules). Condition rules are also referenced by Step.conditions[] for compositional gating.",
       "items": { "$ref": "https://dna.codes/schemas/operational/rule" }
     },
     "outcomes": {
       "type": "array",
-      "description": "State changes and side effects that result from each capability.",
+      "description": "State changes and side effects that result from each operation.",
       "items": { "$ref": "https://dna.codes/schemas/operational/outcome" }
     },
     "equations": {
@@ -37,7 +37,7 @@
     },
     "signals": {
       "type": "array",
-      "description": "Named domain events published after a Capability executes. Signals cross domain boundaries and carry typed payload contracts.",
+      "description": "Named domain events published after an Operation executes. Signals cross domain boundaries and carry typed payload contracts.",
       "items": { "$ref": "https://dna.codes/schemas/operational/signal" }
     },
     "relationships": {
@@ -45,24 +45,14 @@
       "description": "Named, directed connections between Resources — formalizes the semantic link a reference Attribute implies, adding cardinality.",
       "items": { "$ref": "https://dna.codes/schemas/operational/relationship" }
     },
-    "roles": {
-      "type": "array",
-      "description": "Roles — the Actors in the Actor > Action > Resource triad. A Role is a named job title or permission bundle (ClosingSpecialist, Underwriter, Admin, Viewer) referenced by Rules (access), Tasks (assignment), Users (who holds which role), and Processes (operator).",
-      "items": { "$ref": "https://dna.codes/schemas/operational/role" }
-    },
-    "users": {
-      "type": "array",
-      "description": "Named individuals or service accounts holding one or more Roles — the business directory. Documentation-grade DNA, not authentication identity.",
-      "items": { "$ref": "https://dna.codes/schemas/operational/user" }
-    },
     "tasks": {
       "type": "array",
-      "description": "Atomic reusable units of human activity: a Role performing exactly one Capability.",
+      "description": "Atomic reusable units of business activity: an Actor (typically a Resource acting as a Role) performing exactly one Operation.",
       "items": { "$ref": "https://dna.codes/schemas/operational/task" }
     },
     "processes": {
       "type": "array",
-      "description": "Standard Operating Procedures — named, owned, ordered DAGs of Steps that accomplish business goals.",
+      "description": "Standard Operating Procedures — named, owned DAGs of Steps that accomplish business goals. Each Process declares an explicit `startStep` (Amazon-States-Language convention).",
       "items": { "$ref": "https://dna.codes/schemas/operational/process" }
     }
   },
@@ -90,6 +80,14 @@
                       { "name": "Apply" },
                       { "name": "Approve" }
                     ]
+                  },
+                  {
+                    "name": "Borrower",
+                    "description": "External borrower; applies for loans."
+                  },
+                  {
+                    "name": "Underwriter",
+                    "description": "Reviews and approves loan applications."
                   }
                 ]
               }
@@ -97,35 +95,32 @@
           }
         ]
       },
-      "capabilities": [
+      "operations": [
         { "resource": "Loan", "action": "Apply", "name": "Loan.Apply" },
         { "resource": "Loan", "action": "Approve", "name": "Loan.Approve" }
       ],
-      "causes": [
-        { "capability": "Loan.Apply", "source": "user" },
-        { "capability": "Loan.Approve", "source": "user" }
+      "triggers": [
+        { "operation": "Loan.Apply", "source": "user" },
+        { "operation": "Loan.Approve", "source": "user" }
       ],
       "rules": [
-        { "capability": "Loan.Apply", "type": "access", "allow": [{ "role": "Borrower" }] },
-        { "capability": "Loan.Approve", "type": "access", "allow": [{ "role": "Underwriter" }] },
-        { "capability": "Loan.Approve", "type": "condition", "conditions": [{ "attribute": "loan.status", "operator": "eq", "value": "under_review" }] }
+        { "operation": "Loan.Apply", "type": "access", "allow": [{ "role": "Borrower" }] },
+        { "operation": "Loan.Approve", "type": "access", "allow": [{ "role": "Underwriter" }] },
+        { "operation": "Loan.Approve", "type": "condition", "conditions": [{ "attribute": "loan.status", "operator": "eq", "value": "under_review" }] }
       ],
       "outcomes": [
-        { "capability": "Loan.Apply", "changes": [{ "attribute": "loan.status", "set": "under_review" }] },
-        { "capability": "Loan.Approve", "changes": [{ "attribute": "loan.status", "set": "active" }] }
-      ],
-      "roles": [
-        { "name": "Borrower", "description": "Applies for and repays loans." },
-        { "name": "Underwriter", "description": "Approves or rejects loan applications." }
+        { "operation": "Loan.Apply", "changes": [{ "attribute": "loan.status", "set": "under_review" }] },
+        { "operation": "Loan.Approve", "changes": [{ "attribute": "loan.status", "set": "active" }] }
       ],
       "tasks": [
-        { "name": "intake-loan", "role": "Borrower", "capability": "Loan.Apply" },
-        { "name": "approve-loan", "role": "Underwriter", "capability": "Loan.Approve" }
+        { "name": "intake-loan", "actor": "Borrower", "operation": "Loan.Apply" },
+        { "name": "approve-loan", "actor": "Underwriter", "operation": "Loan.Approve" }
       ],
       "processes": [
         {
           "name": "LoanOrigination",
           "operator": "Underwriter",
+          "startStep": "intake",
           "steps": [
             { "id": "intake", "task": "intake-loan" },
             { "id": "approve", "task": "approve-loan", "depends_on": ["intake"] }

@@ -9,13 +9,12 @@ export interface DnaInput {
 
 export interface OperationalDna {
   domain: OperationalDomain
-  capabilities?: Capability[]
+  operations?: Operation[]
   rules?: Rule[]
   outcomes?: Outcome[]
-  causes?: Cause[]
+  triggers?: Trigger[]
   signals?: Signal[]
   relationships?: Relationship[]
-  roles?: Role[]
   tasks?: Task[]
   processes?: Process[]
 }
@@ -33,6 +32,15 @@ export interface Resource {
   description?: string
   attributes?: Attribute[]
   actions?: Action[]
+  parent?: string
+  scope?: string
+  memberships?: Membership[]
+}
+
+export interface Membership {
+  role: string
+  in: string
+  description?: string
 }
 
 export interface Attribute {
@@ -47,7 +55,7 @@ export interface Action {
   description?: string
 }
 
-export interface Capability {
+export interface Operation {
   name: string
   resource: string
   action: string
@@ -56,24 +64,30 @@ export interface Capability {
 
 export interface Rule {
   name?: string
-  capability: string
+  operation: string
   type?: 'access' | 'condition'
   description?: string
   allow?: RuleAllow[]
-  condition?: string
+  conditions?: RuleCondition[]
 }
 
 export interface RuleAllow {
   role?: string
-  ownership?: string
+  ownership?: boolean
   flags?: string[]
 }
 
+export interface RuleCondition {
+  attribute: string
+  operator: string
+  value?: unknown
+}
+
 export interface Outcome {
-  capability: string
+  operation: string
   description?: string
   changes?: OutcomeChange[]
-  initiate?: string[]
+  initiates?: string[]
   emits?: string[]
 }
 
@@ -82,16 +96,20 @@ export interface OutcomeChange {
   set?: unknown
 }
 
-export interface Cause {
-  capability: string
+export interface Trigger {
+  operation?: string
+  process?: string
   source: string
   description?: string
+  schedule?: string
+  event?: string
+  after?: string
   signal?: string
 }
 
 export interface Signal {
   name: string
-  capability: string
+  operation: string
   description?: string
 }
 
@@ -104,16 +122,10 @@ export interface Relationship {
   description?: string
 }
 
-export interface Role {
-  name: string
-  description?: string
-  parent?: string
-}
-
 export interface Task {
   name: string
-  role: string
-  capability: string
+  actor: string
+  operation: string
   description?: string
 }
 
@@ -121,6 +133,7 @@ export interface Process {
   name: string
   description?: string
   operator?: string
+  startStep?: string
   steps?: ProcessStep[]
 }
 
@@ -128,6 +141,8 @@ export interface ProcessStep {
   id: string
   task: string
   depends_on?: string[]
+  conditions?: string[]
+  else?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -135,13 +150,13 @@ export interface ProcessStep {
 // ---------------------------------------------------------------------------
 
 /** Which DNA primitive becomes one text document. */
-export type Unit = 'capability' | 'resource' | 'process'
+export type Unit = 'operation' | 'resource' | 'process'
 
 /**
  * Body template applied to a unit's rendered text.
  *
- *   - user-story   As a / I want / So that + acceptance criteria. Fits Capability.
- *   - gherkin      Feature / Scenario / Given / When / Then. Fits Capability.
+ *   - user-story   As a / I want / So that + acceptance criteria. Fits Operation.
+ *   - gherkin      Feature / Scenario / Given / When / Then. Fits Operation.
  *   - product-dna  Key:value blocks using Product-DNA vocabulary
  *                  (Actor, Resource, Action, Role, Field, Operation). Fits all units.
  *
@@ -156,24 +171,24 @@ export type Style = 'user-story' | 'gherkin' | 'product-dna'
  */
 export type StyleMap = Partial<Record<Unit, Style>>
 
-export const DEFAULT_STYLES: StyleMap = { capability: 'user-story' }
+export const DEFAULT_STYLES: StyleMap = { operation: 'user-story' }
 
 export interface RenderOptions {
   /** Document title. Defaults to the operational domain's path or name. */
   title?: string
-  /** Unit → style map. Default: `{ capability: 'user-story' }`. */
+  /** Unit → style map. Default: `{ operation: 'user-story' }`. */
   styles?: StyleMap
 }
 
 export interface RenderManyOptions {
-  /** Unit → style map. Default: `{ capability: 'user-story' }`. */
+  /** Unit → style map. Default: `{ operation: 'user-story' }`. */
   styles?: StyleMap
 }
 
 /**
  * A single rendered document — shaped for pushing to an issue tracker,
  * docs platform, or database row. `id` is `{unit}-{slug}` (e.g.
- * `capability-loan-apply`) so multi-unit results can't collide.
+ * `operation-loan-apply`) so multi-unit results can't collide.
  */
 export interface TextDocument {
   id: string

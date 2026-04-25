@@ -19,6 +19,7 @@ exports.bookshopInput = {
                     attributes: [
                         { name: 'id', type: 'string', required: true, description: 'Unique identifier' },
                         { name: 'title', type: 'string', required: true, description: 'Book title' },
+                        { name: 'author_id', type: 'reference', required: true, description: 'Reference to Author' },
                         {
                             name: 'status',
                             type: 'enum',
@@ -39,9 +40,22 @@ exports.bookshopInput = {
                         { name: 'name', type: 'string', required: true },
                     ],
                 },
+                {
+                    name: 'Editor',
+                    description: 'Reviews and publishes books. Acts as a Role.',
+                },
+                {
+                    name: 'Ada',
+                    description: 'Named individual; documentation roster entry.',
+                    memberships: [{ role: 'Editor', in: 'Shop' }],
+                },
+                {
+                    name: 'Shop',
+                    description: 'The bookshop itself. Acts as the Group scoping editor memberships.',
+                },
             ],
         },
-        capabilities: [
+        operations: [
             {
                 name: 'Book.Publish',
                 resource: 'Book',
@@ -56,23 +70,24 @@ exports.bookshopInput = {
             },
         ],
         rules: [
-            { capability: 'Book.Publish', type: 'access', allow: [{ role: 'Editor' }] },
+            { operation: 'Book.Publish', type: 'access', allow: [{ role: 'Editor' }] },
             {
-                capability: 'Book.Publish',
+                name: 'BookIsDraft',
+                operation: 'Book.Publish',
                 type: 'condition',
-                condition: 'book.status == "draft"',
+                conditions: [{ attribute: 'book.status', operator: 'eq', value: 'draft' }],
             },
         ],
         outcomes: [
             {
-                capability: 'Book.Publish',
+                operation: 'Book.Publish',
                 changes: [{ attribute: 'book.status', set: 'active' }],
                 emits: ['shop.Book.Published'],
             },
         ],
-        causes: [
+        triggers: [
             {
-                capability: 'Book.Publish',
+                operation: 'Book.Publish',
                 source: 'user',
                 description: 'Editor publishes a book.',
             },
@@ -80,7 +95,7 @@ exports.bookshopInput = {
         signals: [
             {
                 name: 'shop.Book.Published',
-                capability: 'Book.Publish',
+                operation: 'Book.Publish',
                 description: 'Emitted when a book goes live on the storefront.',
                 payload: [{ name: 'book_id', type: 'string', required: true }],
             },
@@ -94,30 +109,23 @@ exports.bookshopInput = {
                 cardinality: 'many-to-one',
             },
         ],
-        roles: [
-            {
-                name: 'Editor',
-                description: 'Reviews and publishes books.',
-            },
-        ],
-        users: [{ name: 'ada', display_name: 'Ada', roles: ['Editor'] }],
         tasks: [
             {
-                name: 'ReviewBook',
-                role: 'Editor',
-                capability: 'Book.Publish',
+                name: 'review-book',
+                actor: 'Editor',
+                operation: 'Book.Publish',
                 description: 'Editor reviews the draft.',
             },
             {
-                name: 'ApproveBook',
-                role: 'Editor',
-                capability: 'Book.Publish',
+                name: 'approve-book',
+                actor: 'Editor',
+                operation: 'Book.Publish',
                 description: 'Editor approves and publishes.',
             },
             {
-                name: 'RejectBook',
-                role: 'Editor',
-                capability: 'Book.Retire',
+                name: 'reject-book',
+                actor: 'Editor',
+                operation: 'Book.Retire',
                 description: 'Editor rejects the draft.',
             },
         ],
@@ -126,19 +134,20 @@ exports.bookshopInput = {
                 name: 'PublishFlow',
                 description: 'How a draft book becomes live.',
                 operator: 'Editor',
+                startStep: 'review',
                 steps: [
-                    { id: 'review', task: 'ReviewBook' },
+                    { id: 'review', task: 'review-book' },
                     {
                         id: 'approve',
-                        task: 'ApproveBook',
+                        task: 'approve-book',
                         depends_on: ['review'],
-                        branch: { when: 'passed' },
+                        conditions: ['BookIsDraft'],
+                        else: 'reject',
                     },
                     {
                         id: 'reject',
-                        task: 'RejectBook',
+                        task: 'reject-book',
                         depends_on: ['review'],
-                        branch: { else: true },
                     },
                 ],
             },

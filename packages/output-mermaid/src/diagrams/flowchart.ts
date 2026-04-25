@@ -21,7 +21,7 @@ export function renderFlowchart(dna: DnaInput, direction: FlowchartDirection = '
     for (const step of proc.steps) {
       const id = mermaidId(step.id)
       const task = tasksByName.get(step.task)
-      const label = labelEscape(task?.capability ?? step.task)
+      const label = labelEscape(task?.operation ?? step.task)
       lines.push(`        ${id}["${label}"]`)
     }
 
@@ -29,12 +29,14 @@ export function renderFlowchart(dna: DnaInput, direction: FlowchartDirection = '
       const to = mermaidId(step.id)
       for (const depId of step.depends_on ?? []) {
         const from = mermaidId(depId)
-        const branch = step.branch?.when
-          ? `-- "${labelEscape(step.branch.when)}" -->`
-          : step.branch?.else
-            ? '-- "else" -->'
-            : '-->'
-        lines.push(`        ${from} ${branch} ${to}`)
+        const arrow = step.conditions?.length
+          ? `-- "${labelEscape(step.conditions.join(' AND '))}" -->`
+          : '-->'
+        lines.push(`        ${from} ${arrow} ${to}`)
+      }
+      if (step.else && step.else !== 'abort') {
+        const elseTo = mermaidId(step.else)
+        lines.push(`        ${to} -- "else" --> ${elseTo}`)
       }
     }
 

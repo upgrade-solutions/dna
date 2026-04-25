@@ -1,7 +1,7 @@
 import { DnaInput } from './types'
 import { renderSummary } from './sections/summary'
 import { renderDomainModel } from './sections/domain-model'
-import { renderCapabilities } from './sections/capabilities'
+import { renderOperations } from './sections/operations'
 import { renderSops } from './sections/sops'
 import { renderProcessFlow } from './sections/process-flow'
 import { escape, heading } from './util'
@@ -9,14 +9,14 @@ import { escape, heading } from './util'
 export type Section =
   | 'summary'
   | 'domain-model'
-  | 'capabilities'
+  | 'operations'
   | 'sops'
   | 'process-flow'
 
 export const DEFAULT_SECTIONS: readonly Section[] = [
   'summary',
   'domain-model',
-  'capabilities',
+  'operations',
   'sops',
   'process-flow',
 ]
@@ -68,8 +68,8 @@ function renderSection(
       return renderSummary(dna, h)
     case 'domain-model':
       return renderDomainModel(dna, h)
-    case 'capabilities':
-      return renderCapabilities(dna, h)
+    case 'operations':
+      return renderOperations(dna, h)
     case 'sops':
       return renderSops(dna, h)
     case 'process-flow':

@@ -47,19 +47,17 @@ exports.schemas = {
     operational: {
         action: load('operational/action.json'),
         attribute: load('operational/attribute.json'),
-        capability: load('operational/capability.json'),
-        cause: load('operational/cause.json'),
         domain: load('operational/domain.json'),
         equation: load('operational/equation.json'),
+        operation: load('operational/operation.json'),
         outcome: load('operational/outcome.json'),
         process: load('operational/process.json'),
         relationship: load('operational/relationship.json'),
         resource: load('operational/resource.json'),
-        role: load('operational/role.json'),
         rule: load('operational/rule.json'),
         signal: load('operational/signal.json'),
         task: load('operational/task.json'),
-        user: load('operational/user.json'),
+        trigger: load('operational/trigger.json'),
     },
     product: {
         core: {

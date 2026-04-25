@@ -21,16 +21,15 @@ export function renderSops(dna: DnaInput, h: number): string | null {
       const items = proc.steps
         .map((step) => {
           const task = tasksByName.get(step.task)
-          const role = task?.role ? code(task.role) : '—'
-          const capability = task?.capability ? code(task.capability) : code(step.task)
-          const branch = step.branch?.when
-            ? ` (when: ${escape(step.branch.when)})`
-            : step.branch?.else
-              ? ' (else)'
-              : ''
+          const actor = task?.actor ? code(task.actor) : '—'
+          const operation = task?.operation ? code(task.operation) : code(step.task)
+          const conds = step.conditions?.length
+            ? ` (when: ${step.conditions.map(code).join(' AND ')})`
+            : ''
+          const elseClause = step.else ? ` (else: ${escape(step.else)})` : ''
           const deps = step.depends_on?.length ? ` — after: ${step.depends_on.map(code).join(', ')}` : ''
           const desc = task?.description ? `<br/>${escape(task.description)}` : ''
-          return `<li><strong>${escape(step.id)}</strong> — ${role} does ${capability}${branch}${deps}${desc}</li>`
+          return `<li><strong>${escape(step.id)}</strong> — ${actor} does ${operation}${conds}${elseClause}${deps}${desc}</li>`
         })
         .join('')
       inner.push(`<ol>${items}</ol>`)

@@ -8,7 +8,7 @@ describe('@dna-codes/output-markdown', () => {
       expect(md).toContain('# shop.books')
       expect(md).toContain('## Summary')
       expect(md).toContain('## Domain Model')
-      expect(md).toContain('## Capabilities')
+      expect(md).toContain('## Operations')
       expect(md).toContain('## SOPs')
       expect(md).toContain('## Process Flows')
     })
@@ -17,7 +17,7 @@ describe('@dna-codes/output-markdown', () => {
       const md = render(bookshopInput, { sections: ['summary'] })
       expect(md).toContain('## Summary')
       expect(md).not.toContain('## Domain Model')
-      expect(md).not.toContain('## Capabilities')
+      expect(md).not.toContain('## Operations')
       expect(md).not.toContain('## SOPs')
       expect(md).not.toContain('## Process Flows')
     })
@@ -55,8 +55,8 @@ describe('@dna-codes/output-markdown', () => {
   describe('section: summary', () => {
     it('lists primitive counts for populated collections only', () => {
       const md = render(bookshopInput, { sections: ['summary'] })
-      expect(md).toContain('- Resources: 2')
-      expect(md).toContain('- Capabilities: 2')
+      expect(md).toContain('- Resources: 5')
+      expect(md).toContain('- Operations: 2')
       expect(md).toContain('- Rules: 2')
       expect(md).toContain('- Processes: 1')
       // Equations are absent in the fixture
@@ -65,7 +65,7 @@ describe('@dna-codes/output-markdown', () => {
 
     it('names top-level resources', () => {
       const md = render(bookshopInput, { sections: ['summary'] })
-      expect(md).toContain('**Top-level resources:** `Book`, `Author`')
+      expect(md).toContain('**Top-level resources:** `Book`, `Author`, `Editor`, `Ada`, `Shop`')
     })
   })
 
@@ -81,14 +81,15 @@ describe('@dna-codes/output-markdown', () => {
     })
   })
 
-  describe('section: capabilities', () => {
+  describe('section: operations', () => {
     it('renders triggers, access rules, condition rules, outcomes, and signals', () => {
-      const md = render(bookshopInput, { sections: ['capabilities'] })
+      const md = render(bookshopInput, { sections: ['operations'] })
       expect(md).toContain('### Book.Publish')
       expect(md).toContain('**Triggered by:**')
       expect(md).toContain('- user')
       expect(md).toContain('*Access:* role `Editor`')
-      expect(md).toContain('*Condition:* book.status == "draft"')
+      expect(md).toContain('*Condition:*')
+      expect(md).toContain('book.status')
       expect(md).toContain('Sets `book.status`')
       expect(md).toContain('Emits `shop.Book.Published`')
       expect(md).toContain('**Signals published:**')
@@ -97,25 +98,25 @@ describe('@dna-codes/output-markdown', () => {
   })
 
   describe('section: sops', () => {
-    it('renders numbered steps that resolve task → role + capability', () => {
+    it('renders numbered steps that resolve task → actor + operation', () => {
       const md = render(bookshopInput, { sections: ['sops'] })
       expect(md).toContain('### PublishFlow')
       expect(md).toContain('**Operator:** `Editor`')
       expect(md).toContain('1. **review** — `Editor` does `Book.Publish`')
-      expect(md).toContain('(when: passed)')
-      expect(md).toContain('(else)')
+      expect(md).toContain('(when: `BookIsDraft`)')
+      expect(md).toContain('(else: reject)')
       expect(md).toContain('after: `review`')
     })
   })
 
   describe('section: process-flow', () => {
-    it('renders an ASCII outline with branch markers and dep arrows', () => {
+    it('renders an ASCII outline with condition markers and dep arrows', () => {
       const md = render(bookshopInput, { sections: ['process-flow'] })
       expect(md).toContain('### PublishFlow')
       expect(md).toContain('```')
-      expect(md).toContain('├── review: ReviewBook')
-      expect(md).toContain('├── approve: ApproveBook [when: passed] ← review')
-      expect(md).toContain('└── reject: RejectBook [else] ← review')
+      expect(md).toContain('├── review: review-book')
+      expect(md).toContain('approve: approve-book [when: BookIsDraft] [else: reject] ← review')
+      expect(md).toContain('└── reject: reject-book ← review')
     })
   })
 })

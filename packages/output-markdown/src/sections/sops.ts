@@ -22,18 +22,17 @@ export function renderSops(dna: DnaInput, h: number): string | null {
       lines.push('')
       steps.forEach((step, i) => {
         const task = tasksByName.get(step.task)
-        const actor = task?.role ?? '—'
-        const cap = task?.capability ?? step.task
-        const branch = step.branch?.else
-          ? ' (else)'
-          : step.branch?.when
-            ? ` (when: ${step.branch.when})`
-            : ''
+        const actor = task?.actor ?? '—'
+        const op = task?.operation ?? step.task
+        const conds = step.conditions?.length
+          ? ` (when: ${step.conditions.map((c) => `\`${c}\``).join(' AND ')})`
+          : ''
+        const elseClause = step.else ? ` (else: ${step.else})` : ''
         const deps = step.depends_on?.length
           ? ` — after: ${step.depends_on.map((d) => `\`${d}\``).join(', ')}`
           : ''
         lines.push(
-          `${i + 1}. **${step.id}** — \`${actor}\` does \`${cap}\`${branch}${deps}`,
+          `${i + 1}. **${step.id}** — \`${actor}\` does \`${op}\`${conds}${elseClause}${deps}`,
         )
         if (task?.description) lines.push(`   ${task.description}`)
       })

@@ -4,20 +4,20 @@
  *   render(dna, options?)     → string                      // one combined document
  *   renderMany(dna, options?) → Array<{id, title, body}>    // one document per unit
  *
- * Both accept a `styles` map: `{ capability: 'user-story' | 'gherkin' | 'product-dna', ... }`.
+ * Both accept a `styles` map: `{ operation: 'user-story' | 'gherkin' | 'product-dna', ... }`.
  * The key set determines which unit types are emitted; the value picks the
- * body template. Default is `{ capability: 'user-story' }`.
+ * body template. Default is `{ operation: 'user-story' }`.
  *
- * `user-story` and `gherkin` are action-shaped and only fit Capability —
+ * `user-story` and `gherkin` are action-shaped and only fit Operation —
  * Resource and Process always render as `product-dna` regardless of the style
  * requested.
  */
 
-import { capabilityTitle, renderCapability } from './capability'
+import { operationTitle, renderOperation } from './operation'
 import { resourceTitle, renderResource } from './resource'
 import { processTitle, renderProcess } from './process'
 import {
-  Capability,
+  Operation,
   DEFAULT_STYLES,
   DnaInput,
   Resource,
@@ -33,7 +33,7 @@ import {
 } from './types'
 import { joinSections, slugify } from './util'
 
-const UNIT_ORDER: Unit[] = ['capability', 'resource', 'process']
+const UNIT_ORDER: Unit[] = ['operation', 'resource', 'process']
 
 export function render(dna: DnaInput, options: RenderOptions = {}): string {
   const op = dna.operational
@@ -76,8 +76,8 @@ export function renderMany(
 
 function unitDocs(unit: Unit, style: Style, op: OperationalDna): TextDocument[] {
   switch (unit) {
-    case 'capability':
-      return (op.capabilities ?? []).map((c) => capabilityDoc(c, op, style))
+    case 'operation':
+      return (op.operations ?? []).map((o) => operationDoc(o, op, style))
     case 'resource':
       return collectResources(op.domain).map((r) => resourceDoc(r, op))
     case 'process':
@@ -85,11 +85,11 @@ function unitDocs(unit: Unit, style: Style, op: OperationalDna): TextDocument[] 
   }
 }
 
-function capabilityDoc(cap: Capability, op: OperationalDna, style: Style): TextDocument {
+function operationDoc(op: Operation, dna: OperationalDna, style: Style): TextDocument {
   return {
-    id: `capability-${slugify(cap.name)}`,
-    title: capabilityTitle(cap),
-    body: renderCapability(cap, op, style),
+    id: `operation-${slugify(op.name)}`,
+    title: operationTitle(op),
+    body: renderOperation(op, dna, style),
   }
 }
 
@@ -122,7 +122,7 @@ function renderUnitSection(unit: Unit, style: Style, op: OperationalDna): string
 }
 
 function unitHeading(unit: Unit): string {
-  if (unit === 'capability') return 'Capabilities'
+  if (unit === 'operation') return 'Operations'
   if (unit === 'resource') return 'Domain model'
   return 'Processes'
 }

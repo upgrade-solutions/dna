@@ -1,38 +1,38 @@
 import { DnaInput, Rule, RuleAllow } from '../types'
 import { hashes } from '../util'
 
-export function renderCapabilities(dna: DnaInput, h: number): string | null {
+export function renderOperations(dna: DnaInput, h: number): string | null {
   const op = dna.operational
-  if (!op?.capabilities?.length) return null
+  if (!op?.operations?.length) return null
 
-  const causesByCap = groupBy(op.causes ?? [], (c) => c.capability)
-  const rulesByCap = groupBy(op.rules ?? [], (r) => r.capability)
-  const outcomesByCap = groupBy(op.outcomes ?? [], (o) => o.capability)
-  const signalsByCap = groupBy(op.signals ?? [], (s) => s.capability)
+  const triggersByOp = groupBy(op.triggers ?? [], (t) => t.operation ?? '')
+  const rulesByOp = groupBy(op.rules ?? [], (r) => r.operation)
+  const outcomesByOp = groupBy(op.outcomes ?? [], (o) => o.operation)
+  const signalsByOp = groupBy(op.signals ?? [], (s) => s.operation)
 
-  const lines: string[] = [`${hashes(h)} Capabilities`]
+  const lines: string[] = [`${hashes(h)} Operations`]
 
-  for (const cap of op.capabilities) {
-    lines.push('', `${hashes(h + 1)} ${cap.name}`)
-    if (cap.description) lines.push('', cap.description)
+  for (const operation of op.operations) {
+    lines.push('', `${hashes(h + 1)} ${operation.name}`)
+    if (operation.description) lines.push('', operation.description)
 
-    const causes = causesByCap.get(cap.name) ?? []
-    if (causes.length) {
+    const triggers = triggersByOp.get(operation.name) ?? []
+    if (triggers.length) {
       lines.push('', '**Triggered by:**')
-      for (const c of causes) {
-        const signal = c.signal ? ` — signal \`${c.signal}\`` : ''
-        const desc = c.description ? ` (${c.description})` : ''
-        lines.push(`- ${c.source}${signal}${desc}`)
+      for (const t of triggers) {
+        const signal = t.signal ? ` — signal \`${t.signal}\`` : ''
+        const desc = t.description ? ` (${t.description})` : ''
+        lines.push(`- ${t.source}${signal}${desc}`)
       }
     }
 
-    const rules = rulesByCap.get(cap.name) ?? []
+    const rules = rulesByOp.get(operation.name) ?? []
     if (rules.length) {
       lines.push('', '**Rules:**')
       for (const r of rules) lines.push(`- ${renderRule(r)}`)
     }
 
-    const outcomes = outcomesByCap.get(cap.name) ?? []
+    const outcomes = outcomesByOp.get(operation.name) ?? []
     if (outcomes.length) {
       lines.push('', '**Outcomes:**')
       for (const o of outcomes) {
@@ -41,12 +41,12 @@ export function renderCapabilities(dna: DnaInput, h: number): string | null {
           const set = c.set === undefined ? '' : ` → \`${JSON.stringify(c.set)}\``
           lines.push(`- Sets \`${c.attribute}\`${set}`)
         }
-        for (const next of o.initiate ?? []) lines.push(`- Initiates \`${next}\``)
+        for (const next of o.initiates ?? []) lines.push(`- Initiates \`${next}\``)
         for (const sig of o.emits ?? []) lines.push(`- Emits \`${sig}\``)
       }
     }
 
-    const signals = signalsByCap.get(cap.name) ?? []
+    const signals = signalsByOp.get(operation.name) ?? []
     if (signals.length) {
       lines.push('', '**Signals published:**')
       for (const s of signals) {
@@ -66,7 +66,14 @@ export function renderCapabilities(dna: DnaInput, h: number): string | null {
 
 function renderRule(r: Rule): string {
   if (r.type === 'access') return `*Access:* ${renderAllow(r.allow ?? [])}`
-  if (r.type === 'condition') return `*Condition:* ${r.condition ?? r.description ?? '—'}`
+  if (r.type === 'condition') {
+    const parts = (r.conditions ?? []).map((c) => {
+      const v = c.value === undefined ? '' : ` ${JSON.stringify(c.value)}`
+      return `\`${c.attribute}\` ${c.operator}${v}`
+    })
+    const expr = parts.length ? parts.join(' AND ') : (r.description ?? '—')
+    return `*Condition:* ${expr}`
+  }
   return r.description ?? r.name ?? '—'
 }
 
@@ -76,7 +83,7 @@ function renderAllow(allow: RuleAllow[]): string {
     .map((a) => {
       const parts: string[] = []
       if (a.role) parts.push(`role \`${a.role}\``)
-      if (a.ownership) parts.push(`ownership \`${a.ownership}\``)
+      if (a.ownership) parts.push(`ownership`)
       if (a.flags?.length) parts.push(`flags \`[${a.flags.join(', ')}]\``)
       return parts.join(' + ') || '—'
     })

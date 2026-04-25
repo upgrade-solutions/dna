@@ -1,8 +1,8 @@
 # Operational Layer Agents
 
-Agents scoped to the Operational DNA layer. Operational DNA is the pure business-logic layer: the Resources, Actions, Capabilities, Attributes, Domains, Relationships, Causes, Rules, Outcomes, Signals, Equations, and Actor primitives (Roles, Users, Tasks, Processes) that describe *what the business does* — independent of how it's surfaced or deployed.
+Agents scoped to the Operational DNA layer. Operational DNA is the pure business-logic layer: the Resources, Actions, Operations, Attributes, Domains, Relationships, Triggers, Rules, Outcomes, Signals, Equations, Tasks, and Processes that describe *what the business does* — independent of how it's surfaced or deployed.
 
-The layer is modeled around the **Actor > Action > Resource** triad. Resources are the things the business tracks (Loan, Invoice, Post); Actions are what gets performed on them (Approve, Issue, Publish); Actors are Roles (LoanOfficer, Underwriter, Borrower) referenced by Rules (access), Tasks (assignment), Users (who holds which role), and Processes (operator) rather than declared inline on the Capability itself. A Capability is a Resource:Action pair; the Actor is supplied by Rule (access) and Task (assignment).
+The layer is modeled around the **Actor > Action > Resource** triad. Resources are the only noun collection — tracked things (Loan, Invoice), Actors (Underwriter, Borrower, JoeKleier), and Groups (Family, Account) are all Resources. Their semantic role is inferred from how they are referenced; there is no declared `type` on a Resource. Actions are what gets performed (Approve, Issue, Publish). An Operation is a Resource.Action pair (the atomic unit of business activity). The Actor is supplied by Rule (access) and Task (assignment).
 
 ## Agent: `operational-dna-architect`
 
@@ -29,13 +29,12 @@ Owns authoring and evolving a domain's `operational.json`. Available as a Claude
 
 ### Primitives owned
 
-All fifteen Operational primitives — see `@dna-codes/schemas/operational/*.json` for the canonical list:
+All thirteen Operational primitives — see `@dna-codes/schemas/operational/*.json` for the canonical list:
 
-- **Structure**: `Resource`, `Action`, `Capability`, `Attribute`, `Domain`, `Relationship`
-- **Behavior**: `Cause`, `Rule`, `Outcome`, `Signal`, `Equation`
-- **Actor**: `Role`, `User`, `Task`, `Process`
+- **Structure**: `Resource`, `Action`, `Operation`, `Attribute`, `Domain`, `Relationship`
+- **Behavior**: `Trigger`, `Rule`, `Outcome`, `Signal`, `Equation`, `Task`, `Process`
 
-`Lifecycle` was removed in favor of explicit `Capability` state transitions expressed through `Outcome.changes`.
+`Lifecycle` was removed in favor of explicit Operation state transitions expressed through `Outcome.changes`. `Capability` was renamed to `Operation`; `Cause` was renamed to `Trigger`. `Role`, `User`, and `Group` are Resources, not separate primitives — distinguished by how they are referenced.
 
 ### Must not touch
 
@@ -58,4 +57,4 @@ When `operational.json` is settled and validates, hand off to **`product-core-ma
 
 1. **Single source of truth**. `operational.json` is authoritative for business logic. Product core is derived from it, not the other way around.
 2. **No surface leakage**. Operational primitives never mention REST paths, React components, databases, or cloud resources.
-3. **Every Capability pairs a Resource with an Action**; every Action belongs to a Resource; every Rule references a real Capability or Attribute. An Action without a Resource is invalid — the atomic unit of business activity is always `Resource.Action`. Cross-references must resolve.
+3. **Every Operation pairs a Resource with an Action**; every Action belongs to a Resource; every Rule references a real Operation or Attribute. An Action without a Resource is invalid — the atomic unit of business activity is always `Resource.Action`. Cross-references must resolve.

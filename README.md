@@ -18,7 +18,7 @@ As documented below, it's incredibly flexible with input/output adapters and int
 
 Layers are one-way downstream: Operational → Product → Technical. Upper layers never depend on lower ones. Cross-layer references (e.g. a Product Resource pointing at an Operational Resource) are plain strings validated by `@dna-codes/core` rather than JSON Schema `$ref`s.
 
-Operational DNA is modeled around the **Actor > Action > Resource** triad: Resources are the things the business tracks (Loan, Invoice, Post); Actions are what gets performed on them (Apply, Approve, Publish); Actors — the humans or systems that perform them — are Roles (LoanOfficer, Underwriter, Borrower) referenced by Rules (access), Tasks (assignment), Users (who holds which role), and Processes (operator) rather than declared on the Capability itself. A Capability is always a `Resource.Action` pair.
+Operational DNA is modeled around the **Actor > Action > Resource** triad. Resources are the only noun collection — the things the business tracks (Loan, Invoice, Post). Actions are what gets performed on them (Apply, Approve, Publish). An **Operation** is always a `Resource.Action` pair (the atomic unit of business activity). Actors — the humans or systems that perform Operations — are also Resources, distinguished only by how they are referenced (e.g. `Underwriter` is a Resource referenced from `Task.actor` and `Rule.allow[].role`).
 
 Here's a minimal Operational DNA document in a lending context:
 
@@ -46,57 +46,71 @@ Here's a minimal Operational DNA document in a lending context:
                   { "name": "Apply" },
                   { "name": "Approve" }
                 ]
-              }
+              },
+              { "name": "Borrower" },
+              { "name": "Underwriter" }
             ]
           }
         ]
       }
     ]
   },
-  "capabilities": [
+  "operations": [
     { "resource": "Loan", "action": "Apply", "name": "Loan.Apply" },
     { "resource": "Loan", "action": "Approve", "name": "Loan.Approve" }
   ],
-  "causes": [
-    { "capability": "Loan.Apply", "source": "user" },
-    { "capability": "Loan.Approve", "source": "user" }
+  "triggers": [
+    { "operation": "Loan.Apply", "source": "user" },
+    { "operation": "Loan.Approve", "source": "user" }
   ],
   "rules": [
-    { "capability": "Loan.Apply", "type": "access", "allow": [{ "role": "Borrower" }] },
-    { "capability": "Loan.Approve", "type": "access", "allow": [{ "role": "Underwriter" }] },
-    { "capability": "Loan.Approve", "type": "condition", "conditions": [{ "attribute": "loan.status", "operator": "eq", "value": "pending" }] }
+    { "operation": "Loan.Apply", "type": "access", "allow": [{ "role": "Borrower" }] },
+    { "operation": "Loan.Approve", "type": "access", "allow": [{ "role": "Underwriter" }] },
+    { "operation": "Loan.Approve", "type": "condition", "conditions": [{ "attribute": "loan.status", "operator": "eq", "value": "pending" }] }
   ],
   "outcomes": [
-    { "capability": "Loan.Apply", "changes": [{ "attribute": "loan.status", "set": "pending" }] },
-    { "capability": "Loan.Approve", "changes": [{ "attribute": "loan.status", "set": "active" }] }
+    { "operation": "Loan.Apply", "changes": [{ "attribute": "loan.status", "set": "pending" }] },
+    { "operation": "Loan.Approve", "changes": [{ "attribute": "loan.status", "set": "active" }] }
   ]
 }
 ```
 
 ## Operational Layer
 
-Operational DNA captures the pure business-logic layer — independent of any UI, API, or deployment technology.
+Operational DNA captures the pure business-logic layer — independent of any UI, API, or deployment technology. It has two buckets: **Structure** (the vocabulary) and **Behavior** (lifecycle and orchestration).
 
 **Structure primitives:**
-- **Resource** — a core entity of the domain (`Loan`, `Invoice`, `Order`). Has Attributes and Actions nested inside it.
+- **Resource** — the only noun. A named entity of the business: tracked things (`Loan`, `Invoice`, `Order`), Actors (`Underwriter`, `Borrower`, `JoeKleier`, `RoutingEngine`), and Groups (`Family`, `Account`, `Workspace`) are all Resources. Their semantic role is *inferred from how they are referenced*; there is no `type` field. Has Attributes and Actions nested inside it; optionally carries `parent`, `scope`, and `memberships[]`.
 - **Action** — an operation performed on a Resource (`Apply`, `Approve`, `Ship`). Every Action is paired with a Resource; there is no Action without a Resource.
-- **Capability** — a Resource:Action pair; the atomic unit of business activity (`Loan.Approve`)
+- **Operation** — a `Resource.Action` pair; the atomic unit of business activity (`Loan.Approve`). Renamed from "Capability" to avoid Business Capability Modeling baggage and to align with the existing Product Core `Operation`.
 - **Attribute** — a typed property on a Resource; types: `string`, `text`, `number`, `boolean`, `date`, `datetime`, `enum`, `reference`
 - **Domain** — a dot-separated hierarchy that organizes Resources into bounded contexts (`acme.finance.lending`)
 - **Relationship** — a named, directed, typed connection between two Resources (cardinality + reference attribute)
 
 **Behavior primitives:**
-- **Cause** — what initiates a Capability; sources: `user`, `schedule`, `webhook`, `capability`
-- **Rule** — constraints on a Capability: `access` (which Role(s) may perform it) or `condition` (what must be true first)
-- **Outcome** — state changes and downstream triggers after a Capability executes
-- **Signal** — a named domain event published after a Capability; carries a typed payload contract
+- **Trigger** — what initiates an Operation or a Process. Sources: `user`, `schedule`, `webhook`, `operation`, `signal`. A Trigger targets exactly one of: an Operation (ad-hoc invocation) or a Process (kick off the whole SOP from `startStep`).
+- **Rule** — constraints on an Operation: `access` (which Role-Resource(s) may perform it) or `condition` (what must be true first). Condition Rules are also referenced from `Step.conditions[]` for compositional gating.
+- **Outcome** — state changes and downstream Operations or Signals after an Operation executes
+- **Signal** — a named domain event published after an Operation; carries a typed payload contract
 - **Equation** — a named, technology-agnostic computation (implemented by a Technical Script)
+- **Task** — a `(actor, operation)` binding. The named, reusable assignment (`UnderwriterApproval` = Underwriter performs Loan.Approve). Referenced by Steps.
+- **Process** — a Standard Operating Procedure: a named DAG of Steps with an explicit `startStep` (Amazon-States-Language convention). Each Step references exactly one Task; Step-level conditions reference Rules compositionally.
 
-**Actor primitives:**
-- **Role** — the Actor in the Actor > Action > Resource triad. A PascalCase job title or permission bundle (`LoanOfficer`, `Underwriter`, `Admin`, `Borrower`). Referenced by Rules (access), Tasks (assignment), Users (who holds which role), and Processes (operator). Supports `parent` for org-chart hierarchy.
-- **User** — a named individual or service account holding one or more Roles (the business directory; documentation-grade, not authentication identity)
-- **Task** — a Role performing exactly one Capability
-- **Process** — a named, owned DAG of Tasks (Standard Operating Procedure)
+**Resource as Actor and Group (structural typing):**
+The same Resource can play multiple semantic roles simultaneously without declaring any of them. Cross-domain examples:
+
+| Resource | Tracked entity | Actor (Role) | Group (scopes Roles) |
+|---|---|---|---|
+| `Customer` (ecommerce) | ✓ | ✓ |  |
+| `Patient` (healthcare) | ✓ | ✓ |  |
+| `Family` | ✓ |  | ✓ |
+| `Account` (sales) | ✓ | ✓ (companies act) | ✓ (employees scoped within) |
+| `CourseOffering` (education) | ✓ |  | ✓ |
+| `Listing` (marketplace) | ✓ |  | ✓ |
+
+A User-like Resource carries `memberships[]` — `(role, in)` pairs that pin a Role-Resource within a Group-Resource. Example: `JoeKleier` holds `[{role: Father, in: Family}, {role: Husband, in: Marriage}, {role: Member, in: RunningClub}]`.
+
+A Role-Resource may declare an optional `scope` naming the Group-Resource type it must be exercised within. The validator enforces that `membership.in` matches the referenced Role's `scope`.
 
 ## Product Layer
 

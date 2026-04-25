@@ -11,8 +11,8 @@ npm install @dna-codes/schemas
 ## Layout
 
 ```
-operational/*.json              # 15 primitive + 1 aggregate
-product/core/*.json             # 5 primitives
+operational/*.json              # 13 primitives + 1 aggregate
+product/core/*.json             # 4 primitives
 product/api/*.json              # 4 primitives
 product/web/*.json              # 4 primitives
 product/product.{core,api,ui}.json   # 3 aggregates

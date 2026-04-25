@@ -8,7 +8,7 @@ describe('@dna-codes/output-html', () => {
       expect(html).toContain('<h1>shop.books</h1>')
       expect(html).toContain('<h2>Summary</h2>')
       expect(html).toContain('<h2>Domain Model</h2>')
-      expect(html).toContain('<h2>Capabilities</h2>')
+      expect(html).toContain('<h2>Operations</h2>')
       expect(html).toContain('<h2>SOPs</h2>')
       expect(html).toContain('<h2>Process Flows</h2>')
     })
@@ -17,7 +17,7 @@ describe('@dna-codes/output-html', () => {
       const html = render(bookshopInput, { sections: ['summary'] })
       expect(html).toContain('<h2>Summary</h2>')
       expect(html).not.toContain('<h2>Domain Model</h2>')
-      expect(html).not.toContain('<h2>Capabilities</h2>')
+      expect(html).not.toContain('<h2>Operations</h2>')
       expect(html).not.toContain('<h2>SOPs</h2>')
       expect(html).not.toContain('<h2>Process Flows</h2>')
     })
@@ -80,8 +80,8 @@ describe('@dna-codes/output-html', () => {
   describe('section: summary', () => {
     it('lists primitive counts for populated collections only', () => {
       const html = render(bookshopInput, { sections: ['summary'] })
-      expect(html).toContain('Resources: 2')
-      expect(html).toContain('Capabilities: 2')
+      expect(html).toContain('Resources: 5')
+      expect(html).toContain('Operations: 2')
       expect(html).toContain('Rules: 2')
       expect(html).toContain('Processes: 1')
       expect(html).not.toContain('Equations:')
@@ -108,16 +108,15 @@ describe('@dna-codes/output-html', () => {
     })
   })
 
-  describe('section: capabilities', () => {
+  describe('section: operations', () => {
     it('renders triggers, access rules, condition rules, outcomes, and signals', () => {
-      const html = render(bookshopInput, { sections: ['capabilities'] })
+      const html = render(bookshopInput, { sections: ['operations'] })
       expect(html).toContain('<h3>Book.Publish</h3>')
       expect(html).toContain('<strong>Triggered by:</strong>')
       expect(html).toContain('user')
       expect(html).toContain('<em>Access:</em>')
       expect(html).toContain('role <code>Editor</code>')
       expect(html).toContain('<em>Condition:</em>')
-      expect(html).toContain('book.status == &quot;draft&quot;')
       expect(html).toContain('<code>book.status</code>')
       expect(html).toContain('<code>shop.Book.Published</code>')
       expect(html).toContain('<strong>Signals published:</strong>')
@@ -126,27 +125,27 @@ describe('@dna-codes/output-html', () => {
   })
 
   describe('section: sops', () => {
-    it('renders numbered steps that resolve task → role + capability', () => {
+    it('renders numbered steps that resolve task → actor + operation', () => {
       const html = render(bookshopInput, { sections: ['sops'] })
       expect(html).toContain('<h3>PublishFlow</h3>')
       expect(html).toContain('<strong>Operator:</strong>')
       expect(html).toContain('<code>Editor</code>')
       expect(html).toMatch(/<ol>.*<li>.*<strong>review<\/strong>/s)
       expect(html).toContain('does <code>Book.Publish</code>')
-      expect(html).toContain('(when: passed)')
-      expect(html).toContain('(else)')
+      expect(html).toContain('(when: <code>BookIsDraft</code>)')
+      expect(html).toContain('(else: reject)')
       expect(html).toContain('after: <code>review</code>')
     })
   })
 
   describe('section: process-flow', () => {
-    it('renders a preformatted outline with branch markers and dep arrows', () => {
+    it('renders a preformatted outline with condition markers and dep arrows', () => {
       const html = render(bookshopInput, { sections: ['process-flow'] })
       expect(html).toContain('<h3>PublishFlow</h3>')
       expect(html).toContain('<pre><code>')
-      expect(html).toContain('├── review: ReviewBook')
-      expect(html).toContain('├── approve: ApproveBook [when: passed] ← review')
-      expect(html).toContain('└── reject: RejectBook [else] ← review')
+      expect(html).toContain('├── review: review-book')
+      expect(html).toContain('approve: approve-book [when: BookIsDraft] [else: reject] ← review')
+      expect(html).toContain('└── reject: reject-book ← review')
     })
   })
 })

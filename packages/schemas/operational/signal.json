@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/operational/signal",
   "title": "Signal",
-  "description": "A Signal is a named domain event published after a Capability executes. Signals cross domain boundaries and carry a typed payload contract that subscribers depend on.",
+  "description": "A Signal is a named domain event published after an Operation executes. Signals cross domain boundaries and carry a typed payload contract that subscribers depend on.",
   "type": "object",
-  "required": ["name", "capability", "payload"],
+  "required": ["name", "operation", "payload"],
   "properties": {
     "name": {
       "type": "string",
@@ -12,9 +12,9 @@
       "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9]*)*\\.[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
       "examples": ["lending.Loan.Disbursed", "lending.Loan.Defaulted", "payments.Payment.Completed"]
     },
-    "capability": {
+    "operation": {
       "type": "string",
-      "description": "The Capability whose successful execution publishes this signal, expressed as Resource.Action.",
+      "description": "The Operation whose successful execution publishes this signal, expressed as Resource.Action.",
       "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
       "examples": ["Loan.Disburse", "Loan.Default", "Payment.Complete"]
     },
@@ -51,7 +51,7 @@
   "examples": [
     {
       "name": "lending.Loan.Disbursed",
-      "capability": "Loan.Disburse",
+      "operation": "Loan.Disburse",
       "description": "Emitted when a loan is successfully disbursed to the borrower.",
       "payload": [
         { "name": "loan_id", "type": "string" },
