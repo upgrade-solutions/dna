@@ -1063,6 +1063,43 @@ describe('DnaValidator — cross-layer validation', () => {
     expect(result.errors.some(e => e.message.includes('Levitate'))).toBe(true)
   })
 
+  it('accepts an Operation targeting a Process (executable lifecycle)', () => {
+    const goodOp = {
+      ...operational,
+      tasks: [{ name: 'kick-off', actor: 'Underwriter', operation: 'Loan.Apply' }],
+      processes: [{
+        name: 'LoanOrigination',
+        operator: 'Underwriter',
+        startStep: 'kick',
+        steps: [{ id: 'kick', task: 'kick-off' }],
+      }],
+      operations: [
+        ...operational.operations,
+        { target: 'LoanOrigination', action: 'Start', name: 'LoanOrigination.Start' },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: goodOp })
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('rejects an Operation targeting an unknown Process and lists Process among targetable kinds', () => {
+    const badOp = {
+      ...operational,
+      operations: [
+        ...operational.operations,
+        { target: 'GhostFlow', action: 'Start', name: 'GhostFlow.Start' },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const targetErr = result.errors.find(e => e.path === 'operations/GhostFlow.Start/target')
+    expect(targetErr).toBeDefined()
+    expect(targetErr!.message).toContain('GhostFlow')
+    expect(targetErr!.message).toContain('Process')
+    expect(targetErr!.message).toContain('Resource')
+  })
+
   it('detects invalid Task actor reference (Role missing)', () => {
     const badOp = {
       ...operational,

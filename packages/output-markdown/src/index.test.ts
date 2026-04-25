@@ -56,7 +56,7 @@ describe('@dna-codes/output-markdown', () => {
     it('lists primitive counts for populated collections only', () => {
       const md = render(bookshopInput, { sections: ['summary'] })
       expect(md).toContain('- Resources: 2')
-      expect(md).toContain('- Operations: 2')
+      expect(md).toContain('- Operations: 3')
       expect(md).toContain('- Rules: 2')
       expect(md).toContain('- Processes: 1')
       // Equations are absent in the fixture
@@ -78,7 +78,7 @@ describe('@dna-codes/output-markdown', () => {
       expect(md).toContain('- Positions: 1')
       expect(md).toContain('- Items: 2')
       // …and unmapped ones stay canonical
-      expect(md).toContain('- Operations: 2')
+      expect(md).toContain('- Operations: 3')
       // top-level label uses the renamed form, lowercased
       expect(md).toContain('**Top-level items:** `Book`, `Author`')
     })

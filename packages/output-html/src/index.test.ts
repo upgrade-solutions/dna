@@ -81,7 +81,7 @@ describe('@dna-codes/output-html', () => {
     it('lists primitive counts for populated collections only', () => {
       const html = render(bookshopInput, { sections: ['summary'] })
       expect(html).toContain('Resources: 2')
-      expect(html).toContain('Operations: 2')
+      expect(html).toContain('Operations: 3')
       expect(html).toContain('Rules: 2')
       expect(html).toContain('Processes: 1')
       expect(html).not.toContain('Equations:')
@@ -103,7 +103,7 @@ describe('@dna-codes/output-html', () => {
       expect(html).toContain('<li>Positions: 1</li>')
       expect(html).toContain('<li>Items: 2</li>')
       // …and unmapped ones stay canonical
-      expect(html).toContain('<li>Operations: 2</li>')
+      expect(html).toContain('<li>Operations: 3</li>')
       // top-level label uses the renamed form, lowercased
       expect(html).toContain('<strong>Top-level items:</strong>')
     })

@@ -81,6 +81,12 @@ export const bookshopInput: DnaInput = {
         action: 'Retire',
         description: 'Remove an active book from sale.',
       },
+      {
+        name: 'PublishFlow.Start',
+        target: 'PublishFlow',
+        action: 'Start',
+        description: 'An Editor kicks off the PublishFlow SOP for a draft book.',
+      },
     ],
     rules: [
       { operation: 'Book.Publish', type: 'access', allow: [{ role: 'Editor' }] },
