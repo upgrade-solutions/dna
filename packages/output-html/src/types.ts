@@ -1,8 +1,8 @@
 /**
  * Loose structural types describing the DNA shapes this renderer reads.
  *
- * Subset of the canonical schemas in @dna-codes/core — only fields the
- * renderer consumes are modeled, keeping the package zero-dependency.
+ * These mirror the canonical shapes in @dna-codes/core. Kept local so the
+ * package stays zero-dependency.
  */
 
 export interface DnaInput {
@@ -15,6 +15,7 @@ export interface DnaInput {
 
 export interface OperationalDna {
   domain: OperationalDomain
+  memberships?: Membership[]
   operations?: Operation[]
   rules?: Rule[]
   outcomes?: Outcome[]
@@ -31,6 +32,9 @@ export interface OperationalDomain {
   path?: string
   description?: string
   resources?: Resource[]
+  persons?: Person[]
+  roles?: Role[]
+  groups?: Group[]
   domains?: OperationalDomain[]
 }
 
@@ -40,14 +44,41 @@ export interface Resource {
   attributes?: Attribute[]
   actions?: Action[]
   parent?: string
-  scope?: string
-  memberships?: Membership[]
+}
+
+export interface Person {
+  name: string
+  description?: string
+  attributes?: Attribute[]
+  actions?: Action[]
+  parent?: string
+}
+
+export interface Group {
+  name: string
+  description?: string
+  attributes?: Attribute[]
+  actions?: Action[]
+  parent?: string
+}
+
+export interface Role {
+  name: string
+  description?: string
+  scope?: string | string[]
+  parent?: string
+  system?: boolean
+  resource?: string
+  attributes?: Attribute[]
+  actions?: Action[]
 }
 
 export interface Membership {
-  role: string
-  in: string
+  name: string
   description?: string
+  person: string
+  role: string
+  group?: string
 }
 
 export interface Attribute {
@@ -60,11 +91,13 @@ export interface Attribute {
 export interface Action {
   name: string
   description?: string
+  type?: 'read' | 'write' | 'destructive'
+  idempotent?: boolean
 }
 
 export interface Operation {
   name: string
-  resource: string
+  target: string
   action: string
   description?: string
 }
@@ -169,6 +202,7 @@ export interface ProcessStep {
   else?: string
 }
 
+/** Product/technical layers modeled loosely — unused in v1 but reserved. */
 export type ProductCoreDna = Record<string, unknown>
 export type ProductApiDna = Record<string, unknown>
 export type ProductUiDna = Record<string, unknown>

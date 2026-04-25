@@ -1,15 +1,19 @@
-import { DnaInput, Resource, OperationalDomain } from '../types'
+import { DnaInput, Resource, Person, Group, Role, OperationalDomain } from '../types'
 import { hashes } from '../util'
 
 export function renderSummary(dna: DnaInput, h: number): string | null {
   const op = dna.operational
   if (!op) return null
 
-  const allResources = collectResources(op.domain)
+  const { resources, persons, roles, groups } = collectNouns(op.domain)
   const topLevel = (op.domain.resources ?? []).map((r) => r.name)
 
   const rawCounts: [string, number][] = [
-    ['Resources', allResources.length],
+    ['Resources', resources.length],
+    ['Persons', persons.length],
+    ['Groups', groups.length],
+    ['Roles', roles.length],
+    ['Memberships', op.memberships?.length ?? 0],
     ['Operations', op.operations?.length ?? 0],
     ['Triggers', op.triggers?.length ?? 0],
     ['Rules', op.rules?.length ?? 0],
@@ -37,8 +41,22 @@ export function renderSummary(dna: DnaInput, h: number): string | null {
   return lines.join('\n')
 }
 
-function collectResources(domain: OperationalDomain): Resource[] {
-  const out = [...(domain.resources ?? [])]
-  for (const sub of domain.domains ?? []) out.push(...collectResources(sub))
+interface NounCollections {
+  resources: Resource[]
+  persons: Person[]
+  groups: Group[]
+  roles: Role[]
+}
+
+function collectNouns(domain: OperationalDomain): NounCollections {
+  const out: NounCollections = { resources: [], persons: [], groups: [], roles: [] }
+  const walk = (d: OperationalDomain) => {
+    for (const r of d.resources ?? []) out.resources.push(r)
+    for (const p of d.persons ?? []) out.persons.push(p)
+    for (const g of d.groups ?? []) out.groups.push(g)
+    for (const r of d.roles ?? []) out.roles.push(r)
+    for (const sub of d.domains ?? []) walk(sub)
+  }
+  walk(domain)
   return out
 }

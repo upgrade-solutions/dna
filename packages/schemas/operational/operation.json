@@ -2,33 +2,37 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/operational/operation",
   "title": "Operation",
-  "description": "An Operation is a Resource.Action pair — the atomic unit of business activity. It represents a complete statement of what can happen in the domain: Loan.Approve, Order.Ship, Employee.Terminate. The Actor that performs an Operation is expressed through Rules (access) and Tasks (assignment), not on the Operation itself.\n\nOperation replaces the prior 'Capability' primitive. The rename avoids overlap with the Business Capability Modeling vocabulary (which uses 'capability' for coarse org functions) and aligns with Product Core's existing 'Operation' name, unifying terminology across layers.",
+  "description": "An Operation is a Subject.Action pair — the atomic unit of business activity. The Subject (target) can be any noun primitive: Resource, Person, Role, or Group. Examples: Loan.Approve (Resource), Patient.GetAdmitted (Person), Underwriter.Activate (Role, org-admin lifecycle), Case.Settle (Group). The Actor that performs an Operation is expressed through Rules (access) and Tasks (assignment), not on the Operation itself.\n\nThe `target` field is a noun name that the validator resolves across resources[], persons[], roles[], and groups[] collections. The `action` field must match an entry in the target noun's actions[] catalog.",
   "type": "object",
-  "required": ["resource", "action"],
+  "required": ["target", "action"],
   "properties": {
-    "resource": {
+    "target": {
       "type": "string",
-      "description": "The Resource this operation belongs to.",
-      "examples": ["Loan", "Order", "Employee"]
+      "description": "The noun primitive this operation acts on. Resolves across Resource, Person, Role, and Group collections.",
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "examples": ["Loan", "Patient", "Underwriter", "Case", "Account"]
     },
     "action": {
       "type": "string",
-      "description": "The Action to be performed on the Resource.",
-      "examples": ["Approve", "Ship", "Terminate"]
+      "description": "The verb being performed. Must match a `name` in the target noun's actions[] catalog.",
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "examples": ["Approve", "Disburse", "GetAdmitted", "Activate", "Settle"]
     },
     "name": {
       "type": "string",
-      "description": "The operation expressed as Resource.Action.",
-      "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
-      "examples": ["Loan.Approve", "Order.Ship", "Employee.Terminate"]
+      "description": "The operation expressed as Target.Action.",
+      "pattern": "^[A-Z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$",
+      "examples": ["Loan.Approve", "Patient.GetAdmitted", "Underwriter.Activate", "Case.Settle"]
     },
     "description": {
       "type": "string",
-      "description": "A human-readable explanation of what this operation represents."
+      "description": "Human-readable explanation of what this operation represents."
     }
   },
   "examples": [
-    { "resource": "Loan", "action": "Approve", "name": "Loan.Approve", "description": "Approves a pending loan application." },
-    { "resource": "Order", "action": "Ship", "name": "Order.Ship", "description": "Ships a fulfilled order to the customer." }
+    { "target": "Loan",        "action": "Approve",     "name": "Loan.Approve",        "description": "Approves a pending loan application." },
+    { "target": "Patient",     "action": "GetAdmitted", "name": "Patient.GetAdmitted", "description": "Patient is admitted to a hospital." },
+    { "target": "Underwriter", "action": "Activate",    "name": "Underwriter.Activate", "description": "Activates an Underwriter Role definition (org admin)." },
+    { "target": "Case",        "action": "Settle",      "name": "Case.Settle",         "description": "Marks a legal case as settled." }
   ]
 }

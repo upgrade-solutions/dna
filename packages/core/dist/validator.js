@@ -37,12 +37,50 @@ class DnaValidator {
         return [...this.validators.keys()];
     }
     // ── Cross-layer validation ─────────────────────────────────────────────────
-    collectResources(domain) {
-        const resources = [...(domain.resources ?? [])];
-        for (const sub of domain.domains ?? []) {
-            resources.push(...this.collectResources(sub));
-        }
-        return resources;
+    collectNouns(domain) {
+        const resources = [];
+        const persons = [];
+        const roles = [];
+        const groups = [];
+        const walk = (d) => {
+            for (const r of d.resources ?? [])
+                resources.push(r);
+            for (const p of d.persons ?? [])
+                persons.push(p);
+            for (const r of d.roles ?? [])
+                roles.push(r);
+            for (const g of d.groups ?? [])
+                groups.push(g);
+            for (const sub of d.domains ?? [])
+                walk(sub);
+        };
+        walk(domain);
+        const byName = new Map();
+        for (const r of resources)
+            byName.set(r.name, { kind: 'resource', noun: r });
+        for (const p of persons)
+            byName.set(p.name, { kind: 'person', noun: p });
+        for (const r of roles)
+            byName.set(r.name, { kind: 'role', noun: r });
+        for (const g of groups)
+            byName.set(g.name, { kind: 'group', noun: g });
+        return {
+            resources,
+            persons,
+            roles,
+            groups,
+            byName,
+            resourceNames: new Set(resources.map(r => r.name)),
+            personNames: new Set(persons.map(p => p.name)),
+            roleNames: new Set(roles.map(r => r.name)),
+            groupNames: new Set(groups.map(g => g.name)),
+            allNounNames: new Set([
+                ...resources.map(r => r.name),
+                ...persons.map(p => p.name),
+                ...roles.map(r => r.name),
+                ...groups.map(g => g.name),
+            ]),
+        };
     }
     validateCrossLayer(layers) {
         const errors = [];
@@ -53,13 +91,35 @@ class DnaValidator {
         const tech = layers.technical;
         // ── Operational ──────────────────────────────────────────────────────
         if (op) {
-            const resources = this.collectResources(op.domain);
-            const resourceNames = new Set(resources.map(r => r.name));
+            const nouns = this.collectNouns(op.domain);
             const operationNames = new Set((op.operations ?? []).map(o => o.name));
             const signalNames = new Set((op.signals ?? []).map(s => s.name));
             const taskNames = new Set((op.tasks ?? []).map(t => t.name));
             const ruleNames = new Set((op.rules ?? []).filter(r => !!r.name).map(r => r.name));
             const processNames = new Set((op.processes ?? []).map(p => p.name));
+            const membershipNames = new Set((op.memberships ?? []).map(m => m.name));
+            // Operation.target must reference a declared noun primitive (Resource | Person | Role | Group)
+            // Operation.action must match an action name in the target's actions[] catalog
+            for (const operation of op.operations ?? []) {
+                if (!nouns.allNounNames.has(operation.target)) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `operations/${operation.name}/target`,
+                        message: `Operation "${operation.name}" references target "${operation.target}" which does not exist as a Resource, Person, Role, or Group. Available: ${[...nouns.allNounNames].sort().join(', ')}`,
+                    });
+                }
+                else {
+                    const entry = nouns.byName.get(operation.target);
+                    const actionNames = new Set((entry.noun.actions ?? []).map(a => a.name));
+                    if (actionNames.size > 0 && !actionNames.has(operation.action)) {
+                        errors.push({
+                            layer: 'operational',
+                            path: `operations/${operation.name}/action`,
+                            message: `Operation "${operation.name}" references action "${operation.action}" which is not declared in ${entry.kind} "${operation.target}".actions[]. Available: ${[...actionNames].join(', ')}`,
+                        });
+                    }
+                }
+            }
             // Signal.operation must reference a valid Operation
             for (const signal of op.signals ?? []) {
                 if (!operationNames.has(signal.operation)) {
@@ -70,8 +130,7 @@ class DnaValidator {
                     });
                 }
             }
-            // Outcome.emits must reference valid Signal names
-            // Outcome.initiates must reference valid Operations
+            // Outcome.operation/emits/initiates references
             for (const outcome of op.outcomes ?? []) {
                 if (!operationNames.has(outcome.operation)) {
                     errors.push({
@@ -99,9 +158,7 @@ class DnaValidator {
                     }
                 }
             }
-            // Trigger: must target either an Operation or a Process (exactly one)
-            // Trigger.signal must reference a valid Signal name
-            // Trigger.after must reference a valid Operation name (when source=operation)
+            // Trigger references (operation/process/signal/after)
             for (const trigger of op.triggers ?? []) {
                 const target = trigger.operation ? `operation:${trigger.operation}` : trigger.process ? `process:${trigger.process}` : '<missing>';
                 if (!trigger.operation && !trigger.process) {
@@ -148,7 +205,7 @@ class DnaValidator {
                 }
             }
             // Rule.operation must reference a declared Operation
-            // Rule.allow[].role must reference a declared Resource (acting as Role)
+            // Rule.allow[].role must reference a declared Role
             for (const rule of op.rules ?? []) {
                 if (!operationNames.has(rule.operation)) {
                     errors.push({
@@ -157,100 +214,168 @@ class DnaValidator {
                         message: `Rule references Operation "${rule.operation}" which does not exist. Available: ${[...operationNames].join(', ')}`,
                     });
                 }
-                if (rule.type === 'access' && resourceNames.size > 0) {
-                    for (const entry of rule.allow ?? []) {
-                        if (entry.role && !resourceNames.has(entry.role)) {
-                            errors.push({
-                                layer: 'operational',
-                                path: `rules/${rule.name ?? rule.operation}/allow/role/${entry.role}`,
-                                message: `Rule for "${rule.operation}" references Role "${entry.role}" (Resource) which does not exist. Available: ${[...resourceNames].join(', ')}`,
-                            });
+                if (rule.type === 'access') {
+                    // Rule.allow[].role accepts any actor (declared Role OR Person — same pool as Task.actor)
+                    const allowPool = new Set([...nouns.roleNames, ...nouns.personNames]);
+                    if (allowPool.size > 0) {
+                        for (const entry of rule.allow ?? []) {
+                            if (entry.role && !allowPool.has(entry.role)) {
+                                errors.push({
+                                    layer: 'operational',
+                                    path: `rules/${rule.name ?? rule.operation}/allow/role/${entry.role}`,
+                                    message: `Rule for "${rule.operation}" references actor "${entry.role}" which is neither a declared Role nor Person. Available: ${[...allowPool].sort().join(', ')}`,
+                                });
+                            }
                         }
                     }
                 }
             }
-            // Resource.parent must reference a declared Resource
-            // Resource.scope must reference a declared Resource
-            // Resource.memberships[].role/in must reference declared Resources
-            // Membership.in must match the referenced Role's scope (when declared)
-            const resourceByName = new Map(resources.map(r => [r.name, r]));
-            for (const resource of resources) {
-                if (resource.parent && !resourceNames.has(resource.parent)) {
+            // Noun-level integrity: parent must reference a noun of the same kind
+            for (const r of nouns.resources) {
+                if (r.parent && !nouns.resourceNames.has(r.parent)) {
                     errors.push({
                         layer: 'operational',
-                        path: `resources/${resource.name}/parent`,
-                        message: `Resource "${resource.name}" parent "${resource.parent}" does not reference a declared Resource. Available: ${[...resourceNames].join(', ')}`,
+                        path: `resources/${r.name}/parent`,
+                        message: `Resource "${r.name}" parent "${r.parent}" does not reference a declared Resource. Available: ${[...nouns.resourceNames].join(', ')}`,
                     });
                 }
-                if (resource.scope && !resourceNames.has(resource.scope)) {
+            }
+            for (const p of nouns.persons) {
+                if (p.parent && !nouns.personNames.has(p.parent)) {
                     errors.push({
                         layer: 'operational',
-                        path: `resources/${resource.name}/scope`,
-                        message: `Resource "${resource.name}" scope "${resource.scope}" does not reference a declared Resource. Available: ${[...resourceNames].join(', ')}`,
+                        path: `persons/${p.name}/parent`,
+                        message: `Person "${p.name}" parent "${p.parent}" does not reference a declared Person. Available: ${[...nouns.personNames].join(', ')}`,
                     });
                 }
-                for (const membership of resource.memberships ?? []) {
-                    if (!resourceNames.has(membership.role)) {
+            }
+            for (const g of nouns.groups) {
+                if (g.parent && !nouns.groupNames.has(g.parent)) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `groups/${g.name}/parent`,
+                        message: `Group "${g.name}" parent "${g.parent}" does not reference a declared Group. Available: ${[...nouns.groupNames].join(', ')}`,
+                    });
+                }
+            }
+            // Role-specific integrity:
+            // - scope (string | string[]) → must resolve to a Group OR Person (the noun the role is exercised within).
+            //   Group is the canonical case; Person scope is for per-individual roles like AttendingPhysician.scope = Patient.
+            // - parent → another Role.
+            // - resource → a Resource (when system Role is backed by a Resource template).
+            const scopePool = new Set([...nouns.groupNames, ...nouns.personNames]);
+            for (const role of nouns.roles) {
+                if (role.parent && !nouns.roleNames.has(role.parent)) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `roles/${role.name}/parent`,
+                        message: `Role "${role.name}" parent "${role.parent}" does not reference a declared Role. Available: ${[...nouns.roleNames].join(', ')}`,
+                    });
+                }
+                const scopes = role.scope === undefined ? [] : Array.isArray(role.scope) ? role.scope : [role.scope];
+                for (const s of scopes) {
+                    if (!scopePool.has(s)) {
                         errors.push({
                             layer: 'operational',
-                            path: `resources/${resource.name}/memberships/${membership.role}`,
-                            message: `Resource "${resource.name}" membership references Role "${membership.role}" (Resource) which does not exist. Available: ${[...resourceNames].join(', ')}`,
+                            path: `roles/${role.name}/scope`,
+                            message: `Role "${role.name}" scope "${s}" does not reference a declared Group or Person. Available: ${[...scopePool].sort().join(', ')}`,
                         });
                     }
-                    if (!resourceNames.has(membership.in)) {
+                }
+                if (role.resource && !nouns.resourceNames.has(role.resource)) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `roles/${role.name}/resource`,
+                        message: `Role "${role.name}" resource "${role.resource}" does not reference a declared Resource. Available: ${[...nouns.resourceNames].join(', ')}`,
+                    });
+                }
+            }
+            // Membership integrity: person/role/group references; group must match Role.scope when both present
+            for (const m of op.memberships ?? []) {
+                if (!nouns.personNames.has(m.person)) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `memberships/${m.name}/person`,
+                        message: `Membership "${m.name}" references Person "${m.person}" which does not exist. Available: ${[...nouns.personNames].join(', ')}`,
+                    });
+                }
+                if (!nouns.roleNames.has(m.role)) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `memberships/${m.name}/role`,
+                        message: `Membership "${m.name}" references Role "${m.role}" which does not exist. Available: ${[...nouns.roleNames].join(', ')}`,
+                    });
+                }
+                if (m.group && !scopePool.has(m.group)) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `memberships/${m.name}/group`,
+                        message: `Membership "${m.name}" references "${m.group}" which is not a declared Group or Person (the valid Role.scope targets). Available: ${[...scopePool].sort().join(', ')}`,
+                    });
+                }
+                if (m.group && nouns.roleNames.has(m.role)) {
+                    const role = nouns.roles.find(r => r.name === m.role);
+                    const scopes = role.scope === undefined ? [] : Array.isArray(role.scope) ? role.scope : [role.scope];
+                    if (scopes.length > 0 && !scopes.includes(m.group)) {
                         errors.push({
                             layer: 'operational',
-                            path: `resources/${resource.name}/memberships/${membership.role}/in`,
-                            message: `Resource "${resource.name}" membership references Group "${membership.in}" (Resource) which does not exist. Available: ${[...resourceNames].join(', ')}`,
+                            path: `memberships/${m.name}/group`,
+                            message: `Membership "${m.name}" pins Role "${m.role}" in "${m.group}", but Role "${m.role}" declares scope "${scopes.join(' | ')}".`,
                         });
                     }
-                    // Scope match
-                    const roleResource = resourceByName.get(membership.role);
-                    if (roleResource?.scope && resourceNames.has(membership.in) && roleResource.scope !== membership.in) {
+                }
+                // Multi-scope ambiguity: Role with array scope requires Membership.group
+                if (!m.group && nouns.roleNames.has(m.role)) {
+                    const role = nouns.roles.find(r => r.name === m.role);
+                    if (Array.isArray(role.scope) && role.scope.length > 1) {
                         errors.push({
                             layer: 'operational',
-                            path: `resources/${resource.name}/memberships/${membership.role}/in`,
-                            message: `Membership of "${resource.name}" pins Role "${membership.role}" in "${membership.in}", but Role "${membership.role}" declares scope "${roleResource.scope}".`,
+                            path: `memberships/${m.name}/group`,
+                            message: `Membership "${m.name}" references multi-scope Role "${m.role}" (scope: ${role.scope.join(' | ')}) but does not specify a group; Membership.group is required to disambiguate.`,
                         });
                     }
                 }
             }
-            // Relationship validation: from/to must reference valid Resources, attribute must exist on "from" Resource
+            void membershipNames;
+            // Relationship validation: from/to must reference any noun, attribute must exist on "from"
             for (const rel of op.relationships ?? []) {
-                if (!resourceNames.has(rel.from)) {
+                if (!nouns.allNounNames.has(rel.from)) {
                     errors.push({
                         layer: 'operational',
                         path: `relationships/${rel.name}/from`,
-                        message: `Relationship "${rel.name}" references Resource "${rel.from}" (from) which does not exist. Available: ${[...resourceNames].join(', ')}`,
+                        message: `Relationship "${rel.name}" references "${rel.from}" (from) which does not exist as any noun primitive. Available: ${[...nouns.allNounNames].sort().join(', ')}`,
                     });
                 }
-                if (!resourceNames.has(rel.to)) {
+                if (!nouns.allNounNames.has(rel.to)) {
                     errors.push({
                         layer: 'operational',
                         path: `relationships/${rel.name}/to`,
-                        message: `Relationship "${rel.name}" references Resource "${rel.to}" (to) which does not exist. Available: ${[...resourceNames].join(', ')}`,
+                        message: `Relationship "${rel.name}" references "${rel.to}" (to) which does not exist as any noun primitive. Available: ${[...nouns.allNounNames].sort().join(', ')}`,
                     });
                 }
-                if (resourceNames.has(rel.from)) {
-                    const fromResource = resources.find(r => r.name === rel.from);
-                    const attrNames = new Set((fromResource?.attributes ?? []).map(a => a.name));
+                if (nouns.allNounNames.has(rel.from)) {
+                    const fromNoun = nouns.byName.get(rel.from).noun;
+                    const attrNames = new Set((fromNoun.attributes ?? []).map(a => a.name));
                     if (!attrNames.has(rel.attribute)) {
                         errors.push({
                             layer: 'operational',
                             path: `relationships/${rel.name}/attribute`,
-                            message: `Relationship "${rel.name}" references Attribute "${rel.attribute}" which does not exist on Resource "${rel.from}". Available: ${[...attrNames].join(', ')}`,
+                            message: `Relationship "${rel.name}" references Attribute "${rel.attribute}" which does not exist on "${rel.from}". Available: ${[...attrNames].join(', ')}`,
                         });
                     }
                 }
             }
-            // Task.actor must reference a declared Resource (acting as Role)
-            // Task.operation must reference a declared Operation
+            // Task.actor must reference a declared Role OR Person.
+            // - Roles cover internal positions (Underwriter, Doctor) where the actor is bound to a position.
+            // - Persons cover external roles (Borrower, Patient) where the entity itself is the actor.
+            // Task.operation must reference a declared Operation.
+            const actorPool = new Set([...nouns.roleNames, ...nouns.personNames]);
             for (const task of op.tasks ?? []) {
-                if (resourceNames.size > 0 && !resourceNames.has(task.actor)) {
+                if (actorPool.size > 0 && !actorPool.has(task.actor)) {
                     errors.push({
                         layer: 'operational',
                         path: `tasks/${task.name}/actor`,
-                        message: `Task "${task.name}" references Actor "${task.actor}" (Resource) which does not exist. Available: ${[...resourceNames].join(', ')}`,
+                        message: `Task "${task.name}" references actor "${task.actor}" which is neither a declared Role nor a declared Person. Available: ${[...actorPool].sort().join(', ')}`,
                     });
                 }
                 if (!operationNames.has(task.operation)) {
@@ -261,19 +386,15 @@ class DnaValidator {
                     });
                 }
             }
-            // Process.operator must reference a declared Resource
+            // Process.operator must reference a declared Role or Person (same pool as Task.actor)
             // Process.startStep must be a defined Step id
             // Process.steps[].task must reference a declared Task
-            // Process.steps[].depends_on[] must reference sibling step IDs
-            // Process.steps[].conditions[] must reference declared Rule names
-            // Process.steps[].else must be a sibling step ID or "abort"
-            // Process.emits[] must reference declared Signals
             for (const proc of op.processes ?? []) {
-                if (resourceNames.size > 0 && !resourceNames.has(proc.operator)) {
+                if (actorPool.size > 0 && !actorPool.has(proc.operator)) {
                     errors.push({
                         layer: 'operational',
                         path: `processes/${proc.name}/operator`,
-                        message: `Process "${proc.name}" operator "${proc.operator}" does not reference a declared Resource. Available: ${[...resourceNames].join(', ')}`,
+                        message: `Process "${proc.name}" operator "${proc.operator}" is neither a declared Role nor a declared Person. Available: ${[...actorPool].sort().join(', ')}`,
                     });
                 }
                 const stepIds = new Set((proc.steps ?? []).map(s => s.id));
@@ -333,12 +454,11 @@ class DnaValidator {
         // If both are present, every Resource/Operation/Signal in product.core must
         // also exist in operational — product core is a projection, never invents.
         if (op && core) {
-            const opResources = this.collectResources(op.domain);
-            const opResourceNames = new Set(opResources.map(r => r.name));
+            const opNouns = this.collectNouns(op.domain);
             const opOperationNames = new Set((op.operations ?? []).map(o => o.name));
             const opSignalNames = new Set((op.signals ?? []).map(s => s.name));
             for (const resource of core.resources ?? []) {
-                if (!opResourceNames.has(resource.name)) {
+                if (!opNouns.resourceNames.has(resource.name)) {
                     errors.push({
                         layer: 'product/core',
                         path: `resources/${resource.name}`,
@@ -369,7 +489,7 @@ class DnaValidator {
         if ((core || op) && api) {
             const resources = core
                 ? (core.resources ?? [])
-                : this.collectResources(op.domain);
+                : this.collectNouns(op.domain).resources;
             const resourceNames = new Set(resources.map(r => r.name));
             const operations = core ? core.operations : op.operations;
             const operationNames = new Set((operations ?? []).map(o => o.name));

@@ -2,9 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/operational/domain",
   "title": "Domain",
-  "description": "A Domain is a grouping mechanism that organizes related Resources into a logical boundary. Domains can be multiple levels deep — e.g. organization → domain → subdomain — with Resources at the leaves.",
+  "description": "A Domain is a bounded-context wrapper that organizes related noun primitives (Resources, Persons, Roles, Groups) into a logical boundary. Domains can be multiple levels deep — e.g. organization → domain → subdomain — with primitives at the leaves.",
   "type": "object",
   "required": ["name"],
+  "additionalProperties": false,
   "properties": {
     "name": {
       "type": "string",
@@ -27,8 +28,23 @@
     },
     "resources": {
       "type": "array",
-      "description": "The Resources that live directly within this domain.",
+      "description": "The Resources (entity templates) that live directly within this domain.",
       "items": { "$ref": "https://dna.codes/schemas/operational/resource" }
+    },
+    "persons": {
+      "type": "array",
+      "description": "The Person templates (kinds of individuals) that live directly within this domain.",
+      "items": { "$ref": "https://dna.codes/schemas/operational/person" }
+    },
+    "roles": {
+      "type": "array",
+      "description": "The Role templates (positions/capacities) that live directly within this domain.",
+      "items": { "$ref": "https://dna.codes/schemas/operational/role" }
+    },
+    "groups": {
+      "type": "array",
+      "description": "The Group templates (work-units / containers) that live directly within this domain.",
+      "items": { "$ref": "https://dna.codes/schemas/operational/group" }
     }
   },
   "examples": [
@@ -43,7 +59,10 @@
             {
               "name": "lending",
               "path": "acme.finance.lending",
-              "resources": [{ "name": "Loan" }]
+              "resources": [{ "name": "Loan" }],
+              "persons":   [{ "name": "Borrower" }, { "name": "Employee" }],
+              "groups":    [{ "name": "BankDepartment" }],
+              "roles":     [{ "name": "Underwriter", "scope": "BankDepartment" }]
             }
           ]
         }

@@ -28,43 +28,57 @@ exports.bookshopInput = {
                         },
                     ],
                     actions: [
-                        { name: 'Publish', description: 'Publish a draft book.' },
-                        { name: 'Retire', description: 'Retire an active book.' },
+                        { name: 'Publish', description: 'Publish a draft book.', type: 'write' },
+                        { name: 'Retire', description: 'Retire an active book.', type: 'destructive' },
                     ],
                 },
                 {
                     name: 'Author',
-                    description: 'A book\'s author.',
+                    description: "A book's author.",
                     attributes: [
                         { name: 'id', type: 'string', required: true },
                         { name: 'name', type: 'string', required: true },
                     ],
                 },
+            ],
+            persons: [
                 {
-                    name: 'Editor',
-                    description: 'Reviews and publishes books. Acts as a Role.',
+                    name: 'Employee',
+                    description: 'Internal worker at the shop.',
                 },
-                {
-                    name: 'Ada',
-                    description: 'Named individual; documentation roster entry.',
-                    memberships: [{ role: 'Editor', in: 'Shop' }],
-                },
+            ],
+            groups: [
                 {
                     name: 'Shop',
-                    description: 'The bookshop itself. Acts as the Group scoping editor memberships.',
+                    description: 'The bookshop itself — the work-unit Editors are scoped to.',
+                },
+            ],
+            roles: [
+                {
+                    name: 'Editor',
+                    description: 'Reviews and publishes books within a Shop.',
+                    scope: 'Shop',
                 },
             ],
         },
+        memberships: [
+            {
+                name: 'EmployeeEditor',
+                description: 'Employees may hold the Editor role within a Shop.',
+                person: 'Employee',
+                role: 'Editor',
+            },
+        ],
         operations: [
             {
                 name: 'Book.Publish',
-                resource: 'Book',
+                target: 'Book',
                 action: 'Publish',
                 description: 'Publish a draft book to the storefront.',
             },
             {
                 name: 'Book.Retire',
-                resource: 'Book',
+                target: 'Book',
                 action: 'Retire',
                 description: 'Remove an active book from sale.',
             },

@@ -34,8 +34,8 @@
     },
     "operations": {
       "type": "array",
-      "description": "Operations surfaced by product.api.json. Each operation references a Resource+Action pair defined in resources[].",
-      "items": { "$ref": "https://dna.codes/schemas/operational/operation" }
+      "description": "Operations surfaced by product.api.json. Each operation references a Resource+Action pair defined in resources[]. Product Core uses Resource as the singular noun reference (operational's wider Target = Resource | Person | Role | Group is collapsed at this layer).",
+      "items": { "$ref": "https://dna.codes/schemas/product/core/operation" }
     },
     "triggers": {
       "type": "array",

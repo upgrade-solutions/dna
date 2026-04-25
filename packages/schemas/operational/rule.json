@@ -14,7 +14,7 @@
     },
     "operation": {
       "type": "string",
-      "description": "The Operation this rule applies to, expressed as Resource.Action.",
+      "description": "The Operation this rule applies to, expressed as Target.Action (where Target is any noun primitive).",
       "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
       "examples": ["Loan.Approve", "Order.Ship", "Employee.Promote"]
     },

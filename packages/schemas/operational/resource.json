@@ -2,75 +2,45 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/operational/resource",
   "title": "Resource",
-  "description": "A Resource is a named entity of the business — anything the system tracks, manages, operates on, or involves in work.\n\nResources do not declare a 'type'. Their semantic role is inferred from how they are referenced:\n- A Resource referenced as an Operation target is a target Resource (e.g. Loan).\n- A Resource referenced from `Membership.role` or `Task.actor` is acting as a Role (e.g. Underwriter, Father).\n- A Resource that has `memberships[]` is acting as a User (e.g. JoeKleier).\n- A Resource referenced from `Membership.in` or another Resource's `scope` is acting as a Group (e.g. Family, Account).\n\nThe same Resource can play multiple semantic roles simultaneously. Customer is both a tracked entity and an actor; Account is both a tracked entity, an actor (the company acts), and a Group (employees scoped within it). No multi-flag declaration is needed.\n\nRoles, Users, and Groups are all Resources — there is no separate primitive for any of them.",
+  "description": "A Resource is an Entity the organization manages — a thing the system tracks, mutates, or operates on. Loans, Accounts, Products, Documents, Invoices.\n\nResources are one of four noun primitives (alongside Person, Role, and Group); all four share the noun base shape: name, optional attributes[], optional actions[], optional parent. People-specific concerns (scope, memberships, eligibility) live on Person/Role/Group/Membership, not on Resource.",
   "type": "object",
   "required": ["name"],
+  "additionalProperties": false,
   "properties": {
     "name": {
       "type": "string",
-      "description": "The singular PascalCase name of the resource.",
-      "examples": ["Loan", "Invoice", "Order", "Employee", "Post", "Underwriter", "Father", "Family", "Account", "JoeKleier"]
+      "description": "The singular PascalCase name of the Resource.",
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "examples": ["Loan", "Account", "Invoice", "Order", "Product", "Document", "Post"]
     },
     "description": {
       "type": "string",
-      "description": "A human-readable explanation of what this resource represents in the domain."
+      "description": "Human-readable explanation of what this Resource represents in the domain."
     },
     "domain": {
       "type": "string",
-      "description": "The dot-separated domain path this resource belongs to.",
-      "examples": ["acme.billing.invoicing", "acme.content.publishing", "acme.identity.auth"]
+      "description": "The dot-separated domain path this Resource belongs to.",
+      "examples": ["acme.finance.lending", "acme.content.publishing"]
     },
     "attributes": {
       "type": "array",
-      "description": "The attributes (fields) that describe this resource.",
+      "description": "Fields that describe this Resource.",
       "items": { "$ref": "https://dna.codes/schemas/operational/attribute" }
     },
     "actions": {
       "type": "array",
-      "description": "The actions that can be performed on this resource.",
+      "description": "Verbs this Resource supports — the catalog of what can be done to it.",
       "items": { "$ref": "https://dna.codes/schemas/operational/action" }
     },
     "parent": {
       "type": "string",
-      "description": "Optional parent Resource name — used when this Resource is acting as a Role and participates in a hierarchy (org-chart or permission composition). E.g. SeniorUnderwriter.parent = Underwriter; ClosingSpecialist.parent = LendingManager.",
+      "description": "Optional parent Resource name for hierarchical relationships (e.g., LineItem.parent = Invoice).",
       "pattern": "^[A-Z][a-zA-Z0-9]*$",
-      "examples": ["Underwriter", "LendingManager", "Admin"]
-    },
-    "scope": {
-      "type": "string",
-      "description": "Optional Resource name naming the Group this Resource must be exercised within when acting as a Role. E.g. Father.scope = Family; Underwriter.scope = BankDepartment. A Role with no scope is global. The validator enforces that any Membership referencing this Role uses an `in` matching this scope.",
-      "pattern": "^[A-Z][a-zA-Z0-9]*$",
-      "examples": ["Family", "Marriage", "BankDepartment", "Account", "CourseOffering"]
-    },
-    "memberships": {
-      "type": "array",
-      "description": "When this Resource acts as a User, the (role, group) pairs it embodies. Each entry pins a Role-Resource within a specific Group-Resource. E.g. JoeKleier holds [{role: Father, in: Family}, {role: Husband, in: Marriage}].",
-      "items": {
-        "type": "object",
-        "required": ["role", "in"],
-        "properties": {
-          "role": {
-            "type": "string",
-            "description": "The Role-Resource embodied (PascalCase Resource name).",
-            "pattern": "^[A-Z][a-zA-Z0-9]*$",
-            "examples": ["Father", "Husband", "Underwriter", "Admin"]
-          },
-          "in": {
-            "type": "string",
-            "description": "The Group-Resource the role is exercised within (PascalCase Resource name). Must match the role's `scope` when declared.",
-            "pattern": "^[A-Z][a-zA-Z0-9]*$",
-            "examples": ["Family", "Marriage", "BankDepartment", "Account"]
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional human-readable note about this membership."
-          }
-        }
-      }
+      "examples": ["Invoice", "Order"]
     },
     "examples": {
       "type": "array",
-      "description": "Representative example records for this resource. Used as stub data when the API is unavailable.",
+      "description": "Representative example records for this Resource. Used as stub data when the API is unavailable.",
       "items": { "type": "object" }
     }
   },
@@ -82,37 +52,13 @@
       "attributes": [
         { "name": "amount", "type": "number", "required": true },
         { "name": "interest_rate", "type": "number", "required": true },
-        { "name": "status", "type": "enum", "values": ["pending", "active", "repaid", "defaulted"] },
-        { "name": "due_date", "type": "date" }
+        { "name": "status", "type": "enum", "values": ["pending", "active", "repaid", "defaulted"] }
       ],
       "actions": [
-        { "name": "Apply" },
-        { "name": "Approve" },
-        { "name": "Disburse" },
-        { "name": "Repay" },
-        { "name": "Default" }
-      ]
-    },
-    {
-      "name": "Underwriter",
-      "description": "Approves or rejects loan applications.",
-      "domain": "acme.finance.lending",
-      "scope": "BankDepartment"
-    },
-    {
-      "name": "Family",
-      "description": "A household unit. Acts as a Group scoping family-role memberships.",
-      "attributes": [
-        { "name": "surname", "type": "string", "required": true }
-      ]
-    },
-    {
-      "name": "JoeKleier",
-      "description": "Named individual; documentation roster entry, not auth identity.",
-      "memberships": [
-        { "role": "Father", "in": "Family" },
-        { "role": "Husband", "in": "Marriage" },
-        { "role": "Member", "in": "RunningClub" }
+        { "name": "Apply",    "type": "write" },
+        { "name": "Approve",  "type": "write" },
+        { "name": "Reject",   "type": "write" },
+        { "name": "Disburse", "type": "destructive" }
       ]
     }
   ]

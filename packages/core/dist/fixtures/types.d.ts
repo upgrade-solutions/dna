@@ -14,6 +14,7 @@ export interface DnaInput {
 }
 export interface OperationalDna {
     domain: OperationalDomain;
+    memberships?: Membership[];
     operations?: Operation[];
     rules?: Rule[];
     outcomes?: Outcome[];
@@ -29,21 +30,53 @@ export interface OperationalDomain {
     path?: string;
     description?: string;
     resources?: Resource[];
+    persons?: Person[];
+    roles?: Role[];
+    groups?: Group[];
     domains?: OperationalDomain[];
 }
 export interface Resource {
     name: string;
     description?: string;
+    domain?: string;
     attributes?: Attribute[];
     actions?: Action[];
     parent?: string;
-    scope?: string;
-    memberships?: Membership[];
+}
+export interface Person {
+    name: string;
+    description?: string;
+    domain?: string;
+    attributes?: Attribute[];
+    actions?: Action[];
+    parent?: string;
+}
+export interface Group {
+    name: string;
+    description?: string;
+    domain?: string;
+    attributes?: Attribute[];
+    actions?: Action[];
+    parent?: string;
+}
+export interface Role {
+    name: string;
+    description?: string;
+    domain?: string;
+    scope?: string | string[];
+    parent?: string;
+    system?: boolean;
+    resource?: string;
+    attributes?: Attribute[];
+    actions?: Action[];
 }
 export interface Membership {
-    role: string;
-    in: string;
+    name: string;
     description?: string;
+    domain?: string;
+    person: string;
+    role: string;
+    group?: string;
 }
 export interface Attribute {
     name: string;
@@ -54,10 +87,12 @@ export interface Attribute {
 export interface Action {
     name: string;
     description?: string;
+    type?: 'read' | 'write' | 'destructive';
+    idempotent?: boolean;
 }
 export interface Operation {
     name: string;
-    resource: string;
+    target: string;
     action: string;
     description?: string;
 }

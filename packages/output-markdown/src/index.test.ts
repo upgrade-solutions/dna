@@ -55,7 +55,7 @@ describe('@dna-codes/output-markdown', () => {
   describe('section: summary', () => {
     it('lists primitive counts for populated collections only', () => {
       const md = render(bookshopInput, { sections: ['summary'] })
-      expect(md).toContain('- Resources: 5')
+      expect(md).toContain('- Resources: 2')
       expect(md).toContain('- Operations: 2')
       expect(md).toContain('- Rules: 2')
       expect(md).toContain('- Processes: 1')
@@ -65,7 +65,7 @@ describe('@dna-codes/output-markdown', () => {
 
     it('names top-level resources', () => {
       const md = render(bookshopInput, { sections: ['summary'] })
-      expect(md).toContain('**Top-level resources:** `Book`, `Author`, `Editor`, `Ada`, `Shop`')
+      expect(md).toContain('**Top-level resources:** `Book`, `Author`')
     })
   })
 

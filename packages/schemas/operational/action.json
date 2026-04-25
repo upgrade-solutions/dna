@@ -2,38 +2,36 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dna.codes/schemas/operational/action",
   "title": "Action",
-  "description": "An Action is the core operation of a business domain — something an Actor performs on a Resource. Actions describe the operations that drive the business forward and produce meaningful state changes.",
+  "description": "An Action is a verb a noun primitive (Resource, Person, Role, or Group) supports. Actions are declared as entries in the noun's `actions[]` catalog using this uniform sub-schema. The Action entry is the catalog declaration; an Operation (top-level) is what binds a (noun, action-name) pair and carries orchestration metadata (Rules, Outcomes, Signals).\n\nThere is no top-level Action collection. Actions are not reused across nouns — Loan.Approve and Document.Approve are independent declarations even when they share an English verb.",
   "type": "object",
   "required": ["name"],
+  "additionalProperties": false,
   "properties": {
     "name": {
       "type": "string",
-      "description": "The PascalCase name of the action.",
-      "examples": ["Approve", "Submit", "Disburse", "Fulfill", "Terminate"]
+      "description": "The PascalCase verb (the action's name within its noun's catalog).",
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "examples": ["Apply", "Approve", "Reject", "Disburse", "Settle", "GetAdmitted", "Activate", "Retire"]
     },
     "description": {
       "type": "string",
-      "description": "A human-readable explanation of what this action does."
+      "description": "Human-readable explanation of what this action does."
     },
-    "resource": {
+    "type": {
       "type": "string",
-      "description": "The name of the Resource this action is performed on.",
-      "examples": ["Loan", "Order", "Claim", "Employee"]
+      "description": "Coarse classification of the action's effect on state. Used by downstream layers (UI affordances, auth defaults).",
+      "enum": ["read", "write", "destructive"]
     },
-    "input": {
-      "type": "array",
-      "description": "The attributes required as input to perform this action.",
-      "items": { "$ref": "https://dna.codes/schemas/operational/attribute" }
-    },
-    "output": {
-      "type": "array",
-      "description": "The attributes returned or updated as a result of this action.",
-      "items": { "$ref": "https://dna.codes/schemas/operational/attribute" }
+    "idempotent": {
+      "type": "boolean",
+      "description": "Whether repeating the action with the same input is safe (yields the same result without additional side effects)."
     }
   },
   "examples": [
-    { "name": "Approve", "description": "Approve a pending loan application.", "resource": "Loan" },
-    { "name": "Publish", "description": "Publish a draft post to the storefront.", "resource": "Post" },
-    { "name": "Ship", "description": "Dispatch a fulfilled order to the carrier.", "resource": "Order" }
+    { "name": "Apply", "description": "Submit a loan application.", "type": "write", "idempotent": false },
+    { "name": "Approve", "description": "Underwriter sign-off on a pending loan.", "type": "write" },
+    { "name": "Disburse", "description": "Release funds to the borrower.", "type": "destructive", "idempotent": false },
+    { "name": "GetAdmitted", "description": "Patient is admitted to a hospital.", "type": "write" },
+    { "name": "Retire", "description": "Deactivate a Role definition (org-admin lifecycle).", "type": "destructive" }
   ]
 }

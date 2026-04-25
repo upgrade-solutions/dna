@@ -80,7 +80,7 @@ describe('@dna-codes/output-html', () => {
   describe('section: summary', () => {
     it('lists primitive counts for populated collections only', () => {
       const html = render(bookshopInput, { sections: ['summary'] })
-      expect(html).toContain('Resources: 5')
+      expect(html).toContain('Resources: 2')
       expect(html).toContain('Operations: 2')
       expect(html).toContain('Rules: 2')
       expect(html).toContain('Processes: 1')

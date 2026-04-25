@@ -14,11 +14,15 @@ export declare const schemas: {
         readonly attribute: JsonSchema;
         readonly domain: JsonSchema;
         readonly equation: JsonSchema;
+        readonly group: JsonSchema;
+        readonly membership: JsonSchema;
         readonly operation: JsonSchema;
         readonly outcome: JsonSchema;
+        readonly person: JsonSchema;
         readonly process: JsonSchema;
         readonly relationship: JsonSchema;
         readonly resource: JsonSchema;
+        readonly role: JsonSchema;
         readonly rule: JsonSchema;
         readonly signal: JsonSchema;
         readonly task: JsonSchema;

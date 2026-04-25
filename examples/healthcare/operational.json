@@ -2,145 +2,126 @@
   "domain": {
     "name": "inpatient",
     "path": "stmary.clinical.inpatient",
-    "description": "Hospital inpatient ward — Patient-centered care team. The Patient is both a Resource (tracked record) AND a Group (their care team's Roles are scoped to that specific Patient).",
+    "description": "Hospital inpatient ward — Patient-centered care team. Patient is a Person template (entity with medical attributes and lifecycle); Roles like AttendingPhysician are scoped TO that Patient (Role.scope can target a Person, not just a Group). The Patient is the per-Patient organizational context; the Pharmacy is a traditional Group scoping Pharmacist Memberships.",
     "resources": [
-      {
-        "name": "Patient",
-        "description": "An admitted person under care. Both Resource (medical record) AND Group (their care team's Roles are scoped here — a Primary Nurse is the Primary Nurse OF a specific Patient).",
-        "attributes": [
-          { "name": "id", "type": "string", "required": true },
-          { "name": "mrn", "type": "string", "required": true, "description": "Medical record number" },
-          { "name": "name", "type": "string", "required": true },
-          { "name": "admitted_at", "type": "datetime" },
-          { "name": "ward", "type": "string" },
-          { "name": "status", "type": "enum", "required": true, "values": ["admitted", "discharged", "transferred"] }
-        ],
-        "actions": [
-          { "name": "Admit" },
-          { "name": "Discharge" },
-          { "name": "Transfer" }
-        ]
-      },
       {
         "name": "Encounter",
         "description": "A single clinical interaction with a Patient (rounds, intake, exam).",
         "attributes": [
-          { "name": "id", "type": "string", "required": true },
-          { "name": "patient_id", "type": "reference", "resource": "Patient", "required": true },
-          { "name": "kind", "type": "enum", "required": true, "values": ["intake", "rounds", "consult", "discharge"] },
+          { "name": "id",          "type": "string", "required": true },
+          { "name": "patient_id",  "type": "reference", "resource": "Patient", "required": true },
+          { "name": "kind",        "type": "enum",   "required": true, "values": ["intake", "rounds", "consult", "discharge"] },
           { "name": "occurred_at", "type": "datetime" }
         ],
         "actions": [
-          { "name": "Open" },
-          { "name": "Close" }
+          { "name": "Open",  "type": "write" },
+          { "name": "Close", "type": "write" }
         ]
       },
       {
         "name": "Order",
         "description": "A clinical order (medication, lab, imaging) placed against a Patient.",
         "attributes": [
-          { "name": "id", "type": "string", "required": true },
+          { "name": "id",         "type": "string", "required": true },
           { "name": "patient_id", "type": "reference", "resource": "Patient", "required": true },
-          { "name": "kind", "type": "enum", "required": true, "values": ["medication", "lab", "imaging", "diet"] },
-          { "name": "status", "type": "enum", "required": true, "values": ["pending", "active", "completed", "cancelled"] },
-          { "name": "ordered_by", "type": "reference", "resource": "AttendingPhysician" }
+          { "name": "kind",       "type": "enum",   "required": true, "values": ["medication", "lab", "imaging", "diet"] },
+          { "name": "status",     "type": "enum",   "required": true, "values": ["pending", "active", "completed", "cancelled"] }
         ],
         "actions": [
-          { "name": "Place" },
-          { "name": "Cancel" },
-          { "name": "Complete" }
+          { "name": "Place",    "type": "write" },
+          { "name": "Cancel",   "type": "destructive" },
+          { "name": "Complete", "type": "write" }
         ]
       },
       {
         "name": "Prescription",
         "description": "A medication order requiring pharmacist sign-off and nurse administration.",
         "attributes": [
-          { "name": "id", "type": "string", "required": true },
+          { "name": "id",         "type": "string", "required": true },
           { "name": "patient_id", "type": "reference", "resource": "Patient", "required": true },
-          { "name": "drug", "type": "string", "required": true },
-          { "name": "dose_mg", "type": "number", "required": true },
-          { "name": "status", "type": "enum", "required": true, "values": ["draft", "pending_review", "approved", "dispensed", "administered", "rejected"] }
+          { "name": "drug",       "type": "string", "required": true },
+          { "name": "dose_mg",    "type": "number", "required": true },
+          { "name": "status",     "type": "enum",   "required": true, "values": ["draft", "pending_review", "approved", "dispensed", "administered", "rejected"] }
         ],
         "actions": [
-          { "name": "Write" },
-          { "name": "Review" },
-          { "name": "Approve" },
-          { "name": "Reject" },
-          { "name": "Administer" }
-        ]
-      },
-      {
-        "name": "AttendingPhysician",
-        "description": "Role: the doctor with primary responsibility for a Patient. Scoped to that Patient.",
-        "scope": "Patient"
-      },
-      {
-        "name": "PrimaryNurse",
-        "description": "Role: the nurse with primary responsibility for a Patient on a shift. Scoped to that Patient.",
-        "scope": "Patient"
-      },
-      {
-        "name": "ConsultingSpecialist",
-        "description": "Role: a specialist consulted on a Patient (multiple may exist per Patient).",
-        "scope": "Patient"
-      },
-      {
-        "name": "Pharmacist",
-        "description": "Role: pharmacy staff reviewing medication orders. Scoped to the Pharmacy as a whole, not per-Patient.",
-        "scope": "Pharmacy"
-      },
-      {
-        "name": "Pharmacy",
-        "description": "Group: the hospital pharmacy. Scopes Pharmacist memberships."
-      },
-      {
-        "name": "DrAdams",
-        "description": "User: Dr. Adams. Attending on three Patients simultaneously, Consulting Specialist on a fourth.",
-        "memberships": [
-          { "role": "AttendingPhysician", "in": "Patient", "description": "Patient #101 (cardiology admission)" },
-          { "role": "AttendingPhysician", "in": "Patient", "description": "Patient #104" },
-          { "role": "AttendingPhysician", "in": "Patient", "description": "Patient #109" },
-          { "role": "ConsultingSpecialist", "in": "Patient", "description": "Patient #112 (cardiology consult)" }
-        ]
-      },
-      {
-        "name": "NurseRivera",
-        "description": "User: Nurse Rivera. Primary nurse on two Patients on day shift.",
-        "memberships": [
-          { "role": "PrimaryNurse", "in": "Patient", "description": "Patient #101" },
-          { "role": "PrimaryNurse", "in": "Patient", "description": "Patient #104" }
+          { "name": "Write",      "type": "write" },
+          { "name": "Review",     "type": "write" },
+          { "name": "Approve",    "type": "write" },
+          { "name": "Reject",     "type": "write" },
+          { "name": "Administer", "type": "write" }
         ]
       }
+    ],
+    "persons": [
+      {
+        "name": "Patient",
+        "description": "An admitted person under care. Person template — entity with medical attributes and lifecycle (Admit, Discharge). Per-Patient Roles like AttendingPhysician scope directly to this Person (Role.scope = Patient).",
+        "attributes": [
+          { "name": "id",          "type": "string", "required": true },
+          { "name": "mrn",         "type": "string", "required": true, "description": "Medical record number" },
+          { "name": "name",        "type": "string", "required": true },
+          { "name": "admitted_at", "type": "datetime" },
+          { "name": "ward",        "type": "string" },
+          { "name": "status",      "type": "enum",   "required": true, "values": ["admitted", "discharged", "transferred"] }
+        ],
+        "actions": [
+          { "name": "Admit",     "type": "write" },
+          { "name": "Discharge", "type": "write" },
+          { "name": "Transfer",  "type": "write" }
+        ]
+      },
+      { "name": "Doctor",     "description": "Physician; eligible for the AttendingPhysician and ConsultingSpecialist Roles." },
+      { "name": "Nurse",      "description": "Nursing staff; eligible for the PrimaryNurse Role." },
+      { "name": "PharmacyStaff", "description": "Pharmacy worker; eligible for the Pharmacist Role." }
+    ],
+    "groups": [
+      {
+        "name": "Pharmacy",
+        "description": "The hospital pharmacy. Scopes Pharmacist Memberships.",
+        "attributes": [{ "name": "name", "type": "string", "required": true }]
+      }
+    ],
+    "roles": [
+      { "name": "AttendingPhysician",   "description": "Doctor with primary responsibility for a Patient.",                                "scope": "Patient" },
+      { "name": "PrimaryNurse",         "description": "Nurse with primary responsibility for a Patient on a shift.",                       "scope": "Patient" },
+      { "name": "ConsultingSpecialist", "description": "Specialist consulted on a Patient (multiple may exist per Patient).",               "scope": "Patient" },
+      { "name": "Pharmacist",           "description": "Pharmacy staff reviewing medication orders. Scoped to the Pharmacy as a whole.",   "scope": "Pharmacy" }
     ]
   },
+  "memberships": [
+    { "name": "DoctorAttendingPhysician",   "person": "Doctor",        "role": "AttendingPhysician" },
+    { "name": "DoctorConsultingSpecialist", "person": "Doctor",        "role": "ConsultingSpecialist" },
+    { "name": "NursePrimaryNurse",          "person": "Nurse",         "role": "PrimaryNurse" },
+    { "name": "PharmacyStaffPharmacist",    "person": "PharmacyStaff", "role": "Pharmacist" }
+  ],
   "operations": [
-    { "resource": "Patient", "action": "Admit", "name": "Patient.Admit" },
-    { "resource": "Patient", "action": "Discharge", "name": "Patient.Discharge" },
-    { "resource": "Encounter", "action": "Open", "name": "Encounter.Open" },
-    { "resource": "Encounter", "action": "Close", "name": "Encounter.Close" },
-    { "resource": "Order", "action": "Place", "name": "Order.Place" },
-    { "resource": "Order", "action": "Complete", "name": "Order.Complete" },
-    { "resource": "Prescription", "action": "Write", "name": "Prescription.Write" },
-    { "resource": "Prescription", "action": "Review", "name": "Prescription.Review" },
-    { "resource": "Prescription", "action": "Approve", "name": "Prescription.Approve" },
-    { "resource": "Prescription", "action": "Reject", "name": "Prescription.Reject" },
-    { "resource": "Prescription", "action": "Administer", "name": "Prescription.Administer" }
+    { "target": "Patient",      "action": "Admit",      "name": "Patient.Admit" },
+    { "target": "Patient",      "action": "Discharge",  "name": "Patient.Discharge" },
+    { "target": "Encounter",    "action": "Open",       "name": "Encounter.Open" },
+    { "target": "Encounter",    "action": "Close",      "name": "Encounter.Close" },
+    { "target": "Order",        "action": "Place",      "name": "Order.Place" },
+    { "target": "Order",        "action": "Complete",   "name": "Order.Complete" },
+    { "target": "Prescription", "action": "Write",      "name": "Prescription.Write" },
+    { "target": "Prescription", "action": "Review",     "name": "Prescription.Review" },
+    { "target": "Prescription", "action": "Approve",    "name": "Prescription.Approve" },
+    { "target": "Prescription", "action": "Reject",     "name": "Prescription.Reject" },
+    { "target": "Prescription", "action": "Administer", "name": "Prescription.Administer" }
   ],
   "triggers": [
-    { "operation": "Patient.Admit", "source": "user" },
-    { "process": "MedicationOrderFlow", "source": "operation", "after": "Prescription.Write" },
-    { "process": "DischargeFlow", "source": "user", "description": "AttendingPhysician initiates discharge planning." }
+    { "operation": "Patient.Admit",       "source": "user" },
+    { "process":   "MedicationOrderFlow", "source": "operation", "after": "Prescription.Write" },
+    { "process":   "DischargeFlow",       "source": "user", "description": "AttendingPhysician initiates discharge planning." }
   ],
   "rules": [
-    { "operation": "Patient.Admit", "type": "access", "allow": [{ "role": "AttendingPhysician" }] },
-    { "operation": "Patient.Discharge", "type": "access", "allow": [{ "role": "AttendingPhysician" }] },
-    { "operation": "Encounter.Open", "type": "access", "allow": [{ "role": "AttendingPhysician" }, { "role": "ConsultingSpecialist" }, { "role": "PrimaryNurse" }] },
-    { "operation": "Order.Place", "type": "access", "allow": [{ "role": "AttendingPhysician" }] },
-    { "operation": "Prescription.Write", "type": "access", "allow": [{ "role": "AttendingPhysician" }] },
-    { "operation": "Prescription.Review", "type": "access", "allow": [{ "role": "Pharmacist" }] },
-    { "operation": "Prescription.Approve", "type": "access", "allow": [{ "role": "Pharmacist" }] },
-    { "operation": "Prescription.Reject", "type": "access", "allow": [{ "role": "Pharmacist" }] },
-    { "operation": "Prescription.Administer", "type": "access", "allow": [{ "role": "PrimaryNurse" }] },
+    { "operation": "Patient.Admit",            "type": "access", "allow": [{ "role": "AttendingPhysician" }] },
+    { "operation": "Patient.Discharge",        "type": "access", "allow": [{ "role": "AttendingPhysician" }] },
+    { "operation": "Encounter.Open",           "type": "access", "allow": [{ "role": "AttendingPhysician" }, { "role": "ConsultingSpecialist" }, { "role": "PrimaryNurse" }] },
+    { "operation": "Order.Place",              "type": "access", "allow": [{ "role": "AttendingPhysician" }] },
+    { "operation": "Prescription.Write",       "type": "access", "allow": [{ "role": "AttendingPhysician" }] },
+    { "operation": "Prescription.Review",      "type": "access", "allow": [{ "role": "Pharmacist" }] },
+    { "operation": "Prescription.Approve",     "type": "access", "allow": [{ "role": "Pharmacist" }] },
+    { "operation": "Prescription.Reject",      "type": "access", "allow": [{ "role": "Pharmacist" }] },
+    { "operation": "Prescription.Administer",  "type": "access", "allow": [{ "role": "PrimaryNurse" }] },
     {
       "name": "PatientIsAdmitted",
       "operation": "Order.Place",
@@ -176,11 +157,11 @@
     }
   ],
   "outcomes": [
-    { "operation": "Patient.Admit", "changes": [{ "attribute": "patient.status", "set": "admitted" }, { "attribute": "patient.admitted_at", "set": "now" }] },
-    { "operation": "Patient.Discharge", "changes": [{ "attribute": "patient.status", "set": "discharged" }], "emits": ["clinical.Patient.Discharged"] },
-    { "operation": "Prescription.Write", "changes": [{ "attribute": "prescription.status", "set": "pending_review" }] },
-    { "operation": "Prescription.Approve", "changes": [{ "attribute": "prescription.status", "set": "approved" }] },
-    { "operation": "Prescription.Reject", "changes": [{ "attribute": "prescription.status", "set": "rejected" }] },
+    { "operation": "Patient.Admit",           "changes": [{ "attribute": "patient.status", "set": "admitted" }, { "attribute": "patient.admitted_at", "set": "now" }] },
+    { "operation": "Patient.Discharge",       "changes": [{ "attribute": "patient.status", "set": "discharged" }], "emits": ["clinical.Patient.Discharged"] },
+    { "operation": "Prescription.Write",      "changes": [{ "attribute": "prescription.status", "set": "pending_review" }] },
+    { "operation": "Prescription.Approve",    "changes": [{ "attribute": "prescription.status", "set": "approved" }] },
+    { "operation": "Prescription.Reject",     "changes": [{ "attribute": "prescription.status", "set": "rejected" }] },
     { "operation": "Prescription.Administer", "changes": [{ "attribute": "prescription.status", "set": "administered" }] }
   ],
   "signals": [
@@ -189,24 +170,24 @@
       "operation": "Patient.Discharge",
       "description": "A Patient has been discharged — billing and follow-up scheduling pick this up.",
       "payload": [
-        { "name": "patient_id", "type": "string" },
-        { "name": "discharged_at", "type": "datetime" },
+        { "name": "patient_id",            "type": "string" },
+        { "name": "discharged_at",         "type": "datetime" },
         { "name": "discharge_disposition", "type": "string" }
       ]
     }
   ],
   "relationships": [
-    { "name": "Encounter.patient", "from": "Encounter", "to": "Patient", "cardinality": "many-to-one", "attribute": "patient_id" },
-    { "name": "Order.patient", "from": "Order", "to": "Patient", "cardinality": "many-to-one", "attribute": "patient_id" },
+    { "name": "Encounter.patient",    "from": "Encounter",    "to": "Patient", "cardinality": "many-to-one", "attribute": "patient_id" },
+    { "name": "Order.patient",        "from": "Order",        "to": "Patient", "cardinality": "many-to-one", "attribute": "patient_id" },
     { "name": "Prescription.patient", "from": "Prescription", "to": "Patient", "cardinality": "many-to-one", "attribute": "patient_id" }
   ],
   "tasks": [
-    { "name": "write-prescription", "actor": "AttendingPhysician", "operation": "Prescription.Write" },
-    { "name": "review-prescription", "actor": "Pharmacist", "operation": "Prescription.Review" },
-    { "name": "approve-prescription", "actor": "Pharmacist", "operation": "Prescription.Approve" },
-    { "name": "reject-prescription", "actor": "Pharmacist", "operation": "Prescription.Reject" },
-    { "name": "administer-prescription", "actor": "PrimaryNurse", "operation": "Prescription.Administer" },
-    { "name": "discharge-patient", "actor": "AttendingPhysician", "operation": "Patient.Discharge" }
+    { "name": "write-prescription",      "actor": "AttendingPhysician", "operation": "Prescription.Write" },
+    { "name": "review-prescription",     "actor": "Pharmacist",         "operation": "Prescription.Review" },
+    { "name": "approve-prescription",    "actor": "Pharmacist",         "operation": "Prescription.Approve" },
+    { "name": "reject-prescription",     "actor": "Pharmacist",         "operation": "Prescription.Reject" },
+    { "name": "administer-prescription", "actor": "PrimaryNurse",       "operation": "Prescription.Administer" },
+    { "name": "discharge-patient",       "actor": "AttendingPhysician", "operation": "Patient.Discharge" }
   ],
   "processes": [
     {
@@ -215,9 +196,9 @@
       "operator": "AttendingPhysician",
       "startStep": "review",
       "steps": [
-        { "id": "review", "task": "review-prescription", "conditions": ["PrescriptionIsPendingReview"] },
-        { "id": "approve", "task": "approve-prescription", "depends_on": ["review"], "conditions": ["DoseWithinSafeRange"], "else": "reject" },
-        { "id": "reject", "task": "reject-prescription", "depends_on": ["review"] },
+        { "id": "review",     "task": "review-prescription",     "conditions": ["PrescriptionIsPendingReview"] },
+        { "id": "approve",    "task": "approve-prescription",    "depends_on": ["review"], "conditions": ["DoseWithinSafeRange"], "else": "reject" },
+        { "id": "reject",     "task": "reject-prescription",     "depends_on": ["review"] },
         { "id": "administer", "task": "administer-prescription", "depends_on": ["approve"], "conditions": ["PrescriptionIsApproved"] }
       ]
     },

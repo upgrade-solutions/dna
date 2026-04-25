@@ -11,18 +11,22 @@ import {
 
 describe('@dna-codes/core', () => {
   describe('schemas', () => {
-    it('loads all 13 operational primitive schemas', () => {
+    it('loads all 16 operational primitive schemas', () => {
       const op = schemas.operational
       expect(Object.keys(op).sort()).toEqual([
         'action',
         'attribute',
         'domain',
         'equation',
+        'group',
+        'membership',
         'operation',
         'outcome',
+        'person',
         'process',
         'relationship',
         'resource',
+        'role',
         'rule',
         'signal',
         'task',
@@ -78,9 +82,9 @@ describe('@dna-codes/core', () => {
       const ids = all.map((s) => s.$id)
       expect(new Set(ids).size).toBe(ids.length)
 
-      // 13 op + 4 product-core + 4 product-api + 4 product-web + 11 technical = 36 primitives
-      // + 5 aggregates = 41 schemas total
-      expect(all.length).toBe(41)
+      // 17 op + 4 product-core + 4 product-api + 4 product-web + 11 technical = 40 primitives
+      // + 5 aggregates = 45 schemas total
+      expect(all.length).toBe(45)
     })
   })
 

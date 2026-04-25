@@ -68,10 +68,11 @@ describe('examples — lending', () => {
     expect(procTrigger).toBeDefined()
   })
 
-  it('models a system actor as a plain Resource referenced from a schedule-source Trigger', () => {
-    const resources = dna.domain.resources as Array<any>
-    const sweep = resources.find((r) => r.name === 'NightlyDelinquencySweep')
+  it('models a system actor as a Role with system: true, referenced from a schedule-source Trigger', () => {
+    const roles = dna.domain.roles as Array<any>
+    const sweep = roles.find((r) => r.name === 'NightlyDelinquencySweep')
     expect(sweep).toBeDefined()
+    expect(sweep.system).toBe(true)
 
     const triggers = dna.triggers as Array<any>
     const scheduled = triggers.find((t) => t.source === 'schedule')
@@ -83,9 +84,24 @@ describe('examples — lending', () => {
   })
 
   it('declares a scoped Role (Underwriter.scope = BankDepartment)', () => {
-    const resources = dna.domain.resources as Array<any>
-    const underwriter = resources.find((r) => r.name === 'Underwriter')
+    const roles = dna.domain.roles as Array<any>
+    const underwriter = roles.find((r) => r.name === 'Underwriter')
     expect(underwriter?.scope).toBe('BankDepartment')
+  })
+
+  it('declares Memberships pinning Person types to Role types', () => {
+    const memberships = dna.memberships as Array<any>
+    const empUnderwriter = memberships.find((m) => m.name === 'EmployeeUnderwriter')
+    expect(empUnderwriter?.person).toBe('Employee')
+    expect(empUnderwriter?.role).toBe('Underwriter')
+  })
+
+  it('uses a Person directly as Task.actor (Borrower) AND a Role as Task.actor (Underwriter)', () => {
+    const tasks = dna.tasks as Array<any>
+    const intake = tasks.find((t) => t.name === 'intake-application')
+    expect(intake?.actor).toBe('Borrower')
+    const underwrite = tasks.find((t) => t.name === 'underwrite-loan')
+    expect(underwrite?.actor).toBe('Underwriter')
   })
 
   it('uses Step-level conditions referencing named Rules', () => {
@@ -98,21 +114,28 @@ describe('examples — lending', () => {
 describe('examples — mass-tort', () => {
   const dna = loadExample('mass-tort')
 
-  it('has Memberships pinning Roles to Group-Resources', () => {
-    const resources = dna.domain.resources as Array<any>
-    const jane = resources.find((r) => r.name === 'JaneEsq')
-    expect(jane?.memberships).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ role: 'LeadCounsel', in: 'Case' }),
-        expect.objectContaining({ role: 'CoCounsel', in: 'Case' }),
-      ]),
-    )
+  it('declares Case as a first-class Group with attributes and lifecycle', () => {
+    const groups = dna.domain.groups as Array<any>
+    const caseGroup = groups.find((g) => g.name === 'Case')
+    expect(caseGroup).toBeDefined()
+    expect(caseGroup.attributes?.length).toBeGreaterThan(0)
   })
 
-  it('declares Role.scope matching the Group-Resource Memberships pin to', () => {
-    const resources = dna.domain.resources as Array<any>
-    const leadCounsel = resources.find((r) => r.name === 'LeadCounsel')
-    expect(leadCounsel?.scope).toBe('Case')
+  it('declares Roles scoped to the Case Group', () => {
+    const roles = dna.domain.roles as Array<any>
+    for (const roleName of ['LeadCounsel', 'CoCounsel', 'Paralegal', 'Judge']) {
+      const role = roles.find((r) => r.name === roleName)
+      expect(role?.scope).toBe('Case')
+    }
+  })
+
+  it('captures multi-Person → multi-Role eligibility via Memberships', () => {
+    const memberships = dna.memberships as Array<any>
+    // Partner can be either LeadCounsel or CoCounsel
+    const partnerLead = memberships.find((m) => m.person === 'Partner' && m.role === 'LeadCounsel')
+    const partnerCo = memberships.find((m) => m.person === 'Partner' && m.role === 'CoCounsel')
+    expect(partnerLead).toBeDefined()
+    expect(partnerCo).toBeDefined()
   })
 
   it('triggers a Process from an upstream Operation completion', () => {
@@ -121,42 +144,42 @@ describe('examples — mass-tort', () => {
     expect(opTriggered?.after).toBe('Settlement.Accept')
   })
 
-  it('exercises Resource/Actor duality (Claimant has attributes AND is referenced as actor)', () => {
-    const resources = dna.domain.resources as Array<any>
-    const claimant = resources.find((r) => r.name === 'Claimant')
+  it('exercises external-actor pattern (Claimant as Person — entity AND actor)', () => {
+    const persons = dna.domain.persons as Array<any>
+    const claimant = persons.find((p) => p.name === 'Claimant')
     expect(claimant?.attributes?.length).toBeGreaterThan(0)
-    // Claimant isn't on access rules in this fixture but is wired as a tracked
-    // entity — the duality is in the model's shape, not necessarily its current uses.
   })
 })
 
 describe('examples — marketplace', () => {
   const dna = loadExample('marketplace')
 
-  it('has a User holding two peer Roles in two distinct Group-Resources simultaneously', () => {
-    const resources = dna.domain.resources as Array<any>
-    const joe = resources.find((r) => r.name === 'Joe')
-    const groups = (joe?.memberships ?? []).map((m: any) => m.in)
-    expect(new Set(groups).size).toBeGreaterThanOrEqual(2)
+  it('has the same Person template eligible for two peer Roles via Memberships', () => {
+    const memberships = dna.memberships as Array<any>
+    const memberHost = memberships.find((m) => m.person === 'Member' && m.role === 'Host')
+    const memberGuest = memberships.find((m) => m.person === 'Member' && m.role === 'Guest')
+    expect(memberHost).toBeDefined()
+    expect(memberGuest).toBeDefined()
   })
 
-  it('treats both Listing and Booking as Resources serving as Groups', () => {
-    const resources = dna.domain.resources as Array<any>
-    const listing = resources.find((r) => r.name === 'Listing')
-    const booking = resources.find((r) => r.name === 'Booking')
+  it('treats both Listing and Booking as first-class Groups with attributes and lifecycle', () => {
+    const groups = dna.domain.groups as Array<any>
+    const listing = groups.find((g) => g.name === 'Listing')
+    const booking = groups.find((g) => g.name === 'Booking')
     expect(listing?.attributes?.length).toBeGreaterThan(0)
     expect(booking?.attributes?.length).toBeGreaterThan(0)
+    expect(listing?.actions?.length).toBeGreaterThan(0)
 
-    // A Role-Resource scopes to each
-    const host = resources.find((r) => r.name === 'Host')
-    const guest = resources.find((r) => r.name === 'Guest')
+    const roles = dna.domain.roles as Array<any>
+    const host = roles.find((r) => r.name === 'Host')
+    const guest = roles.find((r) => r.name === 'Guest')
     expect(host?.scope).toBe('Listing')
     expect(guest?.scope).toBe('Booking')
   })
 
   it('has a global (unscoped) Role alongside scoped ones', () => {
-    const resources = dna.domain.resources as Array<any>
-    const support = resources.find((r) => r.name === 'SupportAgent')
+    const roles = dna.domain.roles as Array<any>
+    const support = roles.find((r) => r.name === 'SupportAgent')
     expect(support).toBeDefined()
     expect(support.scope).toBeUndefined()
   })
@@ -171,31 +194,33 @@ describe('examples — marketplace', () => {
 describe('examples — healthcare', () => {
   const dna = loadExample('healthcare')
 
-  it('treats Patient as a Resource AND a Group (carries attributes AND is referenced as Role.scope)', () => {
-    const resources = dna.domain.resources as Array<any>
-    const patient = resources.find((r) => r.name === 'Patient')
+  it('treats Patient as a Person template with attributes and lifecycle actions', () => {
+    const persons = dna.domain.persons as Array<any>
+    const patient = persons.find((p) => p.name === 'Patient')
     expect(patient?.attributes?.length).toBeGreaterThan(0)
-
-    const patientScopedRoles = resources.filter((r) => r.scope === 'Patient').map((r) => r.name)
-    expect(patientScopedRoles).toEqual(
-      expect.arrayContaining(['AttendingPhysician', 'PrimaryNurse', 'ConsultingSpecialist']),
-    )
+    expect(patient?.actions?.length).toBeGreaterThan(0)
   })
 
-  it('has a single User with multiple memberships across many Patient instances', () => {
-    const resources = dna.domain.resources as Array<any>
-    const drAdams = resources.find((r) => r.name === 'DrAdams')
-    expect(drAdams?.memberships?.length).toBeGreaterThanOrEqual(4)
-    const patientMemberships = drAdams.memberships.filter((m: any) => m.in === 'Patient')
-    expect(patientMemberships.length).toBeGreaterThanOrEqual(4)
+  it('has Roles scoped to a Person (AttendingPhysician.scope = Patient)', () => {
+    const roles = dna.domain.roles as Array<any>
+    const attending = roles.find((r) => r.name === 'AttendingPhysician')
+    expect(attending?.scope).toBe('Patient')
   })
 
-  it('mixes Group-Resource types — Patient-scoped Roles AND Pharmacy-scoped Roles', () => {
-    const resources = dna.domain.resources as Array<any>
-    const pharmacist = resources.find((r) => r.name === 'Pharmacist')
+  it('mixes scope targets — some Roles scope to a Person, others to a Group (Pharmacy)', () => {
+    const roles = dna.domain.roles as Array<any>
+    const pharmacist = roles.find((r) => r.name === 'Pharmacist')
     expect(pharmacist?.scope).toBe('Pharmacy')
-    const pharmacy = resources.find((r) => r.name === 'Pharmacy')
-    expect(pharmacy).toBeDefined()
+    const groups = dna.domain.groups as Array<any>
+    expect(groups.find((g) => g.name === 'Pharmacy')).toBeDefined()
+  })
+
+  it('declares Memberships pinning Person types to multiple Roles (Doctor → Attending OR Consulting)', () => {
+    const memberships = dna.memberships as Array<any>
+    const attending = memberships.find((m) => m.person === 'Doctor' && m.role === 'AttendingPhysician')
+    const consulting = memberships.find((m) => m.person === 'Doctor' && m.role === 'ConsultingSpecialist')
+    expect(attending).toBeDefined()
+    expect(consulting).toBeDefined()
   })
 
   it('has a multi-predicate condition Rule (AND-joined within one Rule)', () => {
@@ -214,12 +239,15 @@ describe('examples — healthcare', () => {
 describe('examples — manufacturing', () => {
   const dna = loadExample('manufacturing')
 
-  it('declares multiple system actors as plain Resources', () => {
-    const resources = dna.domain.resources as Array<any>
+  it('declares multiple system Roles (system: true), some backed by a Resource', () => {
+    const roles = dna.domain.roles as Array<any>
     const machineNames = ['CncMachine', 'StampingPress', 'PaintRobot', 'MaintenanceScheduler']
     for (const name of machineNames) {
-      expect(resources.find((r) => r.name === name)).toBeDefined()
+      const role = roles.find((r) => r.name === name)
+      expect(role?.system).toBe(true)
     }
+    const cnc = roles.find((r) => r.name === 'CncMachine')
+    expect(cnc?.resource).toBe('MachineRecord')
   })
 
   it('expresses parallel fan-out + fan-in through Step.depends_on alone', () => {
@@ -241,7 +269,7 @@ describe('examples — manufacturing', () => {
     expect(opChained?.after).toBe('DefectReport.File')
   })
 
-  it('combines schedule-source Trigger with access rule limited to a system actor', () => {
+  it('combines schedule-source Trigger with access rule limited to a system Role', () => {
     const triggers = dna.triggers as Array<any>
     const cutTrigger = triggers.find((t) => t.operation === 'WorkOrder.Cut' && t.source === 'schedule')
     expect(cutTrigger).toBeDefined()
@@ -255,36 +283,34 @@ describe('examples — manufacturing', () => {
 describe('examples — education', () => {
   const dna = loadExample('education')
 
-  it('separates Course (catalog) from CourseOffering (the Group-Resource)', () => {
+  it('separates Course (Resource catalog) from CourseOffering (Group)', () => {
     const resources = dna.domain.resources as Array<any>
-    const course = resources.find((r) => r.name === 'Course')
-    const offering = resources.find((r) => r.name === 'CourseOffering')
-    expect(course).toBeDefined()
-    expect(offering).toBeDefined()
+    const groups = dna.domain.groups as Array<any>
+    expect(resources.find((r) => r.name === 'Course')).toBeDefined()
+    expect(groups.find((g) => g.name === 'CourseOffering')).toBeDefined()
 
-    // Instructor + Student scope to CourseOffering, not Course
-    const instructor = resources.find((r) => r.name === 'Instructor')
-    const student = resources.find((r) => r.name === 'Student')
-    expect(instructor?.scope).toBe('CourseOffering')
-    expect(student?.scope).toBe('CourseOffering')
+    const roles = dna.domain.roles as Array<any>
+    expect(roles.find((r) => r.name === 'Instructor')?.scope).toBe('CourseOffering')
+    expect(roles.find((r) => r.name === 'Student')?.scope).toBe('CourseOffering')
   })
 
-  it('has a single User holding both Instructor and Student Roles in different CourseOfferings simultaneously', () => {
-    const resources = dna.domain.resources as Array<any>
-    const drPatel = resources.find((r) => r.name === 'DrPatel')
-    const roles = (drPatel?.memberships ?? []).map((m: any) => m.role)
-    expect(new Set(roles)).toEqual(new Set(['Instructor', 'Student']))
+  it('has a Person template eligible for both Instructor and Student Roles via Memberships', () => {
+    const memberships = dna.memberships as Array<any>
+    const facultyInstructor = memberships.find((m) => m.person === 'FacultyMember' && m.role === 'Instructor')
+    const memberStudent = memberships.find((m) => m.person === 'UniversityMember' && m.role === 'Student')
+    expect(facultyInstructor).toBeDefined()
+    expect(memberStudent).toBeDefined()
   })
 
   it('declares three distinct scope tiers (CourseOffering, Department, global)', () => {
-    const resources = dna.domain.resources as Array<any>
-    const instructor = resources.find((r) => r.name === 'Instructor')
-    const chair = resources.find((r) => r.name === 'DepartmentChair')
-    const registrar = resources.find((r) => r.name === 'Registrar')
+    const roles = dna.domain.roles as Array<any>
+    const instructor = roles.find((r) => r.name === 'Instructor')
+    const chair = roles.find((r) => r.name === 'DepartmentChair')
+    const registrar = roles.find((r) => r.name === 'Registrar')
 
     expect(instructor?.scope).toBe('CourseOffering')
     expect(chair?.scope).toBe('Department')
-    expect(registrar?.scope).toBeUndefined() // global
+    expect(registrar?.scope).toBeUndefined()
   })
 
   it('uses calendar-aligned schedule Triggers for both Operation and Process targets', () => {

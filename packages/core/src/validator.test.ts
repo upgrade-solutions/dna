@@ -16,22 +16,34 @@ const operationalFixture = {
           { name: 'id', type: 'string', required: true },
           { name: 'borrower_id', type: 'reference', resource: 'Borrower' },
         ],
-        actions: [{ name: 'Apply' }, { name: 'Approve' }, { name: 'View' }, { name: 'List' }],
+        actions: [
+          { name: 'Apply', type: 'write' },
+          { name: 'Approve', type: 'write' },
+          { name: 'View', type: 'read' },
+          { name: 'List', type: 'read' },
+        ],
       },
-      {
-        name: 'Borrower',
-        attributes: [{ name: 'id', type: 'string', required: true }],
-        actions: [],
-      },
-      { name: 'Underwriter' },
-      { name: 'LendingManager' },
-      { name: 'BankDepartment' },
+    ],
+    persons: [
+      { name: 'Borrower', attributes: [{ name: 'id', type: 'string', required: true }] },
+      { name: 'Employee' },
+    ],
+    groups: [
+      { name: 'BankDepartment', attributes: [{ name: 'region', type: 'string' }] },
+    ],
+    roles: [
+      { name: 'Underwriter', scope: 'BankDepartment' },
+      { name: 'LendingManager', scope: 'BankDepartment' },
     ],
   },
+  memberships: [
+    { name: 'EmployeeUnderwriter', person: 'Employee', role: 'Underwriter' },
+    { name: 'EmployeeLendingManager', person: 'Employee', role: 'LendingManager' },
+  ],
   operations: [
-    { resource: 'Loan', action: 'Apply', name: 'Loan.Apply' },
-    { resource: 'Loan', action: 'Approve', name: 'Loan.Approve' },
-    { resource: 'Loan', action: 'View', name: 'Loan.View' },
+    { target: 'Loan', action: 'Apply', name: 'Loan.Apply' },
+    { target: 'Loan', action: 'Approve', name: 'Loan.Approve' },
+    { target: 'Loan', action: 'View', name: 'Loan.View' },
   ],
   triggers: [{ operation: 'Loan.Apply', source: 'user' }],
   outcomes: [
@@ -117,7 +129,6 @@ const productCoreFixture = {
       attributes: [{ name: 'id', type: 'string' }],
       actions: [{ name: 'Approve' }, { name: 'View' }],
     },
-    { name: 'Borrower', attributes: [{ name: 'id', type: 'string' }], actions: [] },
   ],
   operations: [
     { resource: 'Loan', action: 'Approve', name: 'Loan.Approve' },
@@ -135,36 +146,30 @@ describe('DnaValidator — operational/resource', () => {
         { name: 'amount', type: 'number', required: true },
         { name: 'status', type: 'enum', required: true, values: ['pending', 'active', 'repaid', 'defaulted'] }
       ],
-      actions: [{ name: 'Apply' }, { name: 'Approve' }]
+      actions: [{ name: 'Apply', type: 'write' }, { name: 'Approve', type: 'write' }]
     }
     const result = validator.validate(doc, 'operational/resource')
     expect(result.valid).toBe(true)
     expect(result.errors).toHaveLength(0)
   })
 
-  it('validates a Resource acting as a Role (with scope)', () => {
-    const result = validator.validate({
-      name: 'Father',
-      scope: 'Family',
-    }, 'operational/resource')
-    expect(result.valid).toBe(true)
-  })
-
-  it('validates a Resource acting as a User (with memberships)', () => {
-    const result = validator.validate({
-      name: 'JoeKleier',
-      memberships: [
-        { role: 'Father', in: 'Family' },
-        { role: 'Husband', in: 'Marriage' },
-      ],
-    }, 'operational/resource')
-    expect(result.valid).toBe(true)
-  })
-
   it('rejects a Resource missing required name field', () => {
     const result = validator.validate({ domain: 'acme.finance' }, 'operational/resource')
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.params?.missingProperty === 'name')).toBe(true)
+  })
+
+  it('rejects a Resource declaring a stripped field (scope)', () => {
+    const result = validator.validate({ name: 'Loan', scope: 'BankDepartment' }, 'operational/resource')
+    expect(result.valid).toBe(false)
+  })
+
+  it('rejects a Resource declaring stripped memberships', () => {
+    const result = validator.validate({
+      name: 'Joe',
+      memberships: [{ role: 'Father', in: 'Family' }],
+    }, 'operational/resource')
+    expect(result.valid).toBe(false)
   })
 
   it('rejects an Attribute with enum type but no values', () => {
@@ -177,14 +182,134 @@ describe('DnaValidator — operational/resource', () => {
   })
 })
 
+describe('DnaValidator — operational/person', () => {
+  it('validates a Person with attributes and actions', () => {
+    const result = validator.validate({
+      name: 'Patient',
+      attributes: [{ name: 'dob', type: 'date' }],
+      actions: [
+        { name: 'GetAdmitted', type: 'write' },
+        { name: 'GetDischarged', type: 'write' },
+      ],
+    }, 'operational/person')
+    expect(result.valid).toBe(true)
+  })
+
+  it('rejects a Person missing name', () => {
+    const result = validator.validate({}, 'operational/person')
+    expect(result.valid).toBe(false)
+  })
+})
+
+describe('DnaValidator — operational/group', () => {
+  it('validates a Group with attributes, actions, and parent', () => {
+    const result = validator.validate({
+      name: 'Ward',
+      parent: 'Hospital',
+      attributes: [{ name: 'floor', type: 'number' }],
+      actions: [{ name: 'Open', type: 'write' }],
+    }, 'operational/group')
+    expect(result.valid).toBe(true)
+  })
+
+  it('rejects a Group missing name', () => {
+    const result = validator.validate({}, 'operational/group')
+    expect(result.valid).toBe(false)
+  })
+})
+
+describe('DnaValidator — operational/role', () => {
+  it('validates a Role with single scope', () => {
+    const result = validator.validate({
+      name: 'Underwriter',
+      scope: 'BankDepartment',
+    }, 'operational/role')
+    expect(result.valid).toBe(true)
+  })
+
+  it('validates a Role with multi-scope (array)', () => {
+    const result = validator.validate({
+      name: 'SuperAdmin',
+      scope: ['Workspace', 'Tenant'],
+    }, 'operational/role')
+    expect(result.valid).toBe(true)
+  })
+
+  it('validates a system Role with resource link', () => {
+    const result = validator.validate({
+      name: 'NightlyDelinquencySweep',
+      system: true,
+      resource: 'ScheduledJob',
+    }, 'operational/role')
+    expect(result.valid).toBe(true)
+  })
+
+  it('validates a global Role (no scope)', () => {
+    const result = validator.validate({ name: 'SystemAuditor' }, 'operational/role')
+    expect(result.valid).toBe(true)
+  })
+
+  it('rejects a Role missing name', () => {
+    const result = validator.validate({ scope: 'BankDepartment' }, 'operational/role')
+    expect(result.valid).toBe(false)
+  })
+})
+
+describe('DnaValidator — operational/membership', () => {
+  it('validates a Membership with required fields', () => {
+    const result = validator.validate({
+      name: 'EmployeeUnderwriter',
+      person: 'Employee',
+      role: 'Underwriter',
+    }, 'operational/membership')
+    expect(result.valid).toBe(true)
+  })
+
+  it('validates a Membership with explicit group', () => {
+    const result = validator.validate({
+      name: 'EmployeeAdminWorkspace',
+      person: 'Employee',
+      role: 'SuperAdmin',
+      group: 'Workspace',
+    }, 'operational/membership')
+    expect(result.valid).toBe(true)
+  })
+
+  it('rejects a Membership missing person', () => {
+    const result = validator.validate({
+      name: 'X',
+      role: 'Underwriter',
+    }, 'operational/membership')
+    expect(result.valid).toBe(false)
+  })
+
+  it('rejects a Membership missing role', () => {
+    const result = validator.validate({
+      name: 'X',
+      person: 'Employee',
+    }, 'operational/membership')
+    expect(result.valid).toBe(false)
+  })
+})
+
 describe('DnaValidator — operational/operation', () => {
-  it('validates a valid Operation', () => {
-    const result = validator.validate({ resource: 'Loan', action: 'Approve', name: 'Loan.Approve' }, 'operational/operation')
+  it('validates a valid Operation targeting a Resource', () => {
+    const result = validator.validate({ target: 'Loan', action: 'Approve', name: 'Loan.Approve' }, 'operational/operation')
+    expect(result.valid).toBe(true)
+  })
+
+  it('validates an Operation targeting a Person', () => {
+    const result = validator.validate({ target: 'Patient', action: 'GetAdmitted', name: 'Patient.GetAdmitted' }, 'operational/operation')
+    expect(result.valid).toBe(true)
+  })
+
+  it('validates an Operation targeting a Role (org-admin)', () => {
+    const result = validator.validate({ target: 'Underwriter', action: 'Activate', name: 'Underwriter.Activate' }, 'operational/operation')
     expect(result.valid).toBe(true)
   })
 
   it('rejects an Operation missing action', () => {
-    const result = validator.validate({ resource: 'Loan' }, 'operational/operation')
+    const result = validator.validate({ target: 'Loan' }, 'operational/operation')
     expect(result.valid).toBe(false)
   })
 })
@@ -646,6 +771,10 @@ describe('DnaValidator — availableSchemas', () => {
   it('lists all registered schemas', () => {
     const schemas = validator.availableSchemas()
     expect(schemas).toContain('operational/resource')
+    expect(schemas).toContain('operational/person')
+    expect(schemas).toContain('operational/role')
+    expect(schemas).toContain('operational/group')
+    expect(schemas).toContain('operational/membership')
     expect(schemas).toContain('operational/action')
     expect(schemas).toContain('operational/operation')
     expect(schemas).toContain('operational/attribute')
@@ -682,15 +811,12 @@ describe('DnaValidator — availableSchemas', () => {
     expect(schemas).toContain('technical')
   })
 
-  it('no longer registers retired primitives (capability, cause, role, user)', () => {
+  it('no longer registers retired primitives (capability, cause, user)', () => {
     const schemas = validator.availableSchemas()
     expect(schemas).not.toContain('operational/capability')
     expect(schemas).not.toContain('operational/cause')
-    expect(schemas).not.toContain('operational/role')
     expect(schemas).not.toContain('operational/user')
     expect(schemas).not.toContain('product/core/role')
-    expect(schemas).not.toContain('operational/position')
-    expect(schemas).not.toContain('operational/person')
   })
 })
 
@@ -875,7 +1001,7 @@ describe('DnaValidator — cross-layer validation', () => {
     expect(result.errors.some(e => e.message.includes('Process "GhostProcess"'))).toBe(true)
   })
 
-  it('detects invalid Relationship from resource reference', () => {
+  it('detects invalid Relationship from reference', () => {
     const badOp = {
       ...operational,
       relationships: [
@@ -884,10 +1010,10 @@ describe('DnaValidator — cross-layer validation', () => {
     }
     const result = validator.validateCrossLayer({ operational: badOp })
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('Resource "Ghost"') && e.message.includes('(from)'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('"Ghost"') && e.message.includes('(from)'))).toBe(true)
   })
 
-  it('detects invalid Relationship to resource reference', () => {
+  it('detects invalid Relationship to reference', () => {
     const badOp = {
       ...operational,
       relationships: [
@@ -896,7 +1022,7 @@ describe('DnaValidator — cross-layer validation', () => {
     }
     const result = validator.validateCrossLayer({ operational: badOp })
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('Resource "Phantom"') && e.message.includes('(to)'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('"Phantom"') && e.message.includes('(to)'))).toBe(true)
   })
 
   it('detects invalid Relationship attribute reference', () => {
@@ -911,7 +1037,33 @@ describe('DnaValidator — cross-layer validation', () => {
     expect(result.errors.some(e => e.message.includes('Attribute "ghost_id"'))).toBe(true)
   })
 
-  it('detects invalid Task actor reference (Resource missing)', () => {
+  it('detects invalid Operation target reference', () => {
+    const badOp = {
+      ...operational,
+      operations: [
+        ...operational.operations,
+        { target: 'PhantomNoun', action: 'Vanish', name: 'PhantomNoun.Vanish' },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.message.includes('PhantomNoun'))).toBe(true)
+  })
+
+  it('detects Operation.action not declared in target.actions[]', () => {
+    const badOp = {
+      ...operational,
+      operations: [
+        ...operational.operations,
+        { target: 'Loan', action: 'Levitate', name: 'Loan.Levitate' },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.message.includes('Levitate'))).toBe(true)
+  })
+
+  it('detects invalid Task actor reference (Role missing)', () => {
     const badOp = {
       ...operational,
       tasks: [{ name: 'phantom-task', actor: 'PhantomActor', operation: 'Loan.Apply' }],
@@ -921,31 +1073,12 @@ describe('DnaValidator — cross-layer validation', () => {
     expect(result.errors.some(e => e.message.includes('PhantomActor'))).toBe(true)
   })
 
-  it('detects invalid Resource parent reference', () => {
+  it('detects Role.scope referencing a missing Group', () => {
     const badOp = {
       ...operational,
       domain: {
         ...operational.domain,
-        resources: [
-          ...operational.domain.resources,
-          { name: 'JuniorUnderwriter', parent: 'PhantomRole' },
-        ],
-      },
-    }
-    const result = validator.validateCrossLayer({ operational: badOp })
-    expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('parent "PhantomRole"'))).toBe(true)
-  })
-
-  it('detects Resource.scope referencing a missing Resource', () => {
-    const badOp = {
-      ...operational,
-      domain: {
-        ...operational.domain,
-        resources: [
-          ...operational.domain.resources,
-          { name: 'Father', scope: 'PhantomGroup' },
-        ],
+        roles: [...operational.domain.roles, { name: 'GhostRole', scope: 'PhantomGroup' }],
       },
     }
     const result = validator.validateCrossLayer({ operational: badOp })
@@ -953,40 +1086,90 @@ describe('DnaValidator — cross-layer validation', () => {
     expect(result.errors.some(e => e.message.includes('PhantomGroup'))).toBe(true)
   })
 
-  it('detects Membership referencing a missing Role/Group Resource', () => {
+  it('detects Role.parent referencing a missing Role', () => {
     const badOp = {
       ...operational,
       domain: {
         ...operational.domain,
-        resources: [
-          ...operational.domain.resources,
-          { name: 'Joe', memberships: [{ role: 'PhantomRole', in: 'PhantomGroup' }] },
+        roles: [
+          ...operational.domain.roles,
+          { name: 'JuniorUnderwriter', parent: 'PhantomParent', scope: 'BankDepartment' },
         ],
       },
     }
     const result = validator.validateCrossLayer({ operational: badOp })
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('PhantomRole'))).toBe(true)
-    expect(result.errors.some(e => e.message.includes('PhantomGroup'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('PhantomParent'))).toBe(true)
   })
 
-  it('detects Membership.in not matching Role.scope', () => {
+  it('detects Role.resource referencing a missing Resource', () => {
     const badOp = {
       ...operational,
       domain: {
         ...operational.domain,
-        resources: [
-          ...operational.domain.resources,
-          { name: 'Family' },
-          { name: 'RunningClub' },
-          { name: 'Father', scope: 'Family' },
-          { name: 'Joe', memberships: [{ role: 'Father', in: 'RunningClub' }] },
-        ],
+        roles: [...operational.domain.roles, { name: 'Sweep', system: true, resource: 'PhantomJob' }],
       },
     }
     const result = validator.validateCrossLayer({ operational: badOp })
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('declares scope "Family"'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('PhantomJob'))).toBe(true)
+  })
+
+  it('detects Membership referencing a missing Person/Role/Group', () => {
+    const badOp = {
+      ...operational,
+      memberships: [
+        ...operational.memberships,
+        { name: 'BadMembership', person: 'GhostPerson', role: 'GhostRole', group: 'GhostGroup' },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.message.includes('GhostPerson'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('GhostRole'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('GhostGroup'))).toBe(true)
+  })
+
+  it('detects Membership.group not matching Role.scope', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        groups: [...operational.domain.groups, { name: 'Family' }],
+      },
+      memberships: [
+        ...operational.memberships,
+        { name: 'BadFit', person: 'Employee', role: 'Underwriter', group: 'Family' },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.message.includes('declares scope'))).toBe(true)
+  })
+
+  it('detects multi-scope Role Membership without group disambiguation', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        groups: [
+          ...operational.domain.groups,
+          { name: 'Workspace' },
+          { name: 'Tenant' },
+        ],
+        roles: [
+          ...operational.domain.roles,
+          { name: 'SuperAdmin', scope: ['Workspace', 'Tenant'] },
+        ],
+      },
+      memberships: [
+        ...operational.memberships,
+        { name: 'AmbiguousAdmin', person: 'Employee', role: 'SuperAdmin' },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.message.includes('multi-scope'))).toBe(true)
   })
 
   it('detects invalid Rule operation reference', () => {
@@ -1001,7 +1184,7 @@ describe('DnaValidator — cross-layer validation', () => {
     expect(result.errors.some(e => e.message.includes('Loan.Vanish'))).toBe(true)
   })
 
-  it('detects invalid Rule role reference (Role-Resource missing)', () => {
+  it('detects invalid Rule role reference (Role missing)', () => {
     const badOp = {
       ...operational,
       rules: [
