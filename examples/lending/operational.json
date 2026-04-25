@@ -73,7 +73,8 @@
     { "target": "Loan", "action": "Approve",  "name": "Loan.Approve" },
     { "target": "Loan", "action": "Disburse", "name": "Loan.Disburse" },
     { "target": "Loan", "action": "Repay",    "name": "Loan.Repay" },
-    { "target": "Loan", "action": "Default",  "name": "Loan.Default" }
+    { "target": "Loan", "action": "Default",  "name": "Loan.Default" },
+    { "target": "LoanOrigination", "action": "Start", "name": "LoanOrigination.Start", "description": "LendingManager kicks off the LoanOrigination SOP for a qualified lead." }
   ],
   "triggers": [
     { "operation": "Loan.Apply", "source": "user", "description": "Borrower submits an application via web or branch." },
