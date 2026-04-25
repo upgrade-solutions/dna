@@ -53,6 +53,14 @@ interface DomainShape {
   groups?: NounShape[]
 }
 
+interface ProcessShape {
+  name: string
+  operator: string
+  startStep: string
+  steps: { id: string; task: string; depends_on?: string[]; conditions?: string[]; else?: string }[]
+  emits?: string[]
+}
+
 interface OperationalDNA {
   domain: DomainShape
   memberships?: MembershipShape[]
@@ -63,13 +71,7 @@ interface OperationalDNA {
   rules?: { name?: string; operation: string; type?: string; allow?: { role?: string }[] }[]
   relationships?: { name: string; from: string; to: string; attribute: string; cardinality: string }[]
   tasks?: { name: string; actor: string; operation: string }[]
-  processes?: {
-    name: string
-    operator: string
-    startStep: string
-    steps: { id: string; task: string; depends_on?: string[]; conditions?: string[]; else?: string }[]
-    emits?: string[]
-  }[]
+  processes?: ProcessShape[]
 }
 
 interface ProductCoreDNA {
@@ -100,17 +102,62 @@ interface TechnicalDNA {
   cells?: { name: string; dna: string; constructs?: string[] }[]
 }
 
-interface NounIndex {
+// ── Primitive characteristics ─────────────────────────────────────────────
+// Source of truth for which primitives can fill which slots. See the 5×5
+// table in `docs/operational.md`.
+
+type Characteristic = 'targetable' | 'actorable' | 'scopeable' | 'memberable' | 'executable'
+type PrimitiveKind = 'resource' | 'person' | 'group' | 'role' | 'process'
+
+const CHARACTERISTICS: Record<PrimitiveKind, ReadonlySet<Characteristic>> = {
+  resource: new Set(['targetable']),
+  // Person is scopeable so Roles can be exercised per-individual (e.g.
+  // AttendingPhysician.scope = Patient); not in the canonical 5×5 table.
+  person:   new Set(['targetable', 'actorable', 'scopeable']),
+  group:    new Set(['targetable', 'scopeable']),
+  role:     new Set(['targetable', 'actorable', 'memberable']),
+  process:  new Set(['targetable', 'executable']),
+}
+
+const KIND_LABEL: Record<PrimitiveKind, string> = {
+  resource: 'Resource',
+  person: 'Person',
+  group: 'Group',
+  role: 'Role',
+  process: 'Process',
+}
+
+function kindsWith(characteristic: Characteristic): PrimitiveKind[] {
+  return (Object.keys(CHARACTERISTICS) as PrimitiveKind[]).filter(k => CHARACTERISTICS[k].has(characteristic))
+}
+
+function kindLabelsFor(characteristic: Characteristic, joiner: 'or' | 'nor'): string {
+  const labels = kindsWith(characteristic).map(k => KIND_LABEL[k])
+  if (labels.length <= 1) return labels.join('')
+  if (labels.length === 2) return `${labels[0]} ${joiner} ${labels[1]}`
+  return `${labels.slice(0, -1).join(', ')}, ${joiner} ${labels[labels.length - 1]}`
+}
+
+interface PrimitiveEntry {
+  kind: PrimitiveKind
+  noun: NounShape | RoleShape | ProcessShape
+}
+
+interface PrimitiveIndex {
   resources: NounShape[]
   persons: NounShape[]
   roles: RoleShape[]
   groups: NounShape[]
-  byName: Map<string, { kind: 'resource' | 'person' | 'role' | 'group'; noun: NounShape | RoleShape }>
+  processes: ProcessShape[]
+  byName: Map<string, PrimitiveEntry>
   resourceNames: Set<string>
   personNames: Set<string>
   roleNames: Set<string>
   groupNames: Set<string>
+  processNames: Set<string>
   allNounNames: Set<string>
+  pool(characteristic: Characteristic): Set<string>
+  hasCharacteristic(name: string, characteristic: Characteristic): boolean
 }
 
 export class DnaValidator {
@@ -153,7 +200,7 @@ export class DnaValidator {
 
   // ── Cross-layer validation ─────────────────────────────────────────────────
 
-  private collectNouns(domain: DomainShape): NounIndex {
+  private collectPrimitives(op: OperationalDNA): PrimitiveIndex {
     const resources: NounShape[] = []
     const persons: NounShape[] = []
     const roles: RoleShape[] = []
@@ -165,28 +212,58 @@ export class DnaValidator {
       for (const g of d.groups ?? []) groups.push(g)
       for (const sub of d.domains ?? []) walk(sub)
     }
-    walk(domain)
-    const byName = new Map<string, { kind: 'resource' | 'person' | 'role' | 'group'; noun: NounShape | RoleShape }>()
+    walk(op.domain)
+    const processes: ProcessShape[] = op.processes ?? []
+    const byName = new Map<string, PrimitiveEntry>()
     for (const r of resources) byName.set(r.name, { kind: 'resource', noun: r })
     for (const p of persons) byName.set(p.name, { kind: 'person', noun: p })
     for (const r of roles) byName.set(r.name, { kind: 'role', noun: r })
     for (const g of groups) byName.set(g.name, { kind: 'group', noun: g })
+    for (const p of processes) byName.set(p.name, { kind: 'process', noun: p })
+
+    const resourceNames = new Set(resources.map(r => r.name))
+    const personNames = new Set(persons.map(p => p.name))
+    const roleNames = new Set(roles.map(r => r.name))
+    const groupNames = new Set(groups.map(g => g.name))
+    const processNames = new Set(processes.map(p => p.name))
+
+    const namesByKind: Record<PrimitiveKind, Set<string>> = {
+      resource: resourceNames,
+      person: personNames,
+      role: roleNames,
+      group: groupNames,
+      process: processNames,
+    }
+
     return {
       resources,
       persons,
       roles,
       groups,
+      processes,
       byName,
-      resourceNames: new Set(resources.map(r => r.name)),
-      personNames: new Set(persons.map(p => p.name)),
-      roleNames: new Set(roles.map(r => r.name)),
-      groupNames: new Set(groups.map(g => g.name)),
+      resourceNames,
+      personNames,
+      roleNames,
+      groupNames,
+      processNames,
       allNounNames: new Set([
-        ...resources.map(r => r.name),
-        ...persons.map(p => p.name),
-        ...roles.map(r => r.name),
-        ...groups.map(g => g.name),
+        ...resourceNames,
+        ...personNames,
+        ...roleNames,
+        ...groupNames,
       ]),
+      pool(characteristic) {
+        const out = new Set<string>()
+        for (const kind of kindsWith(characteristic)) {
+          for (const n of namesByKind[kind]) out.add(n)
+        }
+        return out
+      },
+      hasCharacteristic(name, characteristic) {
+        const entry = byName.get(name)
+        return !!entry && CHARACTERISTICS[entry.kind].has(characteristic)
+      },
     }
   }
 
@@ -206,26 +283,34 @@ export class DnaValidator {
 
     // ── Operational ──────────────────────────────────────────────────────
     if (op) {
-      const nouns = this.collectNouns(op.domain)
+      const primitives = this.collectPrimitives(op)
       const operationNames = new Set((op.operations ?? []).map(o => o.name))
       const signalNames = new Set((op.signals ?? []).map(s => s.name))
       const taskNames = new Set((op.tasks ?? []).map(t => t.name))
       const ruleNames = new Set((op.rules ?? []).filter(r => !!r.name).map(r => r.name as string))
-      const processNames = new Set((op.processes ?? []).map(p => p.name))
+      const processNames = primitives.processNames
       const membershipNames = new Set((op.memberships ?? []).map(m => m.name))
 
-      // Operation.target must reference a declared noun primitive (Resource | Person | Role | Group)
-      // Operation.action must match an action name in the target's actions[] catalog
+      const targetablePool = primitives.pool('targetable')
+      const actorablePool = primitives.pool('actorable')
+      const scopeablePool = primitives.pool('scopeable')
+      const targetableKinds = kindLabelsFor('targetable', 'or')
+      const actorableKinds = kindLabelsFor('actorable', 'nor')
+      const scopeableKinds = kindLabelsFor('scopeable', 'or')
+
+      // Operation.target must reference a targetable primitive.
+      // Operation.action must match an action name in the target's actions[] catalog.
       for (const operation of op.operations ?? []) {
-        if (!nouns.allNounNames.has(operation.target)) {
+        if (!targetablePool.has(operation.target)) {
           errors.push({
             layer: 'operational',
             path: `operations/${operation.name}/target`,
-            message: `Operation "${operation.name}" references target "${operation.target}" which does not exist as a Resource, Person, Role, or Group. Available: ${[...nouns.allNounNames].sort().join(', ')}`,
+            message: `Operation "${operation.name}" references target "${operation.target}" which does not exist as a ${targetableKinds}. Available: ${[...targetablePool].sort().join(', ')}`,
           })
         } else {
-          const entry = nouns.byName.get(operation.target)!
-          const actionNames = new Set((entry.noun.actions ?? []).map(a => a.name))
+          const entry = primitives.byName.get(operation.target)!
+          const actions = (entry.noun as NounShape).actions
+          const actionNames = new Set((actions ?? []).map(a => a.name))
           if (actionNames.size > 0 && !actionNames.has(operation.action)) {
             errors.push({
               layer: 'operational',
@@ -324,7 +409,7 @@ export class DnaValidator {
       }
 
       // Rule.operation must reference a declared Operation
-      // Rule.allow[].role must reference a declared Role
+      // Rule.allow[].role must reference an actorable primitive (Role or Person)
       for (const rule of op.rules ?? []) {
         if (!operationNames.has(rule.operation)) {
           errors.push({
@@ -334,15 +419,13 @@ export class DnaValidator {
           })
         }
         if (rule.type === 'access') {
-          // Rule.allow[].role accepts any actor (declared Role OR Person — same pool as Task.actor)
-          const allowPool = new Set<string>([...nouns.roleNames, ...nouns.personNames])
-          if (allowPool.size > 0) {
+          if (actorablePool.size > 0) {
             for (const entry of rule.allow ?? []) {
-              if (entry.role && !allowPool.has(entry.role)) {
+              if (entry.role && !actorablePool.has(entry.role)) {
                 errors.push({
                   layer: 'operational',
                   path: `rules/${rule.name ?? rule.operation}/allow/role/${entry.role}`,
-                  message: `Rule for "${rule.operation}" references actor "${entry.role}" which is neither a declared Role nor Person. Available: ${[...allowPool].sort().join(', ')}`,
+                  message: `Rule for "${rule.operation}" references actor "${entry.role}" which is neither a declared ${actorableKinds}. Available: ${[...actorablePool].sort().join(', ')}`,
                 })
               }
             }
@@ -351,92 +434,90 @@ export class DnaValidator {
       }
 
       // Noun-level integrity: parent must reference a noun of the same kind
-      for (const r of nouns.resources) {
-        if (r.parent && !nouns.resourceNames.has(r.parent)) {
+      for (const r of primitives.resources) {
+        if (r.parent && !primitives.resourceNames.has(r.parent)) {
           errors.push({
             layer: 'operational',
             path: `resources/${r.name}/parent`,
-            message: `Resource "${r.name}" parent "${r.parent}" does not reference a declared Resource. Available: ${[...nouns.resourceNames].join(', ')}`,
+            message: `Resource "${r.name}" parent "${r.parent}" does not reference a declared Resource. Available: ${[...primitives.resourceNames].join(', ')}`,
           })
         }
       }
-      for (const p of nouns.persons) {
-        if (p.parent && !nouns.personNames.has(p.parent)) {
+      for (const p of primitives.persons) {
+        if (p.parent && !primitives.personNames.has(p.parent)) {
           errors.push({
             layer: 'operational',
             path: `persons/${p.name}/parent`,
-            message: `Person "${p.name}" parent "${p.parent}" does not reference a declared Person. Available: ${[...nouns.personNames].join(', ')}`,
+            message: `Person "${p.name}" parent "${p.parent}" does not reference a declared Person. Available: ${[...primitives.personNames].join(', ')}`,
           })
         }
       }
-      for (const g of nouns.groups) {
-        if (g.parent && !nouns.groupNames.has(g.parent)) {
+      for (const g of primitives.groups) {
+        if (g.parent && !primitives.groupNames.has(g.parent)) {
           errors.push({
             layer: 'operational',
             path: `groups/${g.name}/parent`,
-            message: `Group "${g.name}" parent "${g.parent}" does not reference a declared Group. Available: ${[...nouns.groupNames].join(', ')}`,
+            message: `Group "${g.name}" parent "${g.parent}" does not reference a declared Group. Available: ${[...primitives.groupNames].join(', ')}`,
           })
         }
       }
 
       // Role-specific integrity:
-      // - scope (string | string[]) → must resolve to a Group OR Person (the noun the role is exercised within).
-      //   Group is the canonical case; Person scope is for per-individual roles like AttendingPhysician.scope = Patient.
+      // - scope (string | string[]) → must resolve to a scopeable primitive.
       // - parent → another Role.
       // - resource → a Resource (when system Role is backed by a Resource template).
-      const scopePool = new Set<string>([...nouns.groupNames, ...nouns.personNames])
-      for (const role of nouns.roles) {
-        if (role.parent && !nouns.roleNames.has(role.parent)) {
+      for (const role of primitives.roles) {
+        if (role.parent && !primitives.roleNames.has(role.parent)) {
           errors.push({
             layer: 'operational',
             path: `roles/${role.name}/parent`,
-            message: `Role "${role.name}" parent "${role.parent}" does not reference a declared Role. Available: ${[...nouns.roleNames].join(', ')}`,
+            message: `Role "${role.name}" parent "${role.parent}" does not reference a declared Role. Available: ${[...primitives.roleNames].join(', ')}`,
           })
         }
         const scopes = role.scope === undefined ? [] : Array.isArray(role.scope) ? role.scope : [role.scope]
         for (const s of scopes) {
-          if (!scopePool.has(s)) {
+          if (!scopeablePool.has(s)) {
             errors.push({
               layer: 'operational',
               path: `roles/${role.name}/scope`,
-              message: `Role "${role.name}" scope "${s}" does not reference a declared Group or Person. Available: ${[...scopePool].sort().join(', ')}`,
+              message: `Role "${role.name}" scope "${s}" does not reference a declared ${scopeableKinds}. Available: ${[...scopeablePool].sort().join(', ')}`,
             })
           }
         }
-        if (role.resource && !nouns.resourceNames.has(role.resource)) {
+        if (role.resource && !primitives.resourceNames.has(role.resource)) {
           errors.push({
             layer: 'operational',
             path: `roles/${role.name}/resource`,
-            message: `Role "${role.name}" resource "${role.resource}" does not reference a declared Resource. Available: ${[...nouns.resourceNames].join(', ')}`,
+            message: `Role "${role.name}" resource "${role.resource}" does not reference a declared Resource. Available: ${[...primitives.resourceNames].join(', ')}`,
           })
         }
       }
 
       // Membership integrity: person/role/group references; group must match Role.scope when both present
       for (const m of op.memberships ?? []) {
-        if (!nouns.personNames.has(m.person)) {
+        if (!primitives.personNames.has(m.person)) {
           errors.push({
             layer: 'operational',
             path: `memberships/${m.name}/person`,
-            message: `Membership "${m.name}" references Person "${m.person}" which does not exist. Available: ${[...nouns.personNames].join(', ')}`,
+            message: `Membership "${m.name}" references Person "${m.person}" which does not exist. Available: ${[...primitives.personNames].join(', ')}`,
           })
         }
-        if (!nouns.roleNames.has(m.role)) {
+        if (!primitives.hasCharacteristic(m.role, 'memberable')) {
           errors.push({
             layer: 'operational',
             path: `memberships/${m.name}/role`,
-            message: `Membership "${m.name}" references Role "${m.role}" which does not exist. Available: ${[...nouns.roleNames].join(', ')}`,
+            message: `Membership "${m.name}" references Role "${m.role}" which does not exist. Available: ${[...primitives.roleNames].join(', ')}`,
           })
         }
-        if (m.group && !scopePool.has(m.group)) {
+        if (m.group && !scopeablePool.has(m.group)) {
           errors.push({
             layer: 'operational',
             path: `memberships/${m.name}/group`,
-            message: `Membership "${m.name}" references "${m.group}" which is not a declared Group or Person (the valid Role.scope targets). Available: ${[...scopePool].sort().join(', ')}`,
+            message: `Membership "${m.name}" references "${m.group}" which is not a declared ${scopeableKinds} (the valid Role.scope targets). Available: ${[...scopeablePool].sort().join(', ')}`,
           })
         }
-        if (m.group && nouns.roleNames.has(m.role)) {
-          const role = nouns.roles.find(r => r.name === m.role)!
+        if (m.group && primitives.roleNames.has(m.role)) {
+          const role = primitives.roles.find(r => r.name === m.role)!
           const scopes = role.scope === undefined ? [] : Array.isArray(role.scope) ? role.scope : [role.scope]
           if (scopes.length > 0 && !scopes.includes(m.group)) {
             errors.push({
@@ -447,8 +528,8 @@ export class DnaValidator {
           }
         }
         // Multi-scope ambiguity: Role with array scope requires Membership.group
-        if (!m.group && nouns.roleNames.has(m.role)) {
-          const role = nouns.roles.find(r => r.name === m.role)!
+        if (!m.group && primitives.roleNames.has(m.role)) {
+          const role = primitives.roles.find(r => r.name === m.role)!
           if (Array.isArray(role.scope) && role.scope.length > 1) {
             errors.push({
               layer: 'operational',
@@ -462,22 +543,22 @@ export class DnaValidator {
 
       // Relationship validation: from/to must reference any noun, attribute must exist on "from"
       for (const rel of op.relationships ?? []) {
-        if (!nouns.allNounNames.has(rel.from)) {
+        if (!primitives.allNounNames.has(rel.from)) {
           errors.push({
             layer: 'operational',
             path: `relationships/${rel.name}/from`,
-            message: `Relationship "${rel.name}" references "${rel.from}" (from) which does not exist as any noun primitive. Available: ${[...nouns.allNounNames].sort().join(', ')}`,
+            message: `Relationship "${rel.name}" references "${rel.from}" (from) which does not exist as any noun primitive. Available: ${[...primitives.allNounNames].sort().join(', ')}`,
           })
         }
-        if (!nouns.allNounNames.has(rel.to)) {
+        if (!primitives.allNounNames.has(rel.to)) {
           errors.push({
             layer: 'operational',
             path: `relationships/${rel.name}/to`,
-            message: `Relationship "${rel.name}" references "${rel.to}" (to) which does not exist as any noun primitive. Available: ${[...nouns.allNounNames].sort().join(', ')}`,
+            message: `Relationship "${rel.name}" references "${rel.to}" (to) which does not exist as any noun primitive. Available: ${[...primitives.allNounNames].sort().join(', ')}`,
           })
         }
-        if (nouns.allNounNames.has(rel.from)) {
-          const fromNoun = nouns.byName.get(rel.from)!.noun
+        if (primitives.allNounNames.has(rel.from)) {
+          const fromNoun = primitives.byName.get(rel.from)!.noun as NounShape
           const attrNames = new Set((fromNoun.attributes ?? []).map(a => a.name))
           if (!attrNames.has(rel.attribute)) {
             errors.push({
@@ -489,17 +570,14 @@ export class DnaValidator {
         }
       }
 
-      // Task.actor must reference a declared Role OR Person.
-      // - Roles cover internal positions (Underwriter, Doctor) where the actor is bound to a position.
-      // - Persons cover external roles (Borrower, Patient) where the entity itself is the actor.
+      // Task.actor must reference an actorable primitive (Role or Person).
       // Task.operation must reference a declared Operation.
-      const actorPool = new Set<string>([...nouns.roleNames, ...nouns.personNames])
       for (const task of op.tasks ?? []) {
-        if (actorPool.size > 0 && !actorPool.has(task.actor)) {
+        if (actorablePool.size > 0 && !actorablePool.has(task.actor)) {
           errors.push({
             layer: 'operational',
             path: `tasks/${task.name}/actor`,
-            message: `Task "${task.name}" references actor "${task.actor}" which is neither a declared Role nor a declared Person. Available: ${[...actorPool].sort().join(', ')}`,
+            message: `Task "${task.name}" references actor "${task.actor}" which is neither a declared ${actorableKinds}. Available: ${[...actorablePool].sort().join(', ')}`,
           })
         }
         if (!operationNames.has(task.operation)) {
@@ -511,15 +589,15 @@ export class DnaValidator {
         }
       }
 
-      // Process.operator must reference a declared Role or Person (same pool as Task.actor)
-      // Process.startStep must be a defined Step id
-      // Process.steps[].task must reference a declared Task
+      // Process.operator must reference an actorable primitive.
+      // Process.startStep must be a defined Step id.
+      // Process.steps[].task must reference a declared Task.
       for (const proc of op.processes ?? []) {
-        if (actorPool.size > 0 && !actorPool.has(proc.operator)) {
+        if (actorablePool.size > 0 && !actorablePool.has(proc.operator)) {
           errors.push({
             layer: 'operational',
             path: `processes/${proc.name}/operator`,
-            message: `Process "${proc.name}" operator "${proc.operator}" is neither a declared Role nor a declared Person. Available: ${[...actorPool].sort().join(', ')}`,
+            message: `Process "${proc.name}" operator "${proc.operator}" is neither a declared ${actorableKinds}. Available: ${[...actorablePool].sort().join(', ')}`,
           })
         }
         const stepIds = new Set((proc.steps ?? []).map(s => s.id))
@@ -580,12 +658,12 @@ export class DnaValidator {
     // If both are present, every Resource/Operation/Signal in product.core must
     // also exist in operational — product core is a projection, never invents.
     if (op && core) {
-      const opNouns = this.collectNouns(op.domain)
+      const opPrimitives = this.collectPrimitives(op)
       const opOperationNames = new Set((op.operations ?? []).map(o => o.name))
       const opSignalNames = new Set((op.signals ?? []).map(s => s.name))
 
       for (const resource of core.resources ?? []) {
-        if (!opNouns.resourceNames.has(resource.name)) {
+        if (!opPrimitives.resourceNames.has(resource.name)) {
           errors.push({
             layer: 'product/core',
             path: `resources/${resource.name}`,
@@ -617,7 +695,7 @@ export class DnaValidator {
     if ((core || op) && api) {
       const resources = core
         ? (core.resources ?? [])
-        : this.collectNouns((op as OperationalDNA).domain).resources
+        : this.collectPrimitives(op as OperationalDNA).resources
       const resourceNames = new Set(resources.map(r => r.name))
       const operations = core ? core.operations : (op as OperationalDNA).operations
       const operationNames = new Set((operations ?? []).map(o => o.name))
