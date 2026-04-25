@@ -134,10 +134,10 @@ Canonical DNA documents under [`examples/<domain>/`](./examples), each validated
 | `lending` | Shipped | Standard Operation/Task/Process flow; system actor; scoped Role; Step.conditions; Step.else; multi-target Triggers |
 | `mass-tort` | Shipped | Resource as Group; Memberships; multi-Process domain; Process triggered by upstream Operation |
 | `marketplace` | Shipped | Resource/Role duality; same User in peer Roles across multiple Groups; global Role; Step.else routing to sibling |
-| `healthcare` | Planned | Patient as Resource+Role; complex condition Rules; multi-actor care team |
-| `education` | Planned | CourseOffering as Group; Student/Instructor Roles; semester-bound memberships |
-| `banking` | Planned | Heavier scheduled-trigger surface; ATM/branch as Group |
-| `manufacturing` | Planned | Machine actors; parallel-step orchestration |
+| `healthcare` | Shipped | Patient as Resource+Group; same User across many Patient Groups; mixed Group-Resource types; multi-predicate condition Rule |
+| `manufacturing` | Shipped | Multiple system actors; parallel fan-out+fan-in via depends_on; schedule-source Trigger on system Operation; Operation-chain Triggers |
+| `education` | Shipped | CourseOffering vs Course; same User as Instructor + Student simultaneously; three scope tiers; calendar-aligned schedule Triggers |
+| `banking` | Deferred | Overlapping with `lending` — defer until a banking-specific shape (multi-tenant ATM network?) motivates a separate example |
 
 ### Framework comparisons
 
@@ -148,9 +148,10 @@ Concept-by-concept mappings under [`docs/frameworks/`](./docs/frameworks), each 
 | [BPMN 2.0](./docs/frameworks/bpmn.md) | Shipped |
 | [Domain-Driven Design](./docs/frameworks/ddd.md) | Shipped |
 | [ArchiMate 3](./docs/frameworks/archimate.md) | Shipped |
-| C4 Model | Planned |
-| Event Storming (workshop output mapping) | Planned |
-| TOGAF | Planned (broad scope; defer until concrete sub-scope is needed) |
+| [C4 Model](./docs/frameworks/c4.md) | Shipped |
+| [Event Storming](./docs/frameworks/event-storming.md) | Shipped |
+| TOGAF | Deferred (broad scope; defer until concrete sub-scope is needed) |
+| ER / IDEF1X | Deferred (trivial Resource/Attribute/Relationship mapping) |
 
 ## Open questions
 

@@ -84,10 +84,13 @@ Canonical end-to-end DNA documents demonstrating the model across different busi
 | [`examples/lending`](./examples/lending) | Operations, Tasks, Process; Operation-level + Process-level Triggers; system actor (scheduled job); scoped Role; Step.conditions referencing Rules; Step.else routing |
 | [`examples/mass-tort`](./examples/mass-tort) | Resource as Group (Case); Memberships pinning Roles in Groups; multiple Processes; Process triggered by Operation completion |
 | [`examples/marketplace`](./examples/marketplace) | Resource/Role duality (Host, Guest); same User in two peer Roles across two Groups; global (unscoped) Role; Step.else as sibling-step routing |
+| [`examples/healthcare`](./examples/healthcare) | Patient as Resource + Group (care team scoped per-Patient); same User across many Patient Groups; mixed Group-Resource types; multi-predicate condition Rule |
+| [`examples/manufacturing`](./examples/manufacturing) | Multiple system actors (CNC, press, paint robot); parallel fan-out + fan-in via Step.depends_on; schedule-source Trigger on a system Operation; Operation-chain Triggers |
+| [`examples/education`](./examples/education) | CourseOffering vs Course (time-bound Group vs catalog entry); same User as Instructor + Student simultaneously; three scope tiers (CourseOffering, Department, global); calendar-aligned schedule Triggers |
 
 ## Framework comparisons
 
-If you already model your domain in DDD, BPMN, or ArchiMate, see [`docs/frameworks/`](./docs/frameworks) for concept-by-concept mappings, where DNA intentionally differs, and concrete translations using the examples above. Currently covered: [BPMN](./docs/frameworks/bpmn.md), [Domain-Driven Design](./docs/frameworks/ddd.md), [ArchiMate](./docs/frameworks/archimate.md).
+If you already model your domain in DDD, BPMN, ArchiMate, C4, or Event Storming, see [`docs/frameworks/`](./docs/frameworks) for concept-by-concept mappings, where DNA intentionally differs, and concrete translations using the examples above. Currently covered: [BPMN](./docs/frameworks/bpmn.md), [Domain-Driven Design](./docs/frameworks/ddd.md), [ArchiMate](./docs/frameworks/archimate.md), [C4 Model](./docs/frameworks/c4.md), [Event Storming](./docs/frameworks/event-storming.md).
 
 ## Operational Layer
 

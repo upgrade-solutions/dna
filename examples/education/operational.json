@@ -1,0 +1,225 @@
+{
+  "domain": {
+    "name": "academics",
+    "path": "berkeley.cs.academics",
+    "description": "University CS department academics. CourseOffering (a course-in-a-specific-semester) is the Group: Instructor and Student Roles are scoped to a CourseOffering, so the same person can be Instructor of one offering and Student of another in the same semester.",
+    "resources": [
+      {
+        "name": "Course",
+        "description": "A catalog course (e.g. CS101 'Intro to Programming'). Stable across semesters.",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "code", "type": "string", "required": true, "description": "e.g. CS101" },
+          { "name": "title", "type": "string", "required": true },
+          { "name": "units", "type": "number", "required": true }
+        ]
+      },
+      {
+        "name": "CourseOffering",
+        "description": "A specific instance of a Course in a specific semester (CS101 Spring 2026 Section 1). Both Resource (tracked) AND Group (scopes Instructor + Student memberships).",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "course_id", "type": "reference", "resource": "Course", "required": true },
+          { "name": "semester", "type": "string", "required": true, "description": "e.g. spring-2026" },
+          { "name": "section", "type": "number" },
+          { "name": "capacity", "type": "number" },
+          { "name": "status", "type": "enum", "required": true, "values": ["open", "closed", "in_session", "complete"] }
+        ],
+        "actions": [
+          { "name": "Open" },
+          { "name": "Close" },
+          { "name": "Begin" },
+          { "name": "Finalize" }
+        ]
+      },
+      {
+        "name": "Enrollment",
+        "description": "A Student's enrollment in a CourseOffering.",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "offering_id", "type": "reference", "resource": "CourseOffering", "required": true },
+          { "name": "student_id", "type": "string", "required": true },
+          { "name": "status", "type": "enum", "required": true, "values": ["enrolled", "waitlisted", "dropped", "completed"] }
+        ],
+        "actions": [
+          { "name": "Request" },
+          { "name": "Confirm" },
+          { "name": "Drop" }
+        ]
+      },
+      {
+        "name": "Coursework",
+        "description": "An assignment or exam in a CourseOffering.",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "offering_id", "type": "reference", "resource": "CourseOffering", "required": true },
+          { "name": "kind", "type": "enum", "required": true, "values": ["homework", "midterm", "final", "project"] },
+          { "name": "due_at", "type": "datetime" }
+        ],
+        "actions": [
+          { "name": "Submit" },
+          { "name": "Grade" }
+        ]
+      },
+      {
+        "name": "Grade",
+        "description": "A grade assigned by an Instructor for a Student's Coursework submission.",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "coursework_id", "type": "reference", "resource": "Coursework", "required": true },
+          { "name": "student_id", "type": "string", "required": true },
+          { "name": "score", "type": "number", "required": true },
+          { "name": "letter", "type": "enum", "values": ["A", "B", "C", "D", "F", "P", "NP"] }
+        ]
+      },
+      {
+        "name": "Instructor",
+        "description": "Role: an instructor of a CourseOffering. Scoped to the offering — different offering, different membership.",
+        "scope": "CourseOffering"
+      },
+      {
+        "name": "Student",
+        "description": "Role: an enrolled student in a CourseOffering. Scoped to the offering.",
+        "scope": "CourseOffering"
+      },
+      {
+        "name": "DepartmentChair",
+        "description": "Role: the department chair. Scoped to the Department (not a CourseOffering).",
+        "scope": "Department"
+      },
+      {
+        "name": "Department",
+        "description": "Group: the academic department (CS). Scopes DepartmentChair memberships."
+      },
+      {
+        "name": "Registrar",
+        "description": "Role: registrar's office staff. Unscoped — global across all CourseOfferings."
+      },
+      {
+        "name": "DrPatel",
+        "description": "User: Dr. Patel. Instructor of two CourseOfferings AND Student in a third (auditing colleague's grad seminar).",
+        "memberships": [
+          { "role": "Instructor", "in": "CourseOffering", "description": "CS101 Spring 2026 Section 1" },
+          { "role": "Instructor", "in": "CourseOffering", "description": "CS300 Spring 2026" },
+          { "role": "Student", "in": "CourseOffering", "description": "CS499 Spring 2026 (audit)" }
+        ]
+      },
+      {
+        "name": "AlexUndergrad",
+        "description": "User: Alex, undergraduate. Student in three CourseOfferings this semester.",
+        "memberships": [
+          { "role": "Student", "in": "CourseOffering", "description": "CS101 Spring 2026 Section 1" },
+          { "role": "Student", "in": "CourseOffering", "description": "MATH210 Spring 2026" },
+          { "role": "Student", "in": "CourseOffering", "description": "ENG102 Spring 2026" }
+        ]
+      }
+    ]
+  },
+  "operations": [
+    { "resource": "CourseOffering", "action": "Open", "name": "CourseOffering.Open" },
+    { "resource": "CourseOffering", "action": "Close", "name": "CourseOffering.Close" },
+    { "resource": "CourseOffering", "action": "Begin", "name": "CourseOffering.Begin" },
+    { "resource": "CourseOffering", "action": "Finalize", "name": "CourseOffering.Finalize" },
+    { "resource": "Enrollment", "action": "Request", "name": "Enrollment.Request" },
+    { "resource": "Enrollment", "action": "Confirm", "name": "Enrollment.Confirm" },
+    { "resource": "Enrollment", "action": "Drop", "name": "Enrollment.Drop" },
+    { "resource": "Coursework", "action": "Submit", "name": "Coursework.Submit" },
+    { "resource": "Coursework", "action": "Grade", "name": "Coursework.Grade" }
+  ],
+  "triggers": [
+    { "operation": "CourseOffering.Open", "source": "user" },
+    { "operation": "Enrollment.Request", "source": "user" },
+    { "operation": "Coursework.Submit", "source": "user" },
+    { "process": "EnrollmentApproval", "source": "operation", "after": "Enrollment.Request" },
+    { "operation": "CourseOffering.Begin", "source": "schedule", "schedule": "0 0 * 1 *", "description": "January start-of-month opens spring offerings into in-session." },
+    { "process": "SemesterFinalization", "source": "schedule", "schedule": "0 0 15 5 *", "description": "Mid-May runs final-grade rollup for spring offerings." }
+  ],
+  "rules": [
+    { "operation": "CourseOffering.Open", "type": "access", "allow": [{ "role": "Registrar" }, { "role": "DepartmentChair" }] },
+    { "operation": "CourseOffering.Close", "type": "access", "allow": [{ "role": "Registrar" }] },
+    { "operation": "CourseOffering.Begin", "type": "access", "allow": [{ "role": "Registrar" }] },
+    { "operation": "CourseOffering.Finalize", "type": "access", "allow": [{ "role": "Instructor" }] },
+    { "operation": "Enrollment.Request", "type": "access", "allow": [{ "role": "Student" }] },
+    { "operation": "Enrollment.Confirm", "type": "access", "allow": [{ "role": "Registrar" }] },
+    { "operation": "Enrollment.Drop", "type": "access", "allow": [{ "role": "Student", "ownership": true }, { "role": "Registrar" }] },
+    { "operation": "Coursework.Submit", "type": "access", "allow": [{ "role": "Student", "ownership": true }] },
+    { "operation": "Coursework.Grade", "type": "access", "allow": [{ "role": "Instructor" }] },
+    {
+      "name": "OfferingIsOpen",
+      "operation": "Enrollment.Request",
+      "type": "condition",
+      "conditions": [{ "attribute": "course_offering.status", "operator": "eq", "value": "open" }]
+    },
+    {
+      "name": "SeatsAvailable",
+      "operation": "Enrollment.Confirm",
+      "type": "condition",
+      "conditions": [{ "attribute": "course_offering.enrolled_count", "operator": "lt", "value": 999 }]
+    },
+    {
+      "name": "OfferingInSession",
+      "operation": "Coursework.Submit",
+      "type": "condition",
+      "conditions": [{ "attribute": "course_offering.status", "operator": "eq", "value": "in_session" }]
+    },
+    {
+      "name": "AllCourseworkGraded",
+      "operation": "CourseOffering.Finalize",
+      "type": "condition",
+      "conditions": [{ "attribute": "course_offering.ungraded_coursework_count", "operator": "eq", "value": 0 }]
+    }
+  ],
+  "outcomes": [
+    { "operation": "CourseOffering.Open", "changes": [{ "attribute": "course_offering.status", "set": "open" }] },
+    { "operation": "CourseOffering.Begin", "changes": [{ "attribute": "course_offering.status", "set": "in_session" }] },
+    { "operation": "CourseOffering.Finalize", "changes": [{ "attribute": "course_offering.status", "set": "complete" }], "emits": ["academics.CourseOffering.Finalized"] },
+    { "operation": "Enrollment.Request", "changes": [{ "attribute": "enrollment.status", "set": "waitlisted" }] },
+    { "operation": "Enrollment.Confirm", "changes": [{ "attribute": "enrollment.status", "set": "enrolled" }] },
+    { "operation": "Enrollment.Drop", "changes": [{ "attribute": "enrollment.status", "set": "dropped" }] }
+  ],
+  "signals": [
+    {
+      "name": "academics.CourseOffering.Finalized",
+      "operation": "CourseOffering.Finalize",
+      "description": "All grades posted for an offering. Triggers transcript update + degree-audit recalculation downstream.",
+      "payload": [
+        { "name": "offering_id", "type": "string" },
+        { "name": "course_code", "type": "string" },
+        { "name": "semester", "type": "string" }
+      ]
+    }
+  ],
+  "relationships": [
+    { "name": "CourseOffering.course", "from": "CourseOffering", "to": "Course", "cardinality": "many-to-one", "attribute": "course_id" },
+    { "name": "Enrollment.offering", "from": "Enrollment", "to": "CourseOffering", "cardinality": "many-to-one", "attribute": "offering_id" },
+    { "name": "Coursework.offering", "from": "Coursework", "to": "CourseOffering", "cardinality": "many-to-one", "attribute": "offering_id" }
+  ],
+  "tasks": [
+    { "name": "request-enrollment", "actor": "Student", "operation": "Enrollment.Request" },
+    { "name": "confirm-enrollment", "actor": "Registrar", "operation": "Enrollment.Confirm" },
+    { "name": "submit-coursework", "actor": "Student", "operation": "Coursework.Submit" },
+    { "name": "grade-coursework", "actor": "Instructor", "operation": "Coursework.Grade" },
+    { "name": "finalize-offering", "actor": "Instructor", "operation": "CourseOffering.Finalize" }
+  ],
+  "processes": [
+    {
+      "name": "EnrollmentApproval",
+      "description": "Student requests enrollment, Registrar confirms if seats remain.",
+      "operator": "Registrar",
+      "startStep": "request",
+      "steps": [
+        { "id": "request", "task": "request-enrollment", "conditions": ["OfferingIsOpen"], "else": "abort" },
+        { "id": "confirm", "task": "confirm-enrollment", "depends_on": ["request"], "conditions": ["SeatsAvailable"], "else": "abort" }
+      ]
+    },
+    {
+      "name": "SemesterFinalization",
+      "description": "End-of-semester: instructor finalizes the offering once all coursework is graded.",
+      "operator": "Instructor",
+      "startStep": "finalize",
+      "steps": [
+        { "id": "finalize", "task": "finalize-offering", "conditions": ["AllCourseworkGraded"], "else": "abort" }
+      ]
+    }
+  ]
+}

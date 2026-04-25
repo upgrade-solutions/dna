@@ -1,0 +1,175 @@
+{
+  "domain": {
+    "name": "assembly",
+    "path": "acme.manufacturing.assembly",
+    "description": "Discrete-manufacturing assembly line. WorkOrders flow through machines (system actors) and human inspectors with parallel paint+stamp Steps converging at quality inspection.",
+    "resources": [
+      {
+        "name": "WorkOrder",
+        "description": "A production order for a batch of parts.",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "part_number", "type": "string", "required": true },
+          { "name": "quantity", "type": "number", "required": true },
+          { "name": "status", "type": "enum", "required": true, "values": ["queued", "cutting", "in_progress", "inspection", "passed", "failed", "completed"] }
+        ],
+        "actions": [
+          { "name": "Release" },
+          { "name": "Cut" },
+          { "name": "Stamp" },
+          { "name": "Paint" },
+          { "name": "Inspect" },
+          { "name": "Reject" },
+          { "name": "Complete" }
+        ]
+      },
+      {
+        "name": "DefectReport",
+        "description": "A QC failure record tied to a WorkOrder.",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "work_order_id", "type": "reference", "resource": "WorkOrder", "required": true },
+          { "name": "defect_kind", "type": "enum", "required": true, "values": ["dimensional", "surface", "alignment", "other"] },
+          { "name": "noted_at", "type": "datetime" }
+        ],
+        "actions": [
+          { "name": "File" }
+        ]
+      },
+      {
+        "name": "ShiftSupervisor",
+        "description": "Role: human supervisor responsible for a Shift's WorkOrders.",
+        "scope": "Shift"
+      },
+      {
+        "name": "QualityInspector",
+        "description": "Role: inspects post-finish WorkOrders.",
+        "scope": "Shift"
+      },
+      {
+        "name": "Shift",
+        "description": "Group: a production shift. Scopes ShiftSupervisor and QualityInspector memberships."
+      },
+      {
+        "name": "CncMachine",
+        "description": "System actor: CNC milling machine that performs the Cut step on every WorkOrder. No human operates it directly."
+      },
+      {
+        "name": "StampingPress",
+        "description": "System actor: hydraulic press that performs Stamp on suitable WorkOrders. Runs in parallel with PaintRobot after Cut."
+      },
+      {
+        "name": "PaintRobot",
+        "description": "System actor: robotic paint cell that performs Paint. Runs in parallel with StampingPress."
+      },
+      {
+        "name": "MaintenanceScheduler",
+        "description": "System actor: nightly job that flags machines needing service. Demonstrates a schedule-source Trigger on a system Resource that doesn't act on the WorkOrder itself."
+      },
+      {
+        "name": "AlexFirstShift",
+        "description": "User: Alex, ShiftSupervisor on first shift, also QualityInspector on overnight (covering vacation).",
+        "memberships": [
+          { "role": "ShiftSupervisor", "in": "Shift", "description": "First shift, weekdays" },
+          { "role": "QualityInspector", "in": "Shift", "description": "Overnight, two days/week" }
+        ]
+      }
+    ]
+  },
+  "operations": [
+    { "resource": "WorkOrder", "action": "Release", "name": "WorkOrder.Release" },
+    { "resource": "WorkOrder", "action": "Cut", "name": "WorkOrder.Cut" },
+    { "resource": "WorkOrder", "action": "Stamp", "name": "WorkOrder.Stamp" },
+    { "resource": "WorkOrder", "action": "Paint", "name": "WorkOrder.Paint" },
+    { "resource": "WorkOrder", "action": "Inspect", "name": "WorkOrder.Inspect" },
+    { "resource": "WorkOrder", "action": "Reject", "name": "WorkOrder.Reject" },
+    { "resource": "WorkOrder", "action": "Complete", "name": "WorkOrder.Complete" },
+    { "resource": "DefectReport", "action": "File", "name": "DefectReport.File" }
+  ],
+  "triggers": [
+    { "operation": "WorkOrder.Release", "source": "user", "description": "ShiftSupervisor releases a WorkOrder to the line." },
+    { "process": "AssemblyFlow", "source": "operation", "after": "WorkOrder.Release" },
+    { "operation": "WorkOrder.Reject", "source": "operation", "after": "DefectReport.File", "description": "Filing a defect auto-rejects the WorkOrder." },
+    { "operation": "WorkOrder.Cut", "source": "schedule", "schedule": "*/15 * * * *", "description": "CncMachine polls the queue every 15 minutes for cuttable WorkOrders." }
+  ],
+  "rules": [
+    { "operation": "WorkOrder.Release", "type": "access", "allow": [{ "role": "ShiftSupervisor" }] },
+    { "operation": "WorkOrder.Cut", "type": "access", "allow": [{ "role": "CncMachine" }] },
+    { "operation": "WorkOrder.Stamp", "type": "access", "allow": [{ "role": "StampingPress" }] },
+    { "operation": "WorkOrder.Paint", "type": "access", "allow": [{ "role": "PaintRobot" }] },
+    { "operation": "WorkOrder.Inspect", "type": "access", "allow": [{ "role": "QualityInspector" }] },
+    { "operation": "WorkOrder.Reject", "type": "access", "allow": [{ "role": "QualityInspector" }] },
+    { "operation": "WorkOrder.Complete", "type": "access", "allow": [{ "role": "ShiftSupervisor" }] },
+    { "operation": "DefectReport.File", "type": "access", "allow": [{ "role": "QualityInspector" }] },
+    {
+      "name": "WorkOrderIsQueued",
+      "operation": "WorkOrder.Cut",
+      "type": "condition",
+      "conditions": [{ "attribute": "work_order.status", "operator": "eq", "value": "queued" }]
+    },
+    {
+      "name": "WorkOrderIsCut",
+      "operation": "WorkOrder.Stamp",
+      "type": "condition",
+      "conditions": [{ "attribute": "work_order.status", "operator": "in", "value": ["cutting", "in_progress"] }]
+    },
+    {
+      "name": "InspectionPassed",
+      "operation": "WorkOrder.Complete",
+      "type": "condition",
+      "conditions": [{ "attribute": "work_order.status", "operator": "eq", "value": "passed" }]
+    }
+  ],
+  "outcomes": [
+    { "operation": "WorkOrder.Release", "changes": [{ "attribute": "work_order.status", "set": "queued" }] },
+    { "operation": "WorkOrder.Cut", "changes": [{ "attribute": "work_order.status", "set": "in_progress" }] },
+    { "operation": "WorkOrder.Inspect", "changes": [{ "attribute": "work_order.status", "set": "passed" }] },
+    { "operation": "WorkOrder.Reject", "changes": [{ "attribute": "work_order.status", "set": "failed" }], "emits": ["assembly.WorkOrder.Rejected"] },
+    { "operation": "WorkOrder.Complete", "changes": [{ "attribute": "work_order.status", "set": "completed" }], "emits": ["assembly.WorkOrder.Completed"] }
+  ],
+  "signals": [
+    {
+      "name": "assembly.WorkOrder.Rejected",
+      "operation": "WorkOrder.Reject",
+      "description": "QC rejected a WorkOrder. Triggers downstream defect-rate analytics.",
+      "payload": [
+        { "name": "work_order_id", "type": "string" },
+        { "name": "defect_kind", "type": "string" }
+      ]
+    },
+    {
+      "name": "assembly.WorkOrder.Completed",
+      "operation": "WorkOrder.Complete",
+      "description": "WorkOrder finished successfully — shipped to the warehouse.",
+      "payload": [
+        { "name": "work_order_id", "type": "string" },
+        { "name": "completed_at", "type": "datetime" }
+      ]
+    }
+  ],
+  "relationships": [
+    { "name": "DefectReport.work_order", "from": "DefectReport", "to": "WorkOrder", "cardinality": "many-to-one", "attribute": "work_order_id" }
+  ],
+  "tasks": [
+    { "name": "cut-part", "actor": "CncMachine", "operation": "WorkOrder.Cut" },
+    { "name": "stamp-part", "actor": "StampingPress", "operation": "WorkOrder.Stamp" },
+    { "name": "paint-part", "actor": "PaintRobot", "operation": "WorkOrder.Paint" },
+    { "name": "inspect-part", "actor": "QualityInspector", "operation": "WorkOrder.Inspect" },
+    { "name": "complete-order", "actor": "ShiftSupervisor", "operation": "WorkOrder.Complete" }
+  ],
+  "processes": [
+    {
+      "name": "AssemblyFlow",
+      "description": "Cut → (Stamp || Paint) → Inspect → Complete. Stamp and Paint run in parallel after Cut and converge at Inspect.",
+      "operator": "ShiftSupervisor",
+      "startStep": "cut",
+      "steps": [
+        { "id": "cut", "task": "cut-part", "conditions": ["WorkOrderIsQueued"] },
+        { "id": "stamp", "task": "stamp-part", "depends_on": ["cut"], "conditions": ["WorkOrderIsCut"] },
+        { "id": "paint", "task": "paint-part", "depends_on": ["cut"], "conditions": ["WorkOrderIsCut"] },
+        { "id": "inspect", "task": "inspect-part", "depends_on": ["stamp", "paint"] },
+        { "id": "complete", "task": "complete-order", "depends_on": ["inspect"], "conditions": ["InspectionPassed"], "else": "abort" }
+      ]
+    }
+  ]
+}

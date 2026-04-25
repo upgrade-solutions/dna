@@ -7,6 +7,8 @@ DNA is a description language, not a methodology. Most teams that adopt DNA alre
 | [BPMN 2.0](./bpmn.md) | Workflow modeling — graphical process notation | DNA's `Process` / `Step` / `Task` cover the same ground textually; intentionally drops boundary events, inclusive gateways, and inline sub-processes |
 | [Domain-Driven Design](./ddd.md) | Tactical + strategic domain modeling in code | Closest in spirit; Bounded Context = `Domain`, Aggregate Root = `Resource`, Domain Event = `Signal`, Specification = condition `Rule` |
 | [ArchiMate 3](./archimate.md) | Enterprise architecture across business, application, and technology layers | Business layer ≈ Operational; Application ≈ Product; Technology ≈ Technical. Motivation/strategy stay out of scope |
+| [C4 Model](./c4.md) | Software-architecture diagrams (Context / Container / Component / Code) | Context ≈ Operational `Domain`; Container ≈ Technical `Cell`; Component is implicit; Code is generated. Strongest at the Product/Technical boundary |
+| [Event Storming](./event-storming.md) | Workshop output → DNA translation | Sticky-color → primitive mapping. Aggregate (tan) = `Resource`; Command (blue) = `Operation`; Event (orange) = `Signal`; Policy (purple) = `Trigger`; Actor (yellow) = `Resource`-as-Role |
 
 ## How to read each comparison
 
@@ -21,12 +23,12 @@ Every doc follows the same structure:
 
 These comparisons are starting points, not exhaustive treatments. Each is meant to be specific enough that someone fluent in the source framework can sanity-check the mapping by inspection. If you find a primitive that's missing or a translation you'd disagree with, open an issue or PR — these docs evolve with the model.
 
-**Planned but not yet written:**
+**Deferred:**
 
-- C4 Model (Context, Container, Component, Code) — overlaps with Product + Technical layers
-- Event Storming (the workshop) — DNA-as-output rather than concept mapping
 - TOGAF — process/governance overlay; too broad to map cleanly without a defined sub-scope
 - ER / IDEF1X — straightforward Resource/Attribute/Relationship mapping; trivial enough to defer
+
+If you'd find one of these useful, open an issue or PR — defer means "not yet motivated by a real need," not "won't ever do."
 
 ## When framework comparison stops being useful
 
