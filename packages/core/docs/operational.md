@@ -77,6 +77,18 @@ When `operational.json` is settled and validates, hand off to **`product-core-ma
 - Read/Write/Edit for `operational.json` itself
 - WebFetch for reference sources named in the prompt
 
+### Role hierarchy
+
+`Role.parent` declares position hierarchy (e.g., `SeniorUnderwriter.parent = Underwriter`). Semantics:
+
+- **Scope inheritance**: a child Role with no `scope` inherits its parent's effective scope (the validator walks the chain to root).
+- **Narrower-or-equal subset rule**: if a child declares its own `scope`, every entry must be narrower-or-equal to some entry in the parent's effective scope. Group→Group narrows when the child's `Group.parent` chain reaches the parent Group; Person→Person passes only on equality; Person→Group never narrows.
+- **No action inheritance**: each Role's `actions[]` is exactly what's declared on that Role. A child does NOT see the parent's actions.
+- **No Membership widening**: a Membership for `Underwriter` does NOT cover `SeniorUnderwriter`. Memberships reference Roles by exact name.
+- **Cycles rejected**: `A.parent = B`, `B.parent = A` (and longer cycles) fail validation; the cycle suppresses the subset check on its members to avoid cascading errors.
+
+These semantics shipped via the `add-role-hierarchy` OpenSpec change.
+
 ### Invariants
 
 1. **Single source of truth**. `operational.json` is authoritative for business logic. Product core is derived from it, not the other way around.

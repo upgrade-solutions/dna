@@ -31,8 +31,9 @@
     },
     "parent": {
       "type": "string",
-      "description": "Optional parent Role for hierarchy (SeniorUnderwriter.parent = Underwriter). Inheritance semantics deferred to v2.",
-      "pattern": "^[A-Z][a-zA-Z0-9]*$"
+      "description": "Optional parent Role for position hierarchy (SeniorUnderwriter.parent = Underwriter). A child with no `scope` inherits its parent's effective scope; a child that declares its own `scope` must be narrower-or-equal (sub-Group via Group.parent, equal Person, or array subset). Cycles are rejected. Action and Membership inheritance are intentionally NOT implied — children declare their own actions[] and Memberships reference Roles by exact name.",
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "examples": ["Underwriter", "Nurse", "AttendingPhysician"]
     },
     "system": {
       "type": "boolean",

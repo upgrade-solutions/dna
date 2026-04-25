@@ -53,6 +53,14 @@
         "scope": "BankDepartment"
       },
       {
+        "name": "SeniorUnderwriter",
+        "description": "Senior position above Underwriter; inherits BankDepartment scope and adds promotion authority.",
+        "parent": "Underwriter",
+        "actions": [
+          { "name": "Promote", "type": "write", "description": "Promotes a junior Underwriter to senior." }
+        ]
+      },
+      {
         "name": "LendingManager",
         "description": "Internal Role responsible for owning the loan-origination Process.",
         "scope": "BankDepartment"

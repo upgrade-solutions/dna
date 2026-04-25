@@ -1306,6 +1306,172 @@ describe('DnaValidator — cross-layer validation', () => {
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.message.includes('phantom-step'))).toBe(true)
   })
+
+  // ── Role hierarchy ─────────────────────────────────────────────────────────
+
+  it('inherits scope from parent Role through a multi-step chain', () => {
+    const goodOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          { name: 'SeniorUnderwriter', parent: 'Underwriter' },
+          { name: 'PrincipalUnderwriter', parent: 'SeniorUnderwriter' },
+        ],
+        // Membership against the inherited-scope child must be valid
+      },
+      memberships: [
+        ...operational.memberships,
+        { name: 'EmployeePrincipal', person: 'Employee', role: 'PrincipalUnderwriter', group: 'BankDepartment' },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: goodOp })
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('detects a 2-Role cycle in Role.parent', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          { name: 'RoleA', parent: 'RoleB' },
+          { name: 'RoleB', parent: 'RoleA' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const cycleErrs = result.errors.filter(e => e.message.includes('cycle'))
+    expect(cycleErrs).toHaveLength(1)
+    expect(cycleErrs[0].message).toContain('"RoleA"')
+    expect(cycleErrs[0].message).toContain('"RoleB"')
+  })
+
+  it('detects a 3-Role cycle in Role.parent and lists members in walk order', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          { name: 'A', parent: 'B' },
+          { name: 'B', parent: 'C' },
+          { name: 'C', parent: 'A' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const cycleErrs = result.errors.filter(e => e.message.includes('cycle'))
+    expect(cycleErrs).toHaveLength(1)
+    expect(cycleErrs[0].message).toMatch(/"A".*"B".*"C"|"B".*"C".*"A"|"C".*"A".*"B"/)
+  })
+
+  it('rejects child Role scope that is unrelated to parent scope', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        groups: [...operational.domain.groups, { name: 'Tenant' }],
+        roles: [
+          ...operational.domain.roles,
+          { name: 'TenantAdmin', parent: 'Underwriter', scope: 'Tenant' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const subsetErr = result.errors.find(e => e.path === 'roles/TenantAdmin/scope' && e.message.includes('narrower-or-equal'))
+    expect(subsetErr).toBeDefined()
+    expect(subsetErr!.message).toContain('"Tenant"')
+    expect(subsetErr!.message).toContain('"BankDepartment"')
+  })
+
+  it('rejects child Role array scope that is wider than parent', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        groups: [
+          ...operational.domain.groups,
+          { name: 'Workspace' },
+          { name: 'Tenant' },
+          { name: 'Region' },
+        ],
+        roles: [
+          ...operational.domain.roles,
+          { name: 'Parent', scope: ['Workspace', 'Tenant'] },
+          { name: 'Child', parent: 'Parent', scope: ['Workspace', 'Tenant', 'Region'] },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const subsetErrs = result.errors.filter(e => e.path === 'roles/Child/scope' && e.message.includes('narrower-or-equal'))
+    expect(subsetErrs).toHaveLength(1)
+    expect(subsetErrs[0].message).toContain('"Region"')
+  })
+
+  it('accepts child Group scope that is a sub-Group of parent Group via Group.parent', () => {
+    const goodOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        groups: [
+          ...operational.domain.groups,
+          { name: 'RetailBranch', parent: 'BankDepartment' },
+        ],
+        roles: [
+          ...operational.domain.roles,
+          { name: 'BranchUnderwriter', parent: 'Underwriter', scope: 'RetailBranch' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: goodOp })
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('rejects Person scope under a Group-scoped parent with a clear message', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          { name: 'PerBorrowerHandler', parent: 'Underwriter', scope: 'Borrower' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const subsetErr = result.errors.find(e => e.path === 'roles/PerBorrowerHandler/scope' && e.message.includes('narrower-or-equal'))
+    expect(subsetErr).toBeDefined()
+    expect(subsetErr!.message).toContain('Person scope')
+  })
+
+  it('suppresses subset error on Roles inside a cycle', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        groups: [...operational.domain.groups, { name: 'Tenant' }],
+        roles: [
+          ...operational.domain.roles,
+          { name: 'CycA', parent: 'CycB', scope: 'Tenant' },
+          { name: 'CycB', parent: 'CycA', scope: 'BankDepartment' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.message.includes('cycle'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('narrower-or-equal'))).toBe(false)
+  })
 })
 
 // ── Cross-layer: product.core ────────────────────────────────────────────────

@@ -364,13 +364,15 @@ The shipped examples were authored before the People primitive split. Each needs
 - Technical layer — untouched
 - Integration packages — untouched apart from any DNA shape they emit/consume
 
+## Landed post-reorg
+
+### Role hierarchy
+Shipped via the `add-role-hierarchy` OpenSpec change (see `openspec/changes/archive/`). `Role.parent` now drives effective-scope inheritance and a narrower-or-equal subset rule; cycles are rejected. Action and Membership inheritance remain explicitly out of scope. Demonstrated in `examples/lending/` via `SeniorUnderwriter.parent = Underwriter`.
+
 ## Future enhancements (post-reorg)
 
 ### Optional Resource `uses` config
 Once the reorg lands and we've lived with the four-primitive People model, consider an **optional** declaration on Resource that names how it's intended to be used (`uses: [actor]`, `uses: [target]`, etc.). Stays opt-in; addresses any validator-strictness loss without re-introducing mandatory metadata.
-
-### Role hierarchy
-`Role.parent` chains with scope inheritance and narrower-or-equal override. Defer until an example forces it.
 
 ### Membership constraints
 Membership-level fields beyond `person`/`role`/`group`: cardinality limits ("at most one Underwriter per BankDepartment"), tenure ("temporary" vs "permanent"), exclusivity. Defer until a real example needs them.

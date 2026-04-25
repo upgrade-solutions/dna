@@ -152,6 +152,50 @@ function availability(label: string, names: Iterable<string>): string {
   return `available ${label}: ${list.sort().map(n => `"${n}"`).join(', ')}`
 }
 
+function findCycle(start: string, byName: Map<string, RoleShape>): string[] | null {
+  const order: string[] = []
+  const seen = new Set<string>()
+  let cur: string | undefined = start
+  while (cur && byName.has(cur)) {
+    if (seen.has(cur)) {
+      return order.slice(order.indexOf(cur))
+    }
+    seen.add(cur)
+    order.push(cur)
+    cur = byName.get(cur)!.parent
+  }
+  return null
+}
+
+function isNarrowerOrEqual(childEntry: string, parentScope: string[], primitives: PrimitiveIndex): boolean {
+  const childKind = primitives.byName.get(childEntry)?.kind
+  for (const parentEntry of parentScope) {
+    if (childEntry === parentEntry) return true
+    if (childKind === 'person') continue
+    const parentKind = primitives.byName.get(parentEntry)?.kind
+    if (parentKind === 'person') continue
+    if (childKind === 'group' && parentKind === 'group') {
+      let cur: string | undefined = childEntry
+      const visited = new Set<string>()
+      while (cur && !visited.has(cur)) {
+        if (cur === parentEntry) return true
+        visited.add(cur)
+        cur = primitives.groups.find(g => g.name === cur)?.parent
+      }
+    }
+  }
+  return false
+}
+
+function narrowingHint(childEntry: string, parentScope: string[], primitives: PrimitiveIndex): string {
+  const childKind = primitives.byName.get(childEntry)?.kind
+  const parentKinds = new Set(parentScope.map(p => primitives.byName.get(p)?.kind))
+  if (childKind === 'person' && parentKinds.size === 1 && parentKinds.has('group')) {
+    return ' (a Person scope is narrower only than itself; it cannot narrow under a Group scope)'
+  }
+  return ''
+}
+
 interface PrimitiveEntry {
   kind: PrimitiveKind
   noun: NounShape | PersonShape | RoleShape | ProcessShape
@@ -486,8 +530,49 @@ export class DnaValidator {
 
       // Role-specific integrity:
       // - scope (string | string[]) → must resolve to a scopeable primitive.
-      // - parent → another Role.
+      // - parent → another Role; chain must be acyclic.
       // - resource → a Resource (when system Role is backed by a Resource template).
+      // - if both parent and own scope, child scope must be narrower-or-equal to parent's effective scope.
+      const roleByName = new Map(primitives.roles.map(r => [r.name, r] as const))
+      const cyclesEmitted = new Set<string>()
+      const cycleMembers = new Set<string>()
+      for (const role of primitives.roles) {
+        const cycle = findCycle(role.name, roleByName)
+        if (!cycle) continue
+        for (const m of cycle) cycleMembers.add(m)
+        const key = [...cycle].sort().join('|')
+        if (cyclesEmitted.has(key)) continue
+        cyclesEmitted.add(key)
+        errors.push({
+          layer: 'operational',
+          path: `roles/${cycle[0]}/parent`,
+          message: `Role parent chain forms a cycle: ${quoteList(cycle)} (in walk order: ${cycle.map(n => `"${n}"`).join(' → ')})`,
+        })
+      }
+
+      const effectiveScopeCache = new Map<string, string[] | null>()
+      const effectiveScope = (name: string): string[] | null => {
+        if (cycleMembers.has(name)) return null
+        if (effectiveScopeCache.has(name)) return effectiveScopeCache.get(name)!
+        const r = roleByName.get(name)
+        if (!r) {
+          effectiveScopeCache.set(name, null)
+          return null
+        }
+        if (r.scope !== undefined) {
+          const own = Array.isArray(r.scope) ? r.scope : [r.scope]
+          effectiveScopeCache.set(name, own)
+          return own
+        }
+        if (r.parent) {
+          const parentScope = effectiveScope(r.parent)
+          effectiveScopeCache.set(name, parentScope)
+          return parentScope
+        }
+        effectiveScopeCache.set(name, [])
+        return []
+      }
+
       for (const role of primitives.roles) {
         if (role.parent && !primitives.roleNames.has(role.parent)) {
           errors.push({
@@ -512,6 +597,28 @@ export class DnaValidator {
             path: `roles/${role.name}/resource`,
             message: `Role "${role.name}" resource "${role.resource}" is not a declared Resource; ${availability('resources', primitives.resourceNames)}`,
           })
+        }
+
+        // Subset check: if both parent (resolved) and own scope present, every entry in the
+        // child's scope must be narrower-or-equal to some entry in the parent's effective scope.
+        if (
+          role.parent &&
+          primitives.roleNames.has(role.parent) &&
+          !cycleMembers.has(role.name) &&
+          role.scope !== undefined
+        ) {
+          const parentScope = effectiveScope(role.parent)
+          if (parentScope !== null && parentScope.length > 0) {
+            for (const childEntry of scopes) {
+              if (!isNarrowerOrEqual(childEntry, parentScope, primitives)) {
+                errors.push({
+                  layer: 'operational',
+                  path: `roles/${role.name}/scope`,
+                  message: `Role "${role.name}" scope "${childEntry}" is not narrower-or-equal to parent Role "${role.parent}" scope ${quoteList(parentScope)}${narrowingHint(childEntry, parentScope, primitives)}`,
+                })
+              }
+            }
+          }
         }
       }
 
