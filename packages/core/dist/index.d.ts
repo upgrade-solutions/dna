@@ -54,7 +54,6 @@ export declare const schemas: {
         readonly node: JsonSchema;
         readonly output: JsonSchema;
         readonly provider: JsonSchema;
-        readonly script: JsonSchema;
         readonly variable: JsonSchema;
         readonly view: JsonSchema;
         readonly zone: JsonSchema;

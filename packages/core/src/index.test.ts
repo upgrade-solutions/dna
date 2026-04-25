@@ -42,7 +42,7 @@ describe('@dna-codes/core', () => {
       expect(Object.keys(schemas.product.web).sort()).toEqual(['block', 'layout', 'page', 'route'])
     })
 
-    it('loads all 11 technical primitive schemas', () => {
+    it('loads all 10 technical primitive schemas', () => {
       expect(Object.keys(schemas.technical).sort()).toEqual([
         'cell',
         'connection',
@@ -51,7 +51,6 @@ describe('@dna-codes/core', () => {
         'node',
         'output',
         'provider',
-        'script',
         'variable',
         'view',
         'zone',
@@ -80,9 +79,9 @@ describe('@dna-codes/core', () => {
       const ids = all.map((s) => s.$id)
       expect(new Set(ids).size).toBe(ids.length)
 
-      // 15 op + 4 product-core + 4 product-api + 4 product-web + 11 technical = 38 primitives
-      // + 5 aggregates = 43 schemas total
-      expect(all.length).toBe(43)
+      // 15 op + 4 product-core + 4 product-api + 4 product-web + 10 technical = 37 primitives
+      // + 5 aggregates = 42 schemas total
+      expect(all.length).toBe(42)
     })
   })
 

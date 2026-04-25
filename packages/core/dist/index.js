@@ -89,7 +89,6 @@ exports.schemas = {
         node: load('technical/node.json'),
         output: load('technical/output.json'),
         provider: load('technical/provider.json'),
-        script: load('technical/script.json'),
         variable: load('technical/variable.json'),
         view: load('technical/view.json'),
         zone: load('technical/zone.json'),
