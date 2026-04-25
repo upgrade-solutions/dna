@@ -1,28 +1,33 @@
 import { DnaInput, Resource, Person, Group, Role, OperationalDomain } from '../types'
-import { hashes } from '../util'
+import { hashes, label } from '../util'
 
-export function renderSummary(dna: DnaInput, h: number): string | null {
+interface SummaryOptions {
+  rename?: Record<string, string>
+}
+
+export function renderSummary(dna: DnaInput, h: number, options: SummaryOptions = {}): string | null {
   const op = dna.operational
   if (!op) return null
 
   const { resources, persons, roles, groups } = collectNouns(op.domain)
   const topLevel = (op.domain.resources ?? []).map((r) => r.name)
+  const lbl = (canonical: string) => label(canonical, options.rename)
 
   const rawCounts: [string, number][] = [
-    ['Resources', resources.length],
-    ['Persons', persons.length],
-    ['Groups', groups.length],
-    ['Roles', roles.length],
-    ['Memberships', op.memberships?.length ?? 0],
-    ['Operations', op.operations?.length ?? 0],
-    ['Triggers', op.triggers?.length ?? 0],
-    ['Rules', op.rules?.length ?? 0],
-    ['Outcomes', op.outcomes?.length ?? 0],
-    ['Signals', op.signals?.length ?? 0],
-    ['Equations', op.equations?.length ?? 0],
-    ['Relationships', op.relationships?.length ?? 0],
-    ['Tasks', op.tasks?.length ?? 0],
-    ['Processes', op.processes?.length ?? 0],
+    [lbl('Resources'), resources.length],
+    [lbl('Persons'), persons.length],
+    [lbl('Groups'), groups.length],
+    [lbl('Roles'), roles.length],
+    [lbl('Memberships'), op.memberships?.length ?? 0],
+    [lbl('Operations'), op.operations?.length ?? 0],
+    [lbl('Triggers'), op.triggers?.length ?? 0],
+    [lbl('Rules'), op.rules?.length ?? 0],
+    [lbl('Outcomes'), op.outcomes?.length ?? 0],
+    [lbl('Signals'), op.signals?.length ?? 0],
+    [lbl('Equations'), op.equations?.length ?? 0,],
+    [lbl('Relationships'), op.relationships?.length ?? 0],
+    [lbl('Tasks'), op.tasks?.length ?? 0],
+    [lbl('Processes'), op.processes?.length ?? 0],
   ]
   const counts = rawCounts.filter(([, n]) => n > 0)
 
@@ -31,11 +36,11 @@ export function renderSummary(dna: DnaInput, h: number): string | null {
 
   if (counts.length) {
     lines.push('**Primitive counts:**', '')
-    for (const [label, n] of counts) lines.push(`- ${label}: ${n}`)
+    for (const [name, n] of counts) lines.push(`- ${name}: ${n}`)
   }
 
   if (topLevel.length) {
-    lines.push('', `**Top-level resources:** ${topLevel.map((r) => `\`${r}\``).join(', ')}`)
+    lines.push('', `**Top-level ${lbl('Resources').toLowerCase()}:** ${topLevel.map((r) => `\`${r}\``).join(', ')}`)
   }
 
   return lines.join('\n')

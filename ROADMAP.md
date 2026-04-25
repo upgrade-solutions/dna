@@ -136,6 +136,32 @@ Trigger {
 
 ASL-style (`StartAt`); matches Temporal `@WorkflowMethod` and n8n trigger nodes. Explicit beats implicit-from-DAG: the validator catches missing/wrong references with a clear error, and it disambiguates Processes with multiple entry-eligible Steps.
 
+### Characteristics of noun primitives
+
+The differences between Resource, Person, Role, Group, and Process aren't naming or schema-shape alone — they're **the slots each primitive can fill in the rest of the model**. Each noun primitive is defined by a combination of characteristics:
+
+| Characteristic | What it enables |
+|---|---|
+| **targetable** | Can be `Operation.target` — state mutates here |
+| **actorable** | Can be `Task.actor` / `Rule.allow[].role` — it acts on others |
+| **scopeable** | Can be `Role.scope` — Roles are exercised within it |
+| **memberable** | Can be `Membership.role` — a position someone fills |
+| **executable** | Has steps and orchestration (Process-like lifecycle) |
+
+The canonical primitives are well-known combinations of these characteristics:
+
+| Primitive | targetable | actorable | scopeable | memberable | executable |
+|---|---|---|---|---|---|
+| Resource | ✓ |  |  |  |  |
+| Person | ✓ | ✓ |  |  |  |
+| Group | ✓ |  | ✓ |  |  |
+| Role | ✓ | ✓ |  | ✓ |  |
+| Process | ✓ |  |  |  | ✓ |
+
+This decomposition documents the validator's actual behavior, not a configurable layer. Every noun is targetable; only Roles and Persons are actorable; only Groups are scopeable; only Roles are memberable; only Processes are executable. Any future noun primitive earns its place by combining characteristics in a way the existing five don't cover.
+
+**Vocabulary preferences** (a company that says "Position" instead of "Role", "Individual" instead of "Person") are surface concerns, **not schema concerns**. The DNA primitive vocabulary stays canonical; output adapters carry a `rename` map for company-friendly rendering. See `output-markdown` for the reference implementation.
+
 ## Operational primitives — final list
 
 ### People

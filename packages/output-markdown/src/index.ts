@@ -28,6 +28,14 @@ export interface RenderOptions {
   title?: string
   /** Starting heading level for the document title (1 or 2). Section headings nest below. */
   headingLevel?: 1 | 2
+  /**
+   * Rename canonical primitive labels (typically the plural collection name) for
+   * company-friendly output. The DNA schema vocabulary stays canonical
+   * (Resource/Person/Role/Group/Process) — only the rendered text changes.
+   *
+   * @example { Persons: 'Individuals', Roles: 'Positions' }
+   */
+  rename?: Record<string, string>
 }
 
 export function render(dna: DnaInput, options: RenderOptions = {}): string {
@@ -43,7 +51,7 @@ export function render(dna: DnaInput, options: RenderOptions = {}): string {
   if (intro) parts.push(intro)
 
   for (const section of sections) {
-    const rendered = renderSection(section, dna, level + 1)
+    const rendered = renderSection(section, dna, level + 1, options)
     if (rendered) parts.push(rendered)
   }
 
@@ -54,10 +62,11 @@ function renderSection(
   section: Section,
   dna: DnaInput,
   h: number,
+  options: RenderOptions,
 ): string | null {
   switch (section) {
     case 'summary':
-      return renderSummary(dna, h)
+      return renderSummary(dna, h, options)
     case 'domain-model':
       return renderDomainModel(dna, h)
     case 'operations':

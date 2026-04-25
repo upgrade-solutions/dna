@@ -67,6 +67,28 @@ describe('@dna-codes/output-markdown', () => {
       const md = render(bookshopInput, { sections: ['summary'] })
       expect(md).toContain('**Top-level resources:** `Book`, `Author`')
     })
+
+    it('honors a rename map for primitive labels', () => {
+      const md = render(bookshopInput, {
+        sections: ['summary'],
+        rename: { Persons: 'Individuals', Roles: 'Positions', Resources: 'Items' },
+      })
+      // canonical names are translated…
+      expect(md).toContain('- Individuals: 1')
+      expect(md).toContain('- Positions: 1')
+      expect(md).toContain('- Items: 2')
+      // …and unmapped ones stay canonical
+      expect(md).toContain('- Operations: 2')
+      // top-level label uses the renamed form, lowercased
+      expect(md).toContain('**Top-level items:** `Book`, `Author`')
+    })
+
+    it('leaves canonical labels untouched when no rename is provided', () => {
+      const md = render(bookshopInput, { sections: ['summary'] })
+      expect(md).toContain('- Persons: 1')
+      expect(md).toContain('- Roles: 1')
+      expect(md).toContain('**Top-level resources:**')
+    })
   })
 
   describe('section: domain-model', () => {

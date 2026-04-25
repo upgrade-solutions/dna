@@ -38,6 +38,28 @@ All Operational primitives — see `@dna-codes/schemas/operational/*.json` for t
 
 History: `Lifecycle` was removed in favor of explicit Operation state transitions expressed through `Outcome.changes`. `Capability` was renamed to `Operation`; `Cause` was renamed to `Trigger`. `User` was dropped (instance-level identity is a Product/Technical concern). Person, Role, Group, and Membership were promoted from earlier structural-typing-on-Resource into first-class primitives.
 
+### Why these primitives — characteristics
+
+The five noun primitives (Resource, Person, Role, Group, Process) aren't differentiated by their schemas alone — they're differentiated by **which slots they can fill in the rest of the model**. Each is a well-known combination of characteristics:
+
+| Characteristic | What it enables |
+|---|---|
+| **targetable** | Can be `Operation.target` — state mutates here |
+| **actorable** | Can be `Task.actor` / `Rule.allow[].role` — it acts on others |
+| **scopeable** | Can be `Role.scope` — Roles are exercised within it |
+| **memberable** | Can be `Membership.role` — a position someone fills |
+| **executable** | Has steps and orchestration (Process-like lifecycle) |
+
+| Primitive | targetable | actorable | scopeable | memberable | executable |
+|---|---|---|---|---|---|
+| Resource | ✓ |  |  |  |  |
+| Person | ✓ | ✓ |  |  |  |
+| Group | ✓ |  | ✓ |  |  |
+| Role | ✓ | ✓ |  | ✓ |  |
+| Process | ✓ |  |  |  | ✓ |
+
+This is documentation of the validator's actual gate logic. Every noun is targetable; only Roles and Persons are actorable; only Groups are scopeable; only Roles are memberable; only Processes are executable. A future primitive earns its place by combining characteristics in a way the existing five don't cover. Vocabulary preferences (Position vs Role, Individual vs Person) are surface concerns — keep schema names canonical and let `output-*` adapters apply a `rename` map.
+
 ### Must not touch
 
 - **Product layer** — `product.core.json`, `product.api.json`, `product.ui.json`. Surface decisions belong to the product-layer agents.
