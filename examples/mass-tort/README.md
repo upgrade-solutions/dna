@@ -8,6 +8,7 @@ Legal docket / mass-tort case management. Each Case is the scoping Group for the
 - **Resource as Actor**: `Claimant` is a tracked entity with attributes AND the Actor that performs `Filing.Submit` (when accessible). Same Resource/Actor duality pattern as Customer in ecommerce.
 - **Memberships pin Roles in Groups**: `JaneEsq` holds `LeadCounsel` in one Case AND `CoCounsel` in another. Same person, different Roles, different Groups — the 3-way relationship made concrete.
 - **Role.scope enforcement**: `LeadCounsel.scope = Case` — the validator catches any Membership pinning LeadCounsel to anything other than a Case.
+- **Per-Case Role constraints (modeling-layer declarations)**: `LeadCounsel` and `Judge` declare `cardinality: "one", required: true` (exactly one per Case); `LeadCounsel.excludes = ["CoCounsel"]` so the same Partner can't be both Lead and Co-counsel on the same Case. The validator checks well-formedness; runtime systems enforce assignment counts.
 - **Two Process-targeted Triggers**: one `user`-source for `ClaimantIntake`, one `operation`-source (`after: Settlement.Accept`) for `SettlementDisbursement`. Demonstrates Process kickoff via both human action and Operation chaining.
 - **Multi-Process domain**: two distinct Processes — `ClaimantIntake` and `SettlementDisbursement` — sharing the same `LeadCounsel` operator and Tasks across the same Case Group.
 

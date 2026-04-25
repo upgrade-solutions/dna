@@ -89,6 +89,16 @@ When `operational.json` is settled and validates, hand off to **`product-core-ma
 
 These semantics shipped via the `add-role-hierarchy` OpenSpec change.
 
+#### Cardinality, required, and excludes
+
+A Role MAY declare three optional per-scope-instance constraints:
+
+- **`cardinality: "one" | "many"`** (default `"many"`) — at most this many Persons may hold the Role on any given scope instance at runtime. `"one"` requires the Role to have a declared or inherited scope.
+- **`required: boolean`** (default `false`) — at least one Person MUST hold the Role on every scope instance at runtime. Composes orthogonally with cardinality: `{cardinality: "one", required: true}` means exactly one. Also requires a declared or inherited scope.
+- **`excludes: RoleName[]`** — the same Person SHALL NOT simultaneously hold the declaring Role and any named Role on the same scope instance. Symmetric (one-sided declaration is enough). The two Roles MUST share at least one effective-scope entry; cross-scope `excludes` is rejected.
+
+All three are incompatible with `system: true`; system Roles are not filled by Persons. These are **modeling-layer declarations**: the validator checks well-formedness only — runtime systems (auth middleware, admin tooling, seed scripts) are responsible for enforcing the assignment counts. Shipped via the `add-role-cardinality-and-exclusivity` OpenSpec change.
+
 ### Invariants
 
 1. **Single source of truth**. `operational.json` is authoritative for business logic. Product core is derived from it, not the other way around.

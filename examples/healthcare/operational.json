@@ -82,8 +82,8 @@
       }
     ],
     "roles": [
-      { "name": "AttendingPhysician",   "description": "Doctor with primary responsibility for a Patient.",                                "scope": "Patient" },
-      { "name": "PrimaryNurse",         "description": "Nurse with primary responsibility for a Patient on a shift.",                       "scope": "Patient" },
+      { "name": "AttendingPhysician",   "description": "Doctor with primary responsibility for a Patient.",                                "scope": "Patient", "cardinality": "one", "excludes": ["ConsultingSpecialist"] },
+      { "name": "PrimaryNurse",         "description": "Nurse with primary responsibility for a Patient on a shift.",                       "scope": "Patient", "cardinality": "one" },
       { "name": "ConsultingSpecialist", "description": "Specialist consulted on a Patient (multiple may exist per Patient).",               "scope": "Patient" },
       { "name": "Pharmacist",           "description": "Pharmacy staff reviewing medication orders. Scoped to the Pharmacy as a whole.",   "scope": "Pharmacy" }
     ]

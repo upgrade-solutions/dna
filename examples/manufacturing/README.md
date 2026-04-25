@@ -9,6 +9,7 @@ Discrete-manufacturing assembly line with multiple system actors (machines) and 
 - **Schedule-source Trigger on a system actor's Operation**: `WorkOrder.Cut` has a `*/15 * * * *` Trigger because the CncMachine polls the queue. Same Operation also has an `access` Rule restricting it to CncMachine — Trigger and access stay independent, both required.
 - **Operation-chain Trigger**: filing a `DefectReport` automatically fires `WorkOrder.Reject` (`source: operation, after: DefectReport.File`). Demonstrates Operation → Operation chaining alongside Process kickoff via `source: operation`.
 - **One human, two memberships in two Shifts**: `AlexFirstShift` is `ShiftSupervisor` on day shift AND `QualityInspector` on overnight — same person playing different Roles in different temporal Groups.
+- **Per-Shift Role constraint (modeling-layer declaration)**: `ShiftSupervisor` declares `cardinality: "one"` (at most one supervisor per Shift); `QualityInspector` is left unconstrained. Encodes the supervisor-per-shift convention without forcing one on inspectors.
 - **Step.else as terminal abort**: `complete` requires `InspectionPassed`; if not, the Process aborts (no sibling step routing).
 
 ## What this example deliberately omits

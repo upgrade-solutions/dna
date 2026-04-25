@@ -57,8 +57,8 @@
       }
     ],
     "roles": [
-      { "name": "Host",         "description": "A Member who has published a Listing. Scoped to the Listing they own.", "scope": "Listing" },
-      { "name": "Guest",        "description": "A Member on a Booking they requested. Scoped to that Booking.",         "scope": "Booking" },
+      { "name": "Host",         "description": "A Member who has published a Listing. Scoped to the Listing they own.", "scope": "Listing", "cardinality": "one", "required": true },
+      { "name": "Guest",        "description": "A Member on a Booking they requested. Scoped to that Booking.",         "scope": "Booking", "cardinality": "one", "required": true },
       { "name": "SupportAgent", "description": "Platform staff handling disputes. Unscoped — global across all Listings and Bookings." }
     ]
   },

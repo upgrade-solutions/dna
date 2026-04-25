@@ -103,7 +103,7 @@ Operational DNA captures organizational modeling — what an organization *is* a
 
 **People primitives:**
 - **Person** — an individual template (`Customer`, `Employee`, `Patient`, `Borrower`). The kind of human the org deals with — not a specific named individual (instance-level data lives in Product/Technical layers). Has attributes and optional actions.
-- **Role** — a position/capacity template (`Underwriter`, `Doctor`, `LeadCounsel`, `SuperAdmin`). May declare `scope` (the Group or Person the Role is exercised within), optional `system: true` for non-human actors, optional `resource:` link when a system Role is backed by a Resource template, and optional `actions[]` for org-admin lifecycle (e.g. `Underwriter.Activate`).
+- **Role** — a position/capacity template (`Underwriter`, `Doctor`, `LeadCounsel`, `SuperAdmin`). May declare `scope` (the Group or Person the Role is exercised within), optional `system: true` for non-human actors, optional `resource:` link when a system Role is backed by a Resource template, optional `actions[]` for org-admin lifecycle (e.g. `Underwriter.Activate`), and optional per-scope-instance constraints `cardinality` (`one`/`many`), `required` (presence), and `excludes` (mutual-exclusion with other Roles on the same scope instance).
 - **Group** — a work-unit / container template (`BankDepartment`, `Hospital`, `Case`, `Workspace`, `Family`). Has attributes and lifecycle; primarily exists to scope Roles.
 - **Membership** — a template-level eligibility statement: "Persons of type X may hold Roles of type Y, optionally in Groups of type Z." Captures organizational RBAC at the type level — *not* per-instance bindings.
 

@@ -1361,6 +1361,213 @@ describe('DnaValidator — cross-layer validation', () => {
     expect(result.errors.some(e => e.message.includes('cycle'))).toBe(true)
     expect(result.errors.some(e => e.message.includes('narrower-or-equal'))).toBe(false)
   })
+
+  // ── Role cardinality / required / excludes ────────────────────────────────
+
+  it('accepts cardinality "one" on a scoped Role', () => {
+    const goodOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          { name: 'ChiefUnderwriter', scope: 'BankDepartment', cardinality: 'one' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: goodOp })
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('accepts cardinality "one" on a Role inheriting scope through parent', () => {
+    const goodOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          { name: 'SeniorUnderwriter', parent: 'Underwriter', cardinality: 'one' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: goodOp })
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('accepts required + cardinality "one" on a scoped Role', () => {
+    const goodOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          { name: 'HeadUnderwriter', scope: 'BankDepartment', cardinality: 'one', required: true },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: goodOp })
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('accepts same-scope excludes between two Roles (and one-sided declaration is enough)', () => {
+    const goodOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        persons: [...operational.domain.persons, { name: 'Doctor' }],
+        groups: [...operational.domain.groups, { name: 'Patient' }],
+        roles: [
+          ...operational.domain.roles,
+          { name: 'AttendingPhysician', scope: 'Patient', excludes: ['ConsultingSpecialist'] },
+          { name: 'ConsultingSpecialist', scope: 'Patient' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: goodOp })
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('rejects cardinality "one" on a global Role', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          { name: 'GlobalAdmin', cardinality: 'one' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const err = result.errors.find(e => e.path === 'roles/GlobalAdmin/cardinality')
+    expect(err).toBeDefined()
+    expect(err!.message).toContain('declared or inherited scope')
+  })
+
+  it('rejects required: true on a global Role', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          { name: 'GlobalAuditor', required: true },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const err = result.errors.find(e => e.path === 'roles/GlobalAuditor/required')
+    expect(err).toBeDefined()
+    expect(err!.message).toContain('declared or inherited scope')
+  })
+
+  it('rejects cardinality, required, and excludes on a system Role (one error per field)', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          {
+            name: 'NightlySweep',
+            system: true,
+            cardinality: 'one',
+            required: true,
+            excludes: ['Underwriter'],
+          },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.find(e => e.path === 'roles/NightlySweep/cardinality')).toBeDefined()
+    expect(result.errors.find(e => e.path === 'roles/NightlySweep/required')).toBeDefined()
+    expect(result.errors.find(e => e.path === 'roles/NightlySweep/excludes')).toBeDefined()
+  })
+
+  it('rejects excludes referencing an unknown Role and lists available Roles', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          { name: 'Foo', scope: 'BankDepartment', excludes: ['NotARole'] },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const err = result.errors.find(e => e.path === 'roles/Foo/excludes')
+    expect(err).toBeDefined()
+    expect(err!.message).toContain('"NotARole"')
+    expect(err!.message).toContain('Underwriter')
+  })
+
+  it('rejects self-exclusion', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        roles: [
+          ...operational.domain.roles,
+          { name: 'SelfRef', scope: 'BankDepartment', excludes: ['SelfRef'] },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const err = result.errors.find(e => e.path === 'roles/SelfRef/excludes')
+    expect(err).toBeDefined()
+    expect(err!.message).toContain('cannot exclude itself')
+  })
+
+  it('rejects cross-scope excludes with one error naming both scopes', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        groups: [...operational.domain.groups, { name: 'Tenant' }],
+        roles: [
+          ...operational.domain.roles,
+          { name: 'TenantAdmin', scope: 'Tenant', excludes: ['Underwriter'] },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const errs = result.errors.filter(e => e.message.includes('exclusion requires a shared scope'))
+    expect(errs).toHaveLength(1)
+    expect(errs[0].message).toContain('"Tenant"')
+    expect(errs[0].message).toContain('"BankDepartment"')
+    // Path is keyed off the lexicographically-smaller name (TenantAdmin > Underwriter).
+    expect(errs[0].path).toBe('roles/TenantAdmin/excludes')
+  })
+
+  it('emits exactly one error when both sides declare a cross-scope exclusion (symmetric dedup)', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        groups: [...operational.domain.groups, { name: 'Tenant' }],
+        roles: [
+          ...operational.domain.roles,
+          { name: 'TenantAdmin', scope: 'Tenant', excludes: ['DeptAdmin'] },
+          { name: 'DeptAdmin', scope: 'BankDepartment', excludes: ['TenantAdmin'] },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const pairErrs = result.errors.filter(e => e.message.includes('exclusion requires a shared scope'))
+    expect(pairErrs).toHaveLength(1)
+  })
 })
 
 // ── Cross-layer: product.core ────────────────────────────────────────────────

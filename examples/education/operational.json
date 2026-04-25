@@ -88,7 +88,7 @@
     "roles": [
       { "name": "Instructor",      "description": "Instructor of a CourseOffering.",                                                "scope": "CourseOffering" },
       { "name": "Student",         "description": "Enrolled student in a CourseOffering.",                                          "scope": "CourseOffering" },
-      { "name": "DepartmentChair", "description": "Department chair (scoped to the Department, not a CourseOffering).",            "scope": "Department" },
+      { "name": "DepartmentChair", "description": "Department chair (scoped to the Department, not a CourseOffering).",            "scope": "Department", "cardinality": "one" },
       { "name": "Registrar",       "description": "Registrar's office staff. Unscoped — global across all CourseOfferings." }
     ]
   },

@@ -54,6 +54,26 @@
       "type": "array",
       "description": "Verbs supporting org-admin lifecycle on the Role itself (Underwriter.Activate, Doctor.Certify, Role.Retire). NOT what someone in this Role does — those are Operations on other nouns assigned via Tasks.",
       "items": { "$ref": "https://dna.codes/schemas/operational/action" }
+    },
+    "cardinality": {
+      "type": "string",
+      "enum": ["one", "many"],
+      "default": "many",
+      "description": "Per-scope-instance Person count limit. \"one\" means at most one Person may hold this Role on any given scope instance at runtime; \"many\" (default) means unbounded. \"one\" requires a declared or inherited scope and is incompatible with system: true. The validator checks the declaration only — runtime systems enforce the count.",
+      "examples": ["one", "many"]
+    },
+    "required": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether at least one Person must hold this Role on every scope instance at runtime. Composes orthogonally with cardinality: { cardinality: 'one', required: true } means exactly one. Requires a declared or inherited scope and is incompatible with system: true. The validator checks the declaration only — runtime systems enforce presence.",
+      "examples": [true, false]
+    },
+    "excludes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[A-Z][a-zA-Z0-9]*$" },
+      "uniqueItems": true,
+      "description": "Names of other Roles that the same Person SHALL NOT simultaneously hold on the same scope instance. Symmetric (one-sided declaration is enough). Both Roles must share at least one effective-scope entry. No self-reference. Incompatible with system: true. The validator checks well-formedness only — runtime systems enforce the constraint.",
+      "examples": [["ConsultingSpecialist"], ["CoCounsel"]]
     }
   },
   "examples": [
@@ -69,7 +89,10 @@
     {
       "name": "LeadCounsel",
       "description": "Lead attorney on a legal case.",
-      "scope": "Case"
+      "scope": "Case",
+      "cardinality": "one",
+      "required": true,
+      "excludes": ["CoCounsel"]
     },
     {
       "name": "SuperAdmin",

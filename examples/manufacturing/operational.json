@@ -57,7 +57,7 @@
       }
     ],
     "roles": [
-      { "name": "ShiftSupervisor",      "description": "Human supervisor responsible for a Shift's WorkOrders.",                                                "scope": "Shift" },
+      { "name": "ShiftSupervisor",      "description": "Human supervisor responsible for a Shift's WorkOrders.",                                                "scope": "Shift", "cardinality": "one" },
       { "name": "QualityInspector",     "description": "Inspects post-finish WorkOrders.",                                                                     "scope": "Shift" },
       { "name": "CncMachine",           "description": "System Role: CNC milling machine that performs the Cut step on every WorkOrder.",                     "system": true, "resource": "MachineRecord" },
       { "name": "StampingPress",        "description": "System Role: hydraulic press that performs Stamp.",                                                     "system": true, "resource": "MachineRecord" },

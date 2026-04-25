@@ -66,10 +66,10 @@
       }
     ],
     "roles": [
-      { "name": "LeadCounsel", "description": "Lead attorney owning a Case.",                                         "scope": "Case" },
+      { "name": "LeadCounsel", "description": "Lead attorney owning a Case.",                                         "scope": "Case", "cardinality": "one", "required": true, "excludes": ["CoCounsel"] },
       { "name": "CoCounsel",   "description": "Partner attorney supporting Lead Counsel on a Case.",                  "scope": "Case" },
       { "name": "Paralegal",   "description": "Paralegal assigned to a Case.",                                        "scope": "Case" },
-      { "name": "Judge",       "description": "Judge presiding over a Case.",                                          "scope": "Case" }
+      { "name": "Judge",       "description": "Judge presiding over a Case.",                                          "scope": "Case", "cardinality": "one", "required": true }
     ]
   },
   "memberships": [
