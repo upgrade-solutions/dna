@@ -1,8 +1,8 @@
 # Operational Layer Agents
 
-Agents scoped to the Operational DNA layer. Operational DNA is the pure business-logic layer: the Resources, Actions, Operations, Attributes, Domains, Relationships, Triggers, Rules, Outcomes, Signals, Equations, Tasks, and Processes that describe *what the business does* — independent of how it's surfaced or deployed.
+Agents scoped to the Operational DNA layer. Operational DNA is **organizational modeling** — the People (Person, Role, Group, Membership), Entities (Resource, Attribute, Relationship), and Activities (Operation, Task, Step, Process, Trigger, Rule, Outcome, Signal, Equation) that describe *what an organization is and does* — independent of how it's surfaced or deployed.
 
-The layer is modeled around the **Actor > Action > Resource** triad. Resources are the only noun collection — tracked things (Loan, Invoice), Actors (Underwriter, Borrower, JoeKleier), and Groups (Family, Account) are all Resources. Their semantic role is inferred from how they are referenced; there is no declared `type` on a Resource. Actions are what gets performed (Approve, Issue, Publish). An Operation is a Resource.Action pair (the atomic unit of business activity). The Actor is supplied by Rule (access) and Task (assignment).
+The layer is modeled around the **Actor > Action > Subject** triad. Roles act; Subjects (any noun primitive — Resource, Person, Role, or Group) receive actions. Each noun primitive shares the same base shape (`name`, `attributes[]`, `actions[]`, optional `parent`); Role adds `scope`/`system`/`resource`; Membership is a separate eligibility shape (`person`, `role`, optional `group`). An Operation is a `Target.Action` pair (the atomic unit of business activity). The Actor is supplied by Rule (access) and Task (assignment).
 
 ## Agent: `operational-dna-architect`
 
@@ -29,12 +29,14 @@ Owns authoring and evolving a domain's `operational.json`. Available as a Claude
 
 ### Primitives owned
 
-All thirteen Operational primitives — see `@dna-codes/schemas/operational/*.json` for the canonical list:
+All Operational primitives — see `@dna-codes/schemas/operational/*.json` for the canonical list. Organized in three categories plus the bounded-context wrapper:
 
-- **Structure**: `Resource`, `Action`, `Operation`, `Attribute`, `Domain`, `Relationship`
-- **Behavior**: `Trigger`, `Rule`, `Outcome`, `Signal`, `Equation`, `Task`, `Process`
+- **People**: `Person`, `Role`, `Group`, `Membership`
+- **Entities**: `Resource`, `Attribute`, `Relationship`
+- **Activities**: `Operation`, `Task`, `Step`, `Process`, `Trigger`, `Rule`, `Outcome`, `Signal`, `Equation`
+- **Cross-cutting**: `Domain`
 
-`Lifecycle` was removed in favor of explicit Operation state transitions expressed through `Outcome.changes`. `Capability` was renamed to `Operation`; `Cause` was renamed to `Trigger`. `Role`, `User`, and `Group` are Resources, not separate primitives — distinguished by how they are referenced.
+History: `Lifecycle` was removed in favor of explicit Operation state transitions expressed through `Outcome.changes`. `Capability` was renamed to `Operation`; `Cause` was renamed to `Trigger`. `User` was dropped (instance-level identity is a Product/Technical concern). Person, Role, Group, and Membership were promoted from earlier structural-typing-on-Resource into first-class primitives.
 
 ### Must not touch
 

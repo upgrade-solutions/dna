@@ -2,6 +2,8 @@
 
 How DNA's operational layer maps to **ArchiMate 3** (The Open Group). ArchiMate is an enterprise-architecture modeling language spanning Business, Application, and Technology layers across active/behavior/passive concerns. DNA's three layers (Operational, Product, Technical) align loosely; this doc focuses on the Business layer overlap.
 
+> **Note (post-reorg, 2026-04):** This doc was written before the People/Entities/Activities reorg. Some examples reference the old "Resources-used-as-Roles" structural-typing model. The current shape splits Person, Role, Group, and Membership into first-class primitives — see [`README.md`](../../README.md) and [`ROADMAP.md`](../../ROADMAP.md). The conceptual mappings below still hold; concrete syntax examples may be outdated.
+
 > ArchiMate is broader than DNA — it models the whole enterprise architecture portfolio including motivation, strategy, and physical layers. DNA targets a system's description, not the enterprise. Where ArchiMate stops at "Business Service," DNA continues into the implementable specification.
 
 ## Concept-by-concept mapping (Business layer)

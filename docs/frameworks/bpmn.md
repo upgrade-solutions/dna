@@ -2,6 +2,8 @@
 
 How DNA's operational layer maps to **BPMN 2.0** (Business Process Model and Notation, OMG). BPMN is a graphical process-modeling notation; DNA is a textual description of the broader business — process is one concern of many. The two overlap most in DNA's `Process` / `Step` / `Task` primitives.
 
+> **Note (post-reorg, 2026-04):** This doc was written before the People/Entities/Activities reorg. Some examples reference the old "Resources-used-as-Roles" structural-typing model. The current shape splits Person, Role, Group, and Membership into first-class primitives — see [`README.md`](../../README.md) and [`ROADMAP.md`](../../ROADMAP.md). The conceptual mappings below still hold; concrete syntax examples may be outdated.
+
 ## Concept-by-concept mapping
 
 | BPMN concept | DNA equivalent | Notes |

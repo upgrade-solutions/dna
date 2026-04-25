@@ -12,64 +12,63 @@ As documented below, it's incredibly flexible with input/output adapters and int
 
 | Layer | What it captures | Analogous to |
 |-------|-----------------|--------------|
-| **Operational** | What the business does — entities, capabilities, rules, SOPs | Domain-Driven Design |
+| **Operational** | What the business does — people, entities, rules, SOPs | Domain-Driven Design |
 | **Product** | What gets built — resources, operations, endpoints, pages | OpenAPI + Atomic Design |
 | **Technical** | How it gets built — cells, constructs, providers, environments | Terraform / AWS SAM |
 
 Layers are one-way downstream: Operational → Product → Technical. Upper layers never depend on lower ones. Cross-layer references (e.g. a Product Resource pointing at an Operational Resource) are plain strings validated by `@dna-codes/core` rather than JSON Schema `$ref`s.
 
-Operational DNA is modeled around the **Actor > Action > Resource** triad. Resources are the only noun collection — the things the business tracks (Loan, Invoice, Post). Actions are what gets performed on them (Apply, Approve, Publish). An **Operation** is always a `Resource.Action` pair (the atomic unit of business activity). Actors — the humans or systems that perform Operations — are also Resources, distinguished only by how they are referenced (e.g. `Underwriter` is a Resource referenced from `Task.actor` and `Rule.allow[].role`).
+Operational DNA is **organizational modeling** — the **nouns** an organization deals with (people, places, things) and the **verbs** that bind them. It's modeled around the **Actor > Action > Subject** triad: Roles act, Subjects (any noun primitive) receive actions. Operational primitives fall into three categories — **People** (Person, Role, Group, Membership), **Entities** (Resource, Attribute, Relationship), and **Activities** (Operation, Task, Step, Process, Trigger, Rule, Outcome, Signal, Equation). An **Operation** is always a `Target.Action` pair where Target is any noun primitive.
 
 Here's a minimal Operational DNA document in a lending context:
 
 ```json
 {
   "domain": {
-    "name": "acme",
-    "path": "acme",
-    "domains": [
+    "name": "lending",
+    "path": "acme.finance.lending",
+    "resources": [
       {
-        "name": "finance",
-        "path": "acme.finance",
-        "domains": [
-          {
-            "name": "lending",
-            "path": "acme.finance.lending",
-            "resources": [
-              {
-                "name": "Loan",
-                "attributes": [
-                  { "name": "amount", "type": "number", "required": true },
-                  { "name": "status", "type": "enum", "values": ["pending", "active", "repaid"] }
-                ],
-                "actions": [
-                  { "name": "Apply" },
-                  { "name": "Approve" }
-                ]
-              },
-              { "name": "Borrower" },
-              { "name": "Underwriter" }
-            ]
-          }
+        "name": "Loan",
+        "attributes": [
+          { "name": "amount", "type": "number", "required": true },
+          { "name": "status", "type": "enum", "values": ["pending", "active", "repaid"] }
+        ],
+        "actions": [
+          { "name": "Apply",   "type": "write" },
+          { "name": "Approve", "type": "write" }
         ]
       }
+    ],
+    "persons": [
+      { "name": "Borrower" },
+      { "name": "Employee" }
+    ],
+    "groups": [
+      { "name": "BankDepartment" }
+    ],
+    "roles": [
+      { "name": "Underwriter", "scope": "BankDepartment" }
     ]
   },
+  "memberships": [
+    { "name": "EmployeeUnderwriter", "person": "Employee", "role": "Underwriter" }
+  ],
   "operations": [
-    { "resource": "Loan", "action": "Apply", "name": "Loan.Apply" },
-    { "resource": "Loan", "action": "Approve", "name": "Loan.Approve" }
+    { "target": "Loan", "action": "Apply",   "name": "Loan.Apply" },
+    { "target": "Loan", "action": "Approve", "name": "Loan.Approve" }
   ],
   "triggers": [
-    { "operation": "Loan.Apply", "source": "user" },
+    { "operation": "Loan.Apply",   "source": "user" },
     { "operation": "Loan.Approve", "source": "user" }
   ],
   "rules": [
-    { "operation": "Loan.Apply", "type": "access", "allow": [{ "role": "Borrower" }] },
+    { "operation": "Loan.Apply",   "type": "access", "allow": [{ "role": "Borrower" }] },
     { "operation": "Loan.Approve", "type": "access", "allow": [{ "role": "Underwriter" }] },
     { "operation": "Loan.Approve", "type": "condition", "conditions": [{ "attribute": "loan.status", "operator": "eq", "value": "pending" }] }
   ],
   "outcomes": [
-    { "operation": "Loan.Apply", "changes": [{ "attribute": "loan.status", "set": "pending" }] },
+    { "operation": "Loan.Apply",   "changes": [{ "attribute": "loan.status", "set": "pending" }] },
     { "operation": "Loan.Approve", "changes": [{ "attribute": "loan.status", "set": "active" }] }
   ]
 }
@@ -81,12 +80,12 @@ Canonical end-to-end DNA documents demonstrating the model across different busi
 
 | Example | Demonstrates |
 |---|---|
-| [`examples/lending`](./examples/lending) | Operations, Tasks, Process; Operation-level + Process-level Triggers; system actor (scheduled job); scoped Role; Step.conditions referencing Rules; Step.else routing |
-| [`examples/mass-tort`](./examples/mass-tort) | Resource as Group (Case); Memberships pinning Roles in Groups; multiple Processes; Process triggered by Operation completion |
-| [`examples/marketplace`](./examples/marketplace) | Resource/Role duality (Host, Guest); same User in two peer Roles across two Groups; global (unscoped) Role; Step.else as sibling-step routing |
-| [`examples/healthcare`](./examples/healthcare) | Patient as Resource + Group (care team scoped per-Patient); same User across many Patient Groups; mixed Group-Resource types; multi-predicate condition Rule |
-| [`examples/manufacturing`](./examples/manufacturing) | Multiple system actors (CNC, press, paint robot); parallel fan-out + fan-in via Step.depends_on; schedule-source Trigger on a system Operation; Operation-chain Triggers |
-| [`examples/education`](./examples/education) | CourseOffering vs Course (time-bound Group vs catalog entry); same User as Instructor + Student simultaneously; three scope tiers (CourseOffering, Department, global); calendar-aligned schedule Triggers |
+| [`examples/lending`](./examples/lending) | Operations, Tasks, Process; Operation-level + Process-level Triggers; system Role (scheduled job); scoped Role; Person-as-actor (Borrower) + Role-as-actor (Underwriter); Memberships |
+| [`examples/mass-tort`](./examples/mass-tort) | Case as Group; multiple Person→Role Memberships (Partner→LeadCounsel/CoCounsel); multiple Processes; Process triggered by Operation completion |
+| [`examples/marketplace`](./examples/marketplace) | Same Person template eligible for two peer Roles via Memberships (Member→Host AND Member→Guest); two Groups (Listing, Booking); global (unscoped) Role; Step.else routing |
+| [`examples/healthcare`](./examples/healthcare) | Patient as Person template (entity + lifecycle); per-Person Role.scope (AttendingPhysician.scope = Patient); mixed scope targets (Person + Group); multi-predicate condition Rule |
+| [`examples/manufacturing`](./examples/manufacturing) | Multiple system Roles (CNC, press, paint robot, scheduler) with `system: true` and `resource:` link; parallel fan-out + fan-in via Step.depends_on; schedule-source Trigger on a system Operation |
+| [`examples/education`](./examples/education) | Course (Resource catalog) vs CourseOffering (Group); two Person templates eligible for distinct Roles (Faculty→Instructor, UniversityMember→Student); three scope tiers; calendar-aligned schedule Triggers |
 
 ## Framework comparisons
 
@@ -94,46 +93,52 @@ If you already model your domain in DDD, BPMN, ArchiMate, C4, Event Storming, or
 
 ## Operational Layer
 
-Operational DNA captures the pure business-logic layer — independent of any UI, API, or deployment technology. It has two buckets: **Structure** (the vocabulary) and **Behavior** (lifecycle and orchestration).
+Operational DNA captures organizational modeling — what an organization *is* and what it *does*, independent of UI, API, or deployment technology. Three categories of primitives:
 
-**Structure primitives:**
-- **Resource** — the only noun. A named entity of the business: tracked things (`Loan`, `Invoice`, `Order`), Actors (`Underwriter`, `Borrower`, `JoeKleier`, `RoutingEngine`), and Groups (`Family`, `Account`, `Workspace`) are all Resources. Their semantic role is *inferred from how they are referenced*; there is no `type` field. Has Attributes and Actions nested inside it; optionally carries `parent`, `scope`, and `memberships[]`.
-- **Action** — an operation performed on a Resource (`Apply`, `Approve`, `Ship`). Every Action is paired with a Resource; there is no Action without a Resource.
-- **Operation** — a `Resource.Action` pair; the atomic unit of business activity (`Loan.Approve`). Renamed from "Capability" to avoid Business Capability Modeling baggage and to align with the existing Product Core `Operation`.
-- **Attribute** — a typed property on a Resource; types: `string`, `text`, `number`, `boolean`, `date`, `datetime`, `enum`, `reference`
-- **Domain** — a dot-separated hierarchy that organizes Resources into bounded contexts (`acme.finance.lending`)
-- **Relationship** — a named, directed, typed connection between two Resources (cardinality + reference attribute)
+- **People** — Person, Role, Group, Membership
+- **Entities** — Resource, Attribute, Relationship
+- **Activities** — Operation, Task, Step, Process, Trigger, Rule, Outcome, Signal, Equation
 
-**Behavior primitives:**
+`Domain` wraps the four noun primitives (Resources, Persons, Roles, Groups) into bounded contexts; `Memberships` and Activities live at the document top level.
+
+**People primitives:**
+- **Person** — an individual template (`Customer`, `Employee`, `Patient`, `Borrower`). The kind of human the org deals with — not a specific named individual (instance-level data lives in Product/Technical layers). Has attributes and optional actions.
+- **Role** — a position/capacity template (`Underwriter`, `Doctor`, `LeadCounsel`, `SuperAdmin`). May declare `scope` (the Group or Person the Role is exercised within), optional `system: true` for non-human actors, optional `resource:` link when a system Role is backed by a Resource template, and optional `actions[]` for org-admin lifecycle (e.g. `Underwriter.Activate`).
+- **Group** — a work-unit / container template (`BankDepartment`, `Hospital`, `Case`, `Workspace`, `Family`). Has attributes and lifecycle; primarily exists to scope Roles.
+- **Membership** — a template-level eligibility statement: "Persons of type X may hold Roles of type Y, optionally in Groups of type Z." Captures organizational RBAC at the type level — *not* per-instance bindings.
+
+**Entity primitives:**
+- **Resource** — an entity template the org manages (`Loan`, `Invoice`, `Account`, `Document`). Has attributes, actions, and optional parent.
+- **Attribute** — a typed property on any noun primitive; types: `string`, `text`, `number`, `boolean`, `date`, `datetime`, `enum`, `reference`.
+- **Relationship** — a named, directed, typed connection between any two noun primitives (cardinality + reference attribute).
+
+**Shared noun shape:** Resource, Person, Role, and Group all support `name`, `attributes[]`, `actions[]`, and optional `parent`. Each `actions[]` entry is an object with `name`, optional `description`, `type` (`read | write | destructive`), and `idempotent`.
+
+**Activity primitives:**
+- **Operation** — a `Target.Action` pair where Target is any noun primitive; the atomic unit of business activity (`Loan.Approve`, `Patient.GetAdmitted`, `Underwriter.Activate`, `Case.Settle`). The validator resolves `target` across all four noun collections.
 - **Trigger** — what initiates an Operation or a Process. Sources: `user`, `schedule`, `webhook`, `operation`, `signal`. A Trigger targets exactly one of: an Operation (ad-hoc invocation) or a Process (kick off the whole SOP from `startStep`).
-- **Rule** — constraints on an Operation: `access` (which Role-Resource(s) may perform it) or `condition` (what must be true first). Condition Rules are also referenced from `Step.conditions[]` for compositional gating.
-- **Outcome** — state changes and downstream Operations or Signals after an Operation executes
-- **Signal** — a named domain event published after an Operation; carries a typed payload contract
-- **Equation** — a named, technology-agnostic computation (implemented by a Technical Script)
-- **Task** — a `(actor, operation)` binding. The named, reusable assignment (`UnderwriterApproval` = Underwriter performs Loan.Approve). Referenced by Steps.
+- **Rule** — constraints on an Operation: `access` (which Roles or Persons may perform it) or `condition` (what must be true first). Condition Rules are also referenced from `Step.conditions[]` for compositional gating.
+- **Outcome** — state changes and downstream Operations or Signals after an Operation executes.
+- **Signal** — a named domain event published after an Operation; carries a typed payload contract.
+- **Equation** — a named, technology-agnostic computation (implemented by a Technical Script).
+- **Task** — a `(actor, operation)` binding. Actor is a Role (internal positions like Underwriter) OR a Person (external actors like Borrower).
 - **Process** — a Standard Operating Procedure: a named DAG of Steps with an explicit `startStep` (Amazon-States-Language convention). Each Step references exactly one Task; Step-level conditions reference Rules compositionally.
 
-**Resource as Actor and Group (structural typing):**
-The same Resource can play multiple semantic roles simultaneously without declaring any of them. Cross-domain examples:
+**Memberships are template-level, not instances:**
 
-| Resource | Tracked entity | Actor (Role) | Group (scopes Roles) |
-|---|---|---|---|
-| `Customer` (ecommerce) | ✓ | ✓ |  |
-| `Patient` (healthcare) | ✓ | ✓ |  |
-| `Family` | ✓ |  | ✓ |
-| `Account` (sales) | ✓ | ✓ (companies act) | ✓ (employees scoped within) |
-| `CourseOffering` (education) | ✓ |  | ✓ |
-| `Listing` (marketplace) | ✓ |  | ✓ |
+```json
+{ "name": "EmployeeUnderwriter", "person": "Employee", "role": "Underwriter" }
+{ "name": "PartnerLeadCounsel",  "person": "Partner",  "role": "LeadCounsel" }
+{ "name": "EmployeeAdmin",       "person": "Employee", "role": "SuperAdmin", "group": "Workspace" }
+```
 
-A User-like Resource carries `memberships[]` — `(role, in)` pairs that pin a Role-Resource within a Group-Resource. Example: `JoeKleier` holds `[{role: Father, in: Family}, {role: Husband, in: Marriage}, {role: Member, in: RunningClub}]`.
-
-A Role-Resource may declare an optional `scope` naming the Group-Resource type it must be exercised within. The validator enforces that `membership.in` matches the referenced Role's `scope`.
+These say *what kinds of people can hold what kinds of roles in what kinds of groups* — not "Joe is the Underwriter of Eastern Branch." Specific person × role × group bindings (auth records, identity tokens) belong at the Product/Technical layer.
 
 ## Product Layer
 
 Product DNA describes what gets built. It is split into three sub-layers that can be authored independently.
 
-**Core** (`product.core.json`) — materializes Operational concepts into product primitives: `Resource`, `Action`, `Operation`, `Field`. It also carries the surfaced `Role` slice (Roles live in Operational and are referenced by product/api cells for auth middleware and product/ui cells for permission guards). Product `Resource` and `Action` are surface projections of their Operational counterparts — the same vocabulary is reused intentionally.
+**Core** (`product.core.json`) — materializes Operational concepts into product primitives: `Resource`, `Action`, `Operation`, `Field`. Product `Resource` and `Action` are surface projections of their Operational counterparts — the same vocabulary is reused intentionally. Operational People primitives (Person, Role, Group, Membership) are referenced by product/api cells for auth middleware and product/ui cells for permission guards; how they project into Product Core is an open question (`ROADMAP.md` for details).
 
 **API** (`product.api.json`) — REST surface: `Endpoint`, `Namespace`, `Param`, `Schema`
 
