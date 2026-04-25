@@ -153,12 +153,12 @@ The canonical primitives are well-known combinations of these characteristics:
 | Primitive | targetable | actorable | scopeable | memberable | executable |
 |---|---|---|---|---|---|
 | Resource | ✓ |  |  |  |  |
-| Person | ✓ | ✓ |  |  |  |
+| Person | ✓ | ✓ | ✓ |  |  |
 | Group | ✓ |  | ✓ |  |  |
 | Role | ✓ | ✓ |  | ✓ |  |
 | Process | ✓ |  |  |  | ✓ |
 
-This decomposition documents the validator's actual behavior, not a configurable layer. Every noun is targetable; only Roles and Persons are actorable; only Groups are scopeable; only Roles are memberable; only Processes are executable. Any future noun primitive earns its place by combining characteristics in a way the existing five don't cover.
+This decomposition documents the validator's actual behavior, not a configurable layer. Every noun is targetable; only Roles and Persons are actorable; Groups and Persons are scopeable (a Role can be scoped to a population — `Engineers` — or to a specific Person — `AttendingPhysician.scope = Patient`); only Roles are memberable; only Processes are executable. Any future noun primitive earns its place by combining characteristics in a way the existing five don't cover.
 
 **Vocabulary preferences** (a company that says "Position" instead of "Role", "Individual" instead of "Person") are surface concerns, **not schema concerns**. The DNA primitive vocabulary stays canonical; output adapters carry a `rename` map for company-friendly rendering. See `output-markdown` for the reference implementation.
 

@@ -53,12 +53,12 @@ The five noun primitives (Resource, Person, Role, Group, Process) aren't differe
 | Primitive | targetable | actorable | scopeable | memberable | executable |
 |---|---|---|---|---|---|
 | Resource | ✓ |  |  |  |  |
-| Person | ✓ | ✓ |  |  |  |
+| Person | ✓ | ✓ | ✓ |  |  |
 | Group | ✓ |  | ✓ |  |  |
 | Role | ✓ | ✓ |  | ✓ |  |
 | Process | ✓ |  |  |  | ✓ |
 
-This is documentation of the validator's actual gate logic. Every noun is targetable; only Roles and Persons are actorable; only Groups are scopeable; only Roles are memberable; only Processes are executable. A future primitive earns its place by combining characteristics in a way the existing five don't cover. Vocabulary preferences (Position vs Role, Individual vs Person) are surface concerns — keep schema names canonical and let `output-*` adapters apply a `rename` map.
+This is documentation of the validator's actual gate logic. Every noun is targetable; only Roles and Persons are actorable; Groups and Persons are scopeable (a Role can be scoped to a population — `Engineers` — or to a specific Person — `AttendingPhysician.scope = Patient`); only Roles are memberable; only Processes are executable. A future primitive earns its place by combining characteristics in a way the existing five don't cover. Vocabulary preferences (Position vs Role, Individual vs Person) are surface concerns — keep schema names canonical and let `output-*` adapters apply a `rename` map.
 
 ### Must not touch
 
