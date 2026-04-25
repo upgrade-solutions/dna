@@ -178,11 +178,35 @@ export interface RenderOptions {
   title?: string
   /** Unit → style map. Default: `{ operation: 'user-story' }`. */
   styles?: StyleMap
+  /**
+   * Rename canonical primitive labels (typically the plural collection name) for
+   * company-friendly output. The DNA schema vocabulary stays canonical
+   * (Resource/Person/Role/Group/Process) — only the rendered text changes.
+   *
+   * Currently a no-op for this adapter (no primitive-count or top-level
+   * collection labels are emitted) — present for API parity with
+   * `@dna-codes/output-markdown` and `@dna-codes/output-html`.
+   *
+   * @example { Persons: 'Individuals', Roles: 'Positions' }
+   */
+  rename?: Record<string, string>
 }
 
 export interface RenderManyOptions {
   /** Unit → style map. Default: `{ operation: 'user-story' }`. */
   styles?: StyleMap
+  /**
+   * Rename canonical primitive labels (typically the plural collection name) for
+   * company-friendly output. The DNA schema vocabulary stays canonical
+   * (Resource/Person/Role/Group/Process) — only the rendered text changes.
+   *
+   * Currently a no-op for this adapter (no primitive-count or top-level
+   * collection labels are emitted) — present for API parity with
+   * `@dna-codes/output-markdown` and `@dna-codes/output-html`.
+   *
+   * @example { Persons: 'Individuals', Roles: 'Positions' }
+   */
+  rename?: Record<string, string>
 }
 
 /**

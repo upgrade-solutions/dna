@@ -92,6 +92,28 @@ describe('@dna-codes/output-html', () => {
       expect(html).toContain('Top-level resources:')
       expect(html).toContain('<code>Book</code>')
     })
+
+    it('honors a rename map for primitive labels', () => {
+      const html = render(bookshopInput, {
+        sections: ['summary'],
+        rename: { Persons: 'Individuals', Roles: 'Positions', Resources: 'Items' },
+      })
+      // canonical names are translated…
+      expect(html).toContain('<li>Individuals: 1</li>')
+      expect(html).toContain('<li>Positions: 1</li>')
+      expect(html).toContain('<li>Items: 2</li>')
+      // …and unmapped ones stay canonical
+      expect(html).toContain('<li>Operations: 2</li>')
+      // top-level label uses the renamed form, lowercased
+      expect(html).toContain('<strong>Top-level items:</strong>')
+    })
+
+    it('leaves canonical labels untouched when no rename is provided', () => {
+      const html = render(bookshopInput, { sections: ['summary'] })
+      expect(html).toContain('<li>Persons: 1</li>')
+      expect(html).toContain('<li>Roles: 1</li>')
+      expect(html).toContain('<strong>Top-level resources:</strong>')
+    })
   })
 
   describe('section: domain-model', () => {

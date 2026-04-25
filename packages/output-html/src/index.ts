@@ -30,6 +30,14 @@ export interface RenderOptions {
   headingLevel?: 1 | 2
   /** Wrap output in <!DOCTYPE html><html>…</html>. Defaults to false (fragment). */
   standalone?: boolean
+  /**
+   * Rename canonical primitive labels (typically the plural collection name) for
+   * company-friendly output. The DNA schema vocabulary stays canonical
+   * (Resource/Person/Role/Group/Process) — only the rendered text changes.
+   *
+   * @example { Persons: 'Individuals', Roles: 'Positions' }
+   */
+  rename?: Record<string, string>
 }
 
 export function render(dna: DnaInput, options: RenderOptions = {}): string {
@@ -44,7 +52,7 @@ export function render(dna: DnaInput, options: RenderOptions = {}): string {
   if (intro) parts.push(`<p>${escape(intro)}</p>`)
 
   for (const section of sections) {
-    const rendered = renderSection(section, dna, level + 1)
+    const rendered = renderSection(section, dna, level + 1, options)
     if (rendered) parts.push(rendered)
   }
 
@@ -62,10 +70,11 @@ function renderSection(
   section: Section,
   dna: DnaInput,
   h: number,
+  options: RenderOptions,
 ): string | null {
   switch (section) {
     case 'summary':
-      return renderSummary(dna, h)
+      return renderSummary(dna, h, options)
     case 'domain-model':
       return renderDomainModel(dna, h)
     case 'operations':
