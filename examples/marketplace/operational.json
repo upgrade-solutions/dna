@@ -1,0 +1,161 @@
+{
+  "domain": {
+    "name": "marketplace",
+    "path": "rentals.marketplace",
+    "description": "Two-sided rental marketplace (Airbnb-style). The same User can be a Host on one Listing and a Guest on a Booking — exercises peer-Role memberships across distinct Group-Resources.",
+    "resources": [
+      {
+        "name": "User",
+        "description": "A person on the platform. Both Resource (tracked profile) and Actor — Users hold Host or Guest Roles within Listings or Bookings.",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "display_name", "type": "string", "required": true },
+          { "name": "email", "type": "string" },
+          { "name": "joined_at", "type": "datetime" }
+        ]
+      },
+      {
+        "name": "Listing",
+        "description": "A property for rent. Both Resource (tracked) AND Group (scopes the Host Role).",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "title", "type": "string", "required": true },
+          { "name": "host_id", "type": "reference", "resource": "User", "required": true },
+          { "name": "status", "type": "enum", "required": true, "values": ["draft", "active", "paused", "delisted"] },
+          { "name": "nightly_rate", "type": "number", "required": true }
+        ],
+        "actions": [
+          { "name": "Publish", "description": "Host publishes a draft listing." },
+          { "name": "Pause" },
+          { "name": "Delist" }
+        ]
+      },
+      {
+        "name": "Booking",
+        "description": "A reservation against a Listing for a Guest. Both Resource (tracked) AND Group (scopes the Guest Role).",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "listing_id", "type": "reference", "resource": "Listing", "required": true },
+          { "name": "guest_id", "type": "reference", "resource": "User", "required": true },
+          { "name": "checkin", "type": "date", "required": true },
+          { "name": "checkout", "type": "date", "required": true },
+          { "name": "status", "type": "enum", "required": true, "values": ["requested", "approved", "declined", "cancelled", "completed"] }
+        ],
+        "actions": [
+          { "name": "Request", "description": "Guest requests a booking." },
+          { "name": "Approve", "description": "Host approves a pending booking." },
+          { "name": "Decline" },
+          { "name": "Cancel" }
+        ]
+      },
+      {
+        "name": "Host",
+        "description": "Role: a User who has published a Listing. Scoped to the Listing they own.",
+        "scope": "Listing"
+      },
+      {
+        "name": "Guest",
+        "description": "Role: a User on a Booking they requested. Scoped to that Booking.",
+        "scope": "Booking"
+      },
+      {
+        "name": "SupportAgent",
+        "description": "Role: platform staff handling disputes. Unscoped — global across all Listings and Bookings."
+      },
+      {
+        "name": "Joe",
+        "description": "User: Joe holds two Roles in two Groups. He's the Host of his own Listing AND the Guest on a Booking he placed elsewhere — both at the same time.",
+        "memberships": [
+          { "role": "Host", "in": "Listing", "description": "Joe's mountain cabin listing" },
+          { "role": "Guest", "in": "Booking", "description": "Joe booked someone else's apartment for vacation" }
+        ]
+      }
+    ]
+  },
+  "operations": [
+    { "resource": "Listing", "action": "Publish", "name": "Listing.Publish" },
+    { "resource": "Listing", "action": "Pause", "name": "Listing.Pause" },
+    { "resource": "Listing", "action": "Delist", "name": "Listing.Delist" },
+    { "resource": "Booking", "action": "Request", "name": "Booking.Request" },
+    { "resource": "Booking", "action": "Approve", "name": "Booking.Approve" },
+    { "resource": "Booking", "action": "Decline", "name": "Booking.Decline" },
+    { "resource": "Booking", "action": "Cancel", "name": "Booking.Cancel" }
+  ],
+  "triggers": [
+    { "operation": "Listing.Publish", "source": "user" },
+    { "operation": "Booking.Request", "source": "user" },
+    { "operation": "Booking.Approve", "source": "user" },
+    { "process": "BookingFlow", "source": "operation", "after": "Booking.Request", "description": "Booking request kicks off the host-approval SOP." }
+  ],
+  "rules": [
+    { "operation": "Listing.Publish", "type": "access", "allow": [{ "role": "Host", "ownership": true }] },
+    { "operation": "Listing.Pause", "type": "access", "allow": [{ "role": "Host", "ownership": true }, { "role": "SupportAgent" }] },
+    { "operation": "Listing.Delist", "type": "access", "allow": [{ "role": "Host", "ownership": true }, { "role": "SupportAgent" }] },
+    { "operation": "Booking.Request", "type": "access", "allow": [{ "role": "Guest" }] },
+    { "operation": "Booking.Approve", "type": "access", "allow": [{ "role": "Host", "ownership": true }] },
+    { "operation": "Booking.Decline", "type": "access", "allow": [{ "role": "Host", "ownership": true }] },
+    { "operation": "Booking.Cancel", "type": "access", "allow": [{ "role": "Guest", "ownership": true }, { "role": "Host", "ownership": true }, { "role": "SupportAgent" }] },
+    {
+      "name": "ListingIsActive",
+      "operation": "Booking.Request",
+      "type": "condition",
+      "conditions": [{ "attribute": "listing.status", "operator": "eq", "value": "active" }]
+    },
+    {
+      "name": "BookingIsRequested",
+      "operation": "Booking.Approve",
+      "type": "condition",
+      "conditions": [{ "attribute": "booking.status", "operator": "eq", "value": "requested" }]
+    }
+  ],
+  "outcomes": [
+    { "operation": "Listing.Publish", "changes": [{ "attribute": "listing.status", "set": "active" }] },
+    { "operation": "Listing.Pause", "changes": [{ "attribute": "listing.status", "set": "paused" }] },
+    { "operation": "Listing.Delist", "changes": [{ "attribute": "listing.status", "set": "delisted" }] },
+    { "operation": "Booking.Request", "changes": [{ "attribute": "booking.status", "set": "requested" }] },
+    {
+      "operation": "Booking.Approve",
+      "changes": [{ "attribute": "booking.status", "set": "approved" }],
+      "emits": ["marketplace.Booking.Approved"]
+    },
+    { "operation": "Booking.Decline", "changes": [{ "attribute": "booking.status", "set": "declined" }] },
+    { "operation": "Booking.Cancel", "changes": [{ "attribute": "booking.status", "set": "cancelled" }] }
+  ],
+  "signals": [
+    {
+      "name": "marketplace.Booking.Approved",
+      "operation": "Booking.Approve",
+      "description": "Host approved a guest's booking request — downstream payment + calendar sync.",
+      "payload": [
+        { "name": "booking_id", "type": "string" },
+        { "name": "listing_id", "type": "string" },
+        { "name": "guest_id", "type": "string" },
+        { "name": "checkin", "type": "date" },
+        { "name": "checkout", "type": "date" }
+      ]
+    }
+  ],
+  "relationships": [
+    { "name": "Listing.host", "from": "Listing", "to": "User", "cardinality": "many-to-one", "attribute": "host_id", "inverse": "listings" },
+    { "name": "Booking.listing", "from": "Booking", "to": "Listing", "cardinality": "many-to-one", "attribute": "listing_id" },
+    { "name": "Booking.guest", "from": "Booking", "to": "User", "cardinality": "many-to-one", "attribute": "guest_id", "inverse": "bookings" }
+  ],
+  "tasks": [
+    { "name": "request-booking", "actor": "Guest", "operation": "Booking.Request" },
+    { "name": "approve-booking", "actor": "Host", "operation": "Booking.Approve" },
+    { "name": "decline-booking", "actor": "Host", "operation": "Booking.Decline" }
+  ],
+  "processes": [
+    {
+      "name": "BookingFlow",
+      "description": "From a Guest's request through Host's approve-or-decline decision.",
+      "operator": "SupportAgent",
+      "startStep": "request",
+      "steps": [
+        { "id": "request", "task": "request-booking", "conditions": ["ListingIsActive"], "else": "abort" },
+        { "id": "approve", "task": "approve-booking", "depends_on": ["request"], "conditions": ["BookingIsRequested"], "else": "decline" },
+        { "id": "decline", "task": "decline-booking", "depends_on": ["request"] }
+      ]
+    }
+  ]
+}

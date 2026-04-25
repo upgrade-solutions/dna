@@ -75,6 +75,20 @@ Here's a minimal Operational DNA document in a lending context:
 }
 ```
 
+## Cross-domain examples
+
+Canonical end-to-end DNA documents demonstrating the model across different business domains. Each one validates against the schemas under `@dna-codes/core` and exercises specific parts of the model — start here when you want to see how a real domain looks.
+
+| Example | Demonstrates |
+|---|---|
+| [`examples/lending`](./examples/lending) | Operations, Tasks, Process; Operation-level + Process-level Triggers; system actor (scheduled job); scoped Role; Step.conditions referencing Rules; Step.else routing |
+| [`examples/mass-tort`](./examples/mass-tort) | Resource as Group (Case); Memberships pinning Roles in Groups; multiple Processes; Process triggered by Operation completion |
+| [`examples/marketplace`](./examples/marketplace) | Resource/Role duality (Host, Guest); same User in two peer Roles across two Groups; global (unscoped) Role; Step.else as sibling-step routing |
+
+## Framework comparisons
+
+If you already model your domain in DDD, BPMN, or ArchiMate, see [`docs/frameworks/`](./docs/frameworks) for concept-by-concept mappings, where DNA intentionally differs, and concrete translations using the examples above. Currently covered: [BPMN](./docs/frameworks/bpmn.md), [Domain-Driven Design](./docs/frameworks/ddd.md), [ArchiMate](./docs/frameworks/archimate.md).
+
 ## Operational Layer
 
 Operational DNA captures the pure business-logic layer — independent of any UI, API, or deployment technology. It has two buckets: **Structure** (the vocabulary) and **Behavior** (lifecycle and orchestration).

@@ -1,0 +1,174 @@
+{
+  "domain": {
+    "name": "marshall",
+    "path": "mfj.masstort.marshall",
+    "description": "Mass-tort case management for the Marshall Fire Justice docket. Each Case scopes the legal team's roles; Claimants file claims and receive settlements through the Process.",
+    "resources": [
+      {
+        "name": "Case",
+        "description": "A single mass-tort case. Acts as both a tracked Resource AND a Group: the legal team's Memberships are scoped to a Case (Lead Counsel of Case #42).",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "docket_number", "type": "string", "required": true },
+          { "name": "status", "type": "enum", "required": true, "values": ["intake", "discovery", "settlement", "closed"] },
+          { "name": "filed_at", "type": "date" }
+        ]
+      },
+      {
+        "name": "Claimant",
+        "description": "A person harmed by the underlying event who has joined a Case. Both Resource (tracked) and Actor (files claims).",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "name", "type": "string", "required": true },
+          { "name": "case_id", "type": "reference", "resource": "Case", "required": true }
+        ]
+      },
+      {
+        "name": "Filing",
+        "description": "A document filed with the court for a specific Case.",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "case_id", "type": "reference", "resource": "Case", "required": true },
+          { "name": "kind", "type": "enum", "required": true, "values": ["complaint", "motion", "response", "settlement"] },
+          { "name": "filed_at", "type": "datetime" }
+        ],
+        "actions": [
+          { "name": "Submit", "description": "Submit a filing to the court." },
+          { "name": "Serve", "description": "Serve a filing on opposing counsel." }
+        ]
+      },
+      {
+        "name": "Settlement",
+        "description": "A negotiated resolution amount for one or more Claimants in a Case.",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "case_id", "type": "reference", "resource": "Case", "required": true },
+          { "name": "amount", "type": "number", "required": true },
+          { "name": "status", "type": "enum", "required": true, "values": ["proposed", "accepted", "disbursed"] }
+        ],
+        "actions": [
+          { "name": "Propose" },
+          { "name": "Accept" },
+          { "name": "Disburse" }
+        ]
+      },
+      {
+        "name": "LeadCounsel",
+        "description": "Role: the attorney owning a Case. Scoped to one Case at a time.",
+        "scope": "Case"
+      },
+      {
+        "name": "CoCounsel",
+        "description": "Role: a partner attorney supporting Lead Counsel on a Case.",
+        "scope": "Case"
+      },
+      {
+        "name": "Paralegal",
+        "description": "Role: a paralegal assigned to a Case. The same person may be Paralegal on multiple Cases (see Memberships on Sarah).",
+        "scope": "Case"
+      },
+      {
+        "name": "Judge",
+        "description": "Role: the judge presiding over a Case.",
+        "scope": "Case"
+      },
+      {
+        "name": "JaneEsq",
+        "description": "User: Jane Smith, Esq. Lead Counsel on Marshall #1, Co-Counsel on Marshall #2.",
+        "memberships": [
+          { "role": "LeadCounsel", "in": "Case", "description": "Marshall Fire Case #1" },
+          { "role": "CoCounsel", "in": "Case", "description": "Marshall Fire Case #2" }
+        ]
+      },
+      {
+        "name": "SarahPara",
+        "description": "User: Sarah Chen, paralegal staffed across both Cases.",
+        "memberships": [
+          { "role": "Paralegal", "in": "Case", "description": "Both Marshall Fire Cases" }
+        ]
+      }
+    ]
+  },
+  "operations": [
+    { "resource": "Filing", "action": "Submit", "name": "Filing.Submit" },
+    { "resource": "Filing", "action": "Serve", "name": "Filing.Serve" },
+    { "resource": "Settlement", "action": "Propose", "name": "Settlement.Propose" },
+    { "resource": "Settlement", "action": "Accept", "name": "Settlement.Accept" },
+    { "resource": "Settlement", "action": "Disburse", "name": "Settlement.Disburse" }
+  ],
+  "triggers": [
+    { "operation": "Filing.Submit", "source": "user" },
+    { "process": "ClaimantIntake", "source": "user", "description": "Lead Counsel kicks off intake when a new Claimant retains the firm." },
+    { "process": "SettlementDisbursement", "source": "operation", "after": "Settlement.Accept", "description": "Once a Settlement is Accepted, automatically run the disbursement SOP." }
+  ],
+  "rules": [
+    { "operation": "Filing.Submit", "type": "access", "allow": [{ "role": "LeadCounsel" }, { "role": "CoCounsel" }, { "role": "Paralegal" }] },
+    { "operation": "Filing.Serve", "type": "access", "allow": [{ "role": "Paralegal" }] },
+    { "operation": "Settlement.Propose", "type": "access", "allow": [{ "role": "LeadCounsel" }] },
+    { "operation": "Settlement.Accept", "type": "access", "allow": [{ "role": "LeadCounsel" }] },
+    { "operation": "Settlement.Disburse", "type": "access", "allow": [{ "role": "LeadCounsel" }] },
+    {
+      "name": "CaseInDiscovery",
+      "operation": "Filing.Submit",
+      "type": "condition",
+      "conditions": [{ "attribute": "case.status", "operator": "in", "value": ["intake", "discovery"] }]
+    },
+    {
+      "name": "SettlementAccepted",
+      "operation": "Settlement.Disburse",
+      "type": "condition",
+      "conditions": [{ "attribute": "settlement.status", "operator": "eq", "value": "accepted" }]
+    }
+  ],
+  "outcomes": [
+    { "operation": "Filing.Submit", "changes": [{ "attribute": "filing.filed_at", "set": "now" }] },
+    { "operation": "Settlement.Propose", "changes": [{ "attribute": "settlement.status", "set": "proposed" }] },
+    { "operation": "Settlement.Accept", "changes": [{ "attribute": "settlement.status", "set": "accepted" }] },
+    { "operation": "Settlement.Disburse", "changes": [{ "attribute": "settlement.status", "set": "disbursed" }], "emits": ["masstort.Settlement.Disbursed"] }
+  ],
+  "signals": [
+    {
+      "name": "masstort.Settlement.Disbursed",
+      "operation": "Settlement.Disburse",
+      "description": "Funds released to Claimants on a Settlement.",
+      "payload": [
+        { "name": "settlement_id", "type": "string" },
+        { "name": "case_id", "type": "string" },
+        { "name": "amount", "type": "number" }
+      ]
+    }
+  ],
+  "relationships": [
+    { "name": "Claimant.case", "from": "Claimant", "to": "Case", "cardinality": "many-to-one", "attribute": "case_id" },
+    { "name": "Filing.case", "from": "Filing", "to": "Case", "cardinality": "many-to-one", "attribute": "case_id" },
+    { "name": "Settlement.case", "from": "Settlement", "to": "Case", "cardinality": "many-to-one", "attribute": "case_id" }
+  ],
+  "tasks": [
+    { "name": "draft-complaint", "actor": "LeadCounsel", "operation": "Filing.Submit" },
+    { "name": "serve-complaint", "actor": "Paralegal", "operation": "Filing.Serve" },
+    { "name": "propose-settlement", "actor": "LeadCounsel", "operation": "Settlement.Propose" },
+    { "name": "accept-settlement", "actor": "LeadCounsel", "operation": "Settlement.Accept" },
+    { "name": "disburse-settlement", "actor": "LeadCounsel", "operation": "Settlement.Disburse" }
+  ],
+  "processes": [
+    {
+      "name": "ClaimantIntake",
+      "description": "Onboard a new Claimant: draft complaint, serve, await response.",
+      "operator": "LeadCounsel",
+      "startStep": "draft",
+      "steps": [
+        { "id": "draft", "task": "draft-complaint" },
+        { "id": "serve", "task": "serve-complaint", "depends_on": ["draft"], "conditions": ["CaseInDiscovery"] }
+      ]
+    },
+    {
+      "name": "SettlementDisbursement",
+      "description": "Once a Settlement is Accepted, disburse funds.",
+      "operator": "LeadCounsel",
+      "startStep": "disburse",
+      "steps": [
+        { "id": "disburse", "task": "disburse-settlement", "conditions": ["SettlementAccepted"], "else": "abort" }
+      ]
+    }
+  ]
+}

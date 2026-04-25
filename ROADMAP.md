@@ -121,6 +121,37 @@ ASL-style (`StartAt`); matches Temporal `@WorkflowMethod` and n8n trigger nodes.
 | Step | Orchestration node within a Process; references exactly one Task |
 | Process | Named SOP — DAG of Steps with explicit `startStep` |
 
+## Validation surfaces (in progress)
+
+Two parallel validation efforts to demonstrate that the reorg holds up beyond the bookshop fixture.
+
+### Cross-domain examples
+
+Canonical DNA documents under [`examples/<domain>/`](./examples), each validated by `packages/core/src/examples.test.ts` against the schemas + cross-layer rules, with per-domain shape assertions catching silent capability loss.
+
+| Domain | Status | Demonstrates |
+|---|---|---|
+| `lending` | Shipped | Standard Operation/Task/Process flow; system actor; scoped Role; Step.conditions; Step.else; multi-target Triggers |
+| `mass-tort` | Shipped | Resource as Group; Memberships; multi-Process domain; Process triggered by upstream Operation |
+| `marketplace` | Shipped | Resource/Role duality; same User in peer Roles across multiple Groups; global Role; Step.else routing to sibling |
+| `healthcare` | Planned | Patient as Resource+Role; complex condition Rules; multi-actor care team |
+| `education` | Planned | CourseOffering as Group; Student/Instructor Roles; semester-bound memberships |
+| `banking` | Planned | Heavier scheduled-trigger surface; ATM/branch as Group |
+| `manufacturing` | Planned | Machine actors; parallel-step orchestration |
+
+### Framework comparisons
+
+Concept-by-concept mappings under [`docs/frameworks/`](./docs/frameworks), each with a concrete translation pointing at one of the examples above.
+
+| Framework | Status |
+|---|---|
+| [BPMN 2.0](./docs/frameworks/bpmn.md) | Shipped |
+| [Domain-Driven Design](./docs/frameworks/ddd.md) | Shipped |
+| [ArchiMate 3](./docs/frameworks/archimate.md) | Shipped |
+| C4 Model | Planned |
+| Event Storming (workshop output mapping) | Planned |
+| TOGAF | Planned (broad scope; defer until concrete sub-scope is needed) |
+
 ## Open questions
 
 These need to settle before schemas change:

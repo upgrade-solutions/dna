@@ -1,0 +1,137 @@
+{
+  "domain": {
+    "name": "lending",
+    "path": "acme.finance.lending",
+    "description": "Consumer lending — loan origination, underwriting, servicing.",
+    "resources": [
+      {
+        "name": "Loan",
+        "description": "A financial loan issued to a Borrower with repayment terms.",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "amount", "type": "number", "required": true },
+          { "name": "interest_rate", "type": "number", "required": true },
+          { "name": "borrower_id", "type": "reference", "resource": "Borrower", "required": true },
+          { "name": "status", "type": "enum", "required": true, "values": ["pending", "approved", "active", "repaid", "defaulted"] },
+          { "name": "due_date", "type": "date" }
+        ],
+        "actions": [
+          { "name": "Apply", "description": "Borrower submits a loan application." },
+          { "name": "Approve", "description": "Underwriter approves a pending application." },
+          { "name": "Disburse", "description": "Funds released to the borrower." },
+          { "name": "Repay", "description": "Borrower makes a payment." },
+          { "name": "Default", "description": "Loan flagged as overdue beyond grace period." }
+        ]
+      },
+      {
+        "name": "Borrower",
+        "description": "An external party who applies for and repays loans. Acts as both Resource (tracked) and Actor (performs Loan.Apply).",
+        "attributes": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "name", "type": "string", "required": true },
+          { "name": "credit_score", "type": "number" }
+        ]
+      },
+      {
+        "name": "Underwriter",
+        "description": "Internal Role responsible for approving loan applications.",
+        "scope": "BankDepartment"
+      },
+      {
+        "name": "LendingManager",
+        "description": "Internal Role responsible for owning the loan-origination Process."
+      },
+      {
+        "name": "BankDepartment",
+        "description": "Group: an internal department within the bank. Scopes Underwriter memberships.",
+        "attributes": [
+          { "name": "name", "type": "string", "required": true }
+        ]
+      },
+      {
+        "name": "NightlyDelinquencySweep",
+        "description": "System actor: scheduled job that flags overdue loans as defaulted."
+      }
+    ]
+  },
+  "operations": [
+    { "resource": "Loan", "action": "Apply", "name": "Loan.Apply" },
+    { "resource": "Loan", "action": "Approve", "name": "Loan.Approve" },
+    { "resource": "Loan", "action": "Disburse", "name": "Loan.Disburse" },
+    { "resource": "Loan", "action": "Repay", "name": "Loan.Repay" },
+    { "resource": "Loan", "action": "Default", "name": "Loan.Default" }
+  ],
+  "triggers": [
+    { "operation": "Loan.Apply", "source": "user", "description": "Borrower submits an application via web or branch." },
+    { "process": "LoanOrigination", "source": "webhook", "event": "crm.lead.qualified", "description": "Kick off the full origination SOP when CRM signals a qualified lead." },
+    { "operation": "Loan.Default", "source": "schedule", "schedule": "0 0 * * *", "description": "Nightly sweep flags overdue loans." }
+  ],
+  "rules": [
+    { "operation": "Loan.Apply", "type": "access", "allow": [{ "role": "Borrower" }] },
+    { "operation": "Loan.Approve", "type": "access", "allow": [{ "role": "Underwriter" }] },
+    { "operation": "Loan.Disburse", "type": "access", "allow": [{ "role": "LendingManager" }] },
+    { "operation": "Loan.Default", "type": "access", "allow": [{ "role": "NightlyDelinquencySweep" }] },
+    {
+      "name": "ApplicationIsPending",
+      "operation": "Loan.Approve",
+      "type": "condition",
+      "conditions": [{ "attribute": "loan.status", "operator": "eq", "value": "pending" }]
+    },
+    {
+      "name": "LoanIsApproved",
+      "operation": "Loan.Disburse",
+      "type": "condition",
+      "conditions": [{ "attribute": "loan.status", "operator": "eq", "value": "approved" }]
+    }
+  ],
+  "outcomes": [
+    { "operation": "Loan.Apply", "changes": [{ "attribute": "loan.status", "set": "pending" }] },
+    { "operation": "Loan.Approve", "changes": [{ "attribute": "loan.status", "set": "approved" }] },
+    {
+      "operation": "Loan.Disburse",
+      "changes": [{ "attribute": "loan.status", "set": "active" }],
+      "emits": ["lending.Loan.Disbursed"]
+    },
+    { "operation": "Loan.Default", "changes": [{ "attribute": "loan.status", "set": "defaulted" }] }
+  ],
+  "signals": [
+    {
+      "name": "lending.Loan.Disbursed",
+      "operation": "Loan.Disburse",
+      "description": "Emitted when funds are released to the borrower.",
+      "payload": [
+        { "name": "loan_id", "type": "string" },
+        { "name": "amount", "type": "number" },
+        { "name": "disbursed_at", "type": "datetime" }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "Loan.borrower",
+      "from": "Loan",
+      "to": "Borrower",
+      "cardinality": "many-to-one",
+      "attribute": "borrower_id",
+      "inverse": "loans"
+    }
+  ],
+  "tasks": [
+    { "name": "intake-application", "actor": "Borrower", "operation": "Loan.Apply" },
+    { "name": "underwrite-loan", "actor": "Underwriter", "operation": "Loan.Approve" },
+    { "name": "disburse-loan", "actor": "LendingManager", "operation": "Loan.Disburse" }
+  ],
+  "processes": [
+    {
+      "name": "LoanOrigination",
+      "description": "End-to-end loan origination from application to disbursement.",
+      "operator": "LendingManager",
+      "startStep": "intake",
+      "steps": [
+        { "id": "intake", "task": "intake-application" },
+        { "id": "underwrite", "task": "underwrite-loan", "depends_on": ["intake"], "conditions": ["ApplicationIsPending"] },
+        { "id": "disburse", "task": "disburse-loan", "depends_on": ["underwrite"], "conditions": ["LoanIsApproved"], "else": "abort" }
+      ]
+    }
+  ]
+}
