@@ -50,14 +50,6 @@ const operationalFixture = {
     {
       operation: 'Loan.Approve',
       changes: [{ attribute: 'loan.status', set: 'active' }],
-      emits: ['lending.Loan.Disbursed'],
-    },
-  ],
-  signals: [
-    {
-      name: 'lending.Loan.Disbursed',
-      operation: 'Loan.Approve',
-      payload: [{ name: 'loan_id', type: 'string' }],
     },
   ],
   relationships: [
@@ -418,13 +410,12 @@ describe('DnaValidator — operational/trigger', () => {
     expect(result.valid).toBe(false)
   })
 
-  it('rejects a Trigger with signal source but missing signal field', () => {
+  it('rejects a Trigger with the retired signal source', () => {
     const result = validator.validate({
       operation: 'PaymentSchedule.Create',
       source: 'signal'
     }, 'operational/trigger')
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.params?.missingProperty === 'signal')).toBe(true)
   })
 })
 
@@ -567,69 +558,6 @@ describe('DnaValidator — technical/environment', () => {
 
   it('rejects an Environment with an invalid name', () => {
     const result = validator.validate({ name: 'local' }, 'technical/environment')
-    expect(result.valid).toBe(false)
-  })
-})
-
-describe('DnaValidator — operational/signal', () => {
-  it('validates a valid Signal', () => {
-    const result = validator.validate({
-      name: 'lending.Loan.Disbursed',
-      operation: 'Loan.Disburse',
-      description: 'Published when funds are released.',
-      payload: [
-        { name: 'loan_id', type: 'string' },
-        { name: 'amount', type: 'number' }
-      ]
-    }, 'operational/signal')
-    expect(result.valid).toBe(true)
-    expect(result.errors).toHaveLength(0)
-  })
-
-  it('rejects a Signal missing required payload', () => {
-    const result = validator.validate({
-      name: 'lending.Loan.Disbursed',
-      operation: 'Loan.Disburse'
-    }, 'operational/signal')
-    expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.params?.missingProperty === 'payload')).toBe(true)
-  })
-
-  it('rejects a Signal with empty payload', () => {
-    const result = validator.validate({
-      name: 'lending.Loan.Disbursed',
-      operation: 'Loan.Disburse',
-      payload: []
-    }, 'operational/signal')
-    expect(result.valid).toBe(false)
-  })
-
-  it('rejects a Signal with invalid name pattern', () => {
-    const result = validator.validate({
-      name: 'LoanDisbursed',
-      operation: 'Loan.Disburse',
-      payload: [{ name: 'loan_id', type: 'string' }]
-    }, 'operational/signal')
-    expect(result.valid).toBe(false)
-  })
-})
-
-describe('DnaValidator — operational/outcome (emits)', () => {
-  it('validates an Outcome with emits', () => {
-    const result = validator.validate({
-      operation: 'Loan.Disburse',
-      changes: [{ attribute: 'loan.status', set: 'active' }],
-      emits: ['lending.Loan.Disbursed']
-    }, 'operational/outcome')
-    expect(result.valid).toBe(true)
-  })
-
-  it('rejects an Outcome with invalid emits signal pattern', () => {
-    const result = validator.validate({
-      operation: 'Loan.Disburse',
-      changes: [{ attribute: 'loan.status', set: 'active' }],
-      emits: ['BadSignalName']
-    }, 'operational/outcome')
     expect(result.valid).toBe(false)
   })
 })
@@ -790,10 +718,8 @@ describe('DnaValidator — availableSchemas', () => {
     expect(schemas).toContain('operational/trigger')
     expect(schemas).toContain('operational/rule')
     expect(schemas).toContain('operational/outcome')
-    expect(schemas).toContain('operational/equation')
     expect(schemas).toContain('operational/task')
     expect(schemas).toContain('operational/process')
-    expect(schemas).toContain('operational/signal')
     expect(schemas).toContain('operational/relationship')
     expect(schemas).toContain('product/core/resource')
     expect(schemas).toContain('product/core/action')
@@ -819,11 +745,13 @@ describe('DnaValidator — availableSchemas', () => {
     expect(schemas).toContain('technical')
   })
 
-  it('no longer registers retired primitives (capability, cause, user)', () => {
+  it('no longer registers retired primitives (capability, cause, user, signal, equation)', () => {
     const schemas = validator.availableSchemas()
     expect(schemas).not.toContain('operational/capability')
     expect(schemas).not.toContain('operational/cause')
     expect(schemas).not.toContain('operational/user')
+    expect(schemas).not.toContain('operational/signal')
+    expect(schemas).not.toContain('operational/equation')
     expect(schemas).not.toContain('product/core/role')
   })
 })
@@ -955,45 +883,6 @@ describe('DnaValidator — cross-layer validation', () => {
   it('works with only technical layer', () => {
     const result = validator.validateCrossLayer({ technical })
     expect(result.valid).toBe(true)
-  })
-
-  it('detects invalid Signal operation reference', () => {
-    const badOp = {
-      ...operational,
-      signals: [
-        { name: 'lending.Loan.Teleported', operation: 'Loan.Teleport', payload: [{ name: 'id', type: 'string' }] }
-      ]
-    }
-    const result = validator.validateCrossLayer({ operational: badOp })
-    expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('Operation "Loan.Teleport"'))).toBe(true)
-    expect(result.errors.some(e => e.layer === 'operational')).toBe(true)
-  })
-
-  it('detects invalid Outcome emits reference', () => {
-    const badOp = {
-      ...operational,
-      outcomes: [
-        ...operational.outcomes,
-        { operation: 'Loan.Apply', changes: [{ attribute: 'loan.status', set: 'under_review' }], emits: ['lending.Loan.Vanished'] }
-      ]
-    }
-    const result = validator.validateCrossLayer({ operational: badOp })
-    expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('Signal "lending.Loan.Vanished"'))).toBe(true)
-  })
-
-  it('detects invalid Trigger signal reference', () => {
-    const badOp = {
-      ...operational,
-      triggers: [
-        ...operational.triggers,
-        { operation: 'Loan.Apply', source: 'signal', signal: 'payments.Payment.Ghosted' }
-      ]
-    }
-    const result = validator.validateCrossLayer({ operational: badOp })
-    expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('Signal "payments.Payment.Ghosted"'))).toBe(true)
   })
 
   it('detects invalid Trigger process reference', () => {

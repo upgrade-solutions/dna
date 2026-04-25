@@ -102,7 +102,6 @@ exports.bookshopInput = {
             {
                 operation: 'Book.Publish',
                 changes: [{ attribute: 'book.status', set: 'active' }],
-                emits: ['shop.Book.Published'],
             },
         ],
         triggers: [
@@ -110,14 +109,6 @@ exports.bookshopInput = {
                 operation: 'Book.Publish',
                 source: 'user',
                 description: 'Editor publishes a book.',
-            },
-        ],
-        signals: [
-            {
-                name: 'shop.Book.Published',
-                operation: 'Book.Publish',
-                description: 'Emitted when a book goes live on the storefront.',
-                payload: [{ name: 'book_id', type: 'string', required: true }],
             },
         ],
         relationships: [

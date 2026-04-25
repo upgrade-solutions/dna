@@ -6,7 +6,7 @@ Agents scoped to the Product DNA layer. Product DNA is the surface layer: the re
 
 The product layer contains three documents per domain:
 
-- **`product.core.json`** — a self-contained slice of Operational DNA (Resources, Capabilities, Attributes, Signals, Relationships) transitively referenced by the API and UI surfaces. Downstream layers read this *instead of* `operational.json`.
+- **`product.core.json`** — a self-contained slice of Operational DNA (Resources, Capabilities, Attributes, Relationships) transitively referenced by the API and UI surfaces. Downstream layers read this *instead of* `operational.json`.
 - **`product.api.json`** — the HTTP API surface (namespace, endpoints, schemas, params)
 - **`product.ui.json`** — the web UI surface(s) (layouts, pages, routes, blocks, fields)
 
@@ -20,8 +20,8 @@ Produces `product.core.json` from `operational.json` + the references in `produc
 
 ### Scope
 
-- Walk `product.api.json` and `product.ui.json` for references to Operational primitives (Resources, Capabilities, Attributes, Signals)
-- Compute the transitive closure — include Relationships between referenced Resources, Attributes of referenced Resources, Signals emitted by referenced Capabilities
+- Walk `product.api.json` and `product.ui.json` for references to Operational primitives (Resources, Capabilities, Attributes)
+- Compute the transitive closure — include Relationships between referenced Resources and Attributes of referenced Resources
 - Emit `product.core.json` as a self-contained document that validates without `operational.json` present
 
 ### Inputs
@@ -43,7 +43,7 @@ Produces `product.core.json` from `operational.json` + the references in `produc
 ### Invariants
 
 1. **Derived, not authored**. `product.core.json` is never hand-edited. If core is wrong, the fix is in `operational.json` or the product surfaces, not in core itself.
-2. **Transitive closure**. If `product.api.json` references `Loan`, core must include `Loan`'s Attributes and Actions, any Signal that `Loan.*` Capabilities emit, and any `Relationship` involving `Loan`.
+2. **Transitive closure**. If `product.api.json` references `Loan`, core must include `Loan`'s Attributes and Actions and any `Relationship` involving `Loan`.
 3. **No operational leakage past this point**. Once core exists, nothing downstream reads `operational.json` directly.
 
 ---
@@ -61,7 +61,7 @@ Produces `product.api.json` from `product.core.json`.
 
 ### Inputs
 
-- `product.core.json` (Resources, Capabilities, Attributes, Signals)
+- `product.core.json` (Resources, Capabilities, Attributes)
 - Domain-specific prompt or brief describing which Capabilities become public endpoints vs internal
 - An API namespace name (e.g. `marshall`, `lending`)
 

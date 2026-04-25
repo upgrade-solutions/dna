@@ -117,28 +117,8 @@
     { "operation": "WorkOrder.Release",  "changes": [{ "attribute": "work_order.status", "set": "queued" }] },
     { "operation": "WorkOrder.Cut",      "changes": [{ "attribute": "work_order.status", "set": "in_progress" }] },
     { "operation": "WorkOrder.Inspect",  "changes": [{ "attribute": "work_order.status", "set": "passed" }] },
-    { "operation": "WorkOrder.Reject",   "changes": [{ "attribute": "work_order.status", "set": "failed" }],    "emits": ["assembly.WorkOrder.Rejected"] },
-    { "operation": "WorkOrder.Complete", "changes": [{ "attribute": "work_order.status", "set": "completed" }], "emits": ["assembly.WorkOrder.Completed"] }
-  ],
-  "signals": [
-    {
-      "name": "assembly.WorkOrder.Rejected",
-      "operation": "WorkOrder.Reject",
-      "description": "QC rejected a WorkOrder. Triggers downstream defect-rate analytics.",
-      "payload": [
-        { "name": "work_order_id", "type": "string" },
-        { "name": "defect_kind",   "type": "string" }
-      ]
-    },
-    {
-      "name": "assembly.WorkOrder.Completed",
-      "operation": "WorkOrder.Complete",
-      "description": "WorkOrder finished successfully — shipped to the warehouse.",
-      "payload": [
-        { "name": "work_order_id", "type": "string" },
-        { "name": "completed_at",  "type": "datetime" }
-      ]
-    }
+    { "operation": "WorkOrder.Reject",   "changes": [{ "attribute": "work_order.status", "set": "failed" }] },
+    { "operation": "WorkOrder.Complete", "changes": [{ "attribute": "work_order.status", "set": "completed" }] }
   ],
   "relationships": [
     { "name": "DefectReport.work_order", "from": "DefectReport", "to": "WorkOrder", "cardinality": "many-to-one", "attribute": "work_order_id" }

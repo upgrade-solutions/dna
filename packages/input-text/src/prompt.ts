@@ -43,7 +43,7 @@ const OPERATIONAL_SKELETON = `{
       { "target": "<TargetNounInPascalCase>", "action": "<Action>", "name": "<TargetNoun>.<Action>" }
     ],
     "triggers": [
-      { "operation": "<TargetNoun>.<Action>", "source": "user | schedule | webhook | operation | signal" }
+      { "operation": "<TargetNoun>.<Action>", "source": "user | schedule | webhook | operation" }
     ],
     "rules": [
       { "operation": "<TargetNoun>.<Action>", "type": "access", "allow": [{ "role": "<RoleInPascalCase>" }] },
@@ -175,7 +175,7 @@ const LAYER_GUIDE: Record<Layer, string> = {
     '  operations: ARRAY of { target: "<noun>", action: "<verb>", name: "Target.Action" }',
     '    — target resolves across resources/persons/roles/groups (any noun primitive). action must match an entry in target.actions[].',
     '    — one entry per Target+Action pair; target/action are single strings, NOT arrays.',
-    '  triggers: ARRAY of { operation: "Target.Action" | process: "ProcessName", source: "user" | "schedule" | "webhook" | "operation" | "signal" }',
+    '  triggers: ARRAY of { operation: "Target.Action" | process: "ProcessName", source: "user" | "schedule" | "webhook" | "operation" }',
     '    — A Trigger targets EITHER an Operation (ad-hoc invocation) OR a Process (SOP kickoff), not both.',
     '    — source is one of those literal strings ONLY; pick it from the text. Default to "user" when unclear.',
     '  rules: ARRAY of { name?, operation, type: "access" | "condition", allow?: [{role}], conditions?: [...] }',

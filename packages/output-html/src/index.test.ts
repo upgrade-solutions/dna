@@ -84,6 +84,8 @@ describe('@dna-codes/output-html', () => {
       expect(html).toContain('Operations: 3')
       expect(html).toContain('Rules: 2')
       expect(html).toContain('Processes: 1')
+      // Signal and Equation primitives no longer exist
+      expect(html).not.toContain('Signals:')
       expect(html).not.toContain('Equations:')
     })
 
@@ -131,7 +133,7 @@ describe('@dna-codes/output-html', () => {
   })
 
   describe('section: operations', () => {
-    it('renders triggers, access rules, condition rules, outcomes, and signals', () => {
+    it('renders triggers, access rules, condition rules, and outcomes', () => {
       const html = render(bookshopInput, { sections: ['operations'] })
       expect(html).toContain('<h3>Book.Publish</h3>')
       expect(html).toContain('<strong>Triggered by:</strong>')
@@ -140,9 +142,7 @@ describe('@dna-codes/output-html', () => {
       expect(html).toContain('role <code>Editor</code>')
       expect(html).toContain('<em>Condition:</em>')
       expect(html).toContain('<code>book.status</code>')
-      expect(html).toContain('<code>shop.Book.Published</code>')
-      expect(html).toContain('<strong>Signals published:</strong>')
-      expect(html).toContain('<code>book_id</code>')
+      expect(html).not.toContain('<strong>Signals published:</strong>')
     })
   })
 

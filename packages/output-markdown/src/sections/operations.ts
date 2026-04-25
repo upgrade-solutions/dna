@@ -8,7 +8,6 @@ export function renderOperations(dna: DnaInput, h: number): string | null {
   const triggersByOp = groupBy(op.triggers ?? [], (t) => t.operation ?? '')
   const rulesByOp = groupBy(op.rules ?? [], (r) => r.operation)
   const outcomesByOp = groupBy(op.outcomes ?? [], (o) => o.operation)
-  const signalsByOp = groupBy(op.signals ?? [], (s) => s.operation)
 
   const lines: string[] = [`${hashes(h)} Operations`]
 
@@ -20,9 +19,8 @@ export function renderOperations(dna: DnaInput, h: number): string | null {
     if (triggers.length) {
       lines.push('', '**Triggered by:**')
       for (const t of triggers) {
-        const signal = t.signal ? ` — signal \`${t.signal}\`` : ''
         const desc = t.description ? ` (${t.description})` : ''
-        lines.push(`- ${t.source}${signal}${desc}`)
+        lines.push(`- ${t.source}${desc}`)
       }
     }
 
@@ -42,21 +40,6 @@ export function renderOperations(dna: DnaInput, h: number): string | null {
           lines.push(`- Sets \`${c.attribute}\`${set}`)
         }
         for (const next of o.initiates ?? []) lines.push(`- Initiates \`${next}\``)
-        for (const sig of o.emits ?? []) lines.push(`- Emits \`${sig}\``)
-      }
-    }
-
-    const signals = signalsByOp.get(operation.name) ?? []
-    if (signals.length) {
-      lines.push('', '**Signals published:**')
-      for (const s of signals) {
-        lines.push(`- \`${s.name}\`${s.description ? ` — ${s.description}` : ''}`)
-        if (s.payload?.length) {
-          for (const field of s.payload) {
-            const req = field.required ? ' (required)' : ''
-            lines.push(`  - \`${field.name}\`: ${field.type}${req}`)
-          }
-        }
       }
     }
   }

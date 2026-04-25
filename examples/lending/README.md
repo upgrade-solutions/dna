@@ -11,7 +11,6 @@ Consumer lending domain. The "default" example most readers will see first — c
 - **Step-level conditions referencing Rules**: `step.conditions: ["ApplicationIsPending"]` instead of inline expressions.
 - **Step-level `else` routing**: `disburse` aborts the Process if `LoanIsApproved` doesn't hold.
 - **Process with explicit `startStep`**.
-- **Signal published from an Outcome**: `lending.Loan.Disbursed` carries a typed payload contract.
 
 ## What this example deliberately omits
 

@@ -112,22 +112,9 @@
     { "operation": "Loan.Approve",  "changes": [{ "attribute": "loan.status", "set": "approved" }] },
     {
       "operation": "Loan.Disburse",
-      "changes": [{ "attribute": "loan.status", "set": "active" }],
-      "emits": ["lending.Loan.Disbursed"]
+      "changes": [{ "attribute": "loan.status", "set": "active" }]
     },
     { "operation": "Loan.Default",  "changes": [{ "attribute": "loan.status", "set": "defaulted" }] }
-  ],
-  "signals": [
-    {
-      "name": "lending.Loan.Disbursed",
-      "operation": "Loan.Disburse",
-      "description": "Emitted when funds are released to the borrower.",
-      "payload": [
-        { "name": "loan_id",     "type": "string" },
-        { "name": "amount",      "type": "number" },
-        { "name": "disbursed_at", "type": "datetime" }
-      ]
-    }
   ],
   "relationships": [
     {

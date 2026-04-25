@@ -158,23 +158,11 @@
   ],
   "outcomes": [
     { "operation": "Patient.Admit",           "changes": [{ "attribute": "patient.status", "set": "admitted" }, { "attribute": "patient.admitted_at", "set": "now" }] },
-    { "operation": "Patient.Discharge",       "changes": [{ "attribute": "patient.status", "set": "discharged" }], "emits": ["clinical.Patient.Discharged"] },
+    { "operation": "Patient.Discharge",       "changes": [{ "attribute": "patient.status", "set": "discharged" }] },
     { "operation": "Prescription.Write",      "changes": [{ "attribute": "prescription.status", "set": "pending_review" }] },
     { "operation": "Prescription.Approve",    "changes": [{ "attribute": "prescription.status", "set": "approved" }] },
     { "operation": "Prescription.Reject",     "changes": [{ "attribute": "prescription.status", "set": "rejected" }] },
     { "operation": "Prescription.Administer", "changes": [{ "attribute": "prescription.status", "set": "administered" }] }
-  ],
-  "signals": [
-    {
-      "name": "clinical.Patient.Discharged",
-      "operation": "Patient.Discharge",
-      "description": "A Patient has been discharged — billing and follow-up scheduling pick this up.",
-      "payload": [
-        { "name": "patient_id",            "type": "string" },
-        { "name": "discharged_at",         "type": "datetime" },
-        { "name": "discharge_disposition", "type": "string" }
-      ]
-    }
   ],
   "relationships": [
     { "name": "Encounter.patient",    "from": "Encounter",    "to": "Patient", "cardinality": "many-to-one", "attribute": "patient_id" },

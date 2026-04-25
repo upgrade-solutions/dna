@@ -62,16 +62,14 @@ interface ProcessShape {
   operator: string
   startStep: string
   steps: { id: string; task: string; depends_on?: string[]; conditions?: string[]; else?: string }[]
-  emits?: string[]
 }
 
 interface OperationalDNA {
   domain: DomainShape
   memberships?: MembershipShape[]
   operations?: { name: string; target: string; action: string }[]
-  signals?: { name: string; operation: string }[]
-  outcomes?: { operation: string; emits?: string[]; initiates?: string[] }[]
-  triggers?: { operation?: string; process?: string; source: string; signal?: string; after?: string }[]
+  outcomes?: { operation: string; initiates?: string[] }[]
+  triggers?: { operation?: string; process?: string; source: string; after?: string }[]
   rules?: { name?: string; operation: string; type?: string; allow?: { role?: string }[] }[]
   relationships?: { name: string; from: string; to: string; attribute: string; cardinality: string }[]
   tasks?: { name: string; actor: string; operation: string }[]
@@ -82,9 +80,8 @@ interface ProductCoreDNA {
   domain: { name: string; path: string }
   resources?: NounShape[]
   operations?: { name: string; resource?: string; target?: string; action: string }[]
-  signals?: { name: string; operation: string }[]
-  outcomes?: { operation: string; emits?: string[] }[]
-  triggers?: { operation?: string; process?: string; source: string; signal?: string }[]
+  outcomes?: { operation: string }[]
+  triggers?: { operation?: string; process?: string; source: string }[]
   relationships?: { name: string; from: string; to: string; attribute: string }[]
 }
 
@@ -343,7 +340,6 @@ export class DnaValidator {
     if (op) {
       const primitives = this.collectPrimitives(op)
       const operationNames = new Set((op.operations ?? []).map(o => o.name))
-      const signalNames = new Set((op.signals ?? []).map(s => s.name))
       const taskNames = new Set((op.tasks ?? []).map(t => t.name))
       const ruleNames = new Set((op.rules ?? []).filter(r => !!r.name).map(r => r.name as string))
       const processNames = primitives.processNames
@@ -379,18 +375,7 @@ export class DnaValidator {
         }
       }
 
-      // Signal.operation must reference a valid Operation
-      for (const signal of op.signals ?? []) {
-        if (!operationNames.has(signal.operation)) {
-          errors.push({
-            layer: 'operational',
-            path: `signals/${signal.name}/operation`,
-            message: `Signal "${signal.name}" emitted by Operation "${signal.operation}" which is not declared; ${availability('operations', operationNames)}`,
-          })
-        }
-      }
-
-      // Outcome.operation/emits/initiates references
+      // Outcome.operation/initiates references
       for (const outcome of op.outcomes ?? []) {
         if (!operationNames.has(outcome.operation)) {
           errors.push({
@@ -398,15 +383,6 @@ export class DnaValidator {
             path: `outcomes/${outcome.operation}/operation`,
             message: `Outcome attached to Operation "${outcome.operation}" which is not declared; ${availability('operations', operationNames)}`,
           })
-        }
-        for (const signalRef of outcome.emits ?? []) {
-          if (!signalNames.has(signalRef)) {
-            errors.push({
-              layer: 'operational',
-              path: `outcomes/${outcome.operation}/emits/${signalRef}`,
-              message: `Outcome on "${outcome.operation}" emits Signal "${signalRef}" which is not declared; ${availability('signals', signalNames)}`,
-            })
-          }
         }
         for (const opRef of outcome.initiates ?? []) {
           if (!operationNames.has(opRef)) {
@@ -419,7 +395,7 @@ export class DnaValidator {
         }
       }
 
-      // Trigger references (operation/process/signal/after)
+      // Trigger references (operation/process/after)
       for (const trigger of op.triggers ?? []) {
         const target = trigger.operation ? `operation:${trigger.operation}` : trigger.process ? `process:${trigger.process}` : '<missing>'
         if (!trigger.operation && !trigger.process) {
@@ -448,13 +424,6 @@ export class DnaValidator {
             layer: 'operational',
             path: `triggers/${target}/process`,
             message: `Trigger starts Process "${trigger.process}" which is not declared; ${availability('processes', processNames)}`,
-          })
-        }
-        if (trigger.source === 'signal' && trigger.signal && !signalNames.has(trigger.signal)) {
-          errors.push({
-            layer: 'operational',
-            path: `triggers/${target}/signal`,
-            message: `Trigger listens for Signal "${trigger.signal}" which is not declared; ${availability('signals', signalNames)}`,
           })
         }
         if (trigger.source === 'operation' && trigger.after && !operationNames.has(trigger.after)) {
@@ -771,25 +740,15 @@ export class DnaValidator {
             })
           }
         }
-        for (const sig of proc.emits ?? []) {
-          if (!signalNames.has(sig)) {
-            errors.push({
-              layer: 'operational',
-              path: `processes/${proc.name}/emits/${sig}`,
-              message: `Process "${proc.name}" emits Signal "${sig}" which is not declared; ${availability('signals', signalNames)}`,
-            })
-          }
-        }
       }
     }
 
     // ── Operational → Product Core (materializer consistency) ──────────────
-    // If both are present, every Resource/Operation/Signal in product.core must
-    // also exist in operational — product core is a projection, never invents.
+    // If both are present, every Resource/Operation in product.core must also
+    // exist in operational — product core is a projection, never invents.
     if (op && core) {
       const opPrimitives = this.collectPrimitives(op)
       const opOperationNames = new Set((op.operations ?? []).map(o => o.name))
-      const opSignalNames = new Set((op.signals ?? []).map(s => s.name))
 
       for (const resource of core.resources ?? []) {
         if (!opPrimitives.resourceNames.has(resource.name)) {
@@ -806,15 +765,6 @@ export class DnaValidator {
             layer: 'product/core',
             path: `operations/${op2.name}`,
             message: `Product Core Operation "${op2.name}" is not present in Operational DNA; re-run the materializer`,
-          })
-        }
-      }
-      for (const sig of core.signals ?? []) {
-        if (!opSignalNames.has(sig.name)) {
-          errors.push({
-            layer: 'product/core',
-            path: `signals/${sig.name}`,
-            message: `Product Core Signal "${sig.name}" is not present in Operational DNA; re-run the materializer`,
           })
         }
       }

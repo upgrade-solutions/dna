@@ -1,6 +1,6 @@
 # Operational Layer Agents
 
-Agents scoped to the Operational DNA layer. Operational DNA is **organizational modeling** — the People (Person, Role, Group, Membership), Entities (Resource, Attribute, Relationship), and Activities (Operation, Task, Step, Process, Trigger, Rule, Outcome, Signal, Equation) that describe *what an organization is and does* — independent of how it's surfaced or deployed.
+Agents scoped to the Operational DNA layer. Operational DNA is **organizational modeling** — the People (Person, Role, Group, Membership), Entities (Resource, Attribute, Relationship), and Activities (Operation, Task, Step, Process, Trigger, Rule, Outcome) that describe *what an organization is and does* — independent of how it's surfaced or deployed.
 
 The layer is modeled around the **Actor > Action > Subject** triad. Roles act; Subjects (any noun primitive — Resource, Person, Role, or Group) receive actions. Each noun primitive shares the same base shape (`name`, `attributes[]`, `actions[]`, optional `parent`); Role adds `scope`/`system`/`resource`; Membership is a separate eligibility shape (`person`, `role`, optional `group`). An Operation is a `Target.Action` pair (the atomic unit of business activity). The Actor is supplied by Rule (access) and Task (assignment).
 
@@ -12,7 +12,7 @@ Owns authoring and evolving a domain's `operational.json`. Available as a Claude
 
 - Translating domain research (real-world processes, reference sources, stakeholder interviews) into Operational primitives
 - Producing a single `operational.json` that passes `cba validate --layer operational`
-- Iterating the primitive set as research reveals new Resources/Capabilities/Rules/Signals
+- Iterating the primitive set as research reveals new Resources/Operations/Rules
 - Ensuring the domain hierarchy in `Domain.hierarchy` correctly nests under the platform root
 
 ### Inputs
@@ -33,10 +33,10 @@ All Operational primitives — see `@dna-codes/schemas/operational/*.json` for t
 
 - **People**: `Person`, `Role`, `Group`, `Membership`
 - **Entities**: `Resource`, `Attribute`, `Relationship`
-- **Activities**: `Operation`, `Task`, `Step`, `Process`, `Trigger`, `Rule`, `Outcome`, `Signal`, `Equation`
+- **Activities**: `Operation`, `Task`, `Step`, `Process`, `Trigger`, `Rule`, `Outcome`
 - **Cross-cutting**: `Domain`
 
-History: `Lifecycle` was removed in favor of explicit Operation state transitions expressed through `Outcome.changes`. `Capability` was renamed to `Operation`; `Cause` was renamed to `Trigger`. `User` was dropped (instance-level identity is a Product/Technical concern). Person, Role, Group, and Membership were promoted from earlier structural-typing-on-Resource into first-class primitives.
+History: `Lifecycle` was removed in favor of explicit Operation state transitions expressed through `Outcome.changes`. `Capability` was renamed to `Operation`; `Cause` was renamed to `Trigger`. `User` was dropped (instance-level identity is a Product/Technical concern). Person, Role, Group, and Membership were promoted from earlier structural-typing-on-Resource into first-class primitives. `Signal` and `Equation` were removed — Signals were emit-only with no consumer in any example, Equations were unused; see `openspec/changes/remove-signal-and-equation/`. State changes now live exclusively in `Outcome.changes`; there is no first-class event primitive.
 
 ### Why these primitives — characteristics
 

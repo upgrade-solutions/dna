@@ -15,4 +15,4 @@ Hospital inpatient ward with Patient-centered care teams. Stress-tests the Patie
 
 - HIPAA / regulatory metadata (out of scope for the operational vocabulary; would belong as `description` annotations or supplementary docs).
 - Time-of-day scheduling (no `schedule`-source Triggers — the hospital's MAR/eMAR clocks are runtime concerns).
-- Cross-domain Signals to billing/scheduling beyond `clinical.Patient.Discharged`.
+- Cross-domain event emission to billing/scheduling (DNA does not currently model first-class events — see `openspec/changes/remove-signal-and-equation/`).

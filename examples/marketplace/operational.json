@@ -110,25 +110,10 @@
     { "operation": "Booking.Request", "changes": [{ "attribute": "booking.status", "set": "requested" }] },
     {
       "operation": "Booking.Approve",
-      "changes": [{ "attribute": "booking.status", "set": "approved" }],
-      "emits": ["marketplace.Booking.Approved"]
+      "changes": [{ "attribute": "booking.status", "set": "approved" }]
     },
     { "operation": "Booking.Decline", "changes": [{ "attribute": "booking.status", "set": "declined" }] },
     { "operation": "Booking.Cancel",  "changes": [{ "attribute": "booking.status", "set": "cancelled" }] }
-  ],
-  "signals": [
-    {
-      "name": "marketplace.Booking.Approved",
-      "operation": "Booking.Approve",
-      "description": "Host approved a guest's booking request — downstream payment + calendar sync.",
-      "payload": [
-        { "name": "booking_id", "type": "string" },
-        { "name": "listing_id", "type": "string" },
-        { "name": "guest_id",   "type": "string" },
-        { "name": "checkin",    "type": "date" },
-        { "name": "checkout",   "type": "date" }
-      ]
-    }
   ],
   "relationships": [
     { "name": "Listing.host",     "from": "Listing", "to": "Member",  "cardinality": "many-to-one", "attribute": "host_id",    "inverse": "listings" },

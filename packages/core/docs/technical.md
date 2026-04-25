@@ -13,7 +13,6 @@ Owns authoring `technical.json` for a domain.
 - Choose cell adapters (node/express, python/django, vite/react, postgres, node/event-bus, ...)
 - Wire constructs — databases, queues, object storage, CDNs, compute, load balancers
 - Declare providers and environments (dev overlays, prod overlays)
-- Map signal dispatch config (which cell subscribes to which signal) for Pattern A HTTP push
 
 ### Inputs
 

@@ -59,7 +59,8 @@ describe('@dna-codes/output-markdown', () => {
       expect(md).toContain('- Operations: 3')
       expect(md).toContain('- Rules: 2')
       expect(md).toContain('- Processes: 1')
-      // Equations are absent in the fixture
+      // Signal and Equation primitives no longer exist
+      expect(md).not.toContain('Signals:')
       expect(md).not.toContain('Equations:')
     })
 
@@ -104,7 +105,7 @@ describe('@dna-codes/output-markdown', () => {
   })
 
   describe('section: operations', () => {
-    it('renders triggers, access rules, condition rules, outcomes, and signals', () => {
+    it('renders triggers, access rules, condition rules, and outcomes', () => {
       const md = render(bookshopInput, { sections: ['operations'] })
       expect(md).toContain('### Book.Publish')
       expect(md).toContain('**Triggered by:**')
@@ -113,9 +114,7 @@ describe('@dna-codes/output-markdown', () => {
       expect(md).toContain('*Condition:*')
       expect(md).toContain('book.status')
       expect(md).toContain('Sets `book.status`')
-      expect(md).toContain('Emits `shop.Book.Published`')
-      expect(md).toContain('**Signals published:**')
-      expect(md).toContain('`book_id`: string (required)')
+      expect(md).not.toContain('**Signals published:**')
     })
   })
 

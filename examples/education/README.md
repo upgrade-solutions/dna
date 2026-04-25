@@ -13,6 +13,6 @@ University CS department academics. Stress-tests time-bounded Group memberships 
 
 ## What this example deliberately omits
 
-- Grade-letter calculation (would belong as an `Equation` — left out to keep the example focused on memberships).
+- Grade-letter calculation — DNA does not currently model named computations; this would belong in a downstream cell, not Operational DNA.
 - Prerequisites (modelable as `Relationship`s between Courses + a condition Rule on Enrollment.Request — out of scope here).
 - Major/program/degree-audit primitives — would expand the domain past what this example aims to exercise.

@@ -155,22 +155,10 @@
   "outcomes": [
     { "operation": "CourseOffering.Open",     "changes": [{ "attribute": "course_offering.status", "set": "open" }] },
     { "operation": "CourseOffering.Begin",    "changes": [{ "attribute": "course_offering.status", "set": "in_session" }] },
-    { "operation": "CourseOffering.Finalize", "changes": [{ "attribute": "course_offering.status", "set": "complete" }], "emits": ["academics.CourseOffering.Finalized"] },
+    { "operation": "CourseOffering.Finalize", "changes": [{ "attribute": "course_offering.status", "set": "complete" }] },
     { "operation": "Enrollment.Request",      "changes": [{ "attribute": "enrollment.status", "set": "waitlisted" }] },
     { "operation": "Enrollment.Confirm",      "changes": [{ "attribute": "enrollment.status", "set": "enrolled" }] },
     { "operation": "Enrollment.Drop",         "changes": [{ "attribute": "enrollment.status", "set": "dropped" }] }
-  ],
-  "signals": [
-    {
-      "name": "academics.CourseOffering.Finalized",
-      "operation": "CourseOffering.Finalize",
-      "description": "All grades posted for an offering. Triggers transcript update + degree-audit recalculation downstream.",
-      "payload": [
-        { "name": "offering_id", "type": "string" },
-        { "name": "course_code", "type": "string" },
-        { "name": "semester",    "type": "string" }
-      ]
-    }
   ],
   "relationships": [
     { "name": "CourseOffering.course", "from": "CourseOffering", "to": "Course",         "cardinality": "many-to-one", "attribute": "course_id" },

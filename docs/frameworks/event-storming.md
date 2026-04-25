@@ -12,7 +12,7 @@ The "Big Picture" + "Process Modeling" levels of Event Storming use a stable col
 
 | Sticky | Workshop name | DNA primitive |
 |---|---|---|
-| 🟧 Orange | **Domain Event** ("OrderPlaced", "PaymentReceived") | `Signal` (when cross-domain) + `Outcome.emits` (the publish point); the Operation that *produced* the event becomes an `Operation` |
+| 🟧 Orange | **Domain Event** ("OrderPlaced", "PaymentReceived") | No first-class event primitive in DNA today. State changes are modeled via `Outcome.changes` on the producing Operation (e.g. `loan.status → active`); the Operation that produced the event is the `Operation` itself. A dedicated event primitive will return when a real consumer (a downstream Trigger that reads emitted events) motivates it. |
 | 🟦 Blue | **Command** ("PlaceOrder", "ApprovePayment") | `Operation` (Resource.Action) — the verb side becomes `Action`, paired with a Resource |
 | 🟨 Yellow | **Actor** / **User** ("Customer", "Underwriter") | `Resource` referenced as actor — typically used as a Role on `Task.actor` and `Rule.allow[].role` |
 | 🟪 Lavender / Purple | **Policy** ("Whenever X happens, then Y is initiated") | `Trigger` (`source: signal` or `source: operation`) targeting the downstream Operation/Process |

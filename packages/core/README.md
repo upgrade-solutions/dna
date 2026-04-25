@@ -150,7 +150,7 @@ Schemas cross-reference each other by absolute URI (e.g. `https://dna.codes/sche
 
 | Layer | Primitives |
 |-------|-----------|
-| Operational | `Resource`, `Action`, `Capability`, `Attribute`, `Domain`, `Relationship`, `Cause`, `Rule`, `Outcome`, `Signal`, `Equation`, `Role`, `User`, `Task`, `Process` |
+| Operational | `Resource`, `Action`, `Capability`, `Attribute`, `Domain`, `Relationship`, `Cause`, `Rule`, `Outcome`, `Role`, `User`, `Task`, `Process` |
 | Product | `Resource`, `Action`, `Operation`, `Layout`, `Page`, `Route`, `Block`, `Field`, `Namespace`, `Endpoint`, `Schema`, `Param` |
 | Technical | `Environment`, `Cell`, `Construct`, `Provider`, `Variable`, `Output`, `Script`, `View`, `Node`, `Connection`, `Zone` |
 

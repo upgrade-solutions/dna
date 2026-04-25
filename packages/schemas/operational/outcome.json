@@ -39,21 +39,12 @@
         "type": "string",
         "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$"
       }
-    },
-    "emits": {
-      "type": "array",
-      "description": "Signal names published when this outcome completes (cross-domain, asynchronous). Each entry must reference a Signal defined in the signals array.",
-      "items": {
-        "type": "string",
-        "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9]*)*\\.[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$"
-      }
     }
   },
   "examples": [
     {
       "operation": "Loan.Approve",
-      "changes": [{ "attribute": "status", "set": "active" }],
-      "emits": ["lending.Loan.Approved"]
+      "changes": [{ "attribute": "status", "set": "active" }]
     },
     {
       "operation": "Order.Cancel",

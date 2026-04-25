@@ -13,7 +13,6 @@ export interface OperationalDna {
   rules?: Rule[]
   outcomes?: Outcome[]
   triggers?: Trigger[]
-  signals?: Signal[]
   relationships?: Relationship[]
   tasks?: Task[]
   processes?: Process[]
@@ -88,7 +87,6 @@ export interface Outcome {
   description?: string
   changes?: OutcomeChange[]
   initiates?: string[]
-  emits?: string[]
 }
 
 export interface OutcomeChange {
@@ -104,13 +102,6 @@ export interface Trigger {
   schedule?: string
   event?: string
   after?: string
-  signal?: string
-}
-
-export interface Signal {
-  name: string
-  operation: string
-  description?: string
 }
 
 export interface Relationship {

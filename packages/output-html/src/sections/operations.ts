@@ -8,7 +8,6 @@ export function renderOperations(dna: DnaInput, h: number): string | null {
   const triggersByOp = groupBy(op.triggers ?? [], (t) => t.operation ?? '')
   const rulesByOp = groupBy(op.rules ?? [], (r) => r.operation)
   const outcomesByOp = groupBy(op.outcomes ?? [], (o) => o.operation)
-  const signalsByOp = groupBy(op.signals ?? [], (s) => s.operation)
 
   const parts: string[] = [heading(h, 'Operations')]
 
@@ -20,9 +19,8 @@ export function renderOperations(dna: DnaInput, h: number): string | null {
     if (triggers.length) {
       const items = triggers
         .map((t) => {
-          const signal = t.signal ? ` — signal ${code(t.signal)}` : ''
           const desc = t.description ? ` (${escape(t.description)})` : ''
-          return `<li>${escape(t.source)}${signal}${desc}</li>`
+          return `<li>${escape(t.source)}${desc}</li>`
         })
         .join('')
       inner.push(`<p><strong>Triggered by:</strong></p><ul>${items}</ul>`)
@@ -44,30 +42,8 @@ export function renderOperations(dna: DnaInput, h: number): string | null {
           lines.push(`<li>Sets ${code(c.attribute)}${set}</li>`)
         }
         for (const next of o.initiates ?? []) lines.push(`<li>Initiates ${code(next)}</li>`)
-        for (const sig of o.emits ?? []) lines.push(`<li>Emits ${code(sig)}</li>`)
       }
       inner.push(`<p><strong>Outcomes:</strong></p><ul>${lines.join('')}</ul>`)
-    }
-
-    const signals = signalsByOp.get(operation.name) ?? []
-    if (signals.length) {
-      const items: string[] = []
-      for (const s of signals) {
-        const desc = s.description ? ` — ${escape(s.description)}` : ''
-        let line = `<li>${code(s.name)}${desc}`
-        if (s.payload?.length) {
-          const fields = s.payload
-            .map((f) => {
-              const req = f.required ? ' (required)' : ''
-              return `<li>${code(f.name)}: ${escape(f.type)}${req}</li>`
-            })
-            .join('')
-          line += `<ul>${fields}</ul>`
-        }
-        line += '</li>'
-        items.push(line)
-      }
-      inner.push(`<p><strong>Signals published:</strong></p><ul>${items.join('')}</ul>`)
     }
 
     parts.push(`<section>${inner.join('')}</section>`)

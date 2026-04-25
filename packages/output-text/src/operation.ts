@@ -80,7 +80,6 @@ function renderGherkin(op: Operation, dna: OperationalDna): string {
       if (t.source === 'schedule') givens.push('a scheduled trigger fires')
       else if (t.source === 'webhook') givens.push('an inbound webhook is received')
       else if (t.source === 'operation') givens.push(`operation \`${t.after ?? 'previous'}\` has completed`)
-      else if (t.source === 'signal') givens.push(`signal \`${t.signal ?? 'event'}\` is received`)
     }
     for (const r of conditionRules) givens.push(conditionPhrase(r))
 
@@ -156,9 +155,8 @@ function renderTriggerList(triggers: Trigger[]): string | null {
   if (!triggers.length) return null
   return triggers
     .map((t) => {
-      const signal = t.signal ? ` — signal \`${t.signal}\`` : ''
       const desc = t.description ? ` (${t.description})` : ''
-      return `- ${t.source}${signal}${desc}`
+      return `- ${t.source}${desc}`
     })
     .join('\n')
 }
@@ -185,7 +183,6 @@ function outcomeLines(outcomes: Outcome[]): string[] {
       lines.push(`Sets \`${c.attribute}\`${set}`)
     }
     for (const next of o.initiates ?? []) lines.push(`Initiates \`${next}\``)
-    for (const sig of o.emits ?? []) lines.push(`Emits \`${sig}\``)
   }
   return lines
 }

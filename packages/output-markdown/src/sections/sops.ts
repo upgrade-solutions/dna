@@ -13,9 +13,6 @@ export function renderSops(dna: DnaInput, h: number): string | null {
     lines.push('', `${hashes(h + 1)} ${proc.name}`)
     if (proc.description) lines.push('', proc.description)
     if (proc.operator) lines.push('', `**Operator:** \`${proc.operator}\``)
-    if (proc.emits?.length) {
-      lines.push('', `**Emits:** ${proc.emits.map((s) => `\`${s}\``).join(', ')}`)
-    }
 
     const steps = proc.steps ?? []
     if (steps.length) {

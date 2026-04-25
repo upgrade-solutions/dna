@@ -72,7 +72,7 @@ Unknown cardinalities fall back to `one-to-one`.
 Planned diagrams, not yet shipped:
 
 - `class` — UML class diagram (Resources + Actions as methods, Attributes as fields)
-- `sequence` — Signal choreography (Cause → Capability → Outcome → Signal → Cause…)
+- `sequence` — Trigger → Operation → Outcome → next-Trigger choreography
 - `state` — state machines for Resources whose Outcomes change a single status Attribute
 
 ## License

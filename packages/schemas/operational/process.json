@@ -75,14 +75,6 @@
           }
         }
       }
-    },
-    "emits": {
-      "type": "array",
-      "description": "Optional Signals emitted when the terminal steps of this process complete. Signal names must reference declared Signals.",
-      "items": {
-        "type": "string",
-        "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9]*)*\\.[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$"
-      }
     }
   },
   "examples": [

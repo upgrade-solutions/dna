@@ -69,7 +69,7 @@ TOGAF's **Architecture Content Framework** lists ~30 standard deliverables. The 
 | Business Process Diagrams | `Process` documents; render via `output-mermaid` flowchart |
 | Data Entity / Data Component Catalog | `Resource` list with `Attribute`s |
 | Logical / Physical Data Model | `Resource` + `Attribute` + `Relationship` (ERD via `output-mermaid`) |
-| Application Communication Diagram | Cross-`Domain` `Signal` consumption + `Trigger` (`source: signal`) |
+| Application Communication Diagram | Cross-`Domain` Operation chains via `Trigger` (`source: operation`) |
 | Application & User Location Diagram | Out of scope (Technical layer's `Provider.region` is closest, but DNA doesn't track user geography) |
 | Application/Function Matrix | Implicit from `Operation` × `Resource` pairings |
 | Technology Standards Catalog | `Provider` declarations + `Construct` types |

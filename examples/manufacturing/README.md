@@ -15,4 +15,4 @@ Discrete-manufacturing assembly line with multiple system actors (machines) and 
 
 - Material/inventory primitives (BoM, raw materials) — would multiply Resources without exercising new model features.
 - Real-time machine telemetry (out of scope for the operational vocabulary; runtime cell concern).
-- Bin packing / queue prioritization on the cut step (an Equation could model the priority calculation; not modeled here).
+- Bin packing / queue prioritization on the cut step — DNA does not currently model named computations; this would belong in a downstream cell, not Operational DNA.

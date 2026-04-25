@@ -42,6 +42,51 @@ function availability(label, names) {
         return `no ${label} declared`;
     return `available ${label}: ${list.sort().map(n => `"${n}"`).join(', ')}`;
 }
+function findCycle(start, byName) {
+    const order = [];
+    const seen = new Set();
+    let cur = start;
+    while (cur && byName.has(cur)) {
+        if (seen.has(cur)) {
+            return order.slice(order.indexOf(cur));
+        }
+        seen.add(cur);
+        order.push(cur);
+        cur = byName.get(cur).parent;
+    }
+    return null;
+}
+function isNarrowerOrEqual(childEntry, parentScope, primitives) {
+    const childKind = primitives.byName.get(childEntry)?.kind;
+    for (const parentEntry of parentScope) {
+        if (childEntry === parentEntry)
+            return true;
+        if (childKind === 'person')
+            continue;
+        const parentKind = primitives.byName.get(parentEntry)?.kind;
+        if (parentKind === 'person')
+            continue;
+        if (childKind === 'group' && parentKind === 'group') {
+            let cur = childEntry;
+            const visited = new Set();
+            while (cur && !visited.has(cur)) {
+                if (cur === parentEntry)
+                    return true;
+                visited.add(cur);
+                cur = primitives.groups.find(g => g.name === cur)?.parent;
+            }
+        }
+    }
+    return false;
+}
+function narrowingHint(childEntry, parentScope, primitives) {
+    const childKind = primitives.byName.get(childEntry)?.kind;
+    const parentKinds = new Set(parentScope.map(p => primitives.byName.get(p)?.kind));
+    if (childKind === 'person' && parentKinds.size === 1 && parentKinds.has('group')) {
+        return ' (a Person scope is narrower only than itself; it cannot narrow under a Group scope)';
+    }
+    return '';
+}
 class DnaValidator {
     constructor() {
         this.validators = new Map();
@@ -158,7 +203,6 @@ class DnaValidator {
         if (op) {
             const primitives = this.collectPrimitives(op);
             const operationNames = new Set((op.operations ?? []).map(o => o.name));
-            const signalNames = new Set((op.signals ?? []).map(s => s.name));
             const taskNames = new Set((op.tasks ?? []).map(t => t.name));
             const ruleNames = new Set((op.rules ?? []).filter(r => !!r.name).map(r => r.name));
             const processNames = primitives.processNames;
@@ -192,17 +236,7 @@ class DnaValidator {
                     }
                 }
             }
-            // Signal.operation must reference a valid Operation
-            for (const signal of op.signals ?? []) {
-                if (!operationNames.has(signal.operation)) {
-                    errors.push({
-                        layer: 'operational',
-                        path: `signals/${signal.name}/operation`,
-                        message: `Signal "${signal.name}" emitted by Operation "${signal.operation}" which is not declared; ${availability('operations', operationNames)}`,
-                    });
-                }
-            }
-            // Outcome.operation/emits/initiates references
+            // Outcome.operation/initiates references
             for (const outcome of op.outcomes ?? []) {
                 if (!operationNames.has(outcome.operation)) {
                     errors.push({
@@ -210,15 +244,6 @@ class DnaValidator {
                         path: `outcomes/${outcome.operation}/operation`,
                         message: `Outcome attached to Operation "${outcome.operation}" which is not declared; ${availability('operations', operationNames)}`,
                     });
-                }
-                for (const signalRef of outcome.emits ?? []) {
-                    if (!signalNames.has(signalRef)) {
-                        errors.push({
-                            layer: 'operational',
-                            path: `outcomes/${outcome.operation}/emits/${signalRef}`,
-                            message: `Outcome on "${outcome.operation}" emits Signal "${signalRef}" which is not declared; ${availability('signals', signalNames)}`,
-                        });
-                    }
                 }
                 for (const opRef of outcome.initiates ?? []) {
                     if (!operationNames.has(opRef)) {
@@ -230,7 +255,7 @@ class DnaValidator {
                     }
                 }
             }
-            // Trigger references (operation/process/signal/after)
+            // Trigger references (operation/process/after)
             for (const trigger of op.triggers ?? []) {
                 const target = trigger.operation ? `operation:${trigger.operation}` : trigger.process ? `process:${trigger.process}` : '<missing>';
                 if (!trigger.operation && !trigger.process) {
@@ -259,13 +284,6 @@ class DnaValidator {
                         layer: 'operational',
                         path: `triggers/${target}/process`,
                         message: `Trigger starts Process "${trigger.process}" which is not declared; ${availability('processes', processNames)}`,
-                    });
-                }
-                if (trigger.source === 'signal' && trigger.signal && !signalNames.has(trigger.signal)) {
-                    errors.push({
-                        layer: 'operational',
-                        path: `triggers/${target}/signal`,
-                        message: `Trigger listens for Signal "${trigger.signal}" which is not declared; ${availability('signals', signalNames)}`,
                     });
                 }
                 if (trigger.source === 'operation' && trigger.after && !operationNames.has(trigger.after)) {
@@ -338,8 +356,52 @@ class DnaValidator {
             }
             // Role-specific integrity:
             // - scope (string | string[]) → must resolve to a scopeable primitive.
-            // - parent → another Role.
+            // - parent → another Role; chain must be acyclic.
             // - resource → a Resource (when system Role is backed by a Resource template).
+            // - if both parent and own scope, child scope must be narrower-or-equal to parent's effective scope.
+            const roleByName = new Map(primitives.roles.map(r => [r.name, r]));
+            const cyclesEmitted = new Set();
+            const cycleMembers = new Set();
+            for (const role of primitives.roles) {
+                const cycle = findCycle(role.name, roleByName);
+                if (!cycle)
+                    continue;
+                for (const m of cycle)
+                    cycleMembers.add(m);
+                const key = [...cycle].sort().join('|');
+                if (cyclesEmitted.has(key))
+                    continue;
+                cyclesEmitted.add(key);
+                errors.push({
+                    layer: 'operational',
+                    path: `roles/${cycle[0]}/parent`,
+                    message: `Role parent chain forms a cycle: ${quoteList(cycle)} (in walk order: ${cycle.map(n => `"${n}"`).join(' → ')})`,
+                });
+            }
+            const effectiveScopeCache = new Map();
+            const effectiveScope = (name) => {
+                if (cycleMembers.has(name))
+                    return null;
+                if (effectiveScopeCache.has(name))
+                    return effectiveScopeCache.get(name);
+                const r = roleByName.get(name);
+                if (!r) {
+                    effectiveScopeCache.set(name, null);
+                    return null;
+                }
+                if (r.scope !== undefined) {
+                    const own = Array.isArray(r.scope) ? r.scope : [r.scope];
+                    effectiveScopeCache.set(name, own);
+                    return own;
+                }
+                if (r.parent) {
+                    const parentScope = effectiveScope(r.parent);
+                    effectiveScopeCache.set(name, parentScope);
+                    return parentScope;
+                }
+                effectiveScopeCache.set(name, []);
+                return [];
+            };
             for (const role of primitives.roles) {
                 if (role.parent && !primitives.roleNames.has(role.parent)) {
                     errors.push({
@@ -364,6 +426,25 @@ class DnaValidator {
                         path: `roles/${role.name}/resource`,
                         message: `Role "${role.name}" resource "${role.resource}" is not a declared Resource; ${availability('resources', primitives.resourceNames)}`,
                     });
+                }
+                // Subset check: if both parent (resolved) and own scope present, every entry in the
+                // child's scope must be narrower-or-equal to some entry in the parent's effective scope.
+                if (role.parent &&
+                    primitives.roleNames.has(role.parent) &&
+                    !cycleMembers.has(role.name) &&
+                    role.scope !== undefined) {
+                    const parentScope = effectiveScope(role.parent);
+                    if (parentScope !== null && parentScope.length > 0) {
+                        for (const childEntry of scopes) {
+                            if (!isNarrowerOrEqual(childEntry, parentScope, primitives)) {
+                                errors.push({
+                                    layer: 'operational',
+                                    path: `roles/${role.name}/scope`,
+                                    message: `Role "${role.name}" scope "${childEntry}" is not narrower-or-equal to parent Role "${role.parent}" scope ${quoteList(parentScope)}${narrowingHint(childEntry, parentScope, primitives)}`,
+                                });
+                            }
+                        }
+                    }
                 }
             }
             // Membership integrity: person/role/group references; group must match Role.scope when both present
@@ -512,24 +593,14 @@ class DnaValidator {
                         });
                     }
                 }
-                for (const sig of proc.emits ?? []) {
-                    if (!signalNames.has(sig)) {
-                        errors.push({
-                            layer: 'operational',
-                            path: `processes/${proc.name}/emits/${sig}`,
-                            message: `Process "${proc.name}" emits Signal "${sig}" which is not declared; ${availability('signals', signalNames)}`,
-                        });
-                    }
-                }
             }
         }
         // ── Operational → Product Core (materializer consistency) ──────────────
-        // If both are present, every Resource/Operation/Signal in product.core must
-        // also exist in operational — product core is a projection, never invents.
+        // If both are present, every Resource/Operation in product.core must also
+        // exist in operational — product core is a projection, never invents.
         if (op && core) {
             const opPrimitives = this.collectPrimitives(op);
             const opOperationNames = new Set((op.operations ?? []).map(o => o.name));
-            const opSignalNames = new Set((op.signals ?? []).map(s => s.name));
             for (const resource of core.resources ?? []) {
                 if (!opPrimitives.resourceNames.has(resource.name)) {
                     errors.push({
@@ -545,15 +616,6 @@ class DnaValidator {
                         layer: 'product/core',
                         path: `operations/${op2.name}`,
                         message: `Product Core Operation "${op2.name}" is not present in Operational DNA; re-run the materializer`,
-                    });
-                }
-            }
-            for (const sig of core.signals ?? []) {
-                if (!opSignalNames.has(sig.name)) {
-                    errors.push({
-                        layer: 'product/core',
-                        path: `signals/${sig.name}`,
-                        message: `Product Core Signal "${sig.name}" is not present in Operational DNA; re-run the materializer`,
                     });
                 }
             }

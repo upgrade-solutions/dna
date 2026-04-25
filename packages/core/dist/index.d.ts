@@ -13,7 +13,6 @@ export declare const schemas: {
         readonly action: JsonSchema;
         readonly attribute: JsonSchema;
         readonly domain: JsonSchema;
-        readonly equation: JsonSchema;
         readonly group: JsonSchema;
         readonly membership: JsonSchema;
         readonly operation: JsonSchema;
@@ -24,7 +23,6 @@ export declare const schemas: {
         readonly resource: JsonSchema;
         readonly role: JsonSchema;
         readonly rule: JsonSchema;
-        readonly signal: JsonSchema;
         readonly task: JsonSchema;
         readonly trigger: JsonSchema;
     };

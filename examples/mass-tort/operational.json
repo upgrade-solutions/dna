@@ -114,19 +114,7 @@
     { "operation": "Filing.Submit",       "changes": [{ "attribute": "filing.filed_at",     "set": "now" }] },
     { "operation": "Settlement.Propose",  "changes": [{ "attribute": "settlement.status",   "set": "proposed" }] },
     { "operation": "Settlement.Accept",   "changes": [{ "attribute": "settlement.status",   "set": "accepted" }] },
-    { "operation": "Settlement.Disburse", "changes": [{ "attribute": "settlement.status",   "set": "disbursed" }], "emits": ["masstort.Settlement.Disbursed"] }
-  ],
-  "signals": [
-    {
-      "name": "masstort.Settlement.Disbursed",
-      "operation": "Settlement.Disburse",
-      "description": "Funds released to Claimants on a Settlement.",
-      "payload": [
-        { "name": "settlement_id", "type": "string" },
-        { "name": "case_id",       "type": "string" },
-        { "name": "amount",        "type": "number" }
-      ]
-    }
+    { "operation": "Settlement.Disburse", "changes": [{ "attribute": "settlement.status",   "set": "disbursed" }] }
   ],
   "relationships": [
     { "name": "Claimant.case",   "from": "Claimant",   "to": "Case", "cardinality": "many-to-one", "attribute": "case_id" },
