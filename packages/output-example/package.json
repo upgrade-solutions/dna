@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/output-example",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Template for building a DNA output renderer. Fork this to bootstrap a new output-* package that renders DNA into a format string (markdown, html, mermaid, pdf, plaintext, ...) via pure, side-effect-free functions.",
   "license": "MIT",
   "main": "dist/index.js",

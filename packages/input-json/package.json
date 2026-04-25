@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/input-json",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Infer a DNA operational slice from a plain JSON data sample — scalar fields become Attributes, nested objects become Resources + one-to-one Relationships, arrays of objects become Resources + one-to-many Relationships. Zero runtime dependencies.",
   "keywords": ["dna", "json", "input-json", "schema-inference", "resource"],
   "license": "MIT",
@@ -22,7 +22,7 @@
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
   "devDependencies": {
-    "@dna-codes/core": "^0.1.0",
+    "@dna-codes/core": "^0.2.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "jest": "^29.5.0",

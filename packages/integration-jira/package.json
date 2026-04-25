@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/integration-jira",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Bidirectional DNA integration for Jira Cloud. Pulls an Epic's description through @dna-codes/input-text into DNA, then pushes child Stories rendered by @dna-codes/output-text. Basic auth with email + API token.",
   "keywords": ["dna", "jira", "integration", "epic", "story"],
   "license": "MIT",
@@ -27,8 +27,8 @@
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
   "dependencies": {
-    "@dna-codes/input-text": "^0.0.1",
-    "@dna-codes/output-text": "^0.0.1"
+    "@dna-codes/input-text": "^0.1.0",
+    "@dna-codes/output-text": "^0.1.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

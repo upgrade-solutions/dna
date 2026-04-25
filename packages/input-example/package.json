@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/input-example",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Template for building a DNA input adapter. Demonstrates both modes — deterministic (pure functions, any structured format) and probabilistic (LLM-backed). Fork this package to bootstrap a new input-*.",
   "license": "MIT",
   "main": "dist/index.js",

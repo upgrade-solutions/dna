@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/input-text",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Turn freeform prose describing a business system into DNA (operational, product, technical) by dispatching to an LLM provider (openai, openrouter, anthropic). Requires an API key. Zero runtime dependencies.",
   "keywords": ["dna", "input-text", "llm", "openai", "openrouter", "anthropic"],
   "license": "MIT",
