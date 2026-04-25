@@ -52,6 +52,7 @@ export interface Person {
   attributes?: Attribute[]
   actions?: Action[]
   parent?: string
+  resource?: string
 }
 
 export interface Group {

@@ -309,6 +309,13 @@ class DnaValidator {
                         message: `Person "${p.name}" parent "${p.parent}" does not reference a declared Person. Available: ${[...primitives.personNames].join(', ')}`,
                     });
                 }
+                if (p.resource && !primitives.resourceNames.has(p.resource)) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `persons/${p.name}/resource`,
+                        message: `Person "${p.name}" resource "${p.resource}" does not reference a declared Resource. Available: ${[...primitives.resourceNames].join(', ')}`,
+                    });
+                }
             }
             for (const g of primitives.groups) {
                 if (g.parent && !primitives.groupNames.has(g.parent)) {

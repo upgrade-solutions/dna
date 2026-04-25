@@ -195,6 +195,14 @@ describe('DnaValidator — operational/person', () => {
     expect(result.valid).toBe(true)
   })
 
+  it('validates a Person with a resource link', () => {
+    const result = validator.validate({
+      name: 'Customer',
+      resource: 'Customer',
+    }, 'operational/person')
+    expect(result.valid).toBe(true)
+  })
+
   it('rejects a Person missing name', () => {
     const result = validator.validate({}, 'operational/person')
     expect(result.valid).toBe(false)
@@ -1150,6 +1158,40 @@ describe('DnaValidator — cross-layer validation', () => {
     const result = validator.validateCrossLayer({ operational: badOp })
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.message.includes('PhantomJob'))).toBe(true)
+  })
+
+  it('accepts Person.resource referencing a declared Resource', () => {
+    const goodOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        persons: [
+          ...operational.domain.persons,
+          { name: 'LoanHolder', resource: 'Loan' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: goodOp })
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('detects Person.resource referencing a missing Resource', () => {
+    const badOp = {
+      ...operational,
+      domain: {
+        ...operational.domain,
+        persons: [
+          ...operational.domain.persons,
+          { name: 'Customer', resource: 'PhantomResource' },
+        ],
+      },
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    const resourceErr = result.errors.find(e => e.path === 'persons/Customer/resource')
+    expect(resourceErr).toBeDefined()
+    expect(resourceErr!.message).toContain('PhantomResource')
   })
 
   it('detects Membership referencing a missing Person/Role/Group', () => {

@@ -36,6 +36,12 @@
       "description": "Optional parent Person name (e.g., for specialization hierarchies).",
       "pattern": "^[A-Z][a-zA-Z0-9]*$"
     },
+    "resource": {
+      "type": "string",
+      "description": "Optional Resource template that backs this Person — used when a Person template is a façade over a Resource at another layer (e.g., Customer Person backed by Customer Resource).",
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "examples": ["Customer", "Patient"]
+    },
     "examples": {
       "type": "array",
       "description": "Representative example records for this Person template.",

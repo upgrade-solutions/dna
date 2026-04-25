@@ -37,6 +37,10 @@ interface RoleShape extends NounShape {
   resource?: string
 }
 
+interface PersonShape extends NounShape {
+  resource?: string
+}
+
 interface MembershipShape {
   name: string
   person: string
@@ -48,7 +52,7 @@ interface DomainShape {
   name: string
   domains?: DomainShape[]
   resources?: NounShape[]
-  persons?: NounShape[]
+  persons?: PersonShape[]
   roles?: RoleShape[]
   groups?: NounShape[]
 }
@@ -140,12 +144,12 @@ function kindLabelsFor(characteristic: Characteristic, joiner: 'or' | 'nor'): st
 
 interface PrimitiveEntry {
   kind: PrimitiveKind
-  noun: NounShape | RoleShape | ProcessShape
+  noun: NounShape | PersonShape | RoleShape | ProcessShape
 }
 
 interface PrimitiveIndex {
   resources: NounShape[]
-  persons: NounShape[]
+  persons: PersonShape[]
   roles: RoleShape[]
   groups: NounShape[]
   processes: ProcessShape[]
@@ -202,7 +206,7 @@ export class DnaValidator {
 
   private collectPrimitives(op: OperationalDNA): PrimitiveIndex {
     const resources: NounShape[] = []
-    const persons: NounShape[] = []
+    const persons: PersonShape[] = []
     const roles: RoleShape[] = []
     const groups: NounShape[] = []
     const walk = (d: DomainShape) => {
@@ -449,6 +453,13 @@ export class DnaValidator {
             layer: 'operational',
             path: `persons/${p.name}/parent`,
             message: `Person "${p.name}" parent "${p.parent}" does not reference a declared Person. Available: ${[...primitives.personNames].join(', ')}`,
+          })
+        }
+        if (p.resource && !primitives.resourceNames.has(p.resource)) {
+          errors.push({
+            layer: 'operational',
+            path: `persons/${p.name}/resource`,
+            message: `Person "${p.name}" resource "${p.resource}" does not reference a declared Resource. Available: ${[...primitives.resourceNames].join(', ')}`,
           })
         }
       }
