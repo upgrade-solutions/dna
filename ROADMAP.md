@@ -4,79 +4,107 @@ Working plan for the next major refactor of `@dna-codes/schemas` (operational la
 
 ## Goal
 
-The Operational layer should articulate **pure business logic** — what the business does, regardless of UI, API, or deployment technology. Cross-domain stress-testing (mass tort, sales, ecommerce, healthcare, education, marketplace, government, banking) confirmed the **Actor > Action > Resource** triad is the right core. This reorg cleans up the surrounding primitives so they reflect that core honestly.
+The Operational layer should articulate **organizational modeling** — what an organization is and what it does, regardless of UI, API, or deployment technology. Cross-domain stress-testing (mass tort, sales, ecommerce, healthcare, education, marketplace, government, banking) confirmed the **Actor > Action > Subject** triad is the right core, where Actors are organizational People (filling Roles in Groups) and Subjects are Entities the organization manages. This reorg restructures the layer along organizational lines rather than the earlier product-flavored Structure/Behavior split.
+
+> **Plain-language gateway.** Business analysts already think in nouns and verbs: the **nouns** an organization deals with (people, places, things) and the **verbs** that bind them together (what gets done, when, by whom). DNA's People and Entities categories are the organizational nouns; Activities are the verbs and the orchestration that strings them together. The specific primitives below are what you reach for once you're past the gateway — but the README and input-text prompt should keep noun/verb as the on-ramp.
 
 ## Final decisions
 
-### Two buckets, no third
-Drop the "Actor primitives" header. Operational DNA has only **Structure** (vocabulary) and **Behavior** (lifecycle, orchestration). Roles, Tasks, and Processes are behaviors, not a separate category.
+### Operational is organizational modeling
 
-### Resources is the only noun collection
-All actors are Resources. There is no separate `actors` or `groups` collection.
+Drop the Structure/Behavior split — that vocabulary was borrowed from product/data modeling. Organizational modeling has its own native categories:
 
-**Resources do not declare a type.** A Resource is just a Resource — a named, attribute-bearing entity that may have Actions. Its semantic role (whether it functions as a target, a role, a user, a group, etc.) is **inferred from how it is referenced**, not declared on the Resource itself.
-
-| Resource | What makes it that semantic role | Inferred role |
+| Category | Primitives | Captures |
 |---|---|---|
-| `Loan` | Referenced as Operation target (`Loan.Approve`) | target |
-| `Underwriter` | Referenced from `Membership.role`, `Task.actor` | role |
-| `JoeKleier` | Has `memberships[]` | user |
-| `Family` | Referenced from `Membership.in`, `Role.scope` | group |
-| `RoutingEngine` | Referenced from `Task.actor` with no `Membership.role` references | system actor |
+| **People** | Person, Role, Group, Membership | Who's in the organization |
+| **Entities** | Resource, Attribute, Relationship | What the org manages |
+| **Activities** | Operation, Task, Step, Process, Trigger, Rule, Outcome, Signal, Equation | What gets done |
 
-This is structural typing — the same Resource can play multiple roles simultaneously without ever declaring them. Customer is both an Operation target and an actor; Account is target + actor + group. No multi-flag declaration needed.
+`Domain` is the bounded-context wrapper, sitting above the three.
 
-The triad still holds — "the **Actor** (a Resource used in actor context) performs an **Action** on a **Resource** (target)." Both ends are Resources at the schema level.
+### People primitives
 
-**Validator implication:** without a declared type, the validator cannot enforce semantic appropriateness like "`Membership.role` must point to a role-capable Resource" with a static field check. Recovery: structural inference. If a Resource is referenced from `Membership.role` in any document, it is role-capable; the validator can flag inconsistent uses (e.g., the same Resource referenced as both a Membership.role *and* as a non-actor Operation target with no actions, depending on rules we settle on). The field name `type` is reserved for places it is genuinely load-bearing (e.g., possibly on Membership itself if we later need to distinguish flavors of membership) — not on Resource.
+Each People primitive captures a distinct organizational concept. Person, Role, and Group are conceptually **kinds of Resources** — they're nouns the organization recognizes, with state and identity — but they live in their own top-level collections (`persons[]`, `roles[]`, `groups[]`) and add primitive-specific fields. Membership is its own shape (a relationship template, not a noun-with-state).
 
-### Membership is 3-way: User × Role × Group
+**Shared noun shape.** Resource, Person, Role, and Group all support the same base fields: `name`, `attributes[]`, `actions[]`, optional `parent`. This is **shape duplication, not schema inheritance** — each primitive's JSON Schema redeclares these fields rather than composing a base via `allOf`/`$ref`. JSON Schema inheritance is awkward with required-fields and additionalProperties; the small redundancy is worth the clarity.
 
-A flat `User.roles[]` loses scope. Roles are always exercised within a Group:
-
-> Joe is a *father* in a *family*, a *husband* in a *marriage*, a *member* of a *running club*.
-
-Cross-domain confirmation:
-
-| Domain | Role | Group |
-|---|---|---|
-| Mass tort | Lead Counsel | Case |
-| Sales | Account Manager | Account |
-| Education | Instructor | CourseOffering |
-| Healthcare | Charge Nurse | Ward |
-| Marketplace | Host | Listing |
-| Government | Inspector | District |
-| SaaS | Admin | Workspace |
-
-Schema shape (illustrative — exact field names TBD):
+**Action template.** Each entry in a noun's `actions[]` is an object with a uniform sub-schema, used identically across all four noun primitives (no string shorthand — object-only):
 
 ```
-Resource JoeKleier {
-  memberships: [
-    { role: "Father",  in: "Family" },
-    { role: "Husband", in: "Marriage" },
-    { role: "Member",  in: "RunningClub" }
-  ]
+Action entry (sub-schema)
+{
+  name:        string   (required)              // verb (Approve, Disburse, GetAdmitted)
+  description: string   (optional)
+  type:        enum     (optional)              // read | write | destructive
+  idempotent:  boolean  (optional)
 }
 ```
 
-A Resource being used as a Role may declare an optional `scope` naming the Resource it must be exercised within (its Group). The validator enforces that `membership.in` matches `scope`. Roles with no scope are global. Declaring `scope` is itself one of the structural signals that a Resource is being used as a Role.
+The action entry is the catalog declaration of what verbs apply to a noun. Operations (top-level) reference the (noun, action-name) pair and carry orchestration metadata (Rules, Outcomes, Signals) — those don't go on the action entry itself. No top-level `Action` primitive; no cross-noun verb sharing; just a uniform per-action declaration shape.
+
+**Person** — individual template (Employee, Customer, Patient, Borrower, Contractor). Attributes; optional actions (Patient.GetAdmitted, Patient.GetDischarged). A Person is the *kind* of human the organization deals with — not a specific named individual (instance-level data lives in Product/Technical layers).
+
+**Role** — position/capacity template (Underwriter, Doctor, ChargeNurse, LeadCounsel, SuperAdmin). Adds `scope` (the Group type the Role is exercised within, single or array), optional `parent` (Role hierarchy — deferred), optional `system: true` flag for non-human actors, optional `resource:` link when a system Role is backed by a Resource template. May have actions for org-admin lifecycle (Underwriter.Activate, Doctor.Certify).
+
+**Group** — work-unit / container template (BankDepartment, Hospital, Case, Workspace, Family). Attributes, optional actions (Case.Open, Case.Settle), optional `parent` Group for org hierarchy. Groups are entity-like but their organizational primary purpose is to be the container Roles are scoped to.
+
+**Membership** — template-level eligibility statement: "Persons of type X may hold Roles of type Y, optionally in Groups of type Z." Captures organizational RBAC at the template level — the *kinds* of people who can fill *kinds* of roles in *kinds* of groups — without binding specific person-instances. Instance-level (Joe × Father × Family-4271) bindings live in Product/Technical. Membership does NOT share the noun shape — it has no attributes/actions of its own.
 
 ```
-Resource Father       { scope: Family }
-Resource Underwriter  { scope: BankDepartment }
-Resource SuperAdmin   { }       // no scope = global
+Resource Loan {
+  attributes: [amount, status],
+  actions: [
+    { name: Apply,    type: write },
+    { name: Approve,  type: write },
+    { name: Reject,   type: write },
+    { name: Disburse, type: destructive }
+  ]
+}
+
+Person Employee  { }
+Person Patient   {
+  attributes: [dob, allergies],
+  actions: [
+    { name: GetAdmitted,   type: write },
+    { name: GetDischarged, type: write }
+  ]
+}
+Person Borrower  { attributes: [creditScore] }
+
+Group BankDepartment { attributes: [region] }
+Group Case {
+  attributes: [caseNumber, filedAt],
+  actions: [
+    { name: Open,   type: write },
+    { name: Settle, type: write },
+    { name: Close,  type: destructive }
+  ]
+}
+
+Role Underwriter {
+  scope: BankDepartment,
+  actions: [
+    { name: Activate, type: write },
+    { name: Retire,   type: destructive }
+  ]
+}
+Role LeadCounsel             { scope: Case }
+Role SuperAdmin              { scope: [Workspace, Tenant] }                    // multi-scope
+Role NightlyDelinquencySweep { system: true, resource: ScheduledJob }
+
+Membership EmployeeUnderwriter    { person: Employee, role: Underwriter }
+Membership PartnerLeadCounsel     { person: Partner,  role: LeadCounsel }
+Membership EmployeeAdminWorkspace { person: Employee, role: SuperAdmin, group: Workspace }
 ```
 
 ### Renames
 
 **`Capability` → `Operation`**
 - "Capability" has Business Capability Modeling baggage (TOGAF, Gartner) — used for coarse org functions like "Customer Management." DNA's Resource.Action pair is finer-grained; wrong altitude for that term.
-- Product Core already uses `Operation` as the projection of Operational `Capability`. Renaming unifies vocabulary across layers (Resource → Resource, Action → Action, Operation → Operation), removing the lone asymmetry.
-- Bonus: "Operational layer defines Operations" forces bizops to articulate real units of work rather than vague capabilities.
+- Product Core already uses `Operation` as the projection of Operational `Capability`. Renaming unifies vocabulary across layers.
 
 **`Cause` → `Trigger`**
-- "Cause" was vague. "Trigger" is the industry term (GitHub Actions `on:`, EventBridge, Zapier, n8n) and pairs cleanly with Outcome. Source field stays the same: `user | schedule | webhook | operation`.
+- "Cause" was vague. "Trigger" is the industry term (GitHub Actions `on:`, EventBridge, Zapier, n8n) and pairs cleanly with Outcome. Source: `user | schedule | webhook | operation`.
 
 ### Trigger targets are Operation OR Process — nothing else
 
@@ -97,8 +125,8 @@ Trigger {
 
 ### Operation / Task / Step / Process — the orchestration chain
 
-- **Operation** = `Resource.Action` pair. Actor-agnostic *what*. Referenced by Trigger, Rule, Outcome, Signal, Equation.
-- **Task** = `(actor, operation)` binding. Reusable named assignment (`UnderwriterApproval` = Underwriter performs Loan.Approve). Referenced by Step.
+- **Operation** = `Subject.Action` pair. Subject can be any noun primitive — Resource, Person, Role, or Group. Each noun lists its actions in `actions[]`; an Operation is a top-level, named binding of (Subject, Action) that carries the metadata the orchestration layer hangs off (Rules, Outcomes, Signals reference Operations, not bare action names). Operations on Roles cover org-admin lifecycle (Underwriter.Activate, Doctor.Certify), not "what an Underwriter does." Actor-agnostic *what*.
+- **Task** = `(role, operation)` binding. Reusable named assignment (`UnderwriterApproval` = Underwriter performs Loan.Approve). Referenced by Step.
 - **Step** = orchestration node within one Process. References **exactly one Task** — many tasks at one node = a sub-process, not a multi-task step. Owns DAG edges. Step-level conditions reference Rules compositionally ("Rule 1 AND Rule 2 must be true to execute").
 - **Process** = named SOP — owns the DAG of Steps and an explicit `startStep`.
 
@@ -108,20 +136,46 @@ Trigger {
 
 ASL-style (`StartAt`); matches Temporal `@WorkflowMethod` and n8n trigger nodes. Explicit beats implicit-from-DAG: the validator catches missing/wrong references with a clear error, and it disambiguates Processes with multiple entry-eligible Steps.
 
-## Behavior primitives — final list
+## Operational primitives — final list
+
+### People
 
 | Primitive | One-liner |
 |---|---|
+| Person | Individual template (Employee, Patient, Borrower); shares noun base (attributes, actions, parent) |
+| Role | Position/capacity template; shares noun base + `scope`, optional `parent`, optional `system`, optional `resource` link |
+| Group | Work-unit / container template; shares noun base + optional `parent` Group |
+| Membership | Template-level eligibility: which Person types may hold which Roles in which Groups (does *not* share noun base — no actions/attributes) |
+
+### Entities
+
+| Primitive | One-liner |
+|---|---|
+| Resource | Entity template — thing the org manages (Loan, Account, Product, Document); shares noun base (attributes, actions, parent) |
+| Attribute | Field on any noun primitive (Resource, Person, Role, or Group) |
+| Relationship | Between any two noun primitives |
+
+### Activities
+
+| Primitive | One-liner |
+|---|---|
+| Operation | `Subject.Action` pair (Subject = any noun primitive: Resource, Person, Role, or Group) |
+| Task | A `(role, operation)` binding — the named, reusable assignment |
+| Step | Orchestration node within a Process; references exactly one Task |
+| Process | Named SOP — DAG of Steps with explicit `startStep` |
 | Trigger | What initiates an Operation or Process (`user | schedule | webhook | operation`) |
 | Rule | Constraint on an Operation: `access` (which Roles may) or `condition` (what must be true) |
 | Outcome | State changes and downstream triggers after an Operation executes |
 | Signal | Named domain event published after an Operation; carries a typed payload |
 | Equation | Named, technology-agnostic computation (implemented by a Technical Script) |
-| Task | A `(role, operation)` binding — the named, reusable assignment |
-| Step | Orchestration node within a Process; references exactly one Task |
-| Process | Named SOP — DAG of Steps with explicit `startStep` |
 
-## Validation surfaces (in progress)
+### Cross-cutting
+
+| Primitive | One-liner |
+|---|---|
+| Domain | Bounded-context wrapper — names a sub-business; primitives belong to a Domain |
+
+## Validation surfaces
 
 Two parallel validation efforts to demonstrate that the reorg holds up beyond the bookshop fixture.
 
@@ -131,13 +185,13 @@ Canonical DNA documents under [`examples/<domain>/`](./examples), each validated
 
 | Domain | Status | Demonstrates |
 |---|---|---|
-| `lending` | Shipped | Standard Operation/Task/Process flow; system actor; scoped Role; Step.conditions; Step.else; multi-target Triggers |
-| `mass-tort` | Shipped | Resource as Group; Memberships; multi-Process domain; Process triggered by upstream Operation |
-| `marketplace` | Shipped | Resource/Role duality; same User in peer Roles across multiple Groups; global Role; Step.else routing to sibling |
-| `healthcare` | Shipped | Patient as Resource+Group; same User across many Patient Groups; mixed Group-Resource types; multi-predicate condition Rule |
-| `manufacturing` | Shipped | Multiple system actors; parallel fan-out+fan-in via depends_on; schedule-source Trigger on system Operation; Operation-chain Triggers |
-| `education` | Shipped | CourseOffering vs Course; same User as Instructor + Student simultaneously; three scope tiers; calendar-aligned schedule Triggers |
-| `banking` | Deferred | Overlapping with `lending` — defer until a banking-specific shape (multi-tenant ATM network?) motivates a separate example |
+| `lending` | Needs rework | Standard Operation/Task/Process flow; system Role; scoped Role; multi-target Triggers |
+| `mass-tort` | Needs rework | Case as Group; multi-Membership (Partner can be LeadCounsel; Associate can be PlaintiffAttorney); multi-Process domain |
+| `marketplace` | Needs rework | Same Person template (Member) eligible for peer Roles (Host, Guest) across multiple Groups (Listing, Booking); global Role |
+| `healthcare` | Needs rework | Patient as Person (not Resource+Group); Doctor Role with hierarchy; multiple Group types (Hospital, Ward, Patient as care-context Group?) |
+| `manufacturing` | Needs rework | Multiple system Roles backed by Resources; parallel fan-out+fan-in; schedule-source Triggers |
+| `education` | Needs rework | CourseOffering vs Course (Group vs Resource); same Person template can be Instructor + Student (separate Memberships); three scope tiers |
+| `banking` | Deferred | Overlapping with `lending` — defer until a banking-specific shape motivates a separate example |
 
 ### Framework comparisons
 
@@ -145,97 +199,152 @@ Concept-by-concept mappings under [`docs/frameworks/`](./docs/frameworks), each 
 
 | Framework | Status |
 |---|---|
-| [BPMN 2.0](./docs/frameworks/bpmn.md) | Shipped |
-| [Domain-Driven Design](./docs/frameworks/ddd.md) | Shipped |
-| [ArchiMate 3](./docs/frameworks/archimate.md) | Shipped |
-| [C4 Model](./docs/frameworks/c4.md) | Shipped |
-| [Event Storming](./docs/frameworks/event-storming.md) | Shipped |
-| [TOGAF](./docs/frameworks/togaf.md) | Shipped |
+| [BPMN 2.0](./docs/frameworks/bpmn.md) | Shipped (needs primitive-reference updates) |
+| [Domain-Driven Design](./docs/frameworks/ddd.md) | Shipped (needs primitive-reference updates) |
+| [ArchiMate 3](./docs/frameworks/archimate.md) | Shipped (needs primitive-reference updates) |
+| [C4 Model](./docs/frameworks/c4.md) | Shipped (needs primitive-reference updates) |
+| [Event Storming](./docs/frameworks/event-storming.md) | Shipped (needs primitive-reference updates) |
+| [TOGAF](./docs/frameworks/togaf.md) | Shipped (needs primitive-reference updates) |
 | ER / IDEF1X | Deferred (trivial Resource/Attribute/Relationship mapping) |
+
+The framework docs all map external concepts to old primitives like "Resources used as Roles, Memberships nested under user-Resources." Those mappings need to be rewritten in terms of Person, Role, Group, Membership as first-class primitives.
 
 ## Open questions
 
-These need to settle before schemas change:
-
-1. **Membership shape and cardinality.**
-   - One `in:` per membership, or can a membership span multiple groups (rare but possible)?
-   - Are memberships first-class (own collection) or always nested under a Resource that's acting as a user?
-   - Does Membership itself need a `type` field to distinguish flavors of membership (e.g., `direct` vs `delegated` vs `temporary`)?
-
-2. **Role hierarchy and Group scope interaction.**
-   - How do Role parent chains (`parent`) interact with Group `scope`? E.g., if `SeniorUnderwriter.parent = Underwriter` and `Underwriter.scope = BankDepartment`, does the parent chain inherit the scope?
+1. **Role hierarchy and Group scope interaction.** *(Defer to v2 — none of the shipped examples need it.)*
+   - How do Role parent chains (`parent`) interact with Group `scope`?
    - What happens if a parent and child Role declare different scopes?
 
-3. **Validator inference rules.**
-   - Without a declared Resource `type`, the validator infers semantic role from references. Need to spec exactly what inferences run and what inconsistencies they flag.
-   - Example rules to consider: "if a Resource is referenced from `Membership.role` AND has no `actions[]`, it is role-only"; "if a Resource appears in `Membership.in`, it is group-capable."
+2. **Validator inference rules.** *(Settled — keep loose.)*
+   - Hard errors only for dangling references (Task.actor → Role, Role.scope → Group, Role.resource → Resource, Membership.person/role/group, Step.task, Trigger.target, Process.startStep, Operation.target).
+   - Warnings only for clearly-unused declarations (Membership references a Role no Task uses; Person never appears in a Membership and has no actions).
+   - Multi-scope Role validation: if `Role.scope` is array and `Membership.group` is unspecified, error (ambiguous); if specified, must match one entry.
 
-4. **Cross-layer impact.**
-   - Product Core currently surfaces a `roles[]` slice from Operational. With no declared Resource `type`, the surfacing logic must derive the Role slice from references (Resources referenced as `Membership.role` or `Task.actor`). Need to design what Product Core sees.
+3. **Operation target breadth.** *(Settled — Resource | Person | Role | Group.)*
+   - All four noun primitives share the noun base shape and may declare actions.
+   - Memberships cannot be Operation targets (template-level relationship, not a noun with state).
+   - `Operation.target` resolves across the four noun collections; the schema accepts a string name and the validator looks across `resources[]`, `persons[]`, `roles[]`, `groups[]`. (Object-shape one-of `{resource}|{person}|{role}|{group}` is an alternative; settle when wiring up the validator.)
+
+4. **Cross-layer impact on Product Core.**
+   - Old `roles[]` slice is replaced by per-People-primitive projections. Options:
+     - (a) Surface all four (`persons[]`, `roles[]`, `groups[]`, `memberships[]`) to Product Core
+     - (b) Surface a flattened `actors[]` derived from Tasks (covers human + system Roles uniformly) plus `groups[]` for org-chart needs
+     - (c) Skip the projection entirely; let Product Core consume Operational refs directly
+   - Recommendation TBD — settle when Product Core's actual API/UI consumers force a choice.
+
+## Examples revision pass
+
+The shipped examples were authored before the People primitive split. Each needs:
+
+- Replace instance-level user Resources (JaneEsq, Joe, DrAdams, DrPatel) with type-level Person templates (Partner, Associate, Host, Guest, Doctor, Instructor, Student, etc.)
+- Add explicit Group declarations for Cases, Listings, Bookings, Hospitals, Wards, Patients-as-care-contexts, CourseOfferings, BankDepartments
+- Add Membership declarations capturing template-level eligibility ("Partners may be LeadCounsels", "Members may be Hosts", etc.)
+- Move attributes from former user-Resources onto the new Person/Group as appropriate
+- Remove `Resource.memberships[]` everywhere
+- Update READMEs to reflect that "same user across many groups" is a *template-level eligibility* concern (Memberships) — not an instance enumeration
+- Update per-example shape assertions in `packages/core/src/examples.test.ts`
 
 ## Implementation plan
 
 ### 1. Schemas (`packages/schemas/operational/`)
-- Rename `capability.json` → `operation.json`
-- Rename `cause.json` → `trigger.json`
-- Delete `user.json`, `role.json` — fold into `resource.json`. **No `type` discriminator on Resource.** Add optional `scope` and `memberships[]` fields; both are signals that a Resource is being used as a Role or User respectively.
-- Add `task.json`, `step.json`
-- Add `startStep` and `steps[]` to `process.json`
-- Update `operational.json` collections list: `resources`, `operations`, `triggers`, `rules`, `outcomes`, `signals`, `equations`, `tasks`, `processes`
+
+**Shared noun shape** — Resource, Person, Role, and Group each declare the same base fields (`name`, `attributes[]`, `actions[]`, optional `parent`) directly in their own schema file, without `allOf`/`$ref` composition. Small redundancy, simpler schemas, no inheritance gymnastics.
+
+**Action sub-schema** — define an `action.json` (or inline equivalent) for the action entry shape (`name`, optional `description`, optional `type` enum, optional `idempotent`). Each noun schema's `actions[]` items reference this shape. Object-only (no string shorthand) — uniform shape across every noun, discoverable template fields, and forward-compatible: relaxing later to accept strings is non-breaking; the reverse would require another major bump.
+
+**Add** (new files):
+- `person.json` — noun base shape (name, attributes, actions, optional parent)
+- `group.json` — noun base shape + optional parent Group for org hierarchy
+- `membership.json` — Membership primitive (name, person, role, optional group); does NOT share the noun shape — no attributes/actions
+
+**Rename**:
+- `capability.json` → `operation.json`
+- `cause.json` → `trigger.json`
+
+**Rewrite**:
+- `role.json` — noun base shape + `scope` (string or array of Group names), optional `parent` (Role), optional `system: true`, optional `resource:` (Resource name)
+- `resource.json` — noun base shape only. Strip `memberships[]`, `scope`, `kind` (any leftover from earlier drafts). Resource is the unspecialized noun.
+- `operation.json` — `target` resolves across all four noun collections; `action` is a string that must match an entry in the target's `actions[]`
+- `process.json` — keep `startStep`, `steps[]` (already in)
+- `operational.json` — collections list: `domains`, `persons`, `roles`, `groups`, `memberships`, `resources`, `attributes`, `relationships`, `operations`, `tasks`, `processes`, `triggers`, `rules`, `outcomes`, `signals`, `equations`
+
+**Delete**:
+- `user.json` (was already removed in earlier draft)
 
 ### 2. Validator (`packages/core/src/validator.ts`)
-- Drop `User`/`Role` primitive checks
-- Cross-reference checks (existence + structural inference):
+
+- Drop any remaining User-primitive checks
+- Cross-reference checks (existence + structural):
+  - `Task.actor` resolves to a defined Role
+  - `Role.scope` (each entry, if array) resolves to a defined Group
+  - `Role.resource` resolves to a defined Resource (when present)
+  - `Membership.person` resolves to a Person
+  - `Membership.role` resolves to a Role
+  - `Membership.group` resolves to a Group AND matches one of `Role.scope`'s entries (if Role has multi-scope and Membership specifies group, must match; if Role has single-scope, Membership.group is optional but must match if present)
+  - `Operation.target` is `{resource}|{person}|{group}` and resolves
   - `Trigger.target` shape (Operation vs Process)
   - `Step.task` resolves to a defined Task
   - `Process.startStep` resolves to a Step in that Process
-  - `Membership.role` resolves to a Resource; `Membership.in` resolves to a Resource and matches the referenced Role's `scope` (if declared)
-  - Inferred-role consistency checks (rules to be specced — see open question #3)
 - Update name normalization for renamed primitives
 
-### 3. Documentation
-- Rewrite README "Operational Layer" section with Structure/Behavior split and final primitive list
-- Add cross-domain examples table (the one in this roadmap)
-- Document Resource/Actor/Group duality with examples (Customer, Family, Account)
-- Update minimal example in README to use new names
-- Update `packages/core/AGENTS.md` and any package-local docs
+### 3. Core fixture and tests
 
-### 4. Fixture
-- Update bookshop fixture in `@dna-codes/core` for new primitive names + Membership shape
-- Bump assertion counts in all output adapter tests
+- Update bookshop fixture (`packages/core/src/fixtures/bookshop.ts`) and `types.ts` to use Person, Role, Group, Membership shapes
+- Update `validator.test.ts` and `index.test.ts` assertions
+- Rebuild `packages/core/dist/` (the compiled validator)
 
-### 5. Adapters
-- **Output** (`output-markdown`, `output-mermaid`, `output-html`, `output-text`): rename collections, add Membership rendering, update section names
-- **Input — deterministic** (`input-json`, `input-openapi`): emit new primitive names; `input-json` may need to infer `kind` heuristically from sample shape
-- **Input — probabilistic** (`input-text`): update prompt vocabulary; balance prompt for Resource kinds and Memberships
+### 4. Examples
 
-### 6. Versioning
+- Each domain folder under `examples/`: rewrite operational.json with new primitives; rewrite README.md
+- Update per-example shape assertions in `packages/core/src/examples.test.ts`
+
+### 5. Output adapters
+
+- `output-markdown`, `output-mermaid`, `output-html`, `output-text`: render new People sections (Persons, Roles, Groups, Memberships); update `Resource` rendering (no more memberships nested under it); update tests
+
+### 6. Input adapters
+
+- `input-text`: rewrite OPERATIONAL_SKELETON and LAYER_GUIDE in prompt.ts to teach the People/Entities/Activities split and the new primitives
+- `input-json`, `input-openapi`: update emitted shapes; for `input-json` the heuristic for inferring Person vs Resource may need tuning (presence of person-shaped attributes like email/dob)
+
+### 7. Documentation
+
+- README operational layer section: rewrite with People/Entities/Activities split + Person/Role/Group/Membership detail
+- `packages/core/AGENTS.md` and `packages/core/docs/operational.md`: update vocabulary
+- Framework docs (`docs/frameworks/*.md`): update mappings to reference new primitives
+- `docs/frameworks/README.md`: minor — table descriptions reference primitives by new names
+- Migration doc: `docs/migration-from-pre-reorg.md` — short guide for existing DNA users
+
+### 8. Versioning
+
 - Major bump for `@dna-codes/schemas` and `@dna-codes/core` (breaking)
 - Coordinated bump for all input-/output-/integration-* packages
-- Migration note in README + a short `docs/migration-from-pre-reorg.md` for users on the old schemas
+- Migration note in README
 
 ## Sequencing
 
-1. Resolve the open questions above (Actor model details, Membership cardinality, cross-layer impact)
-2. Write the new schemas in a feature branch with the validator updates
-3. Update fixture + run tests across the monorepo to verify the wave
-4. Update README, AGENTS.md, and adapter READMEs
-5. Update output adapters (purely render-side, low risk)
+1. Land schemas (new + renamed + rewritten) in one wave with `operational.json` collections list updated
+2. Update validator alongside schemas; run `packages/core` tests
+3. Update fixture and core tests; verify green
+4. Rework examples one at a time (lending → mass-tort → marketplace → healthcare → manufacturing → education); run examples.test.ts after each
+5. Update output adapters (purely render-side, low risk); run their tests
 6. Update input adapters (text first since it's flexible; then deterministic)
-7. Coordinated version bump and publish
+7. Update README, AGENTS, framework docs
+8. Coordinated version bump and publish
 
 ## Out of scope
 
-- Product layer changes beyond what cross-references force (e.g., Product Core's surfaced Role slice may need a small update, but Product API/UI primitives stay as-is)
+- Product layer changes beyond what cross-references force (Product Core's `roles[]` projection question is open but separable)
 - Technical layer — untouched
 - Integration packages — untouched apart from any DNA shape they emit/consume
 
 ## Future enhancements (post-reorg)
 
 ### Optional Resource `uses` config
-Once the reorg lands and we've lived with structural typing for a bit, consider an **optional** declaration on Resource that names how it's intended to be used — e.g., `uses: [actor, group]` or `uses: [actor]`. This stays opt-in (no Resource is required to declare it) and serves two purposes:
+Once the reorg lands and we've lived with the four-primitive People model, consider an **optional** declaration on Resource that names how it's intended to be used (`uses: [actor]`, `uses: [target]`, etc.). Stays opt-in; addresses any validator-strictness loss without re-introducing mandatory metadata.
 
-- **Stricter validation** — when present, the validator can reject inconsistent references (e.g., `Membership.role` pointing at a Resource whose `uses` doesn't include `actor`)
-- **Documentation hint** — readers see at a glance how a Resource is meant to participate, without having to scan all reference sites
+### Role hierarchy
+`Role.parent` chains with scope inheritance and narrower-or-equal override. Defer until an example forces it.
 
-Resources that omit `uses` continue to rely on structural inference. This addresses the validator-strictness loss from dropping the required type discriminator without re-introducing it as mandatory metadata. Vocabulary for `uses` values (`actor`, `group`, `target`, etc.) can be settled when we build it.
+### Membership constraints
+Membership-level fields beyond `person`/`role`/`group`: cardinality limits ("at most one Underwriter per BankDepartment"), tenure ("temporary" vs "permanent"), exclusivity. Defer until a real example needs them.
