@@ -55,6 +55,7 @@ Every package has a matching `AGENTS.md` — check the relevant template before 
 ## Development flow (from CLAUDE.md)
 
 - Work on `main` — no feature branches for now.
+- **Default to the OpenSpec workflow** (`/opsx:propose` → `/opsx:apply` → `/opsx:archive`) for any non-trivial change. The proposal/design/specs/tasks artifacts live under `openspec/changes/<name>/`; archived ones move to `openspec/changes/archive/` and seed `openspec/specs/<capability>/spec.md`. Skip OpenSpec only for typo fixes, version bumps, formatting, and other genuinely small or contained edits.
 - After a scoped change, commit and update the README.
 - For LLM-backed work, the Anthropic API path is the canonical example; OpenAI-compatible covers OpenAI and OpenRouter.
 - Run commands individually rather than chaining with `&&`.

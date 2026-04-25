@@ -13,3 +13,12 @@ changes are complete. Make all changes on the `main` branch for now.
 
 ## Conventions
 * In general, run commands separately, without `&&`
+
+## OpenSpec workflow (default)
+Non-trivial changes go through OpenSpec, not ad-hoc edit-then-commit. Use the slash commands:
+* `/opsx:propose <name-or-description>` — scaffold proposal/design/specs/tasks before coding
+* `/opsx:apply [name]` — implement against the tasks checklist
+* `/opsx:archive [name]` — move the change to `openspec/changes/archive/` and sync `openspec/specs/`
+* `/opsx:explore` — think-mode for shaping a change before proposing
+
+Skip OpenSpec only for genuinely small or contained work: typo fixes, version bumps, formatting, single-file refactors with no behavior change.
