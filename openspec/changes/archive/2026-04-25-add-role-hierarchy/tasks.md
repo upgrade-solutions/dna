@@ -43,4 +43,4 @@ Discovered during apply: neither `output-markdown` nor `output-html` currently r
 
 - [x] 8.1 Run `npm test` from the repo root; confirm green. (12/12 workspaces passing; 317 tests total.)
 - [x] 8.2 Run `npx openspec validate add-role-hierarchy` to confirm the OpenSpec artifacts still pass. (`Change 'add-role-hierarchy' is valid`.)
-- [ ] 8.3 Commit the schema, validator, tests, example, and docs together with a single conventional message; defer adapter polish (section 7) to a separate commit if it lands.
+- [x] 8.3 Commit the schema, validator, tests, example, and docs together with a single conventional message; defer adapter polish (section 7) to a separate commit if it lands. (Landed as `ec5589c`. OpenSpec scaffolding committed separately as `7151a9d`.)
