@@ -32,7 +32,7 @@ This package-level agent is the **dispatcher**: it holds the cross-layer picture
 1. **Schemas are language-agnostic.** JSON Schema Draft 2020-12 only. Never embed TS/JS runtime behavior into a schema.
 2. **Primitive names are unique per layer, except the Actor > Action > Resource triad.** Operational `Resource`, `Action`, and `Role` intentionally share names across layers — the product layer projects the same concepts onto API and UI surfaces. `Role` lives only in Operational; Product Core carries the surfaced Roles as a string reference via its `roles` array.
 3. **Cross-layer references are strings, validated externally.** A `Product.Resource.resource` is a string referencing an `Operational.Resource.name`. Schemas don't enforce this; `@dna-codes/core` does. Don't introduce JSON-Schema-level refs across layers.
-4. **`$id` URIs are stable.** `https://dna.local/<layer>/<primitive>` identifiers survive renames and refactors. Never change one without a deprecation path.
+4. **`$id` URIs are stable.** `https://dna.codes/schemas/<layer>/<primitive>` identifiers survive renames and refactors. Never change one without a deprecation path.
 5. **Layer boundaries are one-way downstream.** Operational → Product → Technical. Upper layers never read lower-layer DNA; lower layers read exactly what they need and no more.
 6. **Cells belong outside this package.** `@dna-codes/core` defines the contract; cells consume it. If you feel tempted to add runtime logic here, you're building a cell — put it in its own package.
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/technical/provider",
+  "$id": "https://dna.codes/schemas/technical/provider",
   "title": "Provider",
   "description": "A Provider is a named external platform that backs Constructs — AWS, GCP, Auth0, Stripe, etc.",
   "type": "object",

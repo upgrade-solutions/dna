@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/product/api/endpoint",
+  "$id": "https://dna.codes/schemas/product/api/endpoint",
   "title": "Endpoint",
   "description": "An Endpoint is a single HTTP operation: method + path + request + response. It maps from an Operation.",
   "type": "object",
@@ -29,14 +29,14 @@
     "params": {
       "type": "array",
       "description": "Path, query, or header parameters for this endpoint.",
-      "items": { "$ref": "https://dna.local/product/api/param" }
+      "items": { "$ref": "https://dna.codes/schemas/product/api/param" }
     },
     "request": {
-      "$ref": "https://dna.local/product/api/schema",
+      "$ref": "https://dna.codes/schemas/product/api/schema",
       "description": "The request body schema, if applicable."
     },
     "response": {
-      "$ref": "https://dna.local/product/api/schema",
+      "$ref": "https://dna.codes/schemas/product/api/schema",
       "description": "The success response body schema."
     }
   },

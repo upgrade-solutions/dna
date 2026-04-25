@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/rule",
+  "$id": "https://dna.codes/schemas/operational/rule",
   "title": "Rule",
   "description": "A Rule defines a constraint on a Capability — either who is permitted to perform it (type: access) or what conditions must be satisfied before it executes (type: condition). Rules are checked before execution.",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/domain",
+  "$id": "https://dna.codes/schemas/operational/domain",
   "title": "Domain",
   "description": "A Domain is a grouping mechanism that organizes related Resources into a logical boundary. Domains can be multiple levels deep — e.g. organization → domain → subdomain — with Resources at the leaves.",
   "type": "object",
@@ -23,12 +23,12 @@
     "domains": {
       "type": "array",
       "description": "Child domains nested within this domain.",
-      "items": { "$ref": "https://dna.local/operational/domain" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/domain" }
     },
     "resources": {
       "type": "array",
       "description": "The Resources that live directly within this domain.",
-      "items": { "$ref": "https://dna.local/operational/resource" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/resource" }
     }
   },
   "examples": [

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/product/core/field",
+  "$id": "https://dna.codes/schemas/product/core/field",
   "title": "Field",
   "description": "A Field is an input or display element within a Page or Block, mapped from an Operational Attribute.",
   "type": "object",

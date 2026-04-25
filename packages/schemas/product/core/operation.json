@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/product/core/operation",
+  "$id": "https://dna.codes/schemas/product/core/operation",
   "title": "Operation",
   "description": "An Operation is a Resource:Action pair — the unit of user/system interaction at the product level. It maps from an Operational Capability and is the atomic thing a user or system does.",
   "type": "object",

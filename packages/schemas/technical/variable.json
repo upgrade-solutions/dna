@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/technical/variable",
+  "$id": "https://dna.codes/schemas/technical/variable",
   "title": "Variable",
   "description": "A Variable is an environment variable or secret reference used by Cells and Constructs.",
   "type": "object",

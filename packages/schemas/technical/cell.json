@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/technical/cell",
+  "$id": "https://dna.codes/schemas/technical/cell",
   "title": "Cell",
   "description": "A Cell is a deployed unit: DNA + Adapter + wired Constructs. It is the concrete embodiment of cell-based architecture — it accepts a DNA document, applies an adapter, and produces running software or infrastructure.",
   "type": "object",
@@ -47,12 +47,12 @@
     "variables": {
       "type": "array",
       "description": "Variables injected into this cell at runtime.",
-      "items": { "$ref": "https://dna.local/technical/variable" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/variable" }
     },
     "outputs": {
       "type": "array",
       "description": "Values this cell exports for other cells to reference.",
-      "items": { "$ref": "https://dna.local/technical/output" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/output" }
     },
     "environment": {
       "type": "string",

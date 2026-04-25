@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/technical/construct",
+  "$id": "https://dna.codes/schemas/technical/construct",
   "title": "Construct",
   "description": "A Construct is a named infrastructure component with a category and type. Constructs are declared once and referenced by multiple Cells.",
   "type": "object",

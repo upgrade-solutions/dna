@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/cause",
+  "$id": "https://dna.codes/schemas/operational/cause",
   "title": "Cause",
   "description": "A Cause is what initiates a Capability — either from a user, an external system, or the passage of time. Causes are the entry point to all behavior.",
   "type": "object",

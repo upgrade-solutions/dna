@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/product/api/namespace",
+  "$id": "https://dna.codes/schemas/product/api/namespace",
   "title": "Namespace",
   "description": "A Namespace groups Resources under a shared API path prefix. It maps from an Operational Domain.",
   "type": "object",

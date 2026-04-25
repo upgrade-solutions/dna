@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/product/api/schema",
+  "$id": "https://dna.codes/schemas/product/api/schema",
   "title": "Schema",
   "description": "A Schema is a named request/response data shape used by API Endpoints. It maps from a Resource and its Fields.",
   "type": "object",
@@ -19,7 +19,7 @@
       "type": "array",
       "description": "The fields that make up this schema.",
       "minItems": 1,
-      "items": { "$ref": "https://dna.local/product/core/field" }
+      "items": { "$ref": "https://dna.codes/schemas/product/core/field" }
     },
     "resource": {
       "type": "string",

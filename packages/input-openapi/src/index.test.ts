@@ -165,7 +165,7 @@ describe('@dna-codes/input-openapi', () => {
     it('emits product.api DNA that validates against @dna-codes/schemas', () => {
       const { DnaValidator } = require('@dna-codes/core') as typeof import('@dna-codes/core')
       const { productApi } = parse(pets)
-      const result = new DnaValidator().validate(productApi, 'https://dna.local/product/api')
+      const result = new DnaValidator().validate(productApi, 'https://dna.codes/schemas/product/api')
       if (!result.valid) {
         throw new Error(
           `input-openapi output failed product.api schema validation:\n${JSON.stringify(result.errors, null, 2)}`,

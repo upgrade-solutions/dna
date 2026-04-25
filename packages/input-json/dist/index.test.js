@@ -152,7 +152,7 @@ describe('@dna-codes/input-json', () => {
             // Lazy require to keep @dna-codes/core a devDep (not a runtime dep).
             const { DnaValidator } = require('@dna-codes/core');
             const { operational } = (0, index_1.parse)(bookSample, { name: 'Book' });
-            const result = new DnaValidator().validate(operational, 'https://dna.local/operational');
+            const result = new DnaValidator().validate(operational, 'https://dna.codes/schemas/operational');
             if (!result.valid) {
                 throw new Error(`input-json output failed operational schema validation:\n${JSON.stringify(result.errors, null, 2)}`);
             }

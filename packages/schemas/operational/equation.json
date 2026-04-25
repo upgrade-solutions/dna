@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/equation",
+  "$id": "https://dna.codes/schemas/operational/equation",
   "title": "Equation",
   "description": "An Equation is a named, technology-agnostic computation — a pure function defined at the business level. It declares named inputs (referencing Resource Attributes) and a named output. Equations are referenced by Rules and Effects; their concrete implementation is provided by a Script in Technical DNA.",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/user",
+  "$id": "https://dna.codes/schemas/operational/user",
   "title": "User",
   "description": "A User is a named individual or service account who holds one or more Roles. Users are the concrete identities that perform Capabilities through the Roles they hold.\n\nThis is documentation-grade DNA — it describes who fills which role in the business, which is useful for SOP renderers, org directories, and workflow assignment. It is not a replacement for an identity provider. Session identity, authentication, password hashes, and JWT subjects remain owned by the IDP. A User's `email` may serve as a convention join-key with the IDP but is not schema-enforced identity.",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/attribute",
+  "$id": "https://dna.codes/schemas/operational/attribute",
   "title": "Attribute",
   "description": "An Attribute is a property that belongs to a Resource. Attributes describe the data shape of a Resource — its fields, their types, and any constraints.",
   "type": "object",

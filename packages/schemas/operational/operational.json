@@ -1,69 +1,69 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational",
+  "$id": "https://dna.codes/schemas/operational",
   "title": "OperationalDNA",
   "description": "A complete Operational DNA document for an application instance. Composes a domain hierarchy with the full behavior stack (capabilities, causes, rules, outcomes, equations) and the Actor stack (roles, users, tasks, processes). Modeled around the Actor > Action > Resource triad: Resources live inside Domains, Actions apply to Resources, and Roles (referenced by Rules, Tasks, Users, and Processes) perform Capabilities (Resource:Action pairs).",
   "type": "object",
   "required": ["domain"],
   "properties": {
     "domain": {
-      "$ref": "https://dna.local/operational/domain",
+      "$ref": "https://dna.codes/schemas/operational/domain",
       "description": "The root domain, containing the full nested hierarchy of subdomains and resources."
     },
     "capabilities": {
       "type": "array",
       "description": "All Resource:Action capability pairs defined in this domain.",
-      "items": { "$ref": "https://dna.local/operational/capability" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/capability" }
     },
     "causes": {
       "type": "array",
       "description": "What initiates each capability — user actions, schedules, webhooks, or chained capabilities.",
-      "items": { "$ref": "https://dna.local/operational/cause" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/cause" }
     },
     "rules": {
       "type": "array",
       "description": "Constraints on capabilities — who may perform them (access rules) and what conditions must be satisfied (condition rules).",
-      "items": { "$ref": "https://dna.local/operational/rule" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/rule" }
     },
     "outcomes": {
       "type": "array",
       "description": "State changes and side effects that result from each capability.",
-      "items": { "$ref": "https://dna.local/operational/outcome" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/outcome" }
     },
     "equations": {
       "type": "array",
       "description": "Named, technology-agnostic computations that cannot be expressed as declarative Rules or Outcomes. Implemented concretely by Scripts in Technical DNA.",
-      "items": { "$ref": "https://dna.local/operational/equation" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/equation" }
     },
     "signals": {
       "type": "array",
       "description": "Named domain events published after a Capability executes. Signals cross domain boundaries and carry typed payload contracts.",
-      "items": { "$ref": "https://dna.local/operational/signal" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/signal" }
     },
     "relationships": {
       "type": "array",
       "description": "Named, directed connections between Resources — formalizes the semantic link a reference Attribute implies, adding cardinality.",
-      "items": { "$ref": "https://dna.local/operational/relationship" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/relationship" }
     },
     "roles": {
       "type": "array",
       "description": "Roles — the Actors in the Actor > Action > Resource triad. A Role is a named job title or permission bundle (ClosingSpecialist, Underwriter, Admin, Viewer) referenced by Rules (access), Tasks (assignment), Users (who holds which role), and Processes (operator).",
-      "items": { "$ref": "https://dna.local/operational/role" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/role" }
     },
     "users": {
       "type": "array",
       "description": "Named individuals or service accounts holding one or more Roles — the business directory. Documentation-grade DNA, not authentication identity.",
-      "items": { "$ref": "https://dna.local/operational/user" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/user" }
     },
     "tasks": {
       "type": "array",
       "description": "Atomic reusable units of human activity: a Role performing exactly one Capability.",
-      "items": { "$ref": "https://dna.local/operational/task" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/task" }
     },
     "processes": {
       "type": "array",
       "description": "Standard Operating Procedures — named, owned, ordered DAGs of Steps that accomplish business goals.",
-      "items": { "$ref": "https://dna.local/operational/process" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/process" }
     }
   },
   "examples": [

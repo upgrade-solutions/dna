@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/outcome",
+  "$id": "https://dna.codes/schemas/operational/outcome",
   "title": "Outcome",
   "description": "An Outcome describes what changes when a Capability successfully executes — state transitions, derived updates, and side effects like notifications or downstream capabilities.",
   "type": "object",

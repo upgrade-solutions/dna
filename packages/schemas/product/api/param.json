@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/product/api/param",
+  "$id": "https://dna.codes/schemas/product/api/param",
   "title": "Param",
   "description": "A Param is a path, query, or header parameter on an API Endpoint, mapped from an Operational Attribute.",
   "type": "object",

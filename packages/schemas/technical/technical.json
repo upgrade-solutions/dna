@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/technical",
+  "$id": "https://dna.codes/schemas/technical",
   "title": "TechnicalDNA",
   "description": "A complete Technical DNA document for an application instance. Composes environments, providers, constructs, variables, and cells into a single deployable infrastructure definition.",
   "type": "object",
@@ -9,38 +9,38 @@
     "environments": {
       "type": "array",
       "description": "The named deployment contexts for this application.",
-      "items": { "$ref": "https://dna.local/technical/environment" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/environment" }
     },
     "providers": {
       "type": "array",
       "description": "The external platforms backing this application's constructs.",
-      "items": { "$ref": "https://dna.local/technical/provider" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/provider" }
     },
     "constructs": {
       "type": "array",
       "description": "The named infrastructure components shared across cells. Declared once, referenced by many.",
-      "items": { "$ref": "https://dna.local/technical/construct" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/construct" }
     },
     "variables": {
       "type": "array",
       "description": "Environment variables and secrets available to cells.",
-      "items": { "$ref": "https://dna.local/technical/variable" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/variable" }
     },
     "scripts": {
       "type": "array",
       "description": "Concrete implementations of Operational Equations — each maps a named Equation to a deployed compute Construct.",
-      "items": { "$ref": "https://dna.local/technical/script" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/script" }
     },
     "cells": {
       "type": "array",
       "description": "The deployed units that consume DNA and produce running software or infrastructure.",
       "minItems": 1,
-      "items": { "$ref": "https://dna.local/technical/cell" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/cell" }
     },
     "views": {
       "type": "array",
       "description": "Architecture diagram views — named perspectives showing system topology as interactive node/connection/zone diagrams.",
-      "items": { "$ref": "https://dna.local/technical/view" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/view" }
     }
   },
   "examples": [

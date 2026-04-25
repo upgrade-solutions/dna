@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/technical/environment",
+  "$id": "https://dna.codes/schemas/technical/environment",
   "title": "Environment",
   "description": "An Environment is a named deployment context. All Technical primitives can be scoped to an Environment.",
   "type": "object",
@@ -19,12 +19,12 @@
     "providers": {
       "type": "array",
       "description": "The Providers active in this environment.",
-      "items": { "$ref": "https://dna.local/technical/provider" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/provider" }
     },
     "variables": {
       "type": "array",
       "description": "Variables scoped to this environment.",
-      "items": { "$ref": "https://dna.local/technical/variable" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/variable" }
     }
   },
   "examples": [

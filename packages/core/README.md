@@ -41,7 +41,7 @@ Each schema is a JSON Schema Draft 2020-12 document with a stable `$id`:
 
 ```ts
 schemas.operational.resource.$id
-// → 'https://dna.local/operational/resource'
+// → 'https://dna.codes/schemas/operational/resource'
 ```
 
 ### `documents`
@@ -69,7 +69,7 @@ import { allSchemas } from '@dna-codes/core'
 const ajv = new Ajv({ strict: false, allErrors: true })
 for (const s of allSchemas()) ajv.addSchema(s)
 
-const validate = ajv.getSchema('https://dna.local/operational/resource')
+const validate = ajv.getSchema('https://dna.codes/schemas/operational/resource')
 validate({ name: 'Loan' })         // → true
 ```
 
@@ -144,7 +144,7 @@ node_modules/@dna-codes/schemas/
   technical/*.json                # 11 primitives + 1 aggregate
 ```
 
-Schemas cross-reference each other by absolute URI (e.g. `https://dna.local/operational/attribute`), so your validator must register **all** schemas before validating any one of them. The `allSchemas()` helper does this for you in JS; see the corresponding pattern in your target language's validator.
+Schemas cross-reference each other by absolute URI (e.g. `https://dna.codes/schemas/operational/attribute`), so your validator must register **all** schemas before validating any one of them. The `allSchemas()` helper does this for you in JS; see the corresponding pattern in your target language's validator.
 
 ## Primitive vocabulary
 
@@ -164,7 +164,7 @@ Operational is modeled around the **Actor > Action > Resource** triad. `Resource
 
 ## Versioning
 
-DNA schemas are the contract; breaking changes require a major version bump. `$id` URIs (`https://dna.local/<layer>/<primitive>`) are stable identifiers and will not change without a deprecation path.
+DNA schemas are the contract; breaking changes require a major version bump. `$id` URIs (`https://dna.codes/schemas/<layer>/<primitive>`) are stable identifiers and will not change without a deprecation path.
 
 ## License
 

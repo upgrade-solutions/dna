@@ -19,7 +19,7 @@ product/product.{core,api,ui}.json   # 3 aggregates
 technical/*.json                # 11 primitives + 1 aggregate
 ```
 
-Every schema has a stable `$id` of the form `https://dna.local/<layer>/<primitive>`. Schemas cross-reference each other by absolute URI, so your validator must register **all** schemas before validating any one of them.
+Every schema has a stable `$id` of the form `https://dna.codes/schemas/<layer>/<primitive>`. Schemas cross-reference each other by absolute URI, so your validator must register **all** schemas before validating any one of them.
 
 ## Usage from JavaScript
 

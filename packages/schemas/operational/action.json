@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/action",
+  "$id": "https://dna.codes/schemas/operational/action",
   "title": "Action",
   "description": "An Action is the core operation of a business domain — something an Actor performs on a Resource. Actions describe the operations that drive the business forward and produce meaningful state changes.",
   "type": "object",
@@ -23,12 +23,12 @@
     "input": {
       "type": "array",
       "description": "The attributes required as input to perform this action.",
-      "items": { "$ref": "https://dna.local/operational/attribute" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/attribute" }
     },
     "output": {
       "type": "array",
       "description": "The attributes returned or updated as a result of this action.",
-      "items": { "$ref": "https://dna.local/operational/attribute" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/attribute" }
     }
   },
   "examples": [

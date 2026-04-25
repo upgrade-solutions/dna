@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/product/web/layout",
+  "$id": "https://dna.codes/schemas/product/web/layout",
   "title": "Layout",
   "description": "A Layout is the structural shell a set of Pages lives within. It defines the top-level UI frame: sidebar, full-width, split-panel, etc.",
   "type": "object",

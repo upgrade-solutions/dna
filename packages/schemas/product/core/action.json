@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/product/core/action",
+  "$id": "https://dna.codes/schemas/product/core/action",
   "title": "Action",
   "description": "An Action is a product-level operation — it maps from an Operational Action and is realized as a UI trigger and an API endpoint action.",
   "type": "object",
@@ -28,12 +28,12 @@
     "input": {
       "type": "array",
       "description": "The fields required as input to perform this action.",
-      "items": { "$ref": "https://dna.local/product/core/field" }
+      "items": { "$ref": "https://dna.codes/schemas/product/core/field" }
     },
     "output": {
       "type": "array",
       "description": "The fields returned as a result of this action.",
-      "items": { "$ref": "https://dna.local/product/core/field" }
+      "items": { "$ref": "https://dna.codes/schemas/product/core/field" }
     }
   },
   "examples": [

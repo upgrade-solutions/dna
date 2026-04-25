@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/signal",
+  "$id": "https://dna.codes/schemas/operational/signal",
   "title": "Signal",
   "description": "A Signal is a named domain event published after a Capability executes. Signals cross domain boundaries and carry a typed payload contract that subscribers depend on.",
   "type": "object",

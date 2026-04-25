@@ -21,7 +21,7 @@ class DnaValidator {
             const id = schema.$id;
             this.validators.set(id, this.ajv.getSchema(id));
             // Also register by short ID (e.g. "operational/resource") for convenience
-            const shortId = id.replace('https://dna.local/', '');
+            const shortId = id.replace('https://dna.codes/schemas/', '');
             this.validators.set(shortId, this.ajv.getSchema(id));
         }
     }

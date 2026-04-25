@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/technical/script",
+  "$id": "https://dna.codes/schemas/technical/script",
   "title": "Script",
   "description": "A Script is the concrete implementation of an Operational Equation. It maps a named Equation to a deployed compute Construct (e.g. a Lambda function) and specifies the runtime and handler entry point. Cells use Script definitions to generate invocation wiring — the calling code does not need to know the underlying infrastructure.",
   "type": "object",

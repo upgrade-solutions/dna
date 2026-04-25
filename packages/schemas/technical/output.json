@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/technical/output",
+  "$id": "https://dna.codes/schemas/technical/output",
   "title": "Output",
   "description": "An Output is an exported value from one Cell that other Cells can reference via a Variable with source 'output'.",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/capability",
+  "$id": "https://dna.codes/schemas/operational/capability",
   "title": "Capability",
   "description": "A Capability is a Resource:Action pair — the atomic unit of business activity. It represents a complete statement of what can happen in the domain: Loan.Approve, Order.Ship, Employee.Terminate. The Actor that performs a Capability is expressed through Rules (access) and Tasks (assignment), not on the Capability itself.",
   "type": "object",

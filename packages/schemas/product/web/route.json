@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/product/web/route",
+  "$id": "https://dna.codes/schemas/product/web/route",
   "title": "Route",
   "description": "A Route is the URL pattern that resolves to a Page. It maps a path to a Resource page.",
   "type": "object",

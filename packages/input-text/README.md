@@ -42,8 +42,9 @@ const { operational, product, technical, raw } = await parse(
 | `instructions` | — | Extra guidance appended to the system prompt |
 | `temperature` | `0` | Sampling temperature |
 | `fetchImpl` | global `fetch` | Inject a fetch for testing |
+| `onMissingLayers` | `'warn'` | What to do when the model returns fewer layers than requested: `'warn'` logs to `console.warn`, `'throw'` raises, `'silent'` does nothing (the `missingLayers` field on the result is always populated). |
 
-Returns `Promise<{ operational?, product?, technical?, raw }>`. Each layer is only present when the model emitted it. `raw` is the unparsed model response — handy for debugging.
+Returns `Promise<{ operational?, product?, technical?, missingLayers, raw }>`. Each layer is only present when the model emitted it. `missingLayers` lists requested layers that weren't returned (empty on a complete response). `raw` is the unparsed model response — handy for debugging.
 
 ## Provider defaults
 
@@ -52,6 +53,22 @@ Returns `Promise<{ operational?, product?, technical?, raw }>`. Each layer is on
 | `openai` | `https://api.openai.com/v1` | `gpt-4o-mini` |
 | `openrouter` | `https://openrouter.ai/api/v1` | `anthropic/claude-sonnet-4-5` |
 | `anthropic` | `https://api.anthropic.com/v1` | `claude-sonnet-4-5` |
+
+### Local models (Ollama, LM Studio, vLLM)
+
+Any OpenAI-compatible endpoint works — pass `provider: 'openai'` with a custom `baseUrl`:
+
+```ts
+await parse(text, {
+  provider: 'openai',
+  apiKey: 'ollama',
+  baseUrl: 'http://localhost:11434/v1',
+  model: 'llama3.1',
+  layers: ['operational'],
+})
+```
+
+Smaller local models may struggle with strict JSON; see `examples/run-ollama.ts`.
 
 ## Validating the output
 

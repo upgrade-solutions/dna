@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/relationship",
+  "$id": "https://dna.codes/schemas/operational/relationship",
   "title": "Relationship",
   "description": "A Relationship is a named, directed connection between two Resources. It formalizes the semantic link that a reference Attribute implies — adding cardinality and a human-readable name. Relationships are declared at the Operational layer so that Product and Technical cells can derive foreign keys, join tables, nested routes, and navigation links.",
   "type": "object",

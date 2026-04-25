@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/technical/connection",
+  "$id": "https://dna.codes/schemas/technical/connection",
   "title": "Connection",
   "description": "A directed relationship between two nodes in an architecture view. Connections represent data flow, dependencies, or communication paths.",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/resource",
+  "$id": "https://dna.codes/schemas/operational/resource",
   "title": "Resource",
   "description": "A Resource is a core entity of a business domain — a named thing that the system tracks, manages, or operates on. Resources have identity, persist over time, and are the object of Actions performed by Actors.",
   "type": "object",
@@ -23,12 +23,12 @@
     "attributes": {
       "type": "array",
       "description": "The attributes (fields) that describe this resource.",
-      "items": { "$ref": "https://dna.local/operational/attribute" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/attribute" }
     },
     "actions": {
       "type": "array",
       "description": "The actions that can be performed on this resource.",
-      "items": { "$ref": "https://dna.local/operational/action" }
+      "items": { "$ref": "https://dna.codes/schemas/operational/action" }
     },
     "examples": {
       "type": "array",

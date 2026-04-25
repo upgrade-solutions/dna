@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/operational/task",
+  "$id": "https://dna.codes/schemas/operational/task",
   "title": "Task",
   "description": "A Task is the atomic reusable unit of human activity: a Role performing exactly one Capability. A Task reads as '<Role> does <Capability>' (e.g. 'ClosingSpecialist does Loan.Close'). Different Capability = different Task. Tasks are referenced by Steps inside a Process, and are the primary unit of composition for SOPs.",
   "type": "object",

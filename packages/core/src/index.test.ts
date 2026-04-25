@@ -32,7 +32,7 @@ describe('@dna-codes/core', () => {
       ])
       for (const s of Object.values(op)) {
         expect(typeof s.$id).toBe('string')
-        expect(s.$id!.startsWith('https://dna.local/operational/')).toBe(true)
+        expect(s.$id!.startsWith('https://dna.codes/schemas/operational/')).toBe(true)
       }
     })
 

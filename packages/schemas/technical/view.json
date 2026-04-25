@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dna.local/technical/view",
+  "$id": "https://dna.codes/schemas/technical/view",
   "title": "View",
   "description": "A named diagram perspective showing a specific aspect of the architecture. Each view contains its own set of nodes, connections, and zones.",
   "type": "object",
@@ -37,17 +37,17 @@
     "nodes": {
       "type": "array",
       "description": "The visual elements in this view.",
-      "items": { "$ref": "https://dna.local/technical/node" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/node" }
     },
     "connections": {
       "type": "array",
       "description": "The relationships between nodes in this view.",
-      "items": { "$ref": "https://dna.local/technical/connection" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/connection" }
     },
     "zones": {
       "type": "array",
       "description": "Visual groupings of nodes in this view.",
-      "items": { "$ref": "https://dna.local/technical/zone" }
+      "items": { "$ref": "https://dna.codes/schemas/technical/zone" }
     }
   },
   "examples": [
