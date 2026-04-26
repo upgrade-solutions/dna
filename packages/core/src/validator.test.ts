@@ -611,6 +611,79 @@ describe('DnaValidator — composite: operational', () => {
   })
 })
 
+describe('DnaValidator — operational schemas reject undeclared properties', () => {
+  // These tests prove that `additionalProperties: false` is enforced on every
+  // Operational primitive schema and the top-level layer schema. They give
+  // teeth to the rejection scenarios in operational-event-model/spec.md
+  // (signals[]/outcomes[]/equations[] on the layer, initiates on Operation,
+  // condition on Trigger, emits on Process, etc.).
+
+  const minimalOp = { target: 'Loan', action: 'Apply' }
+  const minimalTrigger = { operation: 'Loan.Apply', source: 'user' }
+  const minimalProcess = {
+    name: 'P', operator: 'Op', startStep: 'a',
+    steps: [{ id: 'a', task: 't' }],
+  }
+  const minimalRule = { operation: 'Loan.Apply' }
+  const minimalTask = { name: 't', actor: 'A', operation: 'Loan.Apply' }
+  const minimalAttribute = { name: 'amount', type: 'number' }
+  const minimalRelationship = {
+    name: 'Loan.borrower', from: 'Loan', to: 'Borrower',
+    cardinality: 'many-to-one', attribute: 'borrower_id',
+  }
+
+  function expectAdditionalPropertiesError(result: { valid: boolean; errors: any[] }, prop: string) {
+    expect(result.valid).toBe(false)
+    const offending = result.errors.find(
+      e => e.keyword === 'additionalProperties' && e.params?.additionalProperty === prop
+    )
+    expect(offending).toBeDefined()
+  }
+
+  it('top-level Operational doc rejects an unknown collection (e.g. widgets[])', () => {
+    const doc = {
+      domain: { name: 'd', path: 'd' },
+      widgets: [],
+    }
+    expectAdditionalPropertiesError(validator.validate(doc, 'operational'), 'widgets')
+  })
+
+  it('Operation rejects `initiates` field', () => {
+    const op = { ...minimalOp, initiates: ['Loan.Disburse'] }
+    expectAdditionalPropertiesError(validator.validate(op, 'operational/operation'), 'initiates')
+  })
+
+  it('Trigger rejects `condition` field', () => {
+    const trigger = { ...minimalTrigger, condition: { attribute: 'x', eq: 'y' } }
+    expectAdditionalPropertiesError(validator.validate(trigger, 'operational/trigger'), 'condition')
+  })
+
+  it('Process rejects `emits` field', () => {
+    const process = { ...minimalProcess, emits: ['SomeSignal'] }
+    expectAdditionalPropertiesError(validator.validate(process, 'operational/process'), 'emits')
+  })
+
+  it('Rule rejects an unknown field', () => {
+    const rule = { ...minimalRule, bogus: true }
+    expectAdditionalPropertiesError(validator.validate(rule, 'operational/rule'), 'bogus')
+  })
+
+  it('Task rejects an unknown field', () => {
+    const task = { ...minimalTask, bogus: true }
+    expectAdditionalPropertiesError(validator.validate(task, 'operational/task'), 'bogus')
+  })
+
+  it('Attribute rejects an unknown field', () => {
+    const attribute = { ...minimalAttribute, bogus: true }
+    expectAdditionalPropertiesError(validator.validate(attribute, 'operational/attribute'), 'bogus')
+  })
+
+  it('Relationship rejects an unknown field', () => {
+    const relationship = { ...minimalRelationship, bogus: true }
+    expectAdditionalPropertiesError(validator.validate(relationship, 'operational/relationship'), 'bogus')
+  })
+})
+
 describe('DnaValidator — composite: product/core', () => {
   it('validates a minimal product core document', () => {
     const doc = {

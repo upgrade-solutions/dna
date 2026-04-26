@@ -5,6 +5,7 @@
   "description": "A Rule defines a constraint on an Operation — either who is permitted to perform it (type: access) or what conditions must be satisfied before it executes (type: condition). Rules are checked before execution.\n\nRules of type 'condition' are also referenced by Steps inside a Process via `step.conditions[]` to gate step execution compositionally.",
   "type": "object",
   "required": ["operation"],
+  "additionalProperties": false,
   "properties": {
     "name": {
       "type": "string",

@@ -5,6 +5,7 @@
   "description": "A Relationship is a named, directed connection between two Resources. It formalizes the semantic link that a reference Attribute implies — adding cardinality and a human-readable name. Relationships are declared at the Operational layer so that Product and Technical cells can derive foreign keys, join tables, nested routes, and navigation links.",
   "type": "object",
   "required": ["name", "from", "to", "cardinality", "attribute"],
+  "additionalProperties": false,
   "properties": {
     "name": {
       "type": "string",

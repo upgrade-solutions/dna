@@ -5,6 +5,7 @@
   "description": "A Task is the atomic reusable unit of business activity: a Role performing exactly one Operation. A Task reads as '<Role> does <Operation>' (e.g. 'Underwriter does Loan.Approve'). Different Operation = different Task. Tasks are referenced by Steps inside a Process and are the primary unit of composition for SOPs.\n\nThe `actor` field references a Role (declared in the domain's roles[]). System actors are Roles with `system: true`.",
   "type": "object",
   "required": ["name", "actor", "operation"],
+  "additionalProperties": false,
   "properties": {
     "name": {
       "type": "string",
