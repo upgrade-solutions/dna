@@ -15,7 +15,7 @@
   },
   "files": ["dist", "README.md"],
   "publishConfig": {
-    "access": "public"
+    "access": "restricted"
   },
   "scripts": {
     "build": "tsc",

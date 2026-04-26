@@ -22,6 +22,9 @@
     "README.md",
     "AGENTS.md"
   ],
+  "publishConfig": {
+    "access": "restricted"
+  },
   "scripts": {
     "build": "tsc",
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
