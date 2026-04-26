@@ -1,8 +1,8 @@
 {
-  "name": "@dna-codes/integration-jira",
+  "name": "@dna-codes/output-openapi",
   "version": "0.1.0",
-  "description": "Bidirectional DNA integration for Jira Cloud. Pulls an Epic's description through @dna-codes/input-text into DNA, then pushes child Stories rendered by @dna-codes/output-text. Basic auth with email + API token.",
-  "keywords": ["dna", "jira", "integration", "epic", "story"],
+  "description": "Render a DNA Product API document as an OpenAPI 3.1 specification (YAML or JSON). The contract layer between DNA's product layer and any technical implementation. Zero runtime dependencies.",
+  "keywords": ["dna", "openapi", "output-openapi", "contract", "api"],
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,27 +13,25 @@
     },
     "./package.json": "./package.json"
   },
-  "bin": {
-    "integration-jira": "./bin/integration-jira.js"
-  },
   "files": [
-    "bin",
     "dist",
-    "README.md",
-    "AGENTS.md"
+    "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
-  "dependencies": {
-    "@dna-codes/input-text": "^0.3.0",
-    "@dna-codes/output-text": "^0.1.0"
-  },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^10.1.0",
+    "@dna-codes/core": "^0.3.0",
     "@types/jest": "^29.5.0",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.0.0",
     "jest": "^29.5.0",
+    "js-yaml": "^4.1.0",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.0",
     "typescript": "^5.4.0"

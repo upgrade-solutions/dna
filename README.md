@@ -223,6 +223,7 @@ Legend: ✅ shipped · 🚧 planned (listed below) · 💡 candidate (natural fi
 | `@dna-codes/output-markdown` | Renders DNA as structured markdown documentation |
 | `@dna-codes/output-mermaid` | Renders DNA as Mermaid diagrams (ERDs, flowcharts) |
 | `@dna-codes/output-html` | Renders DNA as semantic HTML |
+| `@dna-codes/output-openapi` | Renders a Product API DNA as an OpenAPI 3.1 spec (YAML or JSON) — the contract layer between DNA and any technical implementation |
 | `@dna-codes/output-text` | Renders DNA as plain prose — one combined document or one per unit (Capability/Resource/Process) for integration writers |
 
 **Integrations**

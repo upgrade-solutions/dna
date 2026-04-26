@@ -158,4 +158,76 @@ export const bookshopInput: DnaInput = {
       },
     ],
   },
+  productApi: {
+    namespace: {
+      name: 'Bookshop',
+      path: '/bookshop',
+      description: 'Bookshop catalog and publishing endpoints.',
+      domain: 'shop.books',
+      resources: ['Book', 'Author'],
+    },
+    operations: [
+      { resource: 'Book', action: 'List', name: 'Book.List' },
+      { resource: 'Book', action: 'Get', name: 'Book.Get' },
+      { resource: 'Book', action: 'Publish', name: 'Book.Publish' },
+    ],
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/bookshop/books',
+        operation: 'Book.List',
+        description: 'List books in the catalog.',
+        params: [
+          { name: 'status', in: 'query', type: 'enum', values: ['draft', 'live', 'retired'] },
+          { name: 'limit', in: 'query', type: 'number', description: 'Max rows returned (default 50).' },
+        ],
+        response: {
+          name: 'BookListResponse',
+          description: 'A page of books.',
+          fields: [
+            { name: 'items', type: 'reference', required: true, description: 'BookSummary[] (see components).' },
+            { name: 'total', type: 'number', required: true },
+          ],
+        },
+      },
+      {
+        method: 'GET',
+        path: '/bookshop/books/:id',
+        operation: 'Book.Get',
+        description: 'Fetch a single book by ID.',
+        params: [{ name: 'id', in: 'path', type: 'string', required: true, attribute: 'id' }],
+        response: {
+          name: 'BookResponse',
+          description: 'A single book.',
+          resource: 'Book',
+          fields: [
+            { name: 'id', type: 'string', required: true },
+            { name: 'title', type: 'string', required: true },
+            { name: 'price', type: 'number', required: true },
+            { name: 'status', type: 'enum', values: ['draft', 'live', 'retired'], required: true },
+          ],
+        },
+      },
+      {
+        method: 'POST',
+        path: '/bookshop/books/:id/publish',
+        operation: 'Book.Publish',
+        description: 'Publish a draft book. Requires editorial approval per the PublishFlow Process.',
+        params: [{ name: 'id', in: 'path', type: 'string', required: true, attribute: 'id' }],
+        request: {
+          name: 'PublishBookRequest',
+          fields: [{ name: 'note', type: 'text', description: 'Optional editorial note.' }],
+        },
+        response: {
+          name: 'BookResponse',
+          description: 'The published book.',
+          fields: [
+            { name: 'id', type: 'string', required: true },
+            { name: 'title', type: 'string', required: true },
+            { name: 'status', type: 'enum', values: ['draft', 'live', 'retired'], required: true },
+          ],
+        },
+      },
+    ],
+  },
 }

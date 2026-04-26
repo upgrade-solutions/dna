@@ -10,6 +10,7 @@
     "packages/output-markdown",
     "packages/output-html",
     "packages/output-mermaid",
+    "packages/output-openapi",
     "packages/output-text",
     "packages/input-example",
     "packages/output-example",
