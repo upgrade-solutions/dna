@@ -68,25 +68,26 @@ describe('@dna-codes/output-mermaid', () => {
             expect(out).toContain('subgraph PublishFlow["PublishFlow"]');
             expect(out).toContain('end');
         });
-        it('emits step nodes labeled by each task\'s capability', () => {
+        it('emits step nodes labeled by each task\'s operation', () => {
             const out = (0, index_1.render)(core_1.bookshopInput, { diagrams: ['flowchart'] });
             expect(out).toContain('review["Book.Publish"]');
             expect(out).toContain('approve["Book.Publish"]');
             expect(out).toContain('reject["Book.Retire"]');
         });
-        it('emits arrows with when/else labels for branches', () => {
+        it('emits arrows with condition/else labels', () => {
             const out = (0, index_1.render)(core_1.bookshopInput, { diagrams: ['flowchart'] });
-            expect(out).toContain('review -- "passed" --> approve');
-            expect(out).toContain('review -- "else" --> reject');
+            expect(out).toContain('review -- "BookIsDraft" --> approve');
+            expect(out).toContain('approve -- "else" --> reject');
         });
-        it('emits an unlabeled arrow when there is no branch', () => {
+        it('emits an unlabeled arrow when there are no conditions', () => {
             const out = (0, index_1.render)({
                 operational: {
                     domain: { name: 'd' },
-                    tasks: [{ name: 'T1', capability: 'Thing.Do' }],
+                    tasks: [{ name: 'T1', actor: 'X', operation: 'Thing.Do' }],
                     processes: [
                         {
                             name: 'Simple',
+                            startStep: 'a',
                             steps: [
                                 { id: 'a', task: 'T1' },
                                 { id: 'b', task: 'T1', depends_on: ['a'] },
@@ -96,7 +97,7 @@ describe('@dna-codes/output-mermaid', () => {
                 },
             }, { diagrams: ['flowchart'] });
             expect(out).toContain('a --> b');
-            expect(out).not.toContain('"passed"');
+            expect(out).not.toContain('"BookIsDraft"');
             expect(out).not.toContain('"else"');
         });
     });

@@ -133,7 +133,7 @@ describe('@dna-codes/output-html', () => {
   })
 
   describe('section: operations', () => {
-    it('renders triggers, access rules, condition rules, and outcomes', () => {
+    it('renders triggers, access rules, condition rules, and Operation.changes', () => {
       const html = render(bookshopInput, { sections: ['operations'] })
       expect(html).toContain('<h3>Book.Publish</h3>')
       expect(html).toContain('<strong>Triggered by:</strong>')
@@ -142,6 +142,9 @@ describe('@dna-codes/output-html', () => {
       expect(html).toContain('role <code>Editor</code>')
       expect(html).toContain('<em>Condition:</em>')
       expect(html).toContain('<code>book.status</code>')
+      expect(html).toContain('<strong>Changes:</strong>')
+      expect(html).toContain('Sets <code>status</code>')
+      expect(html).not.toContain('<strong>Outcomes:</strong>')
       expect(html).not.toContain('<strong>Signals published:</strong>')
     })
   })

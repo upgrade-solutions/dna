@@ -27,12 +27,28 @@
     "description": {
       "type": "string",
       "description": "Human-readable explanation of what this operation represents."
+    },
+    "changes": {
+      "type": "array",
+      "description": "State mutations applied to the target Resource when this operation completes. Each entry names an attribute on the target and the value to assign (use 'now' for the current timestamp).",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["attribute", "set"],
+        "properties": {
+          "attribute": { "type": "string" },
+          "set": {
+            "description": "The value to assign. Use 'now' for the current timestamp.",
+            "examples": ["active", "now", true, null]
+          }
+        }
+      }
     }
   },
   "examples": [
-    { "target": "Loan",        "action": "Approve",     "name": "Loan.Approve",        "description": "Approves a pending loan application." },
+    { "target": "Loan",        "action": "Approve",     "name": "Loan.Approve",        "description": "Approves a pending loan application.", "changes": [{ "attribute": "status", "set": "active" }] },
     { "target": "Patient",     "action": "GetAdmitted", "name": "Patient.GetAdmitted", "description": "Patient is admitted to a hospital." },
     { "target": "Underwriter", "action": "Activate",    "name": "Underwriter.Activate", "description": "Activates an Underwriter Role definition (org admin)." },
-    { "target": "Case",        "action": "Settle",      "name": "Case.Settle",         "description": "Marks a legal case as settled." }
+    { "target": "Case",        "action": "Settle",      "name": "Case.Settle",         "description": "Marks a legal case as settled.", "changes": [{ "attribute": "status", "set": "settled" }, { "attribute": "settled_at", "set": "now" }] }
   ]
 }

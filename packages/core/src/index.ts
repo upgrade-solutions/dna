@@ -27,7 +27,6 @@ export const schemas = {
     group: load('operational/group.json'),
     membership: load('operational/membership.json'),
     operation: load('operational/operation.json'),
-    outcome: load('operational/outcome.json'),
     person: load('operational/person.json'),
     process: load('operational/process.json'),
     relationship: load('operational/relationship.json'),

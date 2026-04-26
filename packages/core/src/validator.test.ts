@@ -15,6 +15,7 @@ const operationalFixture = {
         attributes: [
           { name: 'id', type: 'string', required: true },
           { name: 'borrower_id', type: 'reference', resource: 'Borrower' },
+          { name: 'status', type: 'string' },
         ],
         actions: [
           { name: 'Apply', type: 'write' },
@@ -42,16 +43,10 @@ const operationalFixture = {
   ],
   operations: [
     { target: 'Loan', action: 'Apply', name: 'Loan.Apply' },
-    { target: 'Loan', action: 'Approve', name: 'Loan.Approve' },
+    { target: 'Loan', action: 'Approve', name: 'Loan.Approve', changes: [{ attribute: 'loan.status', set: 'active' }] },
     { target: 'Loan', action: 'View', name: 'Loan.View' },
   ],
   triggers: [{ operation: 'Loan.Apply', source: 'user' }],
-  outcomes: [
-    {
-      operation: 'Loan.Approve',
-      changes: [{ attribute: 'loan.status', set: 'active' }],
-    },
-  ],
   relationships: [
     {
       name: 'Loan.borrower',
@@ -311,6 +306,14 @@ describe('DnaValidator — operational/operation', () => {
   it('rejects an Operation missing action', () => {
     const result = validator.validate({ target: 'Loan' }, 'operational/operation')
     expect(result.valid).toBe(false)
+  })
+
+  it('validates an Operation with `changes`', () => {
+    const result = validator.validate(
+      { target: 'Loan', action: 'Approve', name: 'Loan.Approve', changes: [{ attribute: 'status', set: 'approved' }] },
+      'operational/operation',
+    )
+    expect(result.valid).toBe(true)
   })
 })
 
@@ -717,7 +720,6 @@ describe('DnaValidator — availableSchemas', () => {
     expect(schemas).toContain('operational/domain')
     expect(schemas).toContain('operational/trigger')
     expect(schemas).toContain('operational/rule')
-    expect(schemas).toContain('operational/outcome')
     expect(schemas).toContain('operational/task')
     expect(schemas).toContain('operational/process')
     expect(schemas).toContain('operational/relationship')
@@ -945,6 +947,69 @@ describe('DnaValidator — cross-layer validation', () => {
     const result = validator.validateCrossLayer({ operational: badOp })
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.message.includes('PhantomNoun'))).toBe(true)
+  })
+
+  it('accepts Operation.changes with a known attribute on the target Resource', () => {
+    const okOp = {
+      ...operational,
+      operations: [
+        { target: 'Loan', action: 'Apply', name: 'Loan.Apply' },
+        { target: 'Loan', action: 'Approve', name: 'Loan.Approve', changes: [{ attribute: 'status', set: 'approved' }] },
+        { target: 'Loan', action: 'View', name: 'Loan.View' },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: okOp })
+    expect(result.valid).toBe(true)
+  })
+
+  it('rejects Operation.changes pointing at an unknown attribute on the target', () => {
+    const badOp = {
+      ...operational,
+      operations: [
+        { target: 'Loan', action: 'Apply', name: 'Loan.Apply' },
+        { target: 'Loan', action: 'Approve', name: 'Loan.Approve', changes: [{ attribute: 'nonexistentField', set: 'x' }] },
+        { target: 'Loan', action: 'View', name: 'Loan.View' },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: badOp })
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e =>
+      e.path === 'operations/Loan.Approve/changes/0/attribute' &&
+      e.message.includes('"nonexistentField"'),
+    )).toBe(true)
+  })
+
+  it('accepts Operation.changes using the legacy qualified `<resource>.<attribute>` form without enforcement', () => {
+    const okOp = {
+      ...operational,
+      operations: [
+        { target: 'Loan', action: 'Apply', name: 'Loan.Apply' },
+        { target: 'Loan', action: 'Approve', name: 'Loan.Approve', changes: [{ attribute: 'loan.whatever_no_check', set: 'x' }] },
+        { target: 'Loan', action: 'View', name: 'Loan.View' },
+      ],
+    }
+    const result = validator.validateCrossLayer({ operational: okOp })
+    expect(result.valid).toBe(true)
+  })
+
+  it('operational schema does not declare an `outcomes[]` collection', () => {
+    const opSchema = (validator as any).validators.get('operational').schema
+    expect(opSchema.properties.outcomes).toBeUndefined()
+  })
+
+  it('operational schema does not register an Outcome primitive', () => {
+    const schemaIds = validator.availableSchemas()
+    expect(schemaIds).not.toContain('operational/outcome')
+  })
+
+  it('Operation schema does not declare an `initiates` field', () => {
+    const opSchema = (validator as any).validators.get('operational/operation').schema
+    expect(opSchema.properties.initiates).toBeUndefined()
+  })
+
+  it('Trigger schema does not declare a `condition` field', () => {
+    const triggerSchema = (validator as any).validators.get('operational/trigger').schema
+    expect(triggerSchema.properties.condition).toBeUndefined()
   })
 
   it('detects Operation.action not declared in target.actions[]', () => {

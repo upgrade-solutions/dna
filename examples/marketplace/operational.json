@@ -68,13 +68,13 @@
     { "name": "PlatformStaffSupport",  "person": "PlatformStaff", "role": "SupportAgent", "description": "Platform staff may hold the global SupportAgent role." }
   ],
   "operations": [
-    { "target": "Listing", "action": "Publish", "name": "Listing.Publish" },
-    { "target": "Listing", "action": "Pause",   "name": "Listing.Pause" },
-    { "target": "Listing", "action": "Delist",  "name": "Listing.Delist" },
-    { "target": "Booking", "action": "Request", "name": "Booking.Request" },
-    { "target": "Booking", "action": "Approve", "name": "Booking.Approve" },
-    { "target": "Booking", "action": "Decline", "name": "Booking.Decline" },
-    { "target": "Booking", "action": "Cancel",  "name": "Booking.Cancel" }
+    { "target": "Listing", "action": "Publish", "name": "Listing.Publish", "changes": [{ "attribute": "status", "set": "active" }] },
+    { "target": "Listing", "action": "Pause",   "name": "Listing.Pause",   "changes": [{ "attribute": "status", "set": "paused" }] },
+    { "target": "Listing", "action": "Delist",  "name": "Listing.Delist",  "changes": [{ "attribute": "status", "set": "delisted" }] },
+    { "target": "Booking", "action": "Request", "name": "Booking.Request", "changes": [{ "attribute": "status", "set": "requested" }] },
+    { "target": "Booking", "action": "Approve", "name": "Booking.Approve", "changes": [{ "attribute": "status", "set": "approved" }] },
+    { "target": "Booking", "action": "Decline", "name": "Booking.Decline", "changes": [{ "attribute": "status", "set": "declined" }] },
+    { "target": "Booking", "action": "Cancel",  "name": "Booking.Cancel",  "changes": [{ "attribute": "status", "set": "cancelled" }] }
   ],
   "triggers": [
     { "operation": "Listing.Publish", "source": "user" },
@@ -102,18 +102,6 @@
       "type": "condition",
       "conditions": [{ "attribute": "booking.status", "operator": "eq", "value": "requested" }]
     }
-  ],
-  "outcomes": [
-    { "operation": "Listing.Publish", "changes": [{ "attribute": "listing.status", "set": "active" }] },
-    { "operation": "Listing.Pause",   "changes": [{ "attribute": "listing.status", "set": "paused" }] },
-    { "operation": "Listing.Delist",  "changes": [{ "attribute": "listing.status", "set": "delisted" }] },
-    { "operation": "Booking.Request", "changes": [{ "attribute": "booking.status", "set": "requested" }] },
-    {
-      "operation": "Booking.Approve",
-      "changes": [{ "attribute": "booking.status", "set": "approved" }]
-    },
-    { "operation": "Booking.Decline", "changes": [{ "attribute": "booking.status", "set": "declined" }] },
-    { "operation": "Booking.Cancel",  "changes": [{ "attribute": "booking.status", "set": "cancelled" }] }
   ],
   "relationships": [
     { "name": "Listing.host",     "from": "Listing", "to": "Member",  "cardinality": "many-to-one", "attribute": "host_id",    "inverse": "listings" },

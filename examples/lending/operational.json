@@ -77,11 +77,11 @@
     { "name": "EmployeeLendingManager", "person": "Employee", "role": "LendingManager", "description": "Employees may hold the Lending Manager role within a BankDepartment." }
   ],
   "operations": [
-    { "target": "Loan", "action": "Apply",    "name": "Loan.Apply" },
-    { "target": "Loan", "action": "Approve",  "name": "Loan.Approve" },
-    { "target": "Loan", "action": "Disburse", "name": "Loan.Disburse" },
+    { "target": "Loan", "action": "Apply",    "name": "Loan.Apply",    "changes": [{ "attribute": "status", "set": "pending" }] },
+    { "target": "Loan", "action": "Approve",  "name": "Loan.Approve",  "changes": [{ "attribute": "status", "set": "approved" }] },
+    { "target": "Loan", "action": "Disburse", "name": "Loan.Disburse", "changes": [{ "attribute": "status", "set": "active" }] },
     { "target": "Loan", "action": "Repay",    "name": "Loan.Repay" },
-    { "target": "Loan", "action": "Default",  "name": "Loan.Default" },
+    { "target": "Loan", "action": "Default",  "name": "Loan.Default",  "changes": [{ "attribute": "status", "set": "defaulted" }] },
     { "target": "LoanOrigination", "action": "Start", "name": "LoanOrigination.Start", "description": "LendingManager kicks off the LoanOrigination SOP for a qualified lead." }
   ],
   "triggers": [
@@ -106,15 +106,6 @@
       "type": "condition",
       "conditions": [{ "attribute": "loan.status", "operator": "eq", "value": "approved" }]
     }
-  ],
-  "outcomes": [
-    { "operation": "Loan.Apply",    "changes": [{ "attribute": "loan.status", "set": "pending" }] },
-    { "operation": "Loan.Approve",  "changes": [{ "attribute": "loan.status", "set": "approved" }] },
-    {
-      "operation": "Loan.Disburse",
-      "changes": [{ "attribute": "loan.status", "set": "active" }]
-    },
-    { "operation": "Loan.Default",  "changes": [{ "attribute": "loan.status", "set": "defaulted" }] }
   ],
   "relationships": [
     {

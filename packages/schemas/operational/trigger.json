@@ -42,19 +42,6 @@
       "description": "The Operation whose completion fires this trigger. Required when source is 'operation'.",
       "pattern": "^[A-Z][a-zA-Z]*\\.[A-Z][a-zA-Z]*$",
       "examples": ["Order.Fulfill", "Loan.Disburse"]
-    },
-    "condition": {
-      "type": "object",
-      "description": "An optional condition that must be true at trigger time for the target to be initiated.",
-      "required": ["attribute", "operator"],
-      "properties": {
-        "attribute": { "type": "string" },
-        "operator": {
-          "type": "string",
-          "enum": ["eq", "neq", "gt", "gte", "lt", "lte", "in", "not_in", "present", "absent"]
-        },
-        "value": {}
-      }
     }
   },
   "oneOf": [

@@ -18,14 +18,14 @@ exports.DEFAULT_SECTIONS = void 0;
 exports.render = render;
 const summary_1 = require("./sections/summary");
 const domain_model_1 = require("./sections/domain-model");
-const capabilities_1 = require("./sections/capabilities");
+const operations_1 = require("./sections/operations");
 const sops_1 = require("./sections/sops");
 const process_flow_1 = require("./sections/process-flow");
 const util_1 = require("./util");
 exports.DEFAULT_SECTIONS = [
     'summary',
     'domain-model',
-    'capabilities',
+    'operations',
     'sops',
     'process-flow',
 ];
@@ -40,7 +40,7 @@ function render(dna, options = {}) {
     if (intro)
         parts.push(`<p>${(0, util_1.escape)(intro)}</p>`);
     for (const section of sections) {
-        const rendered = renderSection(section, dna, level + 1);
+        const rendered = renderSection(section, dna, level + 1, options);
         if (rendered)
             parts.push(rendered);
     }
@@ -53,14 +53,14 @@ function render(dna, options = {}) {
     }
     return body;
 }
-function renderSection(section, dna, h) {
+function renderSection(section, dna, h, options) {
     switch (section) {
         case 'summary':
-            return (0, summary_1.renderSummary)(dna, h);
+            return (0, summary_1.renderSummary)(dna, h, options);
         case 'domain-model':
             return (0, domain_model_1.renderDomainModel)(dna, h);
-        case 'capabilities':
-            return (0, capabilities_1.renderCapabilities)(dna, h);
+        case 'operations':
+            return (0, operations_1.renderOperations)(dna, h);
         case 'sops':
             return (0, sops_1.renderSops)(dna, h);
         case 'process-flow':

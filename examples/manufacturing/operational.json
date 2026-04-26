@@ -70,13 +70,13 @@
     { "name": "FloorWorkerQualityInspector", "person": "FloorWorker", "role": "QualityInspector" }
   ],
   "operations": [
-    { "target": "WorkOrder",    "action": "Release",  "name": "WorkOrder.Release" },
-    { "target": "WorkOrder",    "action": "Cut",      "name": "WorkOrder.Cut" },
+    { "target": "WorkOrder",    "action": "Release",  "name": "WorkOrder.Release",  "changes": [{ "attribute": "status", "set": "queued" }] },
+    { "target": "WorkOrder",    "action": "Cut",      "name": "WorkOrder.Cut",      "changes": [{ "attribute": "status", "set": "in_progress" }] },
     { "target": "WorkOrder",    "action": "Stamp",    "name": "WorkOrder.Stamp" },
     { "target": "WorkOrder",    "action": "Paint",    "name": "WorkOrder.Paint" },
-    { "target": "WorkOrder",    "action": "Inspect",  "name": "WorkOrder.Inspect" },
-    { "target": "WorkOrder",    "action": "Reject",   "name": "WorkOrder.Reject" },
-    { "target": "WorkOrder",    "action": "Complete", "name": "WorkOrder.Complete" },
+    { "target": "WorkOrder",    "action": "Inspect",  "name": "WorkOrder.Inspect",  "changes": [{ "attribute": "status", "set": "passed" }] },
+    { "target": "WorkOrder",    "action": "Reject",   "name": "WorkOrder.Reject",   "changes": [{ "attribute": "status", "set": "failed" }] },
+    { "target": "WorkOrder",    "action": "Complete", "name": "WorkOrder.Complete", "changes": [{ "attribute": "status", "set": "completed" }] },
     { "target": "DefectReport", "action": "File",     "name": "DefectReport.File" }
   ],
   "triggers": [
@@ -112,13 +112,6 @@
       "type": "condition",
       "conditions": [{ "attribute": "work_order.status", "operator": "eq", "value": "passed" }]
     }
-  ],
-  "outcomes": [
-    { "operation": "WorkOrder.Release",  "changes": [{ "attribute": "work_order.status", "set": "queued" }] },
-    { "operation": "WorkOrder.Cut",      "changes": [{ "attribute": "work_order.status", "set": "in_progress" }] },
-    { "operation": "WorkOrder.Inspect",  "changes": [{ "attribute": "work_order.status", "set": "passed" }] },
-    { "operation": "WorkOrder.Reject",   "changes": [{ "attribute": "work_order.status", "set": "failed" }] },
-    { "operation": "WorkOrder.Complete", "changes": [{ "attribute": "work_order.status", "set": "completed" }] }
   ],
   "relationships": [
     { "name": "DefectReport.work_order", "from": "DefectReport", "to": "WorkOrder", "cardinality": "many-to-one", "attribute": "work_order_id" }

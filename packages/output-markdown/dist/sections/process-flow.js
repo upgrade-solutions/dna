@@ -28,13 +28,10 @@ function renderSteps(steps) {
     return steps.map((step, i) => {
         const last = i === steps.length - 1;
         const prefix = last ? '└── ' : '├── ';
-        const branch = step.branch?.else
-            ? ' [else]'
-            : step.branch?.when
-                ? ` [when: ${step.branch.when}]`
-                : '';
+        const conds = step.conditions?.length ? ` [when: ${step.conditions.join(' AND ')}]` : '';
+        const elseClause = step.else ? ` [else: ${step.else}]` : '';
         const deps = step.depends_on?.length ? ` ← ${step.depends_on.join(', ')}` : '';
-        return `${prefix}${step.id}: ${step.task}${branch}${deps}`;
+        return `${prefix}${step.id}: ${step.task}${conds}${elseClause}${deps}`;
     });
 }
 //# sourceMappingURL=process-flow.js.map

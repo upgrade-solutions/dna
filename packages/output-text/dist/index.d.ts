@@ -4,11 +4,11 @@
  *   render(dna, options?)     → string                      // one combined document
  *   renderMany(dna, options?) → Array<{id, title, body}>    // one document per unit
  *
- * Both accept a `styles` map: `{ capability: 'user-story' | 'gherkin' | 'product-dna', ... }`.
+ * Both accept a `styles` map: `{ operation: 'user-story' | 'gherkin' | 'product-dna', ... }`.
  * The key set determines which unit types are emitted; the value picks the
- * body template. Default is `{ capability: 'user-story' }`.
+ * body template. Default is `{ operation: 'user-story' }`.
  *
- * `user-story` and `gherkin` are action-shaped and only fit Capability —
+ * `user-story` and `gherkin` are action-shaped and only fit Operation —
  * Resource and Process always render as `product-dna` regardless of the style
  * requested.
  */

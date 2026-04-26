@@ -150,11 +150,11 @@ Schemas cross-reference each other by absolute URI (e.g. `https://dna.codes/sche
 
 | Layer | Primitives |
 |-------|-----------|
-| Operational | `Resource`, `Action`, `Capability`, `Attribute`, `Domain`, `Relationship`, `Cause`, `Rule`, `Outcome`, `Role`, `User`, `Task`, `Process` |
+| Operational | `Resource`, `Action`, `Operation`, `Attribute`, `Domain`, `Relationship`, `Trigger`, `Rule`, `Person`, `Role`, `Group`, `Membership`, `Task`, `Process` |
 | Product | `Resource`, `Action`, `Operation`, `Layout`, `Page`, `Route`, `Block`, `Field`, `Namespace`, `Endpoint`, `Schema`, `Param` |
 | Technical | `Environment`, `Cell`, `Construct`, `Provider`, `Variable`, `Output`, `Script`, `View`, `Node`, `Connection`, `Zone` |
 
-Operational is modeled around the **Actor > Action > Resource** triad. `Resource` and `Action` appear at both the Operational and Product layers by design — a Product `Resource` is the surface projection of an Operational `Resource`, and likewise for `Action`. The Actor is a `Role` referenced by `Rule` (access), `Task` (assignment), `User` (who holds which role), and `Process` (operator), rather than declared on the Capability itself. `Role` lives in Operational as the canonical Actor primitive; Product Core surfaces the subset transitively referenced by API and UI cells. See each layer's doc in [`docs/`](./docs/) for full semantics.
+Operational is modeled around the **Actor > Action > Subject** triad. `Resource` and `Action` appear at both the Operational and Product layers by design — a Product `Resource` is the surface projection of an Operational `Resource`, and likewise for `Action`. The Actor is a `Role` (or `Person`) referenced by `Rule` (access), `Task` (assignment), `Membership` (eligibility), and `Process` (operator), rather than declared on the Operation itself. State mutations live on `Operation.changes`; there is no separate Outcome primitive. See each layer's doc in [`docs/`](./docs/) for full semantics.
 
 ## What this package does *not* include
 

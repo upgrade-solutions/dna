@@ -67,7 +67,7 @@ v1 only consumes the operational layer; the other slots are reserved for future 
 |---------|-----------------|
 | `summary` | Domain header, primitive counts, top-level resources |
 | `domain-model` | Each Resource with attribute table, actions, outgoing relationships |
-| `capabilities` | For every Capability: triggers (Causes), Rules, Outcomes |
+| `capabilities` | For every Capability: triggers (Causes), Rules, Operation `changes[]` |
 | `sops` | Each Process as a numbered playbook with resolved Role + Capability per step |
 | `process-flow` | ASCII outline of each Process DAG with branch markers and dep arrows |
 
@@ -87,7 +87,6 @@ The default set is `['summary', 'domain-model', 'capabilities', 'sops', 'process
 - Resources: 1
 - Capabilities: 2
 - Rules: 2
-- Outcomes: 1
 - Relationships: 1
 - Roles: 1
 - Tasks: 3
@@ -133,8 +132,8 @@ Publish a draft book to the storefront.
 - *Access:* role `editor`
 - *Condition:* book.status == "draft"
 
-**Outcomes:**
-- Sets `book.status` → `"active"`
+**Changes:**
+- Sets `status` → `"active"`
 ```
 
 ### `sops`

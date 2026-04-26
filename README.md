@@ -18,7 +18,7 @@ As documented below, it's incredibly flexible with input/output adapters and int
 
 Layers are one-way downstream: Operational → Product → Technical. Upper layers never depend on lower ones. Cross-layer references (e.g. a Product Resource pointing at an Operational Resource) are plain strings validated by `@dna-codes/core` rather than JSON Schema `$ref`s.
 
-Operational DNA is **organizational modeling** — the **nouns** an organization deals with (people, places, things) and the **verbs** that bind them. It's modeled around the **Actor > Action > Subject** triad: Roles act, Subjects (any noun primitive) receive actions. Operational primitives fall into three categories — **People** (Person, Role, Group, Membership), **Entities** (Resource, Attribute, Relationship), and **Activities** (Operation, Task, Step, Process, Trigger, Rule, Outcome). An **Operation** is always a `Target.Action` pair where Target is any noun primitive.
+Operational DNA is **organizational modeling** — the **nouns** an organization deals with (people, places, things) and the **verbs** that bind them. It's modeled around the **Actor > Action > Subject** triad: Roles act, Subjects (any noun primitive) receive actions. Operational primitives fall into three categories — **People** (Person, Role, Group, Membership), **Entities** (Resource, Attribute, Relationship), and **Activities** (Operation, Task, Step, Process, Trigger, Rule). An **Operation** is always a `Target.Action` pair where Target is any noun primitive.
 
 Here's a minimal Operational DNA document in a lending context:
 
@@ -55,8 +55,8 @@ Here's a minimal Operational DNA document in a lending context:
     { "name": "EmployeeUnderwriter", "person": "Employee", "role": "Underwriter" }
   ],
   "operations": [
-    { "target": "Loan", "action": "Apply",   "name": "Loan.Apply" },
-    { "target": "Loan", "action": "Approve", "name": "Loan.Approve" }
+    { "target": "Loan", "action": "Apply",   "name": "Loan.Apply",   "changes": [{ "attribute": "status", "set": "pending" }] },
+    { "target": "Loan", "action": "Approve", "name": "Loan.Approve", "changes": [{ "attribute": "status", "set": "active" }] }
   ],
   "triggers": [
     { "operation": "Loan.Apply",   "source": "user" },
@@ -66,10 +66,6 @@ Here's a minimal Operational DNA document in a lending context:
     { "operation": "Loan.Apply",   "type": "access", "allow": [{ "role": "Borrower" }] },
     { "operation": "Loan.Approve", "type": "access", "allow": [{ "role": "Underwriter" }] },
     { "operation": "Loan.Approve", "type": "condition", "conditions": [{ "attribute": "loan.status", "operator": "eq", "value": "pending" }] }
-  ],
-  "outcomes": [
-    { "operation": "Loan.Apply",   "changes": [{ "attribute": "loan.status", "set": "pending" }] },
-    { "operation": "Loan.Approve", "changes": [{ "attribute": "loan.status", "set": "active" }] }
   ]
 }
 ```
@@ -97,7 +93,7 @@ Operational DNA captures organizational modeling — what an organization *is* a
 
 - **People** — Person, Role, Group, Membership
 - **Entities** — Resource, Attribute, Relationship
-- **Activities** — Operation, Task, Step, Process, Trigger, Rule, Outcome
+- **Activities** — Operation, Task, Step, Process, Trigger, Rule
 
 `Domain` wraps the four noun primitives (Resources, Persons, Roles, Groups) into bounded contexts; `Memberships` and Activities live at the document top level.
 
@@ -115,12 +111,11 @@ Operational DNA captures organizational modeling — what an organization *is* a
 **Shared noun shape:** Resource, Person, Role, and Group all support `name`, `attributes[]`, `actions[]`, and optional `parent`. Each `actions[]` entry is an object with `name`, optional `description`, `type` (`read | write | destructive`), and `idempotent`.
 
 **Activity primitives:**
-- **Operation** — a `Target.Action` pair where Target is any noun primitive; the atomic unit of business activity (`Loan.Approve`, `Patient.GetAdmitted`, `Underwriter.Activate`, `Case.Settle`). The validator resolves `target` across all four noun collections.
-- **Trigger** — what initiates an Operation or a Process. Sources: `user`, `schedule`, `webhook`, `operation`. A Trigger targets exactly one of: an Operation (ad-hoc invocation) or a Process (kick off the whole SOP from `startStep`).
-- **Rule** — constraints on an Operation: `access` (which Roles or Persons may perform it) or `condition` (what must be true first). Condition Rules are also referenced from `Step.conditions[]` for compositional gating.
-- **Outcome** — state changes and downstream Operations after an Operation executes (`changes` for attribute mutations, `initiates` for chained Operations).
-- **Task** — a `(actor, operation)` binding. Actor is a Role (internal positions like Underwriter) OR a Person (external actors like Borrower).
-- **Process** — a Standard Operating Procedure: a named DAG of Steps with an explicit `startStep` (Amazon-States-Language convention). Each Step references exactly one Task; Step-level conditions reference Rules compositionally.
+- **Operation** — a `Target.Action` pair where Target is any noun primitive; the atomic unit of business activity (`Loan.Approve`, `Patient.GetAdmitted`, `Underwriter.Activate`, `Case.Settle`). The validator resolves `target` across all four noun collections. Optional `changes[]` declares the state mutations the Operation applies to its target Resource (the only place state-mutation modeling lives — there is no separate Outcome primitive).
+- **Trigger** — what initiates an Operation or a Process. Sources: `user`, `schedule`, `webhook`, `operation`. A Trigger targets exactly one of: an Operation (ad-hoc invocation) or a Process (kick off the whole SOP from `startStep`). Operation-to-Operation chaining is expressed via `source: "operation"` + `after`.
+- **Rule** — constraints on an Operation: `access` (which Roles or Persons may perform it) or `condition` (what must be true first). Condition Rules are also referenced from `Step.conditions[]` for compositional gating — the only mechanism for entry/intra-Process gating.
+- **Task** — a `(actor, operation)` binding. Actor is a Role (internal positions like Underwriter) OR a Person (external actors like Borrower). The standalone equivalent of an orchestrated Step — Tasks describe SOP atoms outside any Process.
+- **Process** — a Standard Operating Procedure: a named DAG of **Steps** with an explicit `startStep` (Amazon-States-Language convention). Each Step references exactly one Task and adds orchestration metadata (`depends_on`, `conditions`, `else`); Steps are inline sub-primitives of Process — they have no top-level schema and are meaningful only inside `Process.steps[]`.
 
 **Memberships are template-level, not instances:**
 

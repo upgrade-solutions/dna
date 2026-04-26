@@ -19,19 +19,21 @@ function renderFlowchart(dna, direction = 'TD') {
         for (const step of proc.steps) {
             const id = (0, util_1.mermaidId)(step.id);
             const task = tasksByName.get(step.task);
-            const label = (0, util_1.labelEscape)(task?.capability ?? step.task);
+            const label = (0, util_1.labelEscape)(task?.operation ?? step.task);
             lines.push(`        ${id}["${label}"]`);
         }
         for (const step of proc.steps) {
             const to = (0, util_1.mermaidId)(step.id);
             for (const depId of step.depends_on ?? []) {
                 const from = (0, util_1.mermaidId)(depId);
-                const branch = step.branch?.when
-                    ? `-- "${(0, util_1.labelEscape)(step.branch.when)}" -->`
-                    : step.branch?.else
-                        ? '-- "else" -->'
-                        : '-->';
-                lines.push(`        ${from} ${branch} ${to}`);
+                const arrow = step.conditions?.length
+                    ? `-- "${(0, util_1.labelEscape)(step.conditions.join(' AND '))}" -->`
+                    : '-->';
+                lines.push(`        ${from} ${arrow} ${to}`);
+            }
+            if (step.else && step.else !== 'abort') {
+                const elseTo = (0, util_1.mermaidId)(step.else);
+                lines.push(`        ${to} -- "else" --> ${elseTo}`);
             }
         }
         lines.push('    end');

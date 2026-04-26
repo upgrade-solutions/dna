@@ -5,5 +5,5 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DEFAULT_STYLES = void 0;
-exports.DEFAULT_STYLES = { capability: 'user-story' };
+exports.DEFAULT_STYLES = { operation: 'user-story' };
 //# sourceMappingURL=types.js.map

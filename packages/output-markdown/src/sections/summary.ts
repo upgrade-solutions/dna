@@ -22,7 +22,6 @@ export function renderSummary(dna: DnaInput, h: number, options: SummaryOptions 
     [lbl('Operations'), op.operations?.length ?? 0],
     [lbl('Triggers'), op.triggers?.length ?? 0],
     [lbl('Rules'), op.rules?.length ?? 0],
-    [lbl('Outcomes'), op.outcomes?.length ?? 0],
     [lbl('Relationships'), op.relationships?.length ?? 0],
     [lbl('Tasks'), op.tasks?.length ?? 0],
     [lbl('Processes'), op.processes?.length ?? 0],

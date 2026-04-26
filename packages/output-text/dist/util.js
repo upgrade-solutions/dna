@@ -6,6 +6,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pascalToWords = pascalToWords;
 exports.slugify = slugify;
+exports.label = label;
 exports.groupBy = groupBy;
 exports.joinSections = joinSections;
 /** Turn `LoanApplication` → `Loan Application`. Leaves all-caps acronyms alone. */
@@ -22,6 +23,21 @@ function slugify(s) {
         .replace(/[^A-Za-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '')
         .toLowerCase();
+}
+/**
+ * Apply a rename map to a canonical primitive label. Returns the renamed
+ * string when present, otherwise the canonical label unchanged.
+ *
+ * Rename keys match the rendered LABEL exactly — typically the plural form
+ * the renderer would emit (`Resources`, `Persons`, `Roles`). Companies that
+ * prefer their own vocabulary supply `{ Roles: 'Positions', Persons: 'Individuals' }`.
+ *
+ * Currently unused by this adapter (no primitive-count or top-level
+ * collection labels are emitted) — kept for parity with the markdown / HTML
+ * adapters, ready when prose-style summaries land.
+ */
+function label(canonical, rename) {
+    return rename?.[canonical] ?? canonical;
 }
 /** Group an array by a key function into a Map, preserving insertion order. */
 function groupBy(arr, key) {

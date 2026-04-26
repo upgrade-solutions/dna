@@ -7,7 +7,6 @@ export function renderOperations(dna: DnaInput, h: number): string | null {
 
   const triggersByOp = groupBy(op.triggers ?? [], (t) => t.operation ?? '')
   const rulesByOp = groupBy(op.rules ?? [], (r) => r.operation)
-  const outcomesByOp = groupBy(op.outcomes ?? [], (o) => o.operation)
 
   const parts: string[] = [heading(h, 'Operations')]
 
@@ -32,18 +31,13 @@ export function renderOperations(dna: DnaInput, h: number): string | null {
       inner.push(`<p><strong>Rules:</strong></p><ul>${items}</ul>`)
     }
 
-    const outcomes = outcomesByOp.get(operation.name) ?? []
-    if (outcomes.length) {
-      const lines: string[] = []
-      for (const o of outcomes) {
-        if (o.description) lines.push(`<li>${escape(o.description)}</li>`)
-        for (const c of o.changes ?? []) {
-          const set = c.set === undefined ? '' : ` → ${code(JSON.stringify(c.set))}`
-          lines.push(`<li>Sets ${code(c.attribute)}${set}</li>`)
-        }
-        for (const next of o.initiates ?? []) lines.push(`<li>Initiates ${code(next)}</li>`)
-      }
-      inner.push(`<p><strong>Outcomes:</strong></p><ul>${lines.join('')}</ul>`)
+    const changes = operation.changes ?? []
+    if (changes.length) {
+      const lines = changes.map((c) => {
+        const set = c.set === undefined ? '' : ` → ${code(JSON.stringify(c.set))}`
+        return `<li>Sets ${code(c.attribute)}${set}</li>`
+      })
+      inner.push(`<p><strong>Changes:</strong></p><ul>${lines.join('')}</ul>`)
     }
 
     parts.push(`<section>${inner.join('')}</section>`)

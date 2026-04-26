@@ -1,6 +1,6 @@
 # Operational Layer Agents
 
-Agents scoped to the Operational DNA layer. Operational DNA is **organizational modeling** — the People (Person, Role, Group, Membership), Entities (Resource, Attribute, Relationship), and Activities (Operation, Task, Step, Process, Trigger, Rule, Outcome) that describe *what an organization is and does* — independent of how it's surfaced or deployed.
+Agents scoped to the Operational DNA layer. Operational DNA is **organizational modeling** — the People (Person, Role, Group, Membership), Entities (Resource, Attribute, Relationship), and Activities (Operation, Task, Step, Process, Trigger, Rule) that describe *what an organization is and does* — independent of how it's surfaced or deployed.
 
 The layer is modeled around the **Actor > Action > Subject** triad. Roles act; Subjects (any noun primitive — Resource, Person, Role, or Group) receive actions. Each noun primitive shares the same base shape (`name`, `attributes[]`, `actions[]`, optional `parent`); Role adds `scope`/`system`/`resource`; Membership is a separate eligibility shape (`person`, `role`, optional `group`). An Operation is a `Target.Action` pair (the atomic unit of business activity). The Actor is supplied by Rule (access) and Task (assignment).
 
@@ -33,10 +33,12 @@ All Operational primitives — see `@dna-codes/schemas/operational/*.json` for t
 
 - **People**: `Person`, `Role`, `Group`, `Membership`
 - **Entities**: `Resource`, `Attribute`, `Relationship`
-- **Activities**: `Operation`, `Task`, `Step`, `Process`, `Trigger`, `Rule`, `Outcome`
+- **Activities**: `Operation`, `Task`, `Step`, `Process`, `Trigger`, `Rule`
+
+> **Step is a sub-primitive of Process**, not a top-level noun. Steps live only inside `Process.steps[]` (their `depends_on`, `conditions`, and `else` fields all reference sibling Steps in the same Process). **Task** is the standalone equivalent — `(actor, operation)` SOP unit that can stand alone or be wrapped by a Step inside a Process.
 - **Cross-cutting**: `Domain`
 
-History: `Lifecycle` was removed in favor of explicit Operation state transitions expressed through `Outcome.changes`. `Capability` was renamed to `Operation`; `Cause` was renamed to `Trigger`. `User` was dropped (instance-level identity is a Product/Technical concern). Person, Role, Group, and Membership were promoted from earlier structural-typing-on-Resource into first-class primitives. `Signal` and `Equation` were removed — Signals were emit-only with no consumer in any example, Equations were unused; see `openspec/changes/remove-signal-and-equation/`. State changes now live exclusively in `Outcome.changes`; there is no first-class event primitive.
+History: `Lifecycle` was removed in favor of explicit Operation state transitions. `Capability` was renamed to `Operation`; `Cause` was renamed to `Trigger`. `User` was dropped (instance-level identity is a Product/Technical concern). Person, Role, Group, and Membership were promoted from earlier structural-typing-on-Resource into first-class primitives. `Signal` and `Equation` were removed — Signals were emit-only with no consumer in any example, Equations were unused; see `openspec/changes/archive/2026-04-25-remove-signal-and-equation/`. The `Outcome` primitive was dissolved into `Operation.changes` (state mutations now live directly on the Operation that produces them); `Outcome.initiates` and `Trigger.condition` were removed as redundant orchestration paths; see `openspec/changes/archive/.../simplify-activity-primitives/`. State changes now live exclusively in `Operation.changes`; Operation chaining lives only in `Trigger.after`; entry/intra-Process gating lives only in `Step.conditions`; there is no first-class event primitive.
 
 ### Why these primitives — characteristics
 

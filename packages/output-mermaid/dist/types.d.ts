@@ -38,22 +38,21 @@ export interface Relationship {
 }
 export interface Task {
     name: string;
-    capability?: string;
+    actor?: string;
+    operation?: string;
     description?: string;
 }
 export interface Process {
     name: string;
+    startStep?: string;
     steps?: ProcessStep[];
 }
 export interface ProcessStep {
     id: string;
     task: string;
     depends_on?: string[];
-    branch?: ProcessBranch;
-}
-export interface ProcessBranch {
-    when?: string;
-    else?: boolean;
+    conditions?: string[];
+    else?: string;
 }
 export type ProductCoreDna = Record<string, unknown>;
 export type ProductApiDna = Record<string, unknown>;

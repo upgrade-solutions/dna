@@ -14,14 +14,11 @@ function renderProcessFlow(dna, h) {
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             const taskName = step.task;
-            const branch = step.branch?.when
-                ? ` [when: ${step.branch.when}]`
-                : step.branch?.else
-                    ? ' [else]'
-                    : '';
+            const conds = step.conditions?.length ? ` [when: ${step.conditions.join(' AND ')}]` : '';
+            const elseClause = step.else ? ` [else: ${step.else}]` : '';
             const deps = step.depends_on?.length ? ` ← ${step.depends_on.join(', ')}` : '';
             const prefix = i === steps.length - 1 ? '└── ' : '├── ';
-            lines.push((0, util_1.escape)(`${prefix}${step.id}: ${taskName}${branch}${deps}`));
+            lines.push((0, util_1.escape)(`${prefix}${step.id}: ${taskName}${conds}${elseClause}${deps}`));
         }
         inner.push(`<pre><code>${lines.join('\n')}</code></pre>`);
         parts.push(`<section>${inner.join('')}</section>`);

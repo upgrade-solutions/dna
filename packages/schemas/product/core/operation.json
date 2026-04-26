@@ -25,10 +25,26 @@
     "description": {
       "type": "string",
       "description": "A human-readable explanation of what this operation does."
+    },
+    "changes": {
+      "type": "array",
+      "description": "State mutations applied to the target Resource when this operation completes. Carried through from the operational layer.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["attribute", "set"],
+        "properties": {
+          "attribute": { "type": "string" },
+          "set": {
+            "description": "The value to assign. Use 'now' for the current timestamp.",
+            "examples": ["active", "now", true, null]
+          }
+        }
+      }
     }
   },
   "examples": [
-    { "resource": "Loan", "action": "Apply", "name": "Loan.Apply", "description": "A borrower submits a loan application." },
-    { "resource": "Loan", "action": "Approve", "name": "Loan.Approve", "description": "An underwriter approves a pending loan application." }
+    { "resource": "Loan", "action": "Apply", "name": "Loan.Apply", "description": "A borrower submits a loan application.", "changes": [{ "attribute": "loan.status", "set": "under_review" }] },
+    { "resource": "Loan", "action": "Approve", "name": "Loan.Approve", "description": "An underwriter approves a pending loan application.", "changes": [{ "attribute": "loan.status", "set": "active" }] }
   ]
 }

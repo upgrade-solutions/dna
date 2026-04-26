@@ -99,13 +99,13 @@
     { "name": "RegistrarStaffRegistrar",   "person": "RegistrarStaff",  "role": "Registrar" }
   ],
   "operations": [
-    { "target": "CourseOffering", "action": "Open",     "name": "CourseOffering.Open" },
+    { "target": "CourseOffering", "action": "Open",     "name": "CourseOffering.Open",     "changes": [{ "attribute": "status", "set": "open" }] },
     { "target": "CourseOffering", "action": "Close",    "name": "CourseOffering.Close" },
-    { "target": "CourseOffering", "action": "Begin",    "name": "CourseOffering.Begin" },
-    { "target": "CourseOffering", "action": "Finalize", "name": "CourseOffering.Finalize" },
-    { "target": "Enrollment",     "action": "Request",  "name": "Enrollment.Request" },
-    { "target": "Enrollment",     "action": "Confirm",  "name": "Enrollment.Confirm" },
-    { "target": "Enrollment",     "action": "Drop",     "name": "Enrollment.Drop" },
+    { "target": "CourseOffering", "action": "Begin",    "name": "CourseOffering.Begin",    "changes": [{ "attribute": "status", "set": "in_session" }] },
+    { "target": "CourseOffering", "action": "Finalize", "name": "CourseOffering.Finalize", "changes": [{ "attribute": "status", "set": "complete" }] },
+    { "target": "Enrollment",     "action": "Request",  "name": "Enrollment.Request",      "changes": [{ "attribute": "status", "set": "waitlisted" }] },
+    { "target": "Enrollment",     "action": "Confirm",  "name": "Enrollment.Confirm",      "changes": [{ "attribute": "status", "set": "enrolled" }] },
+    { "target": "Enrollment",     "action": "Drop",     "name": "Enrollment.Drop",         "changes": [{ "attribute": "status", "set": "dropped" }] },
     { "target": "Coursework",     "action": "Submit",   "name": "Coursework.Submit" },
     { "target": "Coursework",     "action": "Grade",    "name": "Coursework.Grade" }
   ],
@@ -151,14 +151,6 @@
       "type": "condition",
       "conditions": [{ "attribute": "course_offering.ungraded_coursework_count", "operator": "eq", "value": 0 }]
     }
-  ],
-  "outcomes": [
-    { "operation": "CourseOffering.Open",     "changes": [{ "attribute": "course_offering.status", "set": "open" }] },
-    { "operation": "CourseOffering.Begin",    "changes": [{ "attribute": "course_offering.status", "set": "in_session" }] },
-    { "operation": "CourseOffering.Finalize", "changes": [{ "attribute": "course_offering.status", "set": "complete" }] },
-    { "operation": "Enrollment.Request",      "changes": [{ "attribute": "enrollment.status", "set": "waitlisted" }] },
-    { "operation": "Enrollment.Confirm",      "changes": [{ "attribute": "enrollment.status", "set": "enrolled" }] },
-    { "operation": "Enrollment.Drop",         "changes": [{ "attribute": "enrollment.status", "set": "dropped" }] }
   ],
   "relationships": [
     { "name": "CourseOffering.course", "from": "CourseOffering", "to": "Course",         "cardinality": "many-to-one", "attribute": "course_id" },

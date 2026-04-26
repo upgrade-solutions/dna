@@ -18,7 +18,6 @@ export interface OperationalDna {
   memberships?: Membership[]
   operations?: Operation[]
   rules?: Rule[]
-  outcomes?: Outcome[]
   triggers?: Trigger[]
   relationships?: Relationship[]
   tasks?: Task[]
@@ -99,6 +98,12 @@ export interface Operation {
   target: string
   action: string
   description?: string
+  changes?: OperationChange[]
+}
+
+export interface OperationChange {
+  attribute: string
+  set?: unknown
 }
 
 export interface Rule {
@@ -120,18 +125,6 @@ export interface RuleCondition {
   attribute: string
   operator: string
   value?: unknown
-}
-
-export interface Outcome {
-  operation: string
-  description?: string
-  changes?: OutcomeChange[]
-  initiates?: string[]
-}
-
-export interface OutcomeChange {
-  attribute: string
-  set?: unknown
 }
 
 export interface Trigger {

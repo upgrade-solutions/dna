@@ -40,7 +40,7 @@ const OPERATIONAL_SKELETON = `{
       { "name": "<PersonRoleNameInPascalCase>", "person": "<PersonInPascalCase>", "role": "<RoleInPascalCase>" }
     ],
     "operations": [
-      { "target": "<TargetNounInPascalCase>", "action": "<Action>", "name": "<TargetNoun>.<Action>" }
+      { "target": "<TargetNounInPascalCase>", "action": "<Action>", "name": "<TargetNoun>.<Action>", "changes": [{ "attribute": "<attribute>", "set": "<value>" }] }
     ],
     "triggers": [
       { "operation": "<TargetNoun>.<Action>", "source": "user | schedule | webhook | operation" }
@@ -48,9 +48,6 @@ const OPERATIONAL_SKELETON = `{
     "rules": [
       { "operation": "<TargetNoun>.<Action>", "type": "access", "allow": [{ "role": "<RoleInPascalCase>" }] },
       { "name": "<RuleInPascalCase>", "operation": "<TargetNoun>.<Action>", "type": "condition", "conditions": [{ "attribute": "<target>.<attribute>", "operator": "eq", "value": "<value>" }] }
-    ],
-    "outcomes": [
-      { "operation": "<TargetNoun>.<Action>", "changes": [{ "attribute": "<target>.<attribute>", "set": "<value>" }] }
     ],
     "tasks": [
       { "name": "<task-kebab-id>", "actor": "<RoleOrPersonInPascalCase>", "operation": "<TargetNoun>.<Action>" }
@@ -181,7 +178,7 @@ const LAYER_GUIDE: Record<Layer, string> = {
     '  rules: ARRAY of { name?, operation, type: "access" | "condition", allow?: [{role}], conditions?: [...] }',
     '    — "access" rules carry actor references (Role or Person names — both are valid actors); "condition" rules carry attribute predicates.',
     '    — condition rules SHOULD have a PascalCase `name` so Steps can reference them via `step.conditions[]`.',
-    '  outcomes: ARRAY of { operation, changes: [{attribute, set}], initiates?: [...], emits?: [...] }',
+    '  operations carry an optional `changes: [{attribute, set}]` array describing the state mutations the Operation applies to its target Resource (formerly the separate `outcomes[]` collection — Outcome was dissolved into Operation).',
     '  relationships (optional): ARRAY of { name, from, to, attribute, cardinality: "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many" }',
     '    — from/to may reference any noun primitive (Resource, Person, Role, or Group).',
     '  tasks (optional): ARRAY of { name, actor, operation, description? }',

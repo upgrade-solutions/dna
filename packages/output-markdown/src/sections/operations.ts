@@ -7,7 +7,6 @@ export function renderOperations(dna: DnaInput, h: number): string | null {
 
   const triggersByOp = groupBy(op.triggers ?? [], (t) => t.operation ?? '')
   const rulesByOp = groupBy(op.rules ?? [], (r) => r.operation)
-  const outcomesByOp = groupBy(op.outcomes ?? [], (o) => o.operation)
 
   const lines: string[] = [`${hashes(h)} Operations`]
 
@@ -30,16 +29,12 @@ export function renderOperations(dna: DnaInput, h: number): string | null {
       for (const r of rules) lines.push(`- ${renderRule(r)}`)
     }
 
-    const outcomes = outcomesByOp.get(operation.name) ?? []
-    if (outcomes.length) {
-      lines.push('', '**Outcomes:**')
-      for (const o of outcomes) {
-        if (o.description) lines.push(`- ${o.description}`)
-        for (const c of o.changes ?? []) {
-          const set = c.set === undefined ? '' : ` → \`${JSON.stringify(c.set)}\``
-          lines.push(`- Sets \`${c.attribute}\`${set}`)
-        }
-        for (const next of o.initiates ?? []) lines.push(`- Initiates \`${next}\``)
+    const changes = operation.changes ?? []
+    if (changes.length) {
+      lines.push('', '**Changes:**')
+      for (const c of changes) {
+        const set = c.set === undefined ? '' : ` → \`${JSON.stringify(c.set)}\``
+        lines.push(`- Sets \`${c.attribute}\`${set}`)
       }
     }
   }

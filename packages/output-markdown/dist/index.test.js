@@ -9,7 +9,7 @@ describe('@dna-codes/output-markdown', () => {
             expect(md).toContain('# shop.books');
             expect(md).toContain('## Summary');
             expect(md).toContain('## Domain Model');
-            expect(md).toContain('## Capabilities');
+            expect(md).toContain('## Operations');
             expect(md).toContain('## SOPs');
             expect(md).toContain('## Process Flows');
         });
@@ -17,7 +17,7 @@ describe('@dna-codes/output-markdown', () => {
             const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
             expect(md).toContain('## Summary');
             expect(md).not.toContain('## Domain Model');
-            expect(md).not.toContain('## Capabilities');
+            expect(md).not.toContain('## Operations');
             expect(md).not.toContain('## SOPs');
             expect(md).not.toContain('## Process Flows');
         });
@@ -51,15 +51,36 @@ describe('@dna-codes/output-markdown', () => {
         it('lists primitive counts for populated collections only', () => {
             const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
             expect(md).toContain('- Resources: 2');
-            expect(md).toContain('- Capabilities: 2');
+            expect(md).toContain('- Operations: 3');
             expect(md).toContain('- Rules: 2');
             expect(md).toContain('- Processes: 1');
-            // Equations are absent in the fixture
+            // Signal and Equation primitives no longer exist
+            expect(md).not.toContain('Signals:');
             expect(md).not.toContain('Equations:');
         });
         it('names top-level resources', () => {
             const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
             expect(md).toContain('**Top-level resources:** `Book`, `Author`');
+        });
+        it('honors a rename map for primitive labels', () => {
+            const md = (0, index_1.render)(core_1.bookshopInput, {
+                sections: ['summary'],
+                rename: { Persons: 'Individuals', Roles: 'Positions', Resources: 'Items' },
+            });
+            // canonical names are translated…
+            expect(md).toContain('- Individuals: 1');
+            expect(md).toContain('- Positions: 1');
+            expect(md).toContain('- Items: 2');
+            // …and unmapped ones stay canonical
+            expect(md).toContain('- Operations: 3');
+            // top-level label uses the renamed form, lowercased
+            expect(md).toContain('**Top-level items:** `Book`, `Author`');
+        });
+        it('leaves canonical labels untouched when no rename is provided', () => {
+            const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
+            expect(md).toContain('- Persons: 1');
+            expect(md).toContain('- Roles: 1');
+            expect(md).toContain('**Top-level resources:**');
         });
     });
     describe('section: domain-model', () => {
@@ -73,39 +94,40 @@ describe('@dna-codes/output-markdown', () => {
             expect(md).toContain('many-to-one → `Author`');
         });
     });
-    describe('section: capabilities', () => {
-        it('renders triggers, access rules, condition rules, outcomes, and signals', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['capabilities'] });
+    describe('section: operations', () => {
+        it('renders triggers, access rules, condition rules, and Operation.changes', () => {
+            const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['operations'] });
             expect(md).toContain('### Book.Publish');
             expect(md).toContain('**Triggered by:**');
             expect(md).toContain('- user');
             expect(md).toContain('*Access:* role `Editor`');
-            expect(md).toContain('*Condition:* book.status == "draft"');
-            expect(md).toContain('Sets `book.status`');
-            expect(md).toContain('Emits `shop.Book.Published`');
-            expect(md).toContain('**Signals published:**');
-            expect(md).toContain('`book_id`: string (required)');
+            expect(md).toContain('*Condition:*');
+            expect(md).toContain('book.status');
+            expect(md).toContain('**Changes:**');
+            expect(md).toContain('Sets `status`');
+            expect(md).not.toContain('**Outcomes:**');
+            expect(md).not.toContain('**Signals published:**');
         });
     });
     describe('section: sops', () => {
-        it('renders numbered steps that resolve task → role + capability', () => {
+        it('renders numbered steps that resolve task → actor + operation', () => {
             const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['sops'] });
             expect(md).toContain('### PublishFlow');
             expect(md).toContain('**Operator:** `Editor`');
             expect(md).toContain('1. **review** — `Editor` does `Book.Publish`');
-            expect(md).toContain('(when: passed)');
-            expect(md).toContain('(else)');
+            expect(md).toContain('(when: `BookIsDraft`)');
+            expect(md).toContain('(else: reject)');
             expect(md).toContain('after: `review`');
         });
     });
     describe('section: process-flow', () => {
-        it('renders an ASCII outline with branch markers and dep arrows', () => {
+        it('renders an ASCII outline with condition markers and dep arrows', () => {
             const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['process-flow'] });
             expect(md).toContain('### PublishFlow');
             expect(md).toContain('```');
-            expect(md).toContain('├── review: ReviewBook');
-            expect(md).toContain('├── approve: ApproveBook [when: passed] ← review');
-            expect(md).toContain('└── reject: RejectBook [else] ← review');
+            expect(md).toContain('├── review: review-book');
+            expect(md).toContain('approve: approve-book [when: BookIsDraft] [else: reject] ← review');
+            expect(md).toContain('└── reject: reject-book ← review');
         });
     });
 });

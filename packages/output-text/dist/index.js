@@ -5,11 +5,11 @@
  *   render(dna, options?)     → string                      // one combined document
  *   renderMany(dna, options?) → Array<{id, title, body}>    // one document per unit
  *
- * Both accept a `styles` map: `{ capability: 'user-story' | 'gherkin' | 'product-dna', ... }`.
+ * Both accept a `styles` map: `{ operation: 'user-story' | 'gherkin' | 'product-dna', ... }`.
  * The key set determines which unit types are emitted; the value picks the
- * body template. Default is `{ capability: 'user-story' }`.
+ * body template. Default is `{ operation: 'user-story' }`.
  *
- * `user-story` and `gherkin` are action-shaped and only fit Capability —
+ * `user-story` and `gherkin` are action-shaped and only fit Operation —
  * Resource and Process always render as `product-dna` regardless of the style
  * requested.
  */
@@ -17,12 +17,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DEFAULT_STYLES = void 0;
 exports.render = render;
 exports.renderMany = renderMany;
-const capability_1 = require("./capability");
+const operation_1 = require("./operation");
 const resource_1 = require("./resource");
 const process_1 = require("./process");
 const types_1 = require("./types");
 const util_1 = require("./util");
-const UNIT_ORDER = ['capability', 'resource', 'process'];
+const UNIT_ORDER = ['operation', 'resource', 'process'];
 function render(dna, options = {}) {
     const op = dna.operational;
     if (!op)
@@ -58,19 +58,19 @@ function renderMany(dna, options = {}) {
 }
 function unitDocs(unit, style, op) {
     switch (unit) {
-        case 'capability':
-            return (op.capabilities ?? []).map((c) => capabilityDoc(c, op, style));
+        case 'operation':
+            return (op.operations ?? []).map((o) => operationDoc(o, op, style));
         case 'resource':
             return collectResources(op.domain).map((r) => resourceDoc(r, op));
         case 'process':
             return (op.processes ?? []).map((p) => processDoc(p, op));
     }
 }
-function capabilityDoc(cap, op, style) {
+function operationDoc(op, dna, style) {
     return {
-        id: `capability-${(0, util_1.slugify)(cap.name)}`,
-        title: (0, capability_1.capabilityTitle)(cap),
-        body: (0, capability_1.renderCapability)(cap, op, style),
+        id: `operation-${(0, util_1.slugify)(op.name)}`,
+        title: (0, operation_1.operationTitle)(op),
+        body: (0, operation_1.renderOperation)(op, dna, style),
     };
 }
 function resourceDoc(r, op) {
@@ -101,8 +101,8 @@ function renderUnitSection(unit, style, op) {
     return parts.join('\n\n');
 }
 function unitHeading(unit) {
-    if (unit === 'capability')
-        return 'Capabilities';
+    if (unit === 'operation')
+        return 'Operations';
     if (unit === 'resource')
         return 'Domain model';
     return 'Processes';

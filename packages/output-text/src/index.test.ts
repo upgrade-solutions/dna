@@ -22,8 +22,8 @@ const dna: DnaInput = {
       ],
     },
     operations: [
-      { name: 'Loan.Apply', resource: 'Loan', action: 'Apply', description: 'Submit a loan application.' },
-      { name: 'Loan.Approve', resource: 'Loan', action: 'Approve' },
+      { name: 'Loan.Apply', resource: 'Loan', action: 'Apply', description: 'Submit a loan application.', changes: [{ attribute: 'loan.status', set: 'pending' }] },
+      { name: 'Loan.Approve', resource: 'Loan', action: 'Approve', changes: [{ attribute: 'loan.status', set: 'active' }] },
     ],
     triggers: [{ operation: 'Loan.Apply', source: 'user' }],
     rules: [
@@ -34,10 +34,6 @@ const dna: DnaInput = {
         type: 'condition',
         conditions: [{ attribute: 'loan.status', operator: 'eq', value: 'pending' }],
       },
-    ],
-    outcomes: [
-      { operation: 'Loan.Apply', changes: [{ attribute: 'loan.status', set: 'pending' }] },
-      { operation: 'Loan.Approve', changes: [{ attribute: 'loan.status', set: 'active' }] },
     ],
     processes: [
       {

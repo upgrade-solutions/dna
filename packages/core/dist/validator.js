@@ -215,7 +215,10 @@ class DnaValidator {
             const scopeableKinds = kindLabelsFor('scopeable', 'or');
             // Operation.target must reference a targetable primitive.
             // Operation.action must match an action name in the target's actions[] catalog.
+            // Operation.changes[].attribute must resolve on the target's attributes[]
+            // catalog when given as an unqualified identifier.
             for (const operation of op.operations ?? []) {
+                let targetNoun;
                 if (!targetablePool.has(operation.target)) {
                     errors.push({
                         layer: 'operational',
@@ -225,8 +228,8 @@ class DnaValidator {
                 }
                 else {
                     const entry = primitives.byName.get(operation.target);
-                    const actions = entry.noun.actions;
-                    const actionNames = new Set((actions ?? []).map(a => a.name));
+                    targetNoun = entry.noun;
+                    const actionNames = new Set((targetNoun.actions ?? []).map(a => a.name));
                     if (actionNames.size > 0 && !actionNames.has(operation.action)) {
                         errors.push({
                             layer: 'operational',
@@ -235,23 +238,21 @@ class DnaValidator {
                         });
                     }
                 }
-            }
-            // Outcome.operation/initiates references
-            for (const outcome of op.outcomes ?? []) {
-                if (!operationNames.has(outcome.operation)) {
-                    errors.push({
-                        layer: 'operational',
-                        path: `outcomes/${outcome.operation}/operation`,
-                        message: `Outcome attached to Operation "${outcome.operation}" which is not declared; ${availability('operations', operationNames)}`,
-                    });
-                }
-                for (const opRef of outcome.initiates ?? []) {
-                    if (!operationNames.has(opRef)) {
-                        errors.push({
-                            layer: 'operational',
-                            path: `outcomes/${outcome.operation}/initiates/${opRef}`,
-                            message: `Outcome on "${outcome.operation}" initiates Operation "${opRef}" which is not declared; ${availability('operations', operationNames)}`,
-                        });
+                if (targetNoun) {
+                    const attrNames = new Set((targetNoun.attributes ?? []).map(a => a.name));
+                    if (attrNames.size > 0) {
+                        for (const [i, change] of (operation.changes ?? []).entries()) {
+                            // Allow legacy qualified form "<resource>.<attribute>"; only check unqualified.
+                            if (change.attribute.includes('.'))
+                                continue;
+                            if (!attrNames.has(change.attribute)) {
+                                errors.push({
+                                    layer: 'operational',
+                                    path: `operations/${operation.name}/changes/${i}/attribute`,
+                                    message: `Operation "${operation.name}" change attribute "${change.attribute}" is not declared on ${KIND_LABEL[primitives.byName.get(operation.target).kind]} "${operation.target}"; ${availability('attributes', attrNames)}`,
+                                });
+                            }
+                        }
                     }
                 }
             }
@@ -445,6 +446,93 @@ class DnaValidator {
                             }
                         }
                     }
+                }
+                // Cardinality / required / excludes: modeling-layer constraints on per-scope-instance
+                // assignment. The validator checks well-formedness only; runtime systems enforce counts.
+                const roleScope = effectiveScope(role.name);
+                const roleHasScope = (roleScope ?? []).length > 0;
+                if (role.cardinality === 'one' && !roleHasScope) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `roles/${role.name}/cardinality`,
+                        message: `Role "${role.name}" declares cardinality "one" but has no declared or inherited scope; per-scope-instance constraints require a scope`,
+                    });
+                }
+                if (role.cardinality !== undefined && role.system === true) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `roles/${role.name}/cardinality`,
+                        message: `Role "${role.name}" is a system Role; cardinality does not apply (system Roles are not filled by Persons)`,
+                    });
+                }
+                if (role.required === true && !roleHasScope) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `roles/${role.name}/required`,
+                        message: `Role "${role.name}" declares required: true but has no declared or inherited scope; per-scope-instance constraints require a scope`,
+                    });
+                }
+                if (role.required === true && role.system === true) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `roles/${role.name}/required`,
+                        message: `Role "${role.name}" is a system Role; required does not apply (system Roles are not filled by Persons)`,
+                    });
+                }
+                for (const e of role.excludes ?? []) {
+                    if (e === role.name) {
+                        errors.push({
+                            layer: 'operational',
+                            path: `roles/${role.name}/excludes`,
+                            message: `Role "${role.name}" cannot exclude itself`,
+                        });
+                    }
+                    else if (!primitives.roleNames.has(e)) {
+                        errors.push({
+                            layer: 'operational',
+                            path: `roles/${role.name}/excludes`,
+                            message: `Role "${role.name}" excludes "${e}" which is not a declared Role; ${availability('roles', primitives.roleNames)}`,
+                        });
+                    }
+                }
+                if (role.excludes && role.excludes.length > 0 && role.system === true) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `roles/${role.name}/excludes`,
+                        message: `Role "${role.name}" is a system Role; excludes does not apply (system Roles are not filled by Persons)`,
+                    });
+                }
+            }
+            // Cross-Role exclusion: same-scope check, symmetric, deduped by unordered pair.
+            const exclusionPairs = new Set();
+            for (const role of primitives.roles) {
+                if (role.system === true)
+                    continue;
+                for (const e of role.excludes ?? []) {
+                    if (e === role.name)
+                        continue;
+                    if (!primitives.roleNames.has(e))
+                        continue;
+                    const other = roleByName.get(e);
+                    if (other.system === true)
+                        continue;
+                    const [a, b] = [role.name, e].sort();
+                    exclusionPairs.add(`${a}|${b}`);
+                }
+            }
+            for (const pairKey of exclusionPairs) {
+                const [a, b] = pairKey.split('|');
+                const scopeA = effectiveScope(a) ?? [];
+                const scopeB = effectiveScope(b) ?? [];
+                if (scopeA.length === 0 || scopeB.length === 0)
+                    continue;
+                const intersect = scopeA.filter(s => scopeB.includes(s));
+                if (intersect.length === 0) {
+                    errors.push({
+                        layer: 'operational',
+                        path: `roles/${a}/excludes`,
+                        message: `Role "${a}" excludes "${b}" but their effective scopes are disjoint (${a}: ${quoteList(scopeA)}; ${b}: ${quoteList(scopeB)}); exclusion requires a shared scope`,
+                    });
                 }
             }
             // Membership integrity: person/role/group references; group must match Role.scope when both present

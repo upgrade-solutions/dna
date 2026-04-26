@@ -105,7 +105,7 @@ describe('@dna-codes/output-markdown', () => {
   })
 
   describe('section: operations', () => {
-    it('renders triggers, access rules, condition rules, and outcomes', () => {
+    it('renders triggers, access rules, condition rules, and Operation.changes', () => {
       const md = render(bookshopInput, { sections: ['operations'] })
       expect(md).toContain('### Book.Publish')
       expect(md).toContain('**Triggered by:**')
@@ -113,7 +113,9 @@ describe('@dna-codes/output-markdown', () => {
       expect(md).toContain('*Access:* role `Editor`')
       expect(md).toContain('*Condition:*')
       expect(md).toContain('book.status')
-      expect(md).toContain('Sets `book.status`')
+      expect(md).toContain('**Changes:**')
+      expect(md).toContain('Sets `status`')
+      expect(md).not.toContain('**Outcomes:**')
       expect(md).not.toContain('**Signals published:**')
     })
   })

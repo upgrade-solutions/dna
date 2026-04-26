@@ -95,17 +95,17 @@
     { "name": "PharmacyStaffPharmacist",    "person": "PharmacyStaff", "role": "Pharmacist" }
   ],
   "operations": [
-    { "target": "Patient",      "action": "Admit",      "name": "Patient.Admit" },
-    { "target": "Patient",      "action": "Discharge",  "name": "Patient.Discharge" },
+    { "target": "Patient",      "action": "Admit",      "name": "Patient.Admit",          "changes": [{ "attribute": "status", "set": "admitted" }, { "attribute": "admitted_at", "set": "now" }] },
+    { "target": "Patient",      "action": "Discharge",  "name": "Patient.Discharge",      "changes": [{ "attribute": "status", "set": "discharged" }] },
     { "target": "Encounter",    "action": "Open",       "name": "Encounter.Open" },
     { "target": "Encounter",    "action": "Close",      "name": "Encounter.Close" },
     { "target": "Order",        "action": "Place",      "name": "Order.Place" },
     { "target": "Order",        "action": "Complete",   "name": "Order.Complete" },
-    { "target": "Prescription", "action": "Write",      "name": "Prescription.Write" },
+    { "target": "Prescription", "action": "Write",      "name": "Prescription.Write",      "changes": [{ "attribute": "status", "set": "pending_review" }] },
     { "target": "Prescription", "action": "Review",     "name": "Prescription.Review" },
-    { "target": "Prescription", "action": "Approve",    "name": "Prescription.Approve" },
-    { "target": "Prescription", "action": "Reject",     "name": "Prescription.Reject" },
-    { "target": "Prescription", "action": "Administer", "name": "Prescription.Administer" }
+    { "target": "Prescription", "action": "Approve",    "name": "Prescription.Approve",    "changes": [{ "attribute": "status", "set": "approved" }] },
+    { "target": "Prescription", "action": "Reject",     "name": "Prescription.Reject",     "changes": [{ "attribute": "status", "set": "rejected" }] },
+    { "target": "Prescription", "action": "Administer", "name": "Prescription.Administer", "changes": [{ "attribute": "status", "set": "administered" }] }
   ],
   "triggers": [
     { "operation": "Patient.Admit",       "source": "user" },
@@ -155,14 +155,6 @@
       "type": "condition",
       "conditions": [{ "attribute": "patient.outstanding_orders_count", "operator": "eq", "value": 0 }]
     }
-  ],
-  "outcomes": [
-    { "operation": "Patient.Admit",           "changes": [{ "attribute": "patient.status", "set": "admitted" }, { "attribute": "patient.admitted_at", "set": "now" }] },
-    { "operation": "Patient.Discharge",       "changes": [{ "attribute": "patient.status", "set": "discharged" }] },
-    { "operation": "Prescription.Write",      "changes": [{ "attribute": "prescription.status", "set": "pending_review" }] },
-    { "operation": "Prescription.Approve",    "changes": [{ "attribute": "prescription.status", "set": "approved" }] },
-    { "operation": "Prescription.Reject",     "changes": [{ "attribute": "prescription.status", "set": "rejected" }] },
-    { "operation": "Prescription.Administer", "changes": [{ "attribute": "prescription.status", "set": "administered" }] }
   ],
   "relationships": [
     { "name": "Encounter.patient",    "from": "Encounter",    "to": "Patient", "cardinality": "many-to-one", "attribute": "patient_id" },

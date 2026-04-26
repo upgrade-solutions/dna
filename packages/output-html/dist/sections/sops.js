@@ -21,16 +21,15 @@ function renderSops(dna, h) {
             const items = proc.steps
                 .map((step) => {
                 const task = tasksByName.get(step.task);
-                const role = task?.role ? (0, util_1.code)(task.role) : '—';
-                const capability = task?.capability ? (0, util_1.code)(task.capability) : (0, util_1.code)(step.task);
-                const branch = step.branch?.when
-                    ? ` (when: ${(0, util_1.escape)(step.branch.when)})`
-                    : step.branch?.else
-                        ? ' (else)'
-                        : '';
+                const actor = task?.actor ? (0, util_1.code)(task.actor) : '—';
+                const operation = task?.operation ? (0, util_1.code)(task.operation) : (0, util_1.code)(step.task);
+                const conds = step.conditions?.length
+                    ? ` (when: ${step.conditions.map(util_1.code).join(' AND ')})`
+                    : '';
+                const elseClause = step.else ? ` (else: ${(0, util_1.escape)(step.else)})` : '';
                 const deps = step.depends_on?.length ? ` — after: ${step.depends_on.map(util_1.code).join(', ')}` : '';
                 const desc = task?.description ? `<br/>${(0, util_1.escape)(task.description)}` : '';
-                return `<li><strong>${(0, util_1.escape)(step.id)}</strong> — ${role} does ${capability}${branch}${deps}${desc}</li>`;
+                return `<li><strong>${(0, util_1.escape)(step.id)}</strong> — ${actor} does ${operation}${conds}${elseClause}${deps}${desc}</li>`;
             })
                 .join('');
             inner.push(`<ol>${items}</ol>`);

@@ -74,6 +74,7 @@ export const bookshopInput: DnaInput = {
         target: 'Book',
         action: 'Publish',
         description: 'Publish a draft book to the storefront.',
+        changes: [{ attribute: 'status', set: 'active' }],
       },
       {
         name: 'Book.Retire',
@@ -95,12 +96,6 @@ export const bookshopInput: DnaInput = {
         operation: 'Book.Publish',
         type: 'condition',
         conditions: [{ attribute: 'book.status', operator: 'eq', value: 'draft' }],
-      },
-    ],
-    outcomes: [
-      {
-        operation: 'Book.Publish',
-        changes: [{ attribute: 'book.status', set: 'active' }],
       },
     ],
     triggers: [

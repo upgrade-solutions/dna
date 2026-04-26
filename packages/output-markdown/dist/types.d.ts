@@ -1,10 +1,8 @@
 /**
  * Loose structural types describing the DNA shapes this renderer reads.
  *
- * These are intentionally a subset of the canonical schemas in @dna-codes/core —
- * only fields the renderer consumes are modeled. That keeps this package
- * zero-dependency and lets callers hand in partially-populated DNA without
- * tripping type errors on unrelated fields.
+ * These mirror the canonical shapes in @dna-codes/core. Kept local so the
+ * package stays zero-dependency.
  */
 export interface DnaInput {
     operational?: OperationalDna;
@@ -15,15 +13,11 @@ export interface DnaInput {
 }
 export interface OperationalDna {
     domain: OperationalDomain;
-    capabilities?: Capability[];
+    memberships?: Membership[];
+    operations?: Operation[];
     rules?: Rule[];
-    outcomes?: Outcome[];
-    causes?: Cause[];
-    signals?: Signal[];
-    equations?: Equation[];
+    triggers?: Trigger[];
     relationships?: Relationship[];
-    roles?: Role[];
-    users?: User[];
     tasks?: Task[];
     processes?: Process[];
 }
@@ -32,6 +26,9 @@ export interface OperationalDomain {
     path?: string;
     description?: string;
     resources?: Resource[];
+    persons?: Person[];
+    roles?: Role[];
+    groups?: Group[];
     domains?: OperationalDomain[];
 }
 export interface Resource {
@@ -39,6 +36,39 @@ export interface Resource {
     description?: string;
     attributes?: Attribute[];
     actions?: Action[];
+    parent?: string;
+}
+export interface Person {
+    name: string;
+    description?: string;
+    attributes?: Attribute[];
+    actions?: Action[];
+    parent?: string;
+    resource?: string;
+}
+export interface Group {
+    name: string;
+    description?: string;
+    attributes?: Attribute[];
+    actions?: Action[];
+    parent?: string;
+}
+export interface Role {
+    name: string;
+    description?: string;
+    scope?: string | string[];
+    parent?: string;
+    system?: boolean;
+    resource?: string;
+    attributes?: Attribute[];
+    actions?: Action[];
+}
+export interface Membership {
+    name: string;
+    description?: string;
+    person: string;
+    role: string;
+    group?: string;
 }
 export interface Attribute {
     name: string;
@@ -49,54 +79,46 @@ export interface Attribute {
 export interface Action {
     name: string;
     description?: string;
+    type?: 'read' | 'write' | 'destructive';
+    idempotent?: boolean;
 }
-export interface Capability {
+export interface Operation {
     name: string;
-    resource: string;
+    target: string;
     action: string;
     description?: string;
+    changes?: OperationChange[];
 }
-export interface Rule {
-    name?: string;
-    capability: string;
-    type?: 'access' | 'condition';
-    description?: string;
-    allow?: RuleAllow[];
-    condition?: string;
-}
-export interface RuleAllow {
-    role?: string;
-    ownership?: string;
-    flags?: string[];
-}
-export interface Outcome {
-    capability: string;
-    description?: string;
-    changes?: OutcomeChange[];
-    initiate?: string[];
-    emits?: string[];
-}
-export interface OutcomeChange {
+export interface OperationChange {
     attribute: string;
     set?: unknown;
 }
-export interface Cause {
-    capability: string;
+export interface Rule {
+    name?: string;
+    operation: string;
+    type?: 'access' | 'condition';
+    description?: string;
+    allow?: RuleAllow[];
+    conditions?: RuleCondition[];
+}
+export interface RuleAllow {
+    role?: string;
+    ownership?: boolean;
+    flags?: string[];
+}
+export interface RuleCondition {
+    attribute: string;
+    operator: string;
+    value?: unknown;
+}
+export interface Trigger {
+    operation?: string;
+    process?: string;
     source: string;
     description?: string;
-    signal?: string;
-}
-export interface Signal {
-    name: string;
-    capability: string;
-    description?: string;
-    payload?: Field[];
-}
-export interface Equation {
-    name: string;
-    description?: string;
-    inputs?: Field[];
-    output?: Field;
+    schedule?: string;
+    event?: string;
+    after?: string;
 }
 export interface Field {
     name: string;
@@ -112,40 +134,26 @@ export interface Relationship {
     cardinality: string;
     description?: string;
 }
-export interface Role {
-    name: string;
-    description?: string;
-    parent?: string;
-}
-export interface User {
-    name: string;
-    display_name?: string;
-    roles: string[];
-    email?: string;
-    active?: boolean;
-}
 export interface Task {
     name: string;
-    role: string;
-    capability: string;
+    actor: string;
+    operation: string;
     description?: string;
 }
 export interface Process {
     name: string;
     description?: string;
     operator?: string;
-    emits?: string[];
+    startStep?: string;
     steps?: ProcessStep[];
 }
 export interface ProcessStep {
     id: string;
     task: string;
+    description?: string;
     depends_on?: string[];
-    branch?: ProcessBranch;
-}
-export interface ProcessBranch {
-    when?: string;
-    else?: boolean;
+    conditions?: string[];
+    else?: string;
 }
 /** Product/technical layers modeled loosely — unused in v1 but reserved. */
 export type ProductCoreDna = Record<string, unknown>;

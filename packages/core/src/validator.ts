@@ -67,11 +67,22 @@ interface ProcessShape {
   steps: { id: string; task: string; depends_on?: string[]; conditions?: string[]; else?: string }[]
 }
 
+interface OperationChangeShape {
+  attribute: string
+  set?: unknown
+}
+
+interface OperationShape {
+  name: string
+  target: string
+  action: string
+  changes?: OperationChangeShape[]
+}
+
 interface OperationalDNA {
   domain: DomainShape
   memberships?: MembershipShape[]
-  operations?: { name: string; target: string; action: string }[]
-  outcomes?: { operation: string; initiates?: string[] }[]
+  operations?: OperationShape[]
   triggers?: { operation?: string; process?: string; source: string; after?: string }[]
   rules?: { name?: string; operation: string; type?: string; allow?: { role?: string }[] }[]
   relationships?: { name: string; from: string; to: string; attribute: string; cardinality: string }[]
@@ -82,8 +93,7 @@ interface OperationalDNA {
 interface ProductCoreDNA {
   domain: { name: string; path: string }
   resources?: NounShape[]
-  operations?: { name: string; resource?: string; target?: string; action: string }[]
-  outcomes?: { operation: string }[]
+  operations?: { name: string; resource?: string; target?: string; action: string; changes?: OperationChangeShape[] }[]
   triggers?: { operation?: string; process?: string; source: string }[]
   relationships?: { name: string; from: string; to: string; attribute: string }[]
 }
@@ -357,7 +367,10 @@ export class DnaValidator {
 
       // Operation.target must reference a targetable primitive.
       // Operation.action must match an action name in the target's actions[] catalog.
+      // Operation.changes[].attribute must resolve on the target's attributes[]
+      // catalog when given as an unqualified identifier.
       for (const operation of op.operations ?? []) {
+        let targetNoun: NounShape | undefined
         if (!targetablePool.has(operation.target)) {
           errors.push({
             layer: 'operational',
@@ -366,8 +379,8 @@ export class DnaValidator {
           })
         } else {
           const entry = primitives.byName.get(operation.target)!
-          const actions = (entry.noun as NounShape).actions
-          const actionNames = new Set((actions ?? []).map(a => a.name))
+          targetNoun = entry.noun as NounShape
+          const actionNames = new Set((targetNoun.actions ?? []).map(a => a.name))
           if (actionNames.size > 0 && !actionNames.has(operation.action)) {
             errors.push({
               layer: 'operational',
@@ -376,24 +389,20 @@ export class DnaValidator {
             })
           }
         }
-      }
-
-      // Outcome.operation/initiates references
-      for (const outcome of op.outcomes ?? []) {
-        if (!operationNames.has(outcome.operation)) {
-          errors.push({
-            layer: 'operational',
-            path: `outcomes/${outcome.operation}/operation`,
-            message: `Outcome attached to Operation "${outcome.operation}" which is not declared; ${availability('operations', operationNames)}`,
-          })
-        }
-        for (const opRef of outcome.initiates ?? []) {
-          if (!operationNames.has(opRef)) {
-            errors.push({
-              layer: 'operational',
-              path: `outcomes/${outcome.operation}/initiates/${opRef}`,
-              message: `Outcome on "${outcome.operation}" initiates Operation "${opRef}" which is not declared; ${availability('operations', operationNames)}`,
-            })
+        if (targetNoun) {
+          const attrNames = new Set((targetNoun.attributes ?? []).map(a => a.name))
+          if (attrNames.size > 0) {
+            for (const [i, change] of (operation.changes ?? []).entries()) {
+              // Allow legacy qualified form "<resource>.<attribute>"; only check unqualified.
+              if (change.attribute.includes('.')) continue
+              if (!attrNames.has(change.attribute)) {
+                errors.push({
+                  layer: 'operational',
+                  path: `operations/${operation.name}/changes/${i}/attribute`,
+                  message: `Operation "${operation.name}" change attribute "${change.attribute}" is not declared on ${KIND_LABEL[primitives.byName.get(operation.target)!.kind]} "${operation.target}"; ${availability('attributes', attrNames)}`,
+                })
+              }
+            }
           }
         }
       }

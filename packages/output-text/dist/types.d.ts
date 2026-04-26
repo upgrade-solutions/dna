@@ -7,13 +7,10 @@ export interface DnaInput {
 }
 export interface OperationalDna {
     domain: OperationalDomain;
-    capabilities?: Capability[];
+    operations?: Operation[];
     rules?: Rule[];
-    outcomes?: Outcome[];
-    causes?: Cause[];
-    signals?: Signal[];
+    triggers?: Trigger[];
     relationships?: Relationship[];
-    roles?: Role[];
     tasks?: Task[];
     processes?: Process[];
 }
@@ -29,6 +26,14 @@ export interface Resource {
     description?: string;
     attributes?: Attribute[];
     actions?: Action[];
+    parent?: string;
+    scope?: string;
+    memberships?: Membership[];
+}
+export interface Membership {
+    role: string;
+    in: string;
+    description?: string;
 }
 export interface Attribute {
     name: string;
@@ -40,46 +45,43 @@ export interface Action {
     name: string;
     description?: string;
 }
-export interface Capability {
+export interface Operation {
     name: string;
     resource: string;
     action: string;
     description?: string;
+    changes?: OperationChange[];
 }
-export interface Rule {
-    name?: string;
-    capability: string;
-    type?: 'access' | 'condition';
-    description?: string;
-    allow?: RuleAllow[];
-    condition?: string;
-}
-export interface RuleAllow {
-    role?: string;
-    ownership?: string;
-    flags?: string[];
-}
-export interface Outcome {
-    capability: string;
-    description?: string;
-    changes?: OutcomeChange[];
-    initiate?: string[];
-    emits?: string[];
-}
-export interface OutcomeChange {
+export interface OperationChange {
     attribute: string;
     set?: unknown;
 }
-export interface Cause {
-    capability: string;
+export interface Rule {
+    name?: string;
+    operation: string;
+    type?: 'access' | 'condition';
+    description?: string;
+    allow?: RuleAllow[];
+    conditions?: RuleCondition[];
+}
+export interface RuleAllow {
+    role?: string;
+    ownership?: boolean;
+    flags?: string[];
+}
+export interface RuleCondition {
+    attribute: string;
+    operator: string;
+    value?: unknown;
+}
+export interface Trigger {
+    operation?: string;
+    process?: string;
     source: string;
     description?: string;
-    signal?: string;
-}
-export interface Signal {
-    name: string;
-    capability: string;
-    description?: string;
+    schedule?: string;
+    event?: string;
+    after?: string;
 }
 export interface Relationship {
     name: string;
@@ -89,35 +91,33 @@ export interface Relationship {
     cardinality: string;
     description?: string;
 }
-export interface Role {
-    name: string;
-    description?: string;
-    parent?: string;
-}
 export interface Task {
     name: string;
-    role: string;
-    capability: string;
+    actor: string;
+    operation: string;
     description?: string;
 }
 export interface Process {
     name: string;
     description?: string;
     operator?: string;
+    startStep?: string;
     steps?: ProcessStep[];
 }
 export interface ProcessStep {
     id: string;
     task: string;
     depends_on?: string[];
+    conditions?: string[];
+    else?: string;
 }
 /** Which DNA primitive becomes one text document. */
-export type Unit = 'capability' | 'resource' | 'process';
+export type Unit = 'operation' | 'resource' | 'process';
 /**
  * Body template applied to a unit's rendered text.
  *
- *   - user-story   As a / I want / So that + acceptance criteria. Fits Capability.
- *   - gherkin      Feature / Scenario / Given / When / Then. Fits Capability.
+ *   - user-story   As a / I want / So that + acceptance criteria. Fits Operation.
+ *   - gherkin      Feature / Scenario / Given / When / Then. Fits Operation.
  *   - product-dna  Key:value blocks using Product-DNA vocabulary
  *                  (Actor, Resource, Action, Role, Field, Operation). Fits all units.
  *
@@ -134,17 +134,41 @@ export declare const DEFAULT_STYLES: StyleMap;
 export interface RenderOptions {
     /** Document title. Defaults to the operational domain's path or name. */
     title?: string;
-    /** Unit → style map. Default: `{ capability: 'user-story' }`. */
+    /** Unit → style map. Default: `{ operation: 'user-story' }`. */
     styles?: StyleMap;
+    /**
+     * Rename canonical primitive labels (typically the plural collection name) for
+     * company-friendly output. The DNA schema vocabulary stays canonical
+     * (Resource/Person/Role/Group/Process) — only the rendered text changes.
+     *
+     * Currently a no-op for this adapter (no primitive-count or top-level
+     * collection labels are emitted) — present for API parity with
+     * `@dna-codes/output-markdown` and `@dna-codes/output-html`.
+     *
+     * @example { Persons: 'Individuals', Roles: 'Positions' }
+     */
+    rename?: Record<string, string>;
 }
 export interface RenderManyOptions {
-    /** Unit → style map. Default: `{ capability: 'user-story' }`. */
+    /** Unit → style map. Default: `{ operation: 'user-story' }`. */
     styles?: StyleMap;
+    /**
+     * Rename canonical primitive labels (typically the plural collection name) for
+     * company-friendly output. The DNA schema vocabulary stays canonical
+     * (Resource/Person/Role/Group/Process) — only the rendered text changes.
+     *
+     * Currently a no-op for this adapter (no primitive-count or top-level
+     * collection labels are emitted) — present for API parity with
+     * `@dna-codes/output-markdown` and `@dna-codes/output-html`.
+     *
+     * @example { Persons: 'Individuals', Roles: 'Positions' }
+     */
+    rename?: Record<string, string>;
 }
 /**
  * A single rendered document — shaped for pushing to an issue tracker,
  * docs platform, or database row. `id` is `{unit}-{slug}` (e.g.
- * `capability-loan-apply`) so multi-unit results can't collide.
+ * `operation-loan-apply`) so multi-unit results can't collide.
  */
 export interface TextDocument {
     id: string;

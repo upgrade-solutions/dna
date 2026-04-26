@@ -16,7 +16,6 @@ export declare const schemas: {
         readonly group: JsonSchema;
         readonly membership: JsonSchema;
         readonly operation: JsonSchema;
-        readonly outcome: JsonSchema;
         readonly person: JsonSchema;
         readonly process: JsonSchema;
         readonly relationship: JsonSchema;

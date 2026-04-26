@@ -1,5 +1,5 @@
 import { DnaInput } from './types';
-export type Section = 'summary' | 'domain-model' | 'capabilities' | 'sops' | 'process-flow';
+export type Section = 'summary' | 'domain-model' | 'operations' | 'sops' | 'process-flow';
 export declare const DEFAULT_SECTIONS: readonly Section[];
 export interface RenderOptions {
     /** Which sections to include, in the given order. Defaults to DEFAULT_SECTIONS. */
@@ -10,6 +10,14 @@ export interface RenderOptions {
     headingLevel?: 1 | 2;
     /** Wrap output in <!DOCTYPE html><html>…</html>. Defaults to false (fragment). */
     standalone?: boolean;
+    /**
+     * Rename canonical primitive labels (typically the plural collection name) for
+     * company-friendly output. The DNA schema vocabulary stays canonical
+     * (Resource/Person/Role/Group/Process) — only the rendered text changes.
+     *
+     * @example { Persons: 'Individuals', Roles: 'Positions' }
+     */
+    rename?: Record<string, string>;
 }
 export declare function render(dna: DnaInput, options?: RenderOptions): string;
 export * from './types';

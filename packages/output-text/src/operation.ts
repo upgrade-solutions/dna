@@ -11,8 +11,8 @@
 
 import {
   Operation,
+  OperationChange,
   OperationalDna,
-  Outcome,
   Rule,
   RuleAllow,
   Style,
@@ -35,7 +35,7 @@ export function renderOperation(op: Operation, dna: OperationalDna, style: Style
 // ---------------------------------------------------------------------------
 
 function renderUserStory(op: Operation, dna: OperationalDna): string {
-  const { rules, triggers, outcomes, roles } = collect(op, dna)
+  const { rules, triggers, roles } = collect(op, dna)
   const parts: string[] = []
 
   if (op.description) parts.push(op.description)
@@ -50,7 +50,7 @@ function renderUserStory(op: Operation, dna: OperationalDna): string {
   const triggerList = renderTriggerList(triggers)
   if (triggerList) parts.push(`**Triggered by:**\n${triggerList}`)
 
-  const criteria = renderCriteriaList(rules, outcomes)
+  const criteria = renderCriteriaList(rules, op.changes ?? [])
   if (criteria) parts.push(`**Acceptance criteria:**\n${criteria}`)
 
   return parts.join('\n\n')
@@ -61,7 +61,7 @@ function renderUserStory(op: Operation, dna: OperationalDna): string {
 // ---------------------------------------------------------------------------
 
 function renderGherkin(op: Operation, dna: OperationalDna): string {
-  const { rules, triggers, outcomes, roles } = collect(op, dna)
+  const { rules, triggers, roles } = collect(op, dna)
   const actor = roles[0] ?? 'user'
   const action = pascalToWords(op.action).toLowerCase()
   const resource = pascalToWords(op.resource).toLowerCase()
@@ -90,7 +90,7 @@ function renderGherkin(op: Operation, dna: OperationalDna): string {
 
   lines.push(`    When they ${action} the ${resource}`)
 
-  const thens = outcomeLines(outcomes)
+  const thens = changeLines(op.changes ?? [])
   if (thens.length === 0) {
     lines.push(`    Then the operation \`${op.name}\` succeeds`)
   } else {
@@ -107,7 +107,7 @@ function renderGherkin(op: Operation, dna: OperationalDna): string {
 // ---------------------------------------------------------------------------
 
 function renderProductDna(op: Operation, dna: OperationalDna): string {
-  const { rules, triggers, outcomes, roles } = collect(op, dna)
+  const { rules, triggers, roles } = collect(op, dna)
   const parts: string[] = []
 
   if (op.description) parts.push(op.description)
@@ -124,7 +124,7 @@ function renderProductDna(op: Operation, dna: OperationalDna): string {
     .map((r) => `- ${conditionPhrase(r)}`)
   if (preconditions.length) parts.push(`**Preconditions:**\n${preconditions.join('\n')}`)
 
-  const postconditions = outcomeLines(outcomes).map((l) => `- ${l}`)
+  const postconditions = changeLines(op.changes ?? []).map((l) => `- ${l}`)
   if (postconditions.length) parts.push(`**Postconditions:**\n${postconditions.join('\n')}`)
 
   return parts.join('\n\n')
@@ -137,18 +137,16 @@ function renderProductDna(op: Operation, dna: OperationalDna): string {
 function collect(op: Operation, dna: OperationalDna): {
   rules: Rule[]
   triggers: Trigger[]
-  outcomes: Outcome[]
   roles: string[]
 } {
   const rules = groupBy(dna.rules ?? [], (r) => r.operation).get(op.name) ?? []
   const triggers = groupBy(dna.triggers ?? [], (t) => t.operation ?? '').get(op.name) ?? []
-  const outcomes = groupBy(dna.outcomes ?? [], (o) => o.operation).get(op.name) ?? []
   const roles: string[] = []
   for (const r of rules) {
     if (r.type !== 'access') continue
     for (const a of r.allow ?? []) if (a.role && !roles.includes(a.role)) roles.push(a.role)
   }
-  return { rules, triggers, outcomes, roles }
+  return { rules, triggers, roles }
 }
 
 function renderTriggerList(triggers: Trigger[]): string | null {
@@ -161,7 +159,7 @@ function renderTriggerList(triggers: Trigger[]): string | null {
     .join('\n')
 }
 
-function renderCriteriaList(rules: Rule[], outcomes: Outcome[]): string | null {
+function renderCriteriaList(rules: Rule[], changes: OperationChange[]): string | null {
   const lines: string[] = []
   for (const r of rules) {
     if (r.type === 'condition') lines.push(`- Only when ${conditionPhrase(r)}`)
@@ -170,19 +168,15 @@ function renderCriteriaList(rules: Rule[], outcomes: Outcome[]): string | null {
       if (allowed) lines.push(`- Restricted to ${allowed}`)
     } else if (r.description) lines.push(`- ${r.description}`)
   }
-  lines.push(...outcomeLines(outcomes).map((l) => `- ${l}`))
+  lines.push(...changeLines(changes).map((l) => `- ${l}`))
   return lines.length ? lines.join('\n') : null
 }
 
-function outcomeLines(outcomes: Outcome[]): string[] {
+function changeLines(changes: OperationChange[]): string[] {
   const lines: string[] = []
-  for (const o of outcomes) {
-    if (o.description) lines.push(o.description)
-    for (const c of o.changes ?? []) {
-      const set = c.set === undefined ? '' : ` to \`${JSON.stringify(c.set)}\``
-      lines.push(`Sets \`${c.attribute}\`${set}`)
-    }
-    for (const next of o.initiates ?? []) lines.push(`Initiates \`${next}\``)
+  for (const c of changes) {
+    const set = c.set === undefined ? '' : ` to \`${JSON.stringify(c.set)}\``
+    lines.push(`Sets \`${c.attribute}\`${set}`)
   }
   return lines
 }

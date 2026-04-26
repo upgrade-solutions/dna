@@ -9,7 +9,7 @@ describe('@dna-codes/output-html', () => {
             expect(html).toContain('<h1>shop.books</h1>');
             expect(html).toContain('<h2>Summary</h2>');
             expect(html).toContain('<h2>Domain Model</h2>');
-            expect(html).toContain('<h2>Capabilities</h2>');
+            expect(html).toContain('<h2>Operations</h2>');
             expect(html).toContain('<h2>SOPs</h2>');
             expect(html).toContain('<h2>Process Flows</h2>');
         });
@@ -17,7 +17,7 @@ describe('@dna-codes/output-html', () => {
             const html = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
             expect(html).toContain('<h2>Summary</h2>');
             expect(html).not.toContain('<h2>Domain Model</h2>');
-            expect(html).not.toContain('<h2>Capabilities</h2>');
+            expect(html).not.toContain('<h2>Operations</h2>');
             expect(html).not.toContain('<h2>SOPs</h2>');
             expect(html).not.toContain('<h2>Process Flows</h2>');
         });
@@ -74,15 +74,37 @@ describe('@dna-codes/output-html', () => {
         it('lists primitive counts for populated collections only', () => {
             const html = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
             expect(html).toContain('Resources: 2');
-            expect(html).toContain('Capabilities: 2');
+            expect(html).toContain('Operations: 3');
             expect(html).toContain('Rules: 2');
             expect(html).toContain('Processes: 1');
+            // Signal and Equation primitives no longer exist
+            expect(html).not.toContain('Signals:');
             expect(html).not.toContain('Equations:');
         });
         it('names top-level resources', () => {
             const html = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
             expect(html).toContain('Top-level resources:');
             expect(html).toContain('<code>Book</code>');
+        });
+        it('honors a rename map for primitive labels', () => {
+            const html = (0, index_1.render)(core_1.bookshopInput, {
+                sections: ['summary'],
+                rename: { Persons: 'Individuals', Roles: 'Positions', Resources: 'Items' },
+            });
+            // canonical names are translated…
+            expect(html).toContain('<li>Individuals: 1</li>');
+            expect(html).toContain('<li>Positions: 1</li>');
+            expect(html).toContain('<li>Items: 2</li>');
+            // …and unmapped ones stay canonical
+            expect(html).toContain('<li>Operations: 3</li>');
+            // top-level label uses the renamed form, lowercased
+            expect(html).toContain('<strong>Top-level items:</strong>');
+        });
+        it('leaves canonical labels untouched when no rename is provided', () => {
+            const html = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
+            expect(html).toContain('<li>Persons: 1</li>');
+            expect(html).toContain('<li>Roles: 1</li>');
+            expect(html).toContain('<strong>Top-level resources:</strong>');
         });
     });
     describe('section: domain-model', () => {
@@ -98,43 +120,43 @@ describe('@dna-codes/output-html', () => {
             expect(html).toContain('<code>Author</code>');
         });
     });
-    describe('section: capabilities', () => {
-        it('renders triggers, access rules, condition rules, outcomes, and signals', () => {
-            const html = (0, index_1.render)(core_1.bookshopInput, { sections: ['capabilities'] });
+    describe('section: operations', () => {
+        it('renders triggers, access rules, condition rules, and Operation.changes', () => {
+            const html = (0, index_1.render)(core_1.bookshopInput, { sections: ['operations'] });
             expect(html).toContain('<h3>Book.Publish</h3>');
             expect(html).toContain('<strong>Triggered by:</strong>');
             expect(html).toContain('user');
             expect(html).toContain('<em>Access:</em>');
             expect(html).toContain('role <code>Editor</code>');
             expect(html).toContain('<em>Condition:</em>');
-            expect(html).toContain('book.status == &quot;draft&quot;');
             expect(html).toContain('<code>book.status</code>');
-            expect(html).toContain('<code>shop.Book.Published</code>');
-            expect(html).toContain('<strong>Signals published:</strong>');
-            expect(html).toContain('<code>book_id</code>');
+            expect(html).toContain('<strong>Changes:</strong>');
+            expect(html).toContain('Sets <code>status</code>');
+            expect(html).not.toContain('<strong>Outcomes:</strong>');
+            expect(html).not.toContain('<strong>Signals published:</strong>');
         });
     });
     describe('section: sops', () => {
-        it('renders numbered steps that resolve task → role + capability', () => {
+        it('renders numbered steps that resolve task → actor + operation', () => {
             const html = (0, index_1.render)(core_1.bookshopInput, { sections: ['sops'] });
             expect(html).toContain('<h3>PublishFlow</h3>');
             expect(html).toContain('<strong>Operator:</strong>');
             expect(html).toContain('<code>Editor</code>');
             expect(html).toMatch(/<ol>.*<li>.*<strong>review<\/strong>/s);
             expect(html).toContain('does <code>Book.Publish</code>');
-            expect(html).toContain('(when: passed)');
-            expect(html).toContain('(else)');
+            expect(html).toContain('(when: <code>BookIsDraft</code>)');
+            expect(html).toContain('(else: reject)');
             expect(html).toContain('after: <code>review</code>');
         });
     });
     describe('section: process-flow', () => {
-        it('renders a preformatted outline with branch markers and dep arrows', () => {
+        it('renders a preformatted outline with condition markers and dep arrows', () => {
             const html = (0, index_1.render)(core_1.bookshopInput, { sections: ['process-flow'] });
             expect(html).toContain('<h3>PublishFlow</h3>');
             expect(html).toContain('<pre><code>');
-            expect(html).toContain('├── review: ReviewBook');
-            expect(html).toContain('├── approve: ApproveBook [when: passed] ← review');
-            expect(html).toContain('└── reject: RejectBook [else] ← review');
+            expect(html).toContain('├── review: review-book');
+            expect(html).toContain('approve: approve-book [when: BookIsDraft] [else: reject] ← review');
+            expect(html).toContain('└── reject: reject-book ← review');
         });
     });
 });
