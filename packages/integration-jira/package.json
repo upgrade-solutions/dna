@@ -23,7 +23,7 @@
     "AGENTS.md"
   ],
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",

@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/output-markdown",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Render DNA documents as markdown — opinionated documentation output with configurable sections (summary, domain model, capabilities, SOPs, process flows). Zero runtime dependencies.",
   "keywords": ["dna", "markdown", "documentation", "output-markdown", "generator"],
   "license": "MIT",
@@ -18,7 +18,7 @@
     "README.md"
   ],
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
