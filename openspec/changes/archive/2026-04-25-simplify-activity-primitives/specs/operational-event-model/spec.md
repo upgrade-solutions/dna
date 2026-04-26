@@ -1,8 +1,5 @@
-# operational-event-model Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change remove-signal-and-equation. Update Purpose after archive.
-## Requirements
 ### Requirement: No first-class event primitive in the Operational layer
 
 The Operational layer SHALL NOT declare a first-class event or signal primitive. State changes are expressed exclusively through `Operation.changes` (which describes what attribute moves from what value to what value); there is no separate "thing was emitted" primitive and no separate `Outcome` wrapper.
@@ -28,6 +25,8 @@ This is a deliberate scope decision, not an oversight. A first-class event primi
 #### Scenario: Operation.changes is the canonical state-mutation output
 - **WHEN** an Operation declares `changes: [{ attribute: "loan.status", set: "active" }]`
 - **THEN** validation passes; `changes` on Operation is the only state-mutation output the Operational layer provides
+
+## ADDED Requirements
 
 ### Requirement: State changes are declared on Operation, not on a separate Outcome wrapper
 
@@ -74,24 +73,3 @@ The Operational layer SHALL NOT provide a `condition` field on `Trigger`. Entry 
 #### Scenario: Step.conditions remains the canonical gating mechanism
 - **WHEN** a Step declares `conditions: ["LoanIsApproved"]` referencing a defined Rule, with optional `else: "abort"`
 - **THEN** validation passes; this is the supported gating mechanism for both entry and mid-Process branching
-
-### Requirement: No Equation primitive in the Operational layer
-
-The Operational layer SHALL NOT declare an `Equation` primitive or top-level `equations[]` collection. Computed/derived values can be expressed by Operations that mutate Resource attributes; a separate Equation primitive is unnecessary until a real example domain motivates one.
-
-#### Scenario: Operational schema rejects `equations[]` collection
-- **WHEN** an Operational document declares a top-level `equations[]` array
-- **THEN** schema validation fails with an "additionalProperties" error against `operational.json`
-
-### Requirement: No Script primitive in the Technical layer
-
-The Technical layer SHALL NOT declare a `Script` primitive or top-level `scripts[]` collection. Script existed only as the deployment binding for an Operational `Equation`; with Equation removed, Script has no concept it implements. A general-purpose "named compute deployment" primitive will be introduced only when a real consumer needs one.
-
-#### Scenario: Technical schema rejects `scripts[]` collection
-- **WHEN** a Technical document declares a top-level `scripts[]` array
-- **THEN** schema validation fails with an "additionalProperties" error against `technical.json`
-
-#### Scenario: technical/script schema is no longer registered
-- **WHEN** code asks the validator for the `technical/script` schema by id
-- **THEN** the schema is not present in the registered set
-

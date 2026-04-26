@@ -74,4 +74,4 @@ In `packages/core/src/validator.test.ts`:
 
 - [x] 7.1 Run `npm test` from the repo root; confirm all workspaces green. (12 workspaces, 319 tests total — core jumps from 162 to 174 with the +12 new validator tests.)
 - [x] 7.2 Run `npx openspec validate add-role-cardinality-and-exclusivity` — `Change 'add-role-cardinality-and-exclusivity' is valid`.
-- [ ] 7.3 Commit schema, validator, tests, examples, and docs together with a single conventional message (`Add Role.cardinality, Role.required, and Role.excludes`).
+- [x] 7.3 Commit schema, validator, tests, examples, and docs together with a single conventional message. Implementation landed as `a722427`; OpenSpec scaffolding committed separately as `84cef3b` (matching the prior `add-role-hierarchy` two-commit pattern).
