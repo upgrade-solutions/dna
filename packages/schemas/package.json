@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/schemas",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "JSON Schema (Draft 2020-12) definitions for DNA — the declarative language for describing business systems. Language-agnostic, zero dependencies.",
   "keywords": ["dna", "json-schema", "dsl", "business-modeling"],
   "license": "MIT",
