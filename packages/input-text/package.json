@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/input-text",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Turn freeform prose describing a business system into DNA (operational, product, technical) by dispatching to an LLM provider (openai, openrouter, anthropic). Requires an API key. Zero runtime dependencies.",
   "keywords": ["dna", "input-text", "llm", "openai", "openrouter", "anthropic"],
   "license": "MIT",
@@ -20,6 +20,10 @@
   "scripts": {
     "build": "tsc",
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
+  },
+  "dependencies": {
+    "@dna-codes/core": "^0.3.0",
+    "@dna-codes/schemas": "^0.3.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
