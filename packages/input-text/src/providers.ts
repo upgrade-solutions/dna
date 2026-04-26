@@ -169,10 +169,11 @@ async function callOpenAICompatibleToolCall(
     }
     return { type: 'tool_call', id: toolCall.id, name: toolCall.function.name, args: parsed }
   }
-  if (typeof message.content === 'string' && message.content.length > 0) {
+  if (typeof message.content === 'string') {
     return { type: 'final', content: message.content }
   }
-  throw new Error(`${args.provider}: response has neither tool_calls nor content`)
+  // Some local models return an empty assistant message — treat as a final empty turn so the loop terminates.
+  return { type: 'final', content: '' }
 }
 
 async function callAnthropicToolCall(base: string, args: ToolCallDispatchArgs): Promise<DispatchResult> {

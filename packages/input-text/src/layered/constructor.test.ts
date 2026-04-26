@@ -114,19 +114,66 @@ describe('LayeredConstructor — no-LLM direct usage', () => {
     expect(snapshot.domain.resources ?? []).toEqual([])
   })
 
-  it('detects duplicate consecutive calls', () => {
+  it('rejects a second add_resource with the same name (even with different args)', () => {
+    const ctor = new LayeredConstructor()
+    expect(
+      ctor.handle({
+        name: 'add_resource',
+        args: { name: 'Claimant', attributes: [{ name: 'email', type: 'string' }] },
+      }),
+    ).toMatchObject({ ok: true })
+
+    const second = ctor.handle({ name: 'add_resource', args: { name: 'Claimant' } })
+    expect(second.ok).toBe(false)
+    if (second.ok) throw new Error('expected failure')
+    expect(second.error).toBe('duplicate_name')
+
+    const snapshot = ctor.result() as { domain: { resources: { name: string }[] } }
+    expect(snapshot.domain.resources).toHaveLength(1)
+  })
+
+  it('rejects a second Operation with the same Target.Action', () => {
+    const ctor = new LayeredConstructor()
+    ctor.handle({
+      name: 'add_resource',
+      args: {
+        name: 'Loan',
+        actions: [
+          { name: 'Apply', type: 'write' },
+          { name: 'Approve', type: 'write' },
+        ],
+      },
+    })
+    expect(
+      ctor.handle({
+        name: 'add_operation',
+        args: { target: 'Loan', action: 'Apply', name: 'Loan.Apply' },
+      }),
+    ).toMatchObject({ ok: true })
+    // Different call breaks the consecutive-call signature so duplicate_name fires (not duplicate_call).
+    ctor.handle({
+      name: 'add_operation',
+      args: { target: 'Loan', action: 'Approve', name: 'Loan.Approve' },
+    })
+    const second = ctor.handle({
+      name: 'add_operation',
+      args: { target: 'Loan', action: 'Apply', name: 'Loan.Apply' },
+    })
+    expect(second.ok).toBe(false)
+    if (second.ok) throw new Error('expected failure')
+    expect(second.error).toBe('duplicate_name')
+  })
+
+  it('detects duplicate consecutive calls (same name + same args)', () => {
     const ctor = new LayeredConstructor()
     const first = ctor.handle({ name: 'add_person', args: { name: 'Employee' } })
     expect(first.ok).toBe(true)
     const dup = ctor.handle({ name: 'add_person', args: { name: 'Employee' } })
     expect(dup.ok).toBe(false)
     if (dup.ok) throw new Error('expected failure')
-    expect(dup.error).toBe('duplicate_call')
-    // A different call between them clears the dup signature.
-    ctor.handle({ name: 'add_group', args: { name: 'BankDepartment' } })
-    const replay = ctor.handle({ name: 'add_person', args: { name: 'Employee' } })
-    // Schema is fine, but the constructor allows replays here — this is a "consecutive same call" guard, not a uniqueness guard.
-    expect(replay.ok).toBe(true)
+    // Either error is correct: duplicate_call (consecutive replay) or duplicate_name (uniqueness).
+    // Both protect the draft from accidental double-adds.
+    expect(['duplicate_call', 'duplicate_name']).toContain(dup.error)
   })
 
   it('throws when the iteration cap is exceeded', () => {

@@ -123,6 +123,9 @@ async function main() {
     mode,
   })
 
+  if (process.env.DUMP_RAW) {
+    require('node:fs').writeFileSync(process.env.DUMP_RAW, result.raw)
+  }
   if (!result.operational) {
     console.error('No operational layer parsed. Raw response:')
     console.error(result.raw)

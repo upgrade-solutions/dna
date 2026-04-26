@@ -37,6 +37,7 @@ export type ToolCallResult =
       error:
         | 'unknown_tool'
         | 'duplicate_call'
+        | 'duplicate_name'
         | 'schema_violation'
         | 'unknown_resource'
         | 'unknown_person'
@@ -89,6 +90,21 @@ const COLLECTION_FOR: Record<PrimitiveKind, keyof DraftDocument | 'domain.resour
   process: 'processes',
   trigger: 'triggers',
   rule: 'rules',
+}
+
+const NAME_POOL_FOR: Partial<Record<PrimitiveKind, keyof EnumPools>> = {
+  resource: 'resources',
+  person: 'persons',
+  role: 'roles',
+  group: 'groups',
+  task: 'tasks',
+  process: 'processes',
+  rule: 'rules',
+  // membership has names too but they're not in the EnumPools shape — handle separately below
+}
+
+function capitalize(s: string): string {
+  return s.length === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 export class LayeredConstructor {
@@ -236,6 +252,9 @@ export class LayeredConstructor {
       }
     }
 
+    const dupName = this.checkNameUniqueness(kind, args)
+    if (dupName) return dupName
+
     const refError = this.checkReferences(kind, args)
     if (refError) return refError
 
@@ -259,6 +278,50 @@ export class LayeredConstructor {
   private validatePrimitive(kind: PrimitiveKind, args: Record<string, unknown>): ValidationResult {
     const schemaId = `operational/${kind}`
     return this.validator.validate(args, schemaId)
+  }
+
+  private checkNameUniqueness(kind: PrimitiveKind, args: Record<string, unknown>): ToolCallResult | null {
+    // Triggers are inherently anonymous (multiple per Operation are valid).
+    if (kind === 'trigger') return null
+    const pools = this.pools()
+    if (kind === 'operation') {
+      const name = typeof args.name === 'string' ? args.name : undefined
+      const target = typeof args.target === 'string' ? args.target : undefined
+      const action = typeof args.action === 'string' ? args.action : undefined
+      const composed = name ?? (target && action ? `${target}.${action}` : undefined)
+      if (composed && (pools.operations ?? []).includes(composed)) {
+        return {
+          ok: false,
+          error: 'duplicate_name',
+          message: `Operation "${composed}" has already been added. Each Target.Action pair is unique.`,
+        }
+      }
+      return null
+    }
+    const name = typeof args.name === 'string' ? args.name : undefined
+    if (!name) return null
+    if (kind === 'membership') {
+      const existing = this.draft.memberships.map((m) => (m as { name?: string }).name).filter(Boolean) as string[]
+      if (existing.includes(name)) {
+        return {
+          ok: false,
+          error: 'duplicate_name',
+          message: `Membership "${name}" has already been added.`,
+        }
+      }
+      return null
+    }
+    const poolKey = NAME_POOL_FOR[kind]
+    if (!poolKey) return null
+    const existing = (pools[poolKey] ?? []) as string[]
+    if (existing.includes(name)) {
+      return {
+        ok: false,
+        error: 'duplicate_name',
+        message: `${capitalize(kind)} "${name}" has already been added.`,
+      }
+    }
+    return null
   }
 
   private checkReferences(kind: PrimitiveKind, args: Record<string, unknown>): ToolCallResult | null {

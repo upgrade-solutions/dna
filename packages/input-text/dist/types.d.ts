@@ -28,6 +28,20 @@ export interface ParseOptions {
      * doesn't describe (e.g. no technical details in a prose SOP).
      */
     onMissingLayers?: 'warn' | 'throw' | 'silent';
+    /**
+     * Construction mode. Default 'one-shot' asks the model for a single JSON document
+     * (existing behavior). 'layered' drives the model through tool calls — one primitive
+     * at a time — with per-call schema and reference-integrity checks. Layered mode
+     * trades more tokens for higher reliability and works on smaller models.
+     *
+     * Layered mode currently supports the operational layer only.
+     */
+    mode?: 'one-shot' | 'layered';
+    /**
+     * Layered-mode only: maximum tool calls before the constructor stops the loop.
+     * Default 50.
+     */
+    maxToolCalls?: number;
 }
 /**
  * Parsed DNA is returned as plain objects matching the shapes in @dna-codes/schemas.
