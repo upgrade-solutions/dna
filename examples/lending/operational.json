@@ -27,7 +27,7 @@
     "persons": [
       {
         "name": "Borrower",
-        "description": "An external party who applies for and repays loans. Acts as both Person template (entity with credit score) and actor (performs Loan.Apply directly).",
+        "description": "An external party who applies for and repays loans. Acts as both Person template (structure with credit score) and actor (performs Loan.Apply directly).",
         "attributes": [
           { "name": "id", "type": "string", "required": true },
           { "name": "name", "type": "string", "required": true },

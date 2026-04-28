@@ -80,7 +80,7 @@ const PRIMITIVE_SCHEMA: Record<PrimitiveKind, JsonSchema> = {
 }
 
 const PRIMITIVE_PURPOSE: Record<PrimitiveKind, string> = {
-  resource: 'Add a Resource (entity the org tracks: Loan, Invoice, Document).',
+  resource: 'Add a Resource (structure the org tracks: Loan, Invoice, Document).',
   person: 'Add a Person template (kind of human: Customer, Employee, Patient).',
   role: 'Add a Role template (position: Underwriter, Doctor, LeadCounsel).',
   group: 'Add a Group template (work-unit / container that scopes Roles: BankDepartment, Case).',

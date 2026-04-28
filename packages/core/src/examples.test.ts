@@ -144,7 +144,7 @@ describe('examples — mass-tort', () => {
     expect(opTriggered?.after).toBe('Settlement.Accept')
   })
 
-  it('exercises external-actor pattern (Claimant as Person — entity AND actor)', () => {
+  it('exercises external-actor pattern (Claimant as Person — structure AND actor)', () => {
     const persons = dna.domain.persons as Array<any>
     const claimant = persons.find((p) => p.name === 'Claimant')
     expect(claimant?.attributes?.length).toBeGreaterThan(0)

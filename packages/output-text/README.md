@@ -35,7 +35,7 @@ The **keys** choose which DNA primitives get rendered; the **values** choose the
 | `gherkin` | Capability | `Feature:` / `Scenario:` / `Given` / `When` / `Then` |
 | `product-dna` | Capability, Resource, Process | Key-value blocks using Product-DNA vocabulary (`Resource`, `Action`, `Actor`, `Role`, `Field`, `Operation`) |
 
-Resource and Process always render as `product-dna` regardless of the style requested — `user-story` and `gherkin` are action-shaped and don't translate to entities or workflows.
+Resource and Process always render as `product-dna` regardless of the style requested — `user-story` and `gherkin` are action-shaped and don't translate to structures or workflows.
 
 ## `render(dna, options?)`
 

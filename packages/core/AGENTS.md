@@ -8,7 +8,7 @@ DNA is a **description**, not a program. It describes a business at three intent
 
 | Layer | Scope | Aggregate file |
 |-------|-------|----------------|
-| **Operational** | What the business does — people, entities, rules, SOPs | `operational.json` |
+| **Operational** | What the business does — people, structures, rules, SOPs | `operational.json` |
 | **Product** | What gets built — resources, operations, endpoints, pages | `product.{core,api,ui}.json` |
 | **Technical** | How it gets built — cells, constructs, providers, environments | `technical.json` |
 
@@ -30,7 +30,7 @@ This package-level agent is the **dispatcher**: it holds the cross-layer picture
 ## Rules of the contract
 
 1. **Schemas are language-agnostic.** JSON Schema Draft 2020-12 only. Never embed TS/JS runtime behavior into a schema.
-2. **Primitive names are unique per layer, except the Actor > Action > Subject triad.** Operational `Resource`, `Action`, and `Operation` intentionally share names across layers — the product layer projects the same concepts onto API and UI surfaces. Operational People primitives (Person, Role, Group, Membership) are first-class collections under Domain — they are NOT collapsed into Resource. Resource is strictly an entity template; Person is for individuals; Group is for work-units / containers; Role is for positions/capacities; Membership is template-level eligibility (Person × Role × optional-Group).
+2. **Primitive names are unique per layer, except the Actor > Action > Subject triad.** Operational `Resource`, `Action`, and `Operation` intentionally share names across layers — the product layer projects the same concepts onto API and UI surfaces. Operational People primitives (Person, Role, Group, Membership) are first-class collections under Domain — they are NOT collapsed into Resource. Resource is strictly a structure template; Person is for individuals; Group is for work-units / containers; Role is for positions/capacities; Membership is template-level eligibility (Person × Role × optional-Group).
 3. **Cross-layer references are strings, validated externally.** A `Product.Resource.resource` is a string referencing an `Operational.Resource.name`. Schemas don't enforce this; `@dna-codes/core` does. Don't introduce JSON-Schema-level refs across layers.
 4. **`$id` URIs are stable.** `https://dna.codes/schemas/<layer>/<primitive>` identifiers survive renames and refactors. Never change one without a deprecation path.
 5. **Layer boundaries are one-way downstream.** Operational → Product → Technical. Upper layers never read lower-layer DNA; lower layers read exactly what they need and no more.

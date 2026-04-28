@@ -2,7 +2,7 @@
 
 How **Event Storming** workshop output translates into DNA. Event Storming (Alberto Brandolini, 2013) is a collaborative discovery technique — teams cover a wall with colored sticky notes representing what happens in their domain. The output is structurally close to DNA: the colors map almost 1:1.
 
-> **Note (post-reorg, 2026-04):** This doc was written before the People/Entities/Activities reorg. Some examples reference the old "Resources-used-as-Roles" structural-typing model. The current shape splits Person, Role, Group, and Membership into first-class primitives — see [`README.md`](../../README.md) and [`ROADMAP.md`](../../ROADMAP.md). The conceptual mappings below still hold; concrete syntax examples may be outdated.
+> **Note (post-reorg, 2026-04):** This doc was written before the People/Structures/Activities reorg. Some examples reference the old "Resources-used-as-Roles" structural-typing model. The current shape splits Person, Role, Group, and Membership into first-class primitives — see [`README.md`](../../README.md) and [`ROADMAP.md`](../../ROADMAP.md). The conceptual mappings below still hold; concrete syntax examples may be outdated.
 
 > Unlike the [BPMN](./bpmn.md), [DDD](./ddd.md), and [ArchiMate](./archimate.md) docs in this folder, this one isn't a notation comparison — Event Storming has no formal notation. It's a workshop. This doc explains how to take a wall full of stickies and produce a valid Operational DNA document.
 

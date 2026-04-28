@@ -47,7 +47,7 @@ DOMAIN-SPECIFIC GUIDANCE FOR THIS TRANSCRIPT:
    - Persons: Claimant (external; submits the form themselves)
    - Groups: Case, Firm
    - Roles: IntakeSpecialist, CaseManager, AssociateAttorney, Paralegal, PartnerAttorney, FirmAdmin
-   Note: a name can appear as both a Resource and a Group when usage demands (e.g. Firm is a tracked entity AND a scoping container for Roles). Same for Case.
+   Note: a name can appear as both a Resource and a Group when usage demands (e.g. Firm is a tracked structure AND a scoping container for Roles). Same for Case.
 
 4. Memberships pin Person templates to Role templates. The IntakeSpecialist, CaseManager, Paralegal, AssociateAttorney, PartnerAttorney, and FirmAdmin Roles are all held by FIRM STAFF — model an Employee (or per-role Person templates like Partner, Associate, Paraprofessional) and pin them. Claimant holds NO Role; Claimant is an external Person who triggers Operations directly via Rule.allow[].person.
 

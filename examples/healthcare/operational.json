@@ -2,7 +2,7 @@
   "domain": {
     "name": "inpatient",
     "path": "stmary.clinical.inpatient",
-    "description": "Hospital inpatient ward — Patient-centered care team. Patient is a Person template (entity with medical attributes and lifecycle); Roles like AttendingPhysician are scoped TO that Patient (Role.scope can target a Person, not just a Group). The Patient is the per-Patient organizational context; the Pharmacy is a traditional Group scoping Pharmacist Memberships.",
+    "description": "Hospital inpatient ward — Patient-centered care team. Patient is a Person template (structure with medical attributes and lifecycle); Roles like AttendingPhysician are scoped TO that Patient (Role.scope can target a Person, not just a Group). The Patient is the per-Patient organizational context; the Pharmacy is a traditional Group scoping Pharmacist Memberships.",
     "resources": [
       {
         "name": "Encounter",
@@ -55,7 +55,7 @@
     "persons": [
       {
         "name": "Patient",
-        "description": "An admitted person under care. Person template — entity with medical attributes and lifecycle (Admit, Discharge). Per-Patient Roles like AttendingPhysician scope directly to this Person (Role.scope = Patient).",
+        "description": "An admitted person under care. Person template — structure with medical attributes and lifecycle (Admit, Discharge). Per-Patient Roles like AttendingPhysician scope directly to this Person (Role.scope = Patient).",
         "attributes": [
           { "name": "id",          "type": "string", "required": true },
           { "name": "mrn",         "type": "string", "required": true, "description": "Medical record number" },

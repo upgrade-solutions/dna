@@ -4,7 +4,7 @@ University CS department academics. Stress-tests time-bounded Group memberships 
 
 ## What this example demonstrates
 
-- **Course vs CourseOffering**: stable catalog `Course` (CS101 "Intro to Programming") separate from time-bound `CourseOffering` (CS101 Spring 2026 Section 1). The CourseOffering is the Group; the Course is just a tracked entity. Demonstrates that "the time-bound thing" is the right scoping unit, not the catalog entry.
+- **Course vs CourseOffering**: stable catalog `Course` (CS101 "Intro to Programming") separate from time-bound `CourseOffering` (CS101 Spring 2026 Section 1). The CourseOffering is the Group; the Course is just a tracked structure. Demonstrates that "the time-bound thing" is the right scoping unit, not the catalog entry.
 - **Same User, different Roles in different CourseOfferings, same semester**: `DrPatel` is `Instructor` of two CourseOfferings AND `Student` (auditing) in a third — all spring-2026, all simultaneously valid memberships. The 3-way model handles this without any "primary role" or temporal disambiguator.
 - **Mixed Group scopes**: most Roles scope to `CourseOffering`, but `DepartmentChair.scope = Department` and `Registrar` is unscoped (global). Three different scoping tiers in one domain.
 - **Per-Department Role constraint (modeling-layer declaration)**: `DepartmentChair` declares `cardinality: "one"` (at most one chair per Department). Records the convention in the model rather than as prose only.

@@ -12,13 +12,13 @@ As documented below, it's incredibly flexible with input/output adapters and int
 
 | Layer | What it captures | Analogous to |
 |-------|-----------------|--------------|
-| **Operational** | What the business does — people, entities, rules, SOPs | Domain-Driven Design |
+| **Operational** | What the business does — people, structures, rules, SOPs | Domain-Driven Design |
 | **Product** | What gets built — resources, operations, endpoints, pages | OpenAPI + Atomic Design |
 | **Technical** | How it gets built — cells, constructs, providers, environments | Terraform / AWS SAM |
 
 Layers are one-way downstream: Operational → Product → Technical. Upper layers never depend on lower ones. Cross-layer references (e.g. a Product Resource pointing at an Operational Resource) are plain strings validated by `@dna-codes/core` rather than JSON Schema `$ref`s.
 
-Operational DNA is **organizational modeling** — the **nouns** an organization deals with (people, places, things) and the **verbs** that bind them. It's modeled around the **Actor > Action > Subject** triad: Roles act, Subjects (any noun primitive) receive actions. Operational primitives fall into three categories — **People** (Person, Role, Group, Membership), **Entities** (Resource, Attribute, Relationship), and **Activities** (Operation, Task, Step, Process, Trigger, Rule). An **Operation** is always a `Target.Action` pair where Target is any noun primitive.
+Operational DNA is **organizational modeling** — the **nouns** an organization deals with (people, places, things) and the **verbs** that bind them. It's modeled around the **Actor > Action > Subject** triad: Roles act, Subjects (any noun primitive) receive actions. Operational primitives fall into three categories — **People** (Person, Role, Group, Membership), **Structures** (Resource, Attribute, Relationship), and **Activities** (Operation, Task, Step, Process, Trigger, Rule). An **Operation** is always a `Target.Action` pair where Target is any noun primitive.
 
 Here's a minimal Operational DNA document in a lending context:
 
@@ -79,7 +79,7 @@ Canonical end-to-end DNA documents demonstrating the model across different busi
 | [`examples/lending`](./examples/lending) | Operations, Tasks, Process; Operation-level + Process-level Triggers; system Role (scheduled job); scoped Role; Person-as-actor (Borrower) + Role-as-actor (Underwriter); Memberships |
 | [`examples/mass-tort`](./examples/mass-tort) | Case as Group; multiple Person→Role Memberships (Partner→LeadCounsel/CoCounsel); multiple Processes; Process triggered by Operation completion |
 | [`examples/marketplace`](./examples/marketplace) | Same Person template eligible for two peer Roles via Memberships (Member→Host AND Member→Guest); two Groups (Listing, Booking); global (unscoped) Role; Step.else routing |
-| [`examples/healthcare`](./examples/healthcare) | Patient as Person template (entity + lifecycle); per-Person Role.scope (AttendingPhysician.scope = Patient); mixed scope targets (Person + Group); multi-predicate condition Rule |
+| [`examples/healthcare`](./examples/healthcare) | Patient as Person template (structure + lifecycle); per-Person Role.scope (AttendingPhysician.scope = Patient); mixed scope targets (Person + Group); multi-predicate condition Rule |
 | [`examples/manufacturing`](./examples/manufacturing) | Multiple system Roles (CNC, press, paint robot, scheduler) with `system: true` and `resource:` link; parallel fan-out + fan-in via Step.depends_on; schedule-source Trigger on a system Operation |
 | [`examples/education`](./examples/education) | Course (Resource catalog) vs CourseOffering (Group); two Person templates eligible for distinct Roles (Faculty→Instructor, UniversityMember→Student); three scope tiers; calendar-aligned schedule Triggers |
 
@@ -92,7 +92,7 @@ If you already model your domain in DDD, BPMN, ArchiMate, C4, Event Storming, or
 Operational DNA captures organizational modeling — what an organization *is* and what it *does*, independent of UI, API, or deployment technology. Three categories of primitives:
 
 - **People** — Person, Role, Group, Membership
-- **Entities** — Resource, Attribute, Relationship
+- **Structures** — Resource, Attribute, Relationship
 - **Activities** — Operation, Task, Step, Process, Trigger, Rule
 
 `Domain` wraps the four noun primitives (Resources, Persons, Roles, Groups) into bounded contexts; `Memberships` and Activities live at the document top level.
@@ -103,8 +103,8 @@ Operational DNA captures organizational modeling — what an organization *is* a
 - **Group** — a work-unit / container template (`BankDepartment`, `Hospital`, `Case`, `Workspace`, `Family`). Has attributes and lifecycle; primarily exists to scope Roles.
 - **Membership** — a template-level eligibility statement: "Persons of type X may hold Roles of type Y, optionally in Groups of type Z." Captures organizational RBAC at the type level — *not* per-instance bindings.
 
-**Entity primitives:**
-- **Resource** — an entity template the org manages (`Loan`, `Invoice`, `Account`, `Document`). Has attributes, actions, and optional parent.
+**Structure primitives:**
+- **Resource** — a structure template the org manages (`Loan`, `Invoice`, `Account`, `Document`). Has attributes, actions, and optional parent.
 - **Attribute** — a typed property on any noun primitive; types: `string`, `text`, `number`, `boolean`, `date`, `datetime`, `enum`, `reference`.
 - **Relationship** — a named, directed, typed connection between any two noun primitives (cardinality + reference attribute).
 
@@ -179,7 +179,7 @@ Packages are published to npm. Deno 2 can consume them directly via `npm:` speci
 
 ### Input coverage by layer
 
-Each `input-*` package has an authoritative scope — OpenAPI honestly knows about APIs, not deployment; a JSON sample knows about entities, not rules. That narrowness is a feature: it keeps deterministic adapters from inventing. `input-text` is the catch-all LLM path that can reach any layer.
+Each `input-*` package has an authoritative scope — OpenAPI honestly knows about APIs, not deployment; a JSON sample knows about structures, not rules. That narrowness is a feature: it keeps deterministic adapters from inventing. `input-text` is the catch-all LLM path that can reach any layer.
 
 | Layer | Deterministic source(s) | Probabilistic source(s) | Status |
 |---|---|---|---|

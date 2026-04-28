@@ -4,7 +4,7 @@ Hospital inpatient ward with Patient-centered care teams. Stress-tests the Patie
 
 ## What this example demonstrates
 
-- **Patient is both a Resource AND a Group**: tracked entity (id, mrn, ward, status, attributes) AND a scoping unit for the care team's Roles. `AttendingPhysician.scope = Patient`, `PrimaryNurse.scope = Patient`, `ConsultingSpecialist.scope = Patient` — all per-Patient memberships. The same Group-Resource carries clinical attributes alongside its Group role.
+- **Patient is both a Resource AND a Group**: tracked structure (id, mrn, ward, status, attributes) AND a scoping unit for the care team's Roles. `AttendingPhysician.scope = Patient`, `PrimaryNurse.scope = Patient`, `ConsultingSpecialist.scope = Patient` — all per-Patient memberships. The same Group-Resource carries clinical attributes alongside its Group role.
 - **Same User across many Patient Groups**: `DrAdams` is `AttendingPhysician` on three distinct Patients AND `ConsultingSpecialist` on a fourth — four memberships, three distinct Roles, all into the same Group-Resource type. `NurseRivera` is `PrimaryNurse` on two Patients.
 - **Per-Patient Role constraints (modeling-layer declarations)**: `AttendingPhysician` and `PrimaryNurse` declare `cardinality: "one"` (at most one per Patient); `AttendingPhysician.excludes = ["ConsultingSpecialist"]` so the same Doctor can't hold both Roles on the same Patient; `ConsultingSpecialist` is left unconstrained (multiple per Patient). Runtime systems enforce the counts; the validator only checks well-formedness of the declaration.
 - **Mixed scoping in one domain**: most Roles scope to `Patient`, but `Pharmacist.scope = Pharmacy` (a different Group-Resource entirely). One Resource's Memberships can pin Roles to *different* Group types.

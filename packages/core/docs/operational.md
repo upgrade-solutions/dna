@@ -1,6 +1,6 @@
 # Operational Layer Agents
 
-Agents scoped to the Operational DNA layer. Operational DNA is **organizational modeling** — the People (Person, Role, Group, Membership), Entities (Resource, Attribute, Relationship), and Activities (Operation, Task, Step, Process, Trigger, Rule) that describe *what an organization is and does* — independent of how it's surfaced or deployed.
+Agents scoped to the Operational DNA layer. Operational DNA is **organizational modeling** — the People (Person, Role, Group, Membership), Structures (Resource, Attribute, Relationship), and Activities (Operation, Task, Step, Process, Trigger, Rule) that describe *what an organization is and does* — independent of how it's surfaced or deployed.
 
 The layer is modeled around the **Actor > Action > Subject** triad. Roles act; Subjects (any noun primitive — Resource, Person, Role, or Group) receive actions. Each noun primitive shares the same base shape (`name`, `attributes[]`, `actions[]`, optional `parent`); Role adds `scope`/`system`/`resource`; Membership is a separate eligibility shape (`person`, `role`, optional `group`). An Operation is a `Target.Action` pair (the atomic unit of business activity). The Actor is supplied by Rule (access) and Task (assignment).
 
@@ -32,7 +32,7 @@ Owns authoring and evolving a domain's `operational.json`. Available as a Claude
 All Operational primitives — see `@dna-codes/schemas/operational/*.json` for the canonical list. Organized in three categories plus the bounded-context wrapper:
 
 - **People**: `Person`, `Role`, `Group`, `Membership`
-- **Entities**: `Resource`, `Attribute`, `Relationship`
+- **Structures**: `Resource`, `Attribute`, `Relationship`
 - **Activities**: `Operation`, `Task`, `Step`, `Process`, `Trigger`, `Rule`
 
 > **Step is a sub-primitive of Process**, not a top-level noun. Steps live only inside `Process.steps[]` (their `depends_on`, `conditions`, and `else` fields all reference sibling Steps in the same Process). **Task** is the standalone equivalent — `(actor, operation)` SOP unit that can stand alone or be wrapped by a Step inside a Process.
