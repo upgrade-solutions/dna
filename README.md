@@ -175,14 +175,15 @@ The pipeline is `[integration] → input-* → DNA → output-* → [integration
 
 Full API reference and layer-specific authoring DNA contracts live in [`@dna-codes/dna-core/docs/`](packages/core/docs/).
 
-Packages are published to [GitHub Packages](https://github.com/orgs/dna-codes/packages) under the `@dna-codes` scope. To install, point npm at the registry:
+Packages are published as **private** to [GitHub Packages](https://github.com/orgs/dna-codes/packages) under the `@dna-codes` scope. To install, you need a GitHub Personal Access Token with `read:packages` scope and an `.npmrc` that points at the registry:
 
 ```sh
 echo '@dna-codes:registry=https://npm.pkg.github.com' >> .npmrc
+echo '//npm.pkg.github.com/:_authToken=ghp_YOUR_PAT_HERE' >> .npmrc
 npm install @dna-codes/dna-core
 ```
 
-Public visibility means no auth is needed for reads. Deno 2 can consume them via `npm:` specifiers (e.g. `import { validate } from "npm:@dna-codes/dna-core"`); no JSR package is published.
+Read access is gated by the PAT; the token holder must be a collaborator on `dna-codes/dna` (or a member of an org team with read access). No JSR package is published.
 
 ### Releasing
 

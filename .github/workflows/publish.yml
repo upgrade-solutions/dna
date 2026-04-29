@@ -21,6 +21,6 @@ jobs:
           scope: '@dna-codes'
       - run: npm ci
       - run: npm run build --workspaces --if-present
-      - run: npm publish --workspaces --access public
+      - run: npm publish --workspaces
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
