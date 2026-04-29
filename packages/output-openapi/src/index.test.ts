@@ -1,11 +1,11 @@
 import SwaggerParser from '@apidevtools/swagger-parser'
-import { bookshopInput } from '@dna-codes/core'
+import { bookshopInput } from '@dna-codes/dna-core'
 import * as YAML from 'js-yaml'
 import { render, type ProductApi } from './index'
 
 const bookshopProductApi = bookshopInput.productApi as unknown as ProductApi
 
-describe('@dna-codes/output-openapi', () => {
+describe('@dna-codes/dna-output-openapi', () => {
   describe('render() — bookshop fixture', () => {
     it('round-trips: YAML output parses back to a structurally equivalent doc', () => {
       const { content, format } = render(bookshopProductApi)
@@ -126,6 +126,70 @@ describe('@dna-codes/output-openapi', () => {
       const doc = YAML.load(content) as { info: { title: string; version: string } }
       expect(doc.info.title).toBe('Custom')
       expect(doc.info.version).toBe('1.2.3')
+    })
+  })
+
+  describe('render() — nested object Fields', () => {
+    const conversionFixture: ProductApi = {
+      namespace: { name: 'Convert', path: '/convert' },
+      endpoints: [
+        {
+          method: 'POST',
+          path: '/v1/convert',
+          operation: 'Conversion.Create',
+          request: {
+            name: 'ConvertRequest',
+            fields: [
+              {
+                name: 'from',
+                label: 'From',
+                type: 'object',
+                required: true,
+                fields: [
+                  { name: 'format', type: 'enum', values: ['text', 'json', 'dna'], required: true },
+                  { name: 'input', type: 'string', required: true },
+                ],
+              },
+              {
+                name: 'to',
+                label: 'To',
+                type: 'object',
+                required: true,
+                fields: [
+                  { name: 'format', type: 'enum', values: ['text', 'json', 'dna'], required: true },
+                ],
+              },
+            ],
+          },
+          response: {
+            name: 'ConvertResponse',
+            fields: [{ name: 'output', type: 'string' }],
+          },
+        },
+      ],
+    }
+
+    it('renders an object Field as an OpenAPI object schema with nested properties', () => {
+      const { content } = render(conversionFixture)
+      const doc = YAML.load(content) as {
+        components: { schemas: Record<string, { properties: Record<string, { type: string; properties?: Record<string, unknown>; required?: string[] }> }> }
+      }
+      const req = doc.components.schemas.ConvertRequest
+      expect(req.properties.from.type).toBe('object')
+      expect(req.properties.from.properties).toBeDefined()
+      expect(Object.keys(req.properties.from.properties!)).toEqual(['format', 'input'])
+      expect(req.properties.from.required).toEqual(['format', 'input'])
+    })
+
+    it('passes OpenAPI 3.1 schema validation with nested objects', async () => {
+      const { content } = render(conversionFixture)
+      const parsed = YAML.load(content) as object
+      await expect(SwaggerParser.validate(JSON.parse(JSON.stringify(parsed)))).resolves.toBeDefined()
+    })
+
+    it('emits stable output for the nested-object fixture (snapshot)', () => {
+      const { content } = render(conversionFixture)
+      expect(content).toMatchSnapshot()
     })
   })
 

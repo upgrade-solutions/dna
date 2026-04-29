@@ -25,7 +25,7 @@ const sampleDna = {
         domain: { name: 'acme', path: 'acme', resources: [{ name: 'Loan', attributes: [], actions: [] }] },
     },
 };
-describe('@dna-codes/input-text', () => {
+describe('@dna-codes/dna-input-text', () => {
     describe('dispatch', () => {
         it('sends an OpenAI chat completion request with Bearer auth', async () => {
             const { fetchImpl, calls } = mockFetch(openAiResponse(JSON.stringify(sampleDna)));

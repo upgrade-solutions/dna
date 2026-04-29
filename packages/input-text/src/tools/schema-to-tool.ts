@@ -1,4 +1,4 @@
-import { schemas, type JsonSchema } from '@dna-codes/core'
+import { schemas, type JsonSchema } from '@dna-codes/dna-core'
 
 export type PrimitiveKind =
   | 'resource'

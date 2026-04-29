@@ -16,7 +16,7 @@ As documented below, it's incredibly flexible with input/output adapters and int
 | **Product** | What gets built — resources, operations, endpoints, pages | OpenAPI + Atomic Design |
 | **Technical** | How it gets built — cells, constructs, providers, environments | Terraform / AWS SAM |
 
-Layers are one-way downstream: Operational → Product → Technical. Upper layers never depend on lower ones. Cross-layer references (e.g. a Product Resource pointing at an Operational Resource) are plain strings validated by `@dna-codes/core` rather than JSON Schema `$ref`s.
+Layers are one-way downstream: Operational → Product → Technical. Upper layers never depend on lower ones. Cross-layer references (e.g. a Product Resource pointing at an Operational Resource) are plain strings validated by `@dna-codes/dna-core` rather than JSON Schema `$ref`s.
 
 Operational DNA is **organizational modeling** — the **nouns** an organization deals with (people, places, things) and the **verbs** that bind them. It's modeled around the **Actor > Action > Subject** triad: Roles act, Subjects (any noun primitive) receive actions. Operational primitives fall into three categories — **People** (Person, Role, Group, Membership), **Structures** (Resource, Attribute, Relationship), and **Activities** (Operation, Task, Step, Process, Trigger, Rule). An **Operation** is always a `Target.Action` pair where Target is any noun primitive.
 
@@ -72,7 +72,7 @@ Here's a minimal Operational DNA document in a lending context:
 
 ## Cross-domain examples
 
-Canonical end-to-end DNA documents demonstrating the model across different business domains. Each one validates against the schemas under `@dna-codes/core` and exercises specific parts of the model — start here when you want to see how a real domain looks.
+Canonical end-to-end DNA documents demonstrating the model across different business domains. Each one validates against the schemas under `@dna-codes/dna-core` and exercises specific parts of the model — start here when you want to see how a real domain looks.
 
 | Example | Demonstrates |
 |---|---|
@@ -161,7 +161,7 @@ The pipeline is `[integration] → input-* → DNA → output-* → [integration
 
   [1]  Reads from an external system (Jira, GitHub, Notion). Owns auth, rate limits, webhooks.
   [2]  Parses a format into DNA. Deterministic (JSON, OpenAPI, DDL) or Probabilistic and LLM-backed (prose, transcripts, images).
-  [3]  Canonical form. Three layers (operational -> product -> technical), validated by @dna-codes/core.
+  [3]  Canonical form. Three layers (operational -> product -> technical), validated by @dna-codes/dna-core.
   [4]  Renders DNA into a format. Pure, no I/O (markdown, Mermaid, HTML).
   [5]  Writes to an external system. Field mapping, API writes, change detection.
 
@@ -173,9 +173,27 @@ The pipeline is `[integration] → input-* → DNA → output-* → [integration
 - **`output-*`** — renders DNA into a format string. No system knowledge; pure and local.
 - **`integration-*`** — connects to an external system bidirectionally. Owns auth, field mapping, rate limits, and API versioning for that system. May use `input-*` or `output-*` packages internally.
 
-Full API reference and layer-specific authoring DNA contracts live in [`@dna-codes/core/docs/`](packages/core/docs/).
+Full API reference and layer-specific authoring DNA contracts live in [`@dna-codes/dna-core/docs/`](packages/core/docs/).
 
-Packages are published to npm. Deno 2 can consume them directly via `npm:` specifiers (e.g. `import { validate } from "npm:@dna-codes/core"`); no JSR package is published.
+Packages are published to [GitHub Packages](https://github.com/orgs/dna-codes/packages) under the `@dna-codes` scope. To install, point npm at the registry:
+
+```sh
+echo '@dna-codes:registry=https://npm.pkg.github.com' >> .npmrc
+npm install @dna-codes/dna-core
+```
+
+Public visibility means no auth is needed for reads. Deno 2 can consume them via `npm:` specifiers (e.g. `import { validate } from "npm:@dna-codes/dna-core"`); no JSR package is published.
+
+### Releasing
+
+Releases are tag-driven. From `main`, after bumping versions:
+
+```sh
+git tag v0.4.0
+git push --tags
+```
+
+The push triggers `.github/workflows/publish.yml`, which builds every workspace and runs `npm publish --workspaces` against GitHub Packages using the auto-injected `GITHUB_TOKEN`. The workflow can also be re-run manually from the Actions tab via `workflow_dispatch`.
 
 ### Input coverage by layer
 
@@ -197,42 +215,42 @@ Legend: ✅ shipped · 🚧 planned (listed below) · 💡 candidate (natural fi
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/schemas` | Canonical JSON Schema (Draft 2020-12) definitions for all three layers — language-agnostic, zero deps |
-| `@dna-codes/core` | TypeScript bindings + per-layer and cross-layer validator; wraps `@dna-codes/schemas` |
+| `@dna-codes/dna-schemas` | Canonical JSON Schema (Draft 2020-12) definitions for all three layers — language-agnostic, zero deps |
+| `@dna-codes/dna-core` | TypeScript bindings + per-layer and cross-layer validator; wraps `@dna-codes/dna-schemas` |
 
 **Input — deterministic** (pure functions, no external dependencies)
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/input-json` | Infers Resources, Attributes, and Relationships from a plain JSON data sample |
-| `@dna-codes/input-openapi` | Parses an OpenAPI 3.x spec into a DNA Product API document |
-| `@dna-codes/input-ddl` | Parses SQL DDL into DNA Resources and Attributes |
+| `@dna-codes/dna-input-json` | Infers Resources, Attributes, and Relationships from a plain JSON data sample |
+| `@dna-codes/dna-input-openapi` | Parses an OpenAPI 3.x spec into a DNA Product API document |
+| `@dna-codes/dna-input-ddl` | Parses SQL DDL into DNA Resources and Attributes |
 
 **Input — probabilistic** (requires an LLM provider and API key)
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/input-text` | Converts freeform prose into DNA |
-| `@dna-codes/input-transcript` | Converts a meeting or interview transcript into DNA |
-| `@dna-codes/input-image` | Infers DNA from an image (screenshot, whiteboard, diagram) |
+| `@dna-codes/dna-input-text` | Converts freeform prose into DNA |
+| `@dna-codes/dna-input-transcript` | Converts a meeting or interview transcript into DNA |
+| `@dna-codes/dna-input-image` | Infers DNA from an image (screenshot, whiteboard, diagram) |
 
 **Output**
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/output-markdown` | Renders DNA as structured markdown documentation |
-| `@dna-codes/output-mermaid` | Renders DNA as Mermaid diagrams (ERDs, flowcharts) |
-| `@dna-codes/output-html` | Renders DNA as semantic HTML |
-| `@dna-codes/output-openapi` | Renders a Product API DNA as an OpenAPI 3.1 spec (YAML or JSON) — the contract layer between DNA and any technical implementation |
-| `@dna-codes/output-text` | Renders DNA as plain prose — one combined document or one per unit (Capability/Resource/Process) for integration writers |
+| `@dna-codes/dna-output-markdown` | Renders DNA as structured markdown documentation |
+| `@dna-codes/dna-output-mermaid` | Renders DNA as Mermaid diagrams (ERDs, flowcharts) |
+| `@dna-codes/dna-output-html` | Renders DNA as semantic HTML |
+| `@dna-codes/dna-output-openapi` | Renders a Product API DNA as an OpenAPI 3.1 spec (YAML or JSON) — the contract layer between DNA and any technical implementation |
+| `@dna-codes/dna-output-text` | Renders DNA as plain prose — one combined document or one per unit (Capability/Resource/Process) for integration writers |
 
 **Integrations**
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/integration-jira` | Bidirectional Jira Cloud integration: Epic → `input-text` → DNA → `output-text` → Stories |
-| `@dna-codes/integration-github` | Read/write DNA via GitHub Issues and Projects |
-| `@dna-codes/integration-notion` | Read/write DNA via Notion pages and databases |
+| `@dna-codes/dna-integration-jira` | Bidirectional Jira Cloud integration: Epic → `input-text` → DNA → `output-text` → Stories |
+| `@dna-codes/dna-integration-github` | Read/write DNA via GitHub Issues and Projects |
+| `@dna-codes/dna-integration-notion` | Read/write DNA via Notion pages and databases |
 
 **Templates**
 
@@ -240,8 +258,8 @@ Reference implementations for engineers and AI agents. Each ships an `AGENTS.md`
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/input-example` | Template for a new `input-*` — shows deterministic and probabilistic modes side-by-side |
-| `@dna-codes/output-example` | Template for a new `output-*` renderer with a sections pattern |
-| `@dna-codes/integration-example` | Template for a new `integration-*` — outbound API, inbound webhook (HMAC), and a CLI |
+| `@dna-codes/dna-input-example` | Template for a new `input-*` — shows deterministic and probabilistic modes side-by-side |
+| `@dna-codes/dna-output-example` | Template for a new `output-*` renderer with a sections pattern |
+| `@dna-codes/dna-integration-example` | Template for a new `integration-*` — outbound API, inbound webhook (HMAC), and a CLI |
 
 See the root [`AGENTS.md`](AGENTS.md) for overall repo orientation.

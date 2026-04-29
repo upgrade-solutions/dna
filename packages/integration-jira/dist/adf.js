@@ -49,7 +49,7 @@ function isBlock(type) {
         type === 'blockquote');
 }
 /**
- * Minimal markdown → ADF converter covering what @dna-codes/output-text emits:
+ * Minimal markdown → ADF converter covering what @dna-codes/dna-output-text emits:
  *   - paragraphs separated by blank lines
  *   - bullet lists (lines starting with "- ")
  *   - inline marks: **bold** and `code`

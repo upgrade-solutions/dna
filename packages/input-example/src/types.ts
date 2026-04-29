@@ -11,7 +11,7 @@
  *   or a single primitive — always a layered object.
  *
  * Keep the DNA types here loose (structural subsets, optional fields).
- * The authoritative shapes live in `@dna-codes/core` / `@dna-codes/schemas`
+ * The authoritative shapes live in `@dna-codes/dna-core` / `@dna-codes/dna-schemas`
  * and are enforced by the cross-layer validator, not at the adapter boundary.
  */
 

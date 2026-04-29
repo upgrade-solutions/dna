@@ -1,6 +1,6 @@
 {
-  "name": "@dna-codes/integration-example",
-  "version": "0.1.0",
+  "name": "@dna-codes/dna-integration-example",
+  "version": "0.4.0",
   "description": "Template for building a DNA integration-* package. Connects an external system bidirectionally via API calls, inbound webhooks, and a CLI. Fork this to bootstrap a new integration (Jira, GitHub, Notion, Linear, ...).",
   "license": "MIT",
   "main": "dist/index.js",
@@ -22,6 +22,7 @@
     "AGENTS.md"
   ],
   "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
     "access": "public"
   },
   "scripts": {

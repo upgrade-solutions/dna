@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LayeredConstructor = void 0;
-const core_1 = require("@dna-codes/core");
+const dna_core_1 = require("@dna-codes/dna-core");
 const schema_to_tool_1 = require("../tools/schema-to-tool");
 const COLLECTION_FOR = {
     resource: 'domain.resources',
@@ -30,7 +30,7 @@ function capitalize(s) {
 }
 class LayeredConstructor {
     constructor(options = {}) {
-        this.validator = new core_1.DnaValidator();
+        this.validator = new dna_core_1.DnaValidator();
         this.transcript = [];
         this.callCount = 0;
         this.finalizeAttempts = 0;

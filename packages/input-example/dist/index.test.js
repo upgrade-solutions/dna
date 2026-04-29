@@ -20,7 +20,7 @@ const sample = {
         { entity: 'loan', action: 'approve' },
     ],
 };
-describe('@dna-codes/input-example — parse (deterministic)', () => {
+describe('@dna-codes/dna-input-example — parse (deterministic)', () => {
     it('PascalCases entity names into Resources', () => {
         const { operational } = (0, index_1.parse)(sample, { domain: 'acme.finance.lending' });
         expect(operational.domain.resources.map((r) => r.name)).toEqual(['Loan', 'Borrower']);
@@ -68,7 +68,7 @@ function mockFetch(body, status = 200) {
     return { fetchImpl, calls };
 }
 const openAiBody = (content) => ({ choices: [{ message: { content } }] });
-describe('@dna-codes/input-example — parseText (probabilistic)', () => {
+describe('@dna-codes/dna-input-example — parseText (probabilistic)', () => {
     it('sends an OpenAI chat completion and parses the returned JSON', async () => {
         const dna = { operational: { domain: { name: 'x', path: 'x', resources: [] } } };
         const { fetchImpl, calls } = mockFetch(openAiBody(JSON.stringify(dna)));

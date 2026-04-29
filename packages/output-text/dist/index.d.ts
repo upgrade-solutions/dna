@@ -1,5 +1,5 @@
 /**
- * @dna-codes/output-text — render DNA as plain prose.
+ * @dna-codes/dna-output-text — render DNA as plain prose.
  *
  *   render(dna, options?)     → string                      // one combined document
  *   renderMany(dna, options?) → Array<{id, title, body}>    // one document per unit

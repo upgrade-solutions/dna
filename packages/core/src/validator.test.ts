@@ -451,6 +451,80 @@ describe('DnaValidator — product/core/resource', () => {
     }, 'product/core/resource')
     expect(result.valid).toBe(false)
   })
+
+  it('validates a Resource with an object Field carrying nested fields', () => {
+    const result = validator.validate({
+      name: 'Conversion',
+      fields: [
+        {
+          name: 'from',
+          label: 'From',
+          type: 'object',
+          required: true,
+          fields: [
+            { name: 'format', type: 'enum', values: ['text', 'json', 'dna'], required: true },
+            { name: 'input', type: 'string', required: true },
+          ],
+        },
+      ],
+    }, 'product/core/resource')
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('validates deeply-nested object Fields (recursion)', () => {
+    const result = validator.validate({
+      name: 'Wrapper',
+      fields: [
+        {
+          name: 'outer',
+          type: 'object',
+          fields: [
+            {
+              name: 'inner',
+              type: 'object',
+              fields: [
+                { name: 'leaf', type: 'string' },
+              ],
+            },
+          ],
+        },
+      ],
+    }, 'product/core/resource')
+    expect(result.valid).toBe(true)
+  })
+
+  it('rejects an object Field missing fields[]', () => {
+    const result = validator.validate({
+      name: 'Conversion',
+      fields: [{ name: 'from', type: 'object' }],
+    }, 'product/core/resource')
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.params?.missingProperty === 'fields')).toBe(true)
+  })
+
+  it('rejects an object Field with empty fields[] (minItems: 1)', () => {
+    const result = validator.validate({
+      name: 'Conversion',
+      fields: [{ name: 'from', type: 'object', fields: [] }],
+    }, 'product/core/resource')
+    expect(result.valid).toBe(false)
+  })
+
+  it('rejects an object Field carrying values[] (enum/object mutual exclusion)', () => {
+    const result = validator.validate({
+      name: 'Conversion',
+      fields: [
+        {
+          name: 'from',
+          type: 'object',
+          values: ['a', 'b'],
+          fields: [{ name: 'format', type: 'string' }],
+        },
+      ],
+    }, 'product/core/resource')
+    expect(result.valid).toBe(false)
+  })
 })
 
 describe('DnaValidator — product/core/operation', () => {

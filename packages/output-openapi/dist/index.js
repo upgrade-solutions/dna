@@ -21,7 +21,7 @@ const APPLICATION_JSON = 'application/json';
  * Render a DNA Product API document to an OpenAPI 3.1 specification.
  *
  * v0.1 scope: every request and response is `application/json`. The current
- * `@dna-codes/schemas` Endpoint shape carries no `content_type` field and a
+ * `@dna-codes/dna-schemas` Endpoint shape carries no `content_type` field and a
  * single `response` (not a status-code map), so SSE and multi-status responses
  * are not faithfully rendered. SSE behavior should be documented in the
  * endpoint's `description` (prose). See `redesign-endpoint-responses` for the
@@ -127,6 +127,21 @@ function mapFieldType(field) {
             return { type: 'string', format: 'uri' };
         case 'enum':
             return { type: 'string', ...(field.values ? { enum: field.values } : {}) };
+        case 'object': {
+            const subFields = field.fields ?? [];
+            const properties = {};
+            const required = [];
+            for (const sub of subFields) {
+                properties[sub.name] = fieldToJsonSchema(sub);
+                if (sub.required)
+                    required.push(sub.name);
+            }
+            return {
+                type: 'object',
+                properties,
+                ...(required.length ? { required } : {}),
+            };
+        }
         default:
             return { type: 'string' };
     }

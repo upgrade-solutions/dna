@@ -1,5 +1,5 @@
 /**
- * Scratch: run @dna-codes/input-text against Anthropic with your own key.
+ * Scratch: run @dna-codes/dna-input-text against Anthropic with your own key.
  *
  *   export ANTHROPIC_API_KEY=sk-ant-...
  *   npx ts-node packages/input-text/examples/run-anthropic.ts "We run a lending business..."

@@ -1,5 +1,5 @@
 /**
- * @dna-codes/output-example — template output renderer.
+ * @dna-codes/dna-output-example — template output renderer.
  *
  * Public contract (shared across output-*):
  *
@@ -9,7 +9,7 @@
  * - Never throws on malformed / partial DNA — returns `''` when there's
  *   nothing to render.
  * - Never returns null. If a section produces nothing, it's dropped.
- * - Zero runtime dependencies. `@dna-codes/core` is a dev dep (for types)
+ * - Zero runtime dependencies. `@dna-codes/dna-core` is a dev dep (for types)
  *   at most; don't import it at runtime.
  *
  * The demo renders DNA as plain-text markdown-lite. Fork the sections

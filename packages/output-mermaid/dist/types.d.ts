@@ -1,6 +1,6 @@
 /**
  * Loose structural types describing the DNA shapes this renderer reads.
- * Subset of @dna-codes/core schemas — only fields the renderer consumes.
+ * Subset of @dna-codes/dna-core schemas — only fields the renderer consumes.
  */
 export interface DnaInput {
     operational?: OperationalDna;

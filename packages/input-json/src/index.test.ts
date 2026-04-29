@@ -18,7 +18,7 @@ const bookSample = {
   ],
 }
 
-describe('@dna-codes/input-json', () => {
+describe('@dna-codes/dna-input-json', () => {
   describe('root resource', () => {
     it('names the root resource from options.name', () => {
       const { operational } = parse(bookSample, { name: 'Book' })
@@ -169,14 +169,14 @@ describe('@dna-codes/input-json', () => {
 
   /**
    * Drift detection: validate parse() output against the canonical operational
-   * JSON Schema from @dna-codes/schemas (loaded via @dna-codes/core). If the
+   * JSON Schema from @dna-codes/dna-schemas (loaded via @dna-codes/dna-core). If the
    * schema adds a required field or tightens a constraint, this test fails —
    * forcing the adapter to stay in sync.
    */
   describe('schema conformance', () => {
-    it('emits operational DNA that validates against @dna-codes/schemas', () => {
-      // Lazy require to keep @dna-codes/core a devDep (not a runtime dep).
-      const { DnaValidator } = require('@dna-codes/core') as typeof import('@dna-codes/core')
+    it('emits operational DNA that validates against @dna-codes/dna-schemas', () => {
+      // Lazy require to keep @dna-codes/dna-core a devDep (not a runtime dep).
+      const { DnaValidator } = require('@dna-codes/dna-core') as typeof import('@dna-codes/dna-core')
       const { operational } = parse(bookSample, { name: 'Book' })
       const result = new DnaValidator().validate(operational, 'https://dna.codes/schemas/operational')
       if (!result.valid) {

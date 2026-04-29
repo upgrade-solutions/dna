@@ -1,4 +1,4 @@
-# `@dna-codes/input-example`
+# `@dna-codes/dna-input-example`
 
 Template for building a DNA input adapter. Demonstrates **both** input modes in one package so you can see the full shape before committing to a direction:
 
@@ -12,13 +12,13 @@ Zero runtime dependencies. Probabilistic mode uses global `fetch` (Node 18+).
 ## Install
 
 ```bash
-npm install @dna-codes/input-example
+npm install @dna-codes/dna-input-example
 ```
 
 ## Usage — deterministic
 
 ```ts
-import { parse } from '@dna-codes/input-example'
+import { parse } from '@dna-codes/dna-input-example'
 
 const { operational } = parse(
   {
@@ -35,7 +35,7 @@ const { operational } = parse(
 ## Usage — probabilistic
 
 ```ts
-import { parseText } from '@dna-codes/input-example'
+import { parseText } from '@dna-codes/dna-input-example'
 
 const { operational, raw } = await parseText(
   'Acme runs a lending desk. Borrowers apply for loans; underwriters approve them.',
@@ -76,7 +76,7 @@ npx ts-node packages/input-example/examples/run-anthropic.ts "We run a lending b
 
 ## Validating the output
 
-Pass the result to `@dna-codes/core`'s `DnaValidator` to catch structural issues before downstream use.
+Pass the result to `@dna-codes/dna-core`'s `DnaValidator` to catch structural issues before downstream use.
 
 ## License
 

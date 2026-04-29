@@ -2,17 +2,17 @@
 /**
  * DNA ⇄ Jira field mapping.
  *
- * One Capability → one Story. `@dna-codes/output-text` renders the per-unit
+ * One Capability → one Story. `@dna-codes/dna-output-text` renders the per-unit
  * `{id, title, body}` shape, and we translate those into Jira `fields`
  * payloads. The description remains a plain string here — transport layer
  * wraps it in ADF on the way out.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dnaToStoryFields = dnaToStoryFields;
-const output_text_1 = require("@dna-codes/output-text");
+const dna_output_text_1 = require("@dna-codes/dna-output-text");
 const EPIC_LINK_FIELD = 'customfield_10014';
 function dnaToStoryFields(dna, options) {
-    const docs = (0, output_text_1.renderMany)(dna, {
+    const docs = (0, dna_output_text_1.renderMany)(dna, {
         styles: { capability: options.style ?? 'user-story' },
     });
     const mode = options.epicLinkMode ?? 'auto';

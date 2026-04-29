@@ -3,8 +3,8 @@
  *
  * - Basic auth: `Authorization: Basic <base64(email:apiToken)>`
  * - Uses global fetch; no SDK.
- * - Runtime deps: @dna-codes/input-text (epic description → DNA) and
- *   @dna-codes/output-text (DNA → per-capability Story prose). These are
+ * - Runtime deps: @dna-codes/dna-input-text (epic description → DNA) and
+ *   @dna-codes/dna-output-text (DNA → per-capability Story prose). These are
  *   legitimate runtime deps — the integration's whole purpose is to wire
  *   them into a real system.
  *

@@ -1,11 +1,11 @@
 /**
- * @dna-codes/integration-jira — bidirectional Jira Cloud integration.
+ * @dna-codes/dna-integration-jira — bidirectional Jira Cloud integration.
  *
  *   Jira Epic ──▶ input-text ──▶ DNA ──▶ output-text ──▶ Jira Stories
  *
  * One Capability in the DNA becomes one child Story under the Epic.
- * The Epic's description is fed into @dna-codes/input-text (LLM-backed);
- * each Capability is rendered by @dna-codes/output-text.renderMany.
+ * The Epic's description is fed into @dna-codes/dna-input-text (LLM-backed);
+ * each Capability is rendered by @dna-codes/dna-output-text.renderMany.
  *
  * No webhook surface — Jira Cloud's native outbound webhooks are not
  * signed in a way external verifiers can safely validate. Use Jira

@@ -1,21 +1,21 @@
-# `@dna-codes/input-text`
+# `@dna-codes/dna-input-text`
 
 Turn freeform prose about a business system into DNA by dispatching the text to an LLM. Supports **OpenAI**, **OpenRouter**, and **Anthropic**.
 
 > **Requires an API key.** Unlike the other `input-*` adapters, this one hits the network. It's still format-first (text in, DNA out) — it just needs a provider to do the interpretation.
 
-Lightweight: only depends on `@dna-codes/core` (for the validator used by layered mode) and `@dna-codes/schemas`. Uses global `fetch` (Node 18+).
+Lightweight: only depends on `@dna-codes/dna-core` (for the validator used by layered mode) and `@dna-codes/dna-schemas`. Uses global `fetch` (Node 18+).
 
 ## Install
 
 ```bash
-npm install @dna-codes/input-text
+npm install @dna-codes/dna-input-text
 ```
 
 ## Usage
 
 ```ts
-import { parse } from '@dna-codes/input-text'
+import { parse } from '@dna-codes/dna-input-text'
 
 const { operational, product, technical, raw } = await parse(
   `We run a small lending business. Borrowers apply for loans. Underwriters
@@ -55,7 +55,7 @@ One-shot mode produces a full JSON document in a single LLM call. That works wel
 Layered mode trades tokens for reliability. The model assembles the document one primitive at a time through tool calls (`add_resource`, `add_role`, `add_membership`, `add_operation`, ...). The runtime validates each call against the per-primitive JSON Schema and checks that any cross-primitive reference (e.g. `Membership.role`) points to something already declared. A bad call returns a structured error the model can recover from; a `finalize` call runs full schema validation and either succeeds or feeds errors back for correction.
 
 ```ts
-import { parse } from '@dna-codes/input-text'
+import { parse } from '@dna-codes/dna-input-text'
 
 const { operational, raw } = await parse(transcript, {
   provider: 'openai',
@@ -77,7 +77,7 @@ const { operational, raw } = await parse(transcript, {
 `LayeredConstructor` is a public, transport-free class. You can drive it directly without `parse()` — useful for embedding in an external agent (Claude Code, MCP server, custom Anthropic SDK loop) or for hand-building documents in tests/migrations with no LLM at all.
 
 ```ts
-import { LayeredConstructor, toOpenAITools, toAnthropicTools } from '@dna-codes/input-text'
+import { LayeredConstructor, toOpenAITools, toAnthropicTools } from '@dna-codes/dna-input-text'
 
 const ctor = new LayeredConstructor({ domain: { name: 'lending', path: 'acme.lending' } })
 
@@ -123,10 +123,10 @@ Smaller local models may struggle with strict JSON; see `examples/run-ollama.ts`
 
 ## Validating the output
 
-`parse` returns loose `Record<string, unknown>` shapes — LLMs are not strictly typed. If you want schema conformance, validate with `@dna-codes/core`:
+`parse` returns loose `Record<string, unknown>` shapes — LLMs are not strictly typed. If you want schema conformance, validate with `@dna-codes/dna-core`:
 
 ```ts
-import { DnaValidator } from '@dna-codes/core'
+import { DnaValidator } from '@dna-codes/dna-core'
 
 const { operational } = await parse(text, { provider: 'openai', apiKey })
 const result = new DnaValidator().validateOperational(operational)

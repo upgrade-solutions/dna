@@ -1,17 +1,17 @@
-# `@dna-codes/output-html`
+# `@dna-codes/dna-output-html`
 
-Render DNA documents as HTML — opinionated documentation output with configurable sections. Sibling of [`@dna-codes/output-markdown`](../output-markdown/); same sections, same options, same zero-dependency footprint.
+Render DNA documents as HTML — opinionated documentation output with configurable sections. Sibling of [`@dna-codes/dna-output-markdown`](../output-markdown/); same sections, same options, same zero-dependency footprint.
 
 ## Install
 
 ```bash
-npm install @dna-codes/output-html
+npm install @dna-codes/dna-output-html
 ```
 
 ## Usage
 
 ```ts
-import { render } from '@dna-codes/output-html'
+import { render } from '@dna-codes/dna-output-html'
 import operational from './dna/acme/operational.json'
 
 const html = render({ operational })
@@ -51,7 +51,7 @@ Returns an HTML string.
 
 **`Section`** values: `'summary'`, `'domain-model'`, `'capabilities'`, `'sops'`, `'process-flow'`.
 
-See [`@dna-codes/output-markdown`](../output-markdown/) for section-by-section details — content maps 1:1, just rendered as semantic HTML (`<section>`, `<table>`, `<ul>`, `<ol>`, `<code>`, `<strong>`) instead of markdown.
+See [`@dna-codes/dna-output-markdown`](../output-markdown/) for section-by-section details — content maps 1:1, just rendered as semantic HTML (`<section>`, `<table>`, `<ul>`, `<ol>`, `<code>`, `<strong>`) instead of markdown.
 
 ## License
 

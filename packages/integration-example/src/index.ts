@@ -1,5 +1,5 @@
 /**
- * @dna-codes/integration-example — template integration package.
+ * @dna-codes/dna-integration-example — template integration package.
  *
  * An `integration-*` connects an external system to DNA bidirectionally.
  * It owns three surfaces:
@@ -8,7 +8,7 @@
  *   2. Inbound webhooks     — parseWebhook()  (webhook.ts)
  *   3. A CLI                — runCli()        (cli.ts, bin/)
  *
- * Unlike input-* and output-*, an integration may depend on @dna-codes/core
+ * Unlike input-* and output-*, an integration may depend on @dna-codes/dna-core
  * at runtime — e.g. for validation before pushing. This template stays
  * zero-dep so fork it as-is, then add runtime deps deliberately.
  */

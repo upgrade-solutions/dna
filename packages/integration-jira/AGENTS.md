@@ -1,4 +1,4 @@
-# AGENTS.md — `@dna-codes/integration-jira`
+# AGENTS.md — `@dna-codes/dna-integration-jira`
 
 Notes for AI agents working inside this package.
 
@@ -16,8 +16,8 @@ This is the first integration to exercise the full bidirectional contract end-to
 
 The template `integration-example` ships zero runtime deps by design. This package takes two:
 
-- `@dna-codes/input-text` — parse the Epic description into DNA
-- `@dna-codes/output-text` — render one Story per DNA Capability
+- `@dna-codes/dna-input-text` — parse the Epic description into DNA
+- `@dna-codes/dna-output-text` — render one Story per DNA Capability
 
 Both are `@dna-codes/*` packages, not third-party SDKs. An integration legitimately needs to compose `input-*` and `output-*`; that's its reason to exist. Don't add other runtime deps without updating this note.
 
@@ -46,8 +46,8 @@ Both are `@dna-codes/*` packages, not third-party SDKs. An integration legitimat
 `fetch` is mocked via a local helper (see `src/index.test.ts`). Don't call the real Jira API in CI; add dry-run support rather than live tests.
 
 ```bash
-npm run build -w @dna-codes/integration-jira
-npm test   -w @dna-codes/integration-jira
+npm run build -w @dna-codes/dna-integration-jira
+npm test   -w @dna-codes/dna-integration-jira
 ```
 
 ## Manual smoke test

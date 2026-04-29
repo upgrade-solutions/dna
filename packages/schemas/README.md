@@ -1,11 +1,11 @@
-# `@dna-codes/schemas`
+# `@dna-codes/dna-schemas`
 
 Canonical JSON Schema (Draft 2020-12) definitions for DNA. Zero dependencies, no JS runtime — just JSON files that any JSON-Schema-aware tool in any language can validate against.
 
 ## Install
 
 ```bash
-npm install @dna-codes/schemas
+npm install @dna-codes/dna-schemas
 ```
 
 ## Layout
@@ -24,17 +24,17 @@ Every schema has a stable `$id` of the form `https://dna.codes/schemas/<layer>/<
 ## Usage from JavaScript
 
 ```ts
-import resource from '@dna-codes/schemas/operational/resource.json'
+import resource from '@dna-codes/dna-schemas/operational/resource.json'
 ```
 
-For a batteries-included JS/TS experience (typed bindings + a cross-layer validator), use [`@dna-codes/core`](../core/), which depends on this package.
+For a batteries-included JS/TS experience (typed bindings + a cross-layer validator), use [`@dna-codes/dna-core`](../core/), which depends on this package.
 
 ## Usage from other languages
 
 Point any JSON-Schema validator (Python `jsonschema`, Ruby `json-schema`, Rust `jsonschema` crate, Go `gojsonschema`, etc.) at the installed package root:
 
 ```
-node_modules/@dna-codes/schemas/
+node_modules/@dna-codes/dna-schemas/
 ```
 
 Register every file before validating — URIs cross-reference each other.

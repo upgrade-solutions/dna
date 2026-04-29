@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = require("@dna-codes/core");
+const dna_core_1 = require("@dna-codes/dna-core");
 const constructor_1 = require("./constructor");
 describe('LayeredConstructor — no-LLM direct usage', () => {
     it('exposes 11 tools (10 add_* + finalize)', () => {
@@ -55,7 +55,7 @@ describe('LayeredConstructor — no-LLM direct usage', () => {
         expect(final).toMatchObject({ ok: true, finalized: true });
         if (!('document' in final))
             throw new Error('expected document on finalized result');
-        const validator = new core_1.DnaValidator();
+        const validator = new dna_core_1.DnaValidator();
         const validation = validator.validate(final.document, 'operational');
         expect(validation.valid).toBe(true);
         const cross = validator.validateCrossLayer({ operational: final.document });

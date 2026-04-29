@@ -1,13 +1,13 @@
 /**
  * DNA ⇄ Jira field mapping.
  *
- * One Capability → one Story. `@dna-codes/output-text` renders the per-unit
+ * One Capability → one Story. `@dna-codes/dna-output-text` renders the per-unit
  * `{id, title, body}` shape, and we translate those into Jira `fields`
  * payloads. The description remains a plain string here — transport layer
  * wraps it in ADF on the way out.
  */
 
-import { renderMany, Style } from '@dna-codes/output-text'
+import { renderMany, Style } from '@dna-codes/dna-output-text'
 
 import { DnaInput, JiraIssueFields } from './types'
 

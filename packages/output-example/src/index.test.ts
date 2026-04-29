@@ -25,7 +25,7 @@ const dna: DnaInput = {
   },
 }
 
-describe('@dna-codes/output-example — render', () => {
+describe('@dna-codes/dna-output-example — render', () => {
   it('uses the domain path as the default title', () => {
     const out = render(dna)
     expect(out.split('\n')[0]).toBe('# acme.finance.lending')

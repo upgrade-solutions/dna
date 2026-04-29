@@ -4,8 +4,8 @@
  *
  * - Basic auth: `Authorization: Basic <base64(email:apiToken)>`
  * - Uses global fetch; no SDK.
- * - Runtime deps: @dna-codes/input-text (epic description → DNA) and
- *   @dna-codes/output-text (DNA → per-capability Story prose). These are
+ * - Runtime deps: @dna-codes/dna-input-text (epic description → DNA) and
+ *   @dna-codes/dna-output-text (DNA → per-capability Story prose). These are
  *   legitimate runtime deps — the integration's whole purpose is to wire
  *   them into a real system.
  *
@@ -14,11 +14,11 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createClient = createClient;
-const input_text_1 = require("@dna-codes/input-text");
-const output_text_1 = require("@dna-codes/output-text");
+const dna_input_text_1 = require("@dna-codes/dna-input-text");
+const dna_output_text_1 = require("@dna-codes/dna-output-text");
 const adf_1 = require("./adf");
 const mapping_1 = require("./mapping");
-const DEFAULT_USER_AGENT = '@dna-codes/integration-jira';
+const DEFAULT_USER_AGENT = '@dna-codes/dna-integration-jira';
 const DEFAULT_STORY_ISSUE_TYPE = 'Story';
 function createClient(options) {
     if (!options.baseUrl)
@@ -67,7 +67,7 @@ function createClient(options) {
         if (!text) {
             throw new Error(`integration-jira: epic ${key} has no summary or description to parse.`);
         }
-        const { raw, missingLayers, ...dna } = await (0, input_text_1.parse)(text, {
+        const { raw, missingLayers, ...dna } = await (0, dna_input_text_1.parse)(text, {
             provider: pullOptions.provider,
             apiKey: pullOptions.apiKey,
             ...(pullOptions.model ? { model: pullOptions.model } : {}),
@@ -99,7 +99,7 @@ function createClient(options) {
         });
     }
     async function updateStoriesUnderEpic(key, dna, style = 'user-story') {
-        const docs = (0, output_text_1.renderMany)(dna, { styles: { capability: style } });
+        const docs = (0, dna_output_text_1.renderMany)(dna, { styles: { capability: style } });
         if (!docs.length)
             return { epicKey: key, updated: [], skipped: [] };
         // Fetch every child of the epic — avoids JQL gymnastics and lets us

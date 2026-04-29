@@ -3,8 +3,8 @@
  *
  * - Basic auth: `Authorization: Basic <base64(email:apiToken)>`
  * - Uses global fetch; no SDK.
- * - Runtime deps: @dna-codes/input-text (epic description → DNA) and
- *   @dna-codes/output-text (DNA → per-capability Story prose). These are
+ * - Runtime deps: @dna-codes/dna-input-text (epic description → DNA) and
+ *   @dna-codes/dna-output-text (DNA → per-capability Story prose). These are
  *   legitimate runtime deps — the integration's whole purpose is to wire
  *   them into a real system.
  *
@@ -12,8 +12,8 @@
  * conversion lives in adf.ts.
  */
 
-import { parse as parseText } from '@dna-codes/input-text'
-import { renderMany, Style } from '@dna-codes/output-text'
+import { parse as parseText } from '@dna-codes/dna-input-text'
+import { renderMany, Style } from '@dna-codes/dna-output-text'
 
 import { extractText, fromMarkdown } from './adf'
 import { dnaToStoryFields } from './mapping'
@@ -31,7 +31,7 @@ import {
   UpdateStoriesResult,
 } from './types'
 
-const DEFAULT_USER_AGENT = '@dna-codes/integration-jira'
+const DEFAULT_USER_AGENT = '@dna-codes/dna-integration-jira'
 const DEFAULT_STORY_ISSUE_TYPE = 'Story'
 
 export function createClient(options: ClientOptions): Client {

@@ -1,6 +1,6 @@
 "use strict";
 /**
- * @dna-codes/input-example — template input adapter.
+ * @dna-codes/dna-input-example — template input adapter.
  *
  * This package demonstrates the two input modes with matching entry points:
  *
@@ -13,7 +13,7 @@
  *
  * Contract (shared across input-*):
  *   - Throw on structural errors the caller should fix; let the
- *     `@dna-codes/core` validator handle downstream DNA validation.
+ *     `@dna-codes/dna-core` validator handle downstream DNA validation.
  *   - Return an object keyed by DNA layer (operational, productCore, ...).
  *     Never return a bare array or scalar.
  *   - Zero runtime dependencies. Use global `fetch` for probabilistic mode.

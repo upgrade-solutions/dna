@@ -1,19 +1,19 @@
-# `@dna-codes/output-markdown`
+# `@dna-codes/dna-output-markdown`
 
 Render DNA documents as markdown — opinionated documentation output with configurable sections.
 
-Zero runtime dependencies. Works against the DNA shapes described by [`@dna-codes/core`](../../core/) but doesn't import it, so callers can pass raw JSON directly without an install graph.
+Zero runtime dependencies. Works against the DNA shapes described by [`@dna-codes/dna-core`](../../core/) but doesn't import it, so callers can pass raw JSON directly without an install graph.
 
 ## Install
 
 ```bash
-npm install @dna-codes/output-markdown
+npm install @dna-codes/dna-output-markdown
 ```
 
 ## Usage
 
 ```ts
-import { render } from '@dna-codes/output-markdown'
+import { render } from '@dna-codes/dna-output-markdown'
 import operational from './dna/acme/operational.json'
 
 const md = render({ operational })

@@ -18,12 +18,12 @@ Owns authoring `technical.json` for a domain.
 
 - `product.core.json` + `product.api.json` + `product.ui.json`
 - Domain-specific prompt (stack preferences, cloud target, dev vs prod expectations)
-- Catalog of available cells (below) and construct categories from `@dna-codes/schemas/technical/`
+- Catalog of available cells (below) and construct categories from `@dna-codes/dna-schemas/technical/`
 
 ### Outputs
 
 - **`technical.json`** at the target domain directory
-- Must validate against `@dna-codes/schemas/technical/technical.json`
+- Must validate against `@dna-codes/dna-schemas/technical/technical.json`
 - Must pass cross-layer validation (product.core ↔ technical) via `cba validate`
 
 ### Must not touch

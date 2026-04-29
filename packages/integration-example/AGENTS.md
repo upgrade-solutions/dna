@@ -1,4 +1,4 @@
-# AGENTS.md — `@dna-codes/integration-example`
+# AGENTS.md — `@dna-codes/dna-integration-example`
 
 Guidance for AI agents forking this template into a new `integration-*` package.
 
@@ -26,7 +26,7 @@ If your target system lacks one (e.g. no webhooks), delete the file and mention 
 
 1. Copy the directory: `cp -R packages/integration-example packages/integration-<system>`
 2. Update `package.json`:
-   - `name` → `@dna-codes/integration-<system>`
+   - `name` → `@dna-codes/dna-integration-<system>`
    - `bin` key → `integration-<system>: ./bin/integration-<system>.js`
    - `description` — one sentence stating the target system.
 3. Rename `bin/integration-example.js` → `bin/integration-<system>.js` (keep it executable).
@@ -88,8 +88,8 @@ After creating the directory, add it to the root `package.json` `workspaces` arr
 ## Testing
 
 ```bash
-npm run build -w @dna-codes/integration-<system>
-npm test   -w @dna-codes/integration-<system>
+npm run build -w @dna-codes/dna-integration-<system>
+npm test   -w @dna-codes/dna-integration-<system>
 ```
 
 Mock `fetch` for client tests (see `src/index.test.ts` for the pattern). For webhook tests, compute real HMACs with Node's `crypto` — don't stub them.

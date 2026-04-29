@@ -1,4 +1,4 @@
-# AGENTS.md — `@dna-codes/output-example`
+# AGENTS.md — `@dna-codes/dna-output-example`
 
 Guidance for AI agents forking this template into a new `output-*` package.
 
@@ -14,13 +14,13 @@ Guidance for AI agents forking this template into a new `output-*` package.
 
 1. Copy the directory: `cp -R packages/output-example packages/output-<format>`
 2. Update `package.json`:
-   - `name` → `@dna-codes/output-<format>`
+   - `name` → `@dna-codes/dna-output-<format>`
    - `description` — one sentence stating the output format.
 3. Replace the sections/diagrams:
    - For text-like outputs (markdown, HTML, plaintext): keep `src/sections/` and rewrite each section for your format. Extend the `Section` union in `src/index.ts`.
-   - For diagram outputs (Mermaid, GraphViz, PlantUML): rename `sections/` to `diagrams/` and rename the option from `sections` to `diagrams` (see `@dna-codes/output-mermaid` for precedent).
+   - For diagram outputs (Mermaid, GraphViz, PlantUML): rename `sections/` to `diagrams/` and rename the option from `sections` to `diagrams` (see `@dna-codes/dna-output-mermaid` for precedent).
 4. Rewrite `src/util.ts` with helpers for your format (escaping, wrapping, ID sanitization).
-5. If your format has a wrapper concept (e.g. a standalone HTML document vs. a fragment), add a boolean option — see `@dna-codes/output-html`'s `standalone` option for precedent.
+5. If your format has a wrapper concept (e.g. a standalone HTML document vs. a fragment), add a boolean option — see `@dna-codes/dna-output-html`'s `standalone` option for precedent.
 6. Update tests to assert on the new output shape.
 7. Update this `AGENTS.md` and `README.md`.
 
@@ -30,7 +30,7 @@ Guidance for AI agents forking this template into a new `output-*` package.
 - **Sync and pure.** No I/O, no Promises.
 - **Never throws on partial/empty DNA.** Return `''` when there's nothing to render.
 - **Returns `string`.** If you need to emit binary output (PDF), return a base64 string or export a second function like `renderBinary(): Uint8Array` — don't change `render`'s signature.
-- **Zero runtime dependencies.** `@dna-codes/core` may be a dev dep for types only, but never imported at runtime. Keep the `DnaInput` type local and loose.
+- **Zero runtime dependencies.** `@dna-codes/dna-core` may be a dev dep for types only, but never imported at runtime. Keep the `DnaInput` type local and loose.
 - **Sections/diagrams return `string | null`.** `null` means "skip me". The top-level `render` drops nulls and joins the rest.
 
 ## Design tips
@@ -47,6 +47,6 @@ After creating the directory, add it to the root `package.json` `workspaces` arr
 ## Testing
 
 ```bash
-npm run build -w @dna-codes/output-<format>
-npm test   -w @dna-codes/output-<format>
+npm run build -w @dna-codes/dna-output-<format>
+npm test   -w @dna-codes/dna-output-<format>
 ```

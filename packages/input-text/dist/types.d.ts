@@ -44,8 +44,8 @@ export interface ParseOptions {
     maxToolCalls?: number;
 }
 /**
- * Parsed DNA is returned as plain objects matching the shapes in @dna-codes/schemas.
- * Types here are intentionally loose — validate with @dna-codes/core if you need
+ * Parsed DNA is returned as plain objects matching the shapes in @dna-codes/dna-schemas.
+ * Types here are intentionally loose — validate with @dna-codes/dna-core if you need
  * strict conformance; the raw model output is always included for debugging.
  */
 export interface ParseResult {

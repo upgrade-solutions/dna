@@ -1,5 +1,5 @@
 /**
- * Scratch: run @dna-codes/input-text against a local Ollama server.
+ * Scratch: run @dna-codes/dna-input-text against a local Ollama server.
  *
  *   ollama pull llama3.1
  *   ollama serve   # if not already running

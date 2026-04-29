@@ -1,4 +1,4 @@
-import { DnaValidator } from '@dna-codes/core'
+import { DnaValidator } from '@dna-codes/dna-core'
 import { LayeredConstructor } from './constructor'
 
 describe('LayeredConstructor — no-LLM direct usage', () => {

@@ -1,10 +1,11 @@
 {
-  "name": "@dna-codes/core",
-  "version": "0.3.0",
-  "description": "DNA — a JSON description language for business systems. Ships typed schema bindings, a JSON-schema manifest, and the cross-layer validator. Schemas themselves live in @dna-codes/schemas.",
+  "name": "@dna-codes/dna-core",
+  "version": "0.4.0",
+  "description": "DNA — a JSON description language for business systems. Ships typed schema bindings, a JSON-schema manifest, and the cross-layer validator. Schemas themselves live in @dna-codes/dna-schemas.",
   "keywords": ["dna", "json-schema", "dsl", "business-modeling", "cell-based-architecture"],
   "license": "MIT",
   "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
     "access": "public"
   },
   "main": "dist/index.js",
@@ -26,7 +27,7 @@
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
   "dependencies": {
-    "@dna-codes/schemas": "^0.3.0",
+    "@dna-codes/dna-schemas": "^0.4.0",
     "ajv": "^8.17.1"
   },
   "devDependencies": {

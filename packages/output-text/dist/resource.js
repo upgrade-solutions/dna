@@ -1,7 +1,7 @@
 "use strict";
 /**
  * Render a single Resource. Resources only render in `product-dna` style — the
- * other styles are action-shaped and don't fit an entity.
+ * other styles are action-shaped and don't fit a structure.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resourceTitle = resourceTitle;

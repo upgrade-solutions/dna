@@ -9,7 +9,7 @@ import {
   schemas,
 } from './index'
 
-describe('@dna-codes/core', () => {
+describe('@dna-codes/dna-core', () => {
   describe('schemas', () => {
     it('loads all 14 operational primitive schemas', () => {
       const op = schemas.operational

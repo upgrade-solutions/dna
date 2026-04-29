@@ -1,4 +1,4 @@
-import { type JsonSchema } from '@dna-codes/core';
+import { type JsonSchema } from '@dna-codes/dna-core';
 export type PrimitiveKind = 'resource' | 'person' | 'role' | 'group' | 'membership' | 'operation' | 'task' | 'process' | 'trigger' | 'rule';
 export declare const PRIMITIVE_KINDS: PrimitiveKind[];
 export interface ToolDefinition {

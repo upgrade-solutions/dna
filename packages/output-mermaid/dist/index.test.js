@@ -1,24 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("./index");
-const core_1 = require("@dna-codes/core");
-describe('@dna-codes/output-mermaid', () => {
+const dna_core_1 = require("@dna-codes/dna-core");
+describe('@dna-codes/dna-output-mermaid', () => {
     describe('render() — defaults and options', () => {
         it('emits both default diagrams', () => {
-            const out = (0, index_1.render)(core_1.bookshopInput);
+            const out = (0, index_1.render)(dna_core_1.bookshopInput);
             expect(out).toContain('erDiagram');
             expect(out).toContain('flowchart TD');
         });
         it('honors an explicit diagrams list', () => {
-            const erdOnly = (0, index_1.render)(core_1.bookshopInput, { diagrams: ['erd'] });
+            const erdOnly = (0, index_1.render)(dna_core_1.bookshopInput, { diagrams: ['erd'] });
             expect(erdOnly).toContain('erDiagram');
             expect(erdOnly).not.toContain('flowchart');
-            const flowOnly = (0, index_1.render)(core_1.bookshopInput, { diagrams: ['flowchart'] });
+            const flowOnly = (0, index_1.render)(dna_core_1.bookshopInput, { diagrams: ['flowchart'] });
             expect(flowOnly).toContain('flowchart TD');
             expect(flowOnly).not.toContain('erDiagram');
         });
         it('applies flowchartDirection option', () => {
-            const lr = (0, index_1.render)(core_1.bookshopInput, { diagrams: ['flowchart'], flowchartDirection: 'LR' });
+            const lr = (0, index_1.render)(dna_core_1.bookshopInput, { diagrams: ['flowchart'], flowchartDirection: 'LR' });
             expect(lr).toContain('flowchart LR');
             expect(lr).not.toContain('flowchart TD');
         });
@@ -28,7 +28,7 @@ describe('@dna-codes/output-mermaid', () => {
         it('skips diagrams whose data is missing', () => {
             const noProcess = {
                 operational: {
-                    ...core_1.bookshopInput.operational,
+                    ...dna_core_1.bookshopInput.operational,
                     processes: [],
                 },
             };
@@ -39,7 +39,7 @@ describe('@dna-codes/output-mermaid', () => {
     });
     describe('diagram: erd', () => {
         it('emits an entity block per resource with attributes', () => {
-            const out = (0, index_1.render)(core_1.bookshopInput, { diagrams: ['erd'] });
+            const out = (0, index_1.render)(dna_core_1.bookshopInput, { diagrams: ['erd'] });
             expect(out).toContain('Book {');
             expect(out).toContain('string id');
             expect(out).toContain('string title');
@@ -48,7 +48,7 @@ describe('@dna-codes/output-mermaid', () => {
             expect(out).toContain('string name');
         });
         it('emits a relationship edge with the mapped cardinality', () => {
-            const out = (0, index_1.render)(core_1.bookshopInput, { diagrams: ['erd'] });
+            const out = (0, index_1.render)(dna_core_1.bookshopInput, { diagrams: ['erd'] });
             // many-to-one → }o--||
             expect(out).toContain('Book }o--|| Author : "Book.author"');
         });
@@ -64,18 +64,18 @@ describe('@dna-codes/output-mermaid', () => {
     });
     describe('diagram: flowchart', () => {
         it('emits a subgraph per process', () => {
-            const out = (0, index_1.render)(core_1.bookshopInput, { diagrams: ['flowchart'] });
+            const out = (0, index_1.render)(dna_core_1.bookshopInput, { diagrams: ['flowchart'] });
             expect(out).toContain('subgraph PublishFlow["PublishFlow"]');
             expect(out).toContain('end');
         });
         it('emits step nodes labeled by each task\'s operation', () => {
-            const out = (0, index_1.render)(core_1.bookshopInput, { diagrams: ['flowchart'] });
+            const out = (0, index_1.render)(dna_core_1.bookshopInput, { diagrams: ['flowchart'] });
             expect(out).toContain('review["Book.Publish"]');
             expect(out).toContain('approve["Book.Publish"]');
             expect(out).toContain('reject["Book.Retire"]');
         });
         it('emits arrows with condition/else labels', () => {
-            const out = (0, index_1.render)(core_1.bookshopInput, { diagrams: ['flowchart'] });
+            const out = (0, index_1.render)(dna_core_1.bookshopInput, { diagrams: ['flowchart'] });
             expect(out).toContain('review -- "BookIsDraft" --> approve');
             expect(out).toContain('approve -- "else" --> reject');
         });

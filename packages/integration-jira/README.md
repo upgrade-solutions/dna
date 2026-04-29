@@ -1,21 +1,21 @@
-# `@dna-codes/integration-jira`
+# `@dna-codes/dna-integration-jira`
 
 Bidirectional DNA integration for Jira Cloud.
 
 ```
-Jira Epic  ──▶  @dna-codes/input-text  ──▶  DNA  ──▶  @dna-codes/output-text  ──▶  Jira Stories
+Jira Epic  ──▶  @dna-codes/dna-input-text  ──▶  DNA  ──▶  @dna-codes/dna-output-text  ──▶  Jira Stories
   (read)              (LLM parse)                   (renderMany: 1 per Capability)      (write)
 ```
 
-- **Pull:** fetch an Epic, extract its summary + description (ADF or plain), parse to DNA via `@dna-codes/input-text`.
-- **Push:** render DNA with `@dna-codes/output-text.renderMany({ unit: 'capability' })`, create one child Story per entry under the Epic.
+- **Pull:** fetch an Epic, extract its summary + description (ADF or plain), parse to DNA via `@dna-codes/dna-input-text`.
+- **Push:** render DNA with `@dna-codes/dna-output-text.renderMany({ unit: 'capability' })`, create one child Story per entry under the Epic.
 
-Node 18+ (global `fetch`). Runtime deps: `@dna-codes/input-text`, `@dna-codes/output-text`.
+Node 18+ (global `fetch`). Runtime deps: `@dna-codes/dna-input-text`, `@dna-codes/dna-output-text`.
 
 ## Install
 
 ```bash
-npm install @dna-codes/integration-jira
+npm install @dna-codes/dna-integration-jira
 ```
 
 ## Credentials
@@ -31,7 +31,7 @@ export JIRA_PROJECT_KEY=ENG
 export JIRA_STORY_ISSUE_TYPE=Story
 ```
 
-For the pull step (epic → DNA), `@dna-codes/input-text` needs an LLM provider:
+For the pull step (epic → DNA), `@dna-codes/dna-input-text` needs an LLM provider:
 
 ```bash
 export DNA_LLM_PROVIDER=anthropic       # or openai / openrouter
@@ -64,7 +64,7 @@ npx integration-jira sync --epic ENG-123
 ## Programmatic usage
 
 ```ts
-import { createClient } from '@dna-codes/integration-jira'
+import { createClient } from '@dna-codes/dna-integration-jira'
 
 const client = createClient({
   baseUrl: process.env.JIRA_BASE_URL!,

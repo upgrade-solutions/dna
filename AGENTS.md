@@ -39,7 +39,7 @@ Every package has a matching `AGENTS.md` — check the relevant template before 
   - integrations: `createClient(options)` + `parseWebhook(...)` + `runCli(argv)`
 - **Return layered DNA** — always an object keyed by `operational` / `productCore` / `productApi` / `productUi` / `technical`. Never a bare resource / array.
 - **Layers are one-way downstream.** Operational → Product → Technical. Upper layers never import lower.
-- **Cross-layer references are strings.** Validated by `@dna-codes/core`, not by JSON Schema `$ref`.
+- **Cross-layer references are strings.** Validated by `@dna-codes/dna-core`, not by JSON Schema `$ref`.
 - **DNA naming:** Operational DNA uses the Actor > Action > Resource triad. Resources are PascalCase singular. Actions are PascalCase and must pair with a Resource. Capability names are `Resource.Action`.
 
 ## Creating a new package
@@ -50,7 +50,7 @@ Every package has a matching `AGENTS.md` — check the relevant template before 
 4. Add the new package to the `workspaces` array in the root `package.json`.
 5. Add a row to the package table in the root `README.md`.
 6. `npm install` from the repo root to link workspaces.
-7. `npm run build -w @dna-codes/<new-name>` then `npm test -w @dna-codes/<new-name>`.
+7. `npm run build -w @dna-codes/dna-<new-name>` then `npm test -w @dna-codes/dna-<new-name>`.
 
 ## Development flow (from CLAUDE.md)
 
@@ -68,8 +68,8 @@ Every package has a matching `AGENTS.md` — check the relevant template before 
 
 ## What NOT to do
 
-- Don't import `@dna-codes/core` at runtime from `input-*` or `output-*` — use it as a dev dep for types only. Integrations may import it at runtime for validation.
+- Don't import `@dna-codes/dna-core` at runtime from `input-*` or `output-*` — use it as a dev dep for types only. Integrations may import it at runtime for validation.
 - Don't reach across layers — an operational helper must not know about Product or Technical shapes.
-- Don't add schema validation inside an adapter. That's `@dna-codes/core`'s job.
+- Don't add schema validation inside an adapter. That's `@dna-codes/dna-core`'s job.
 - Don't invent DNA fields. If a source doesn't give you a value, omit the field.
 - Don't skip the webhook signature check. Ever.

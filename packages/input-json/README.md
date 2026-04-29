@@ -1,4 +1,4 @@
-# `@dna-codes/input-json`
+# `@dna-codes/dna-input-json`
 
 Infer a DNA operational slice from a **plain JSON data sample** — not JSON Schema. Given a record (or an array of records), it produces Resources, Attributes, and Relationships by walking the structure. Zero runtime dependencies.
 
@@ -10,13 +10,13 @@ Useful for bootstrapping DNA from:
 ## Install
 
 ```bash
-npm install @dna-codes/input-json
+npm install @dna-codes/dna-input-json
 ```
 
 ## Usage
 
 ```ts
-import { parse } from '@dna-codes/input-json'
+import { parse } from '@dna-codes/dna-input-json'
 
 const sample = {
   id: 'book-1',

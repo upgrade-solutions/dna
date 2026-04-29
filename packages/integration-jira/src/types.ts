@@ -7,13 +7,13 @@
  * on the way out.
  */
 
-import type { ParseResult } from '@dna-codes/input-text'
-import type { Style } from '@dna-codes/output-text'
+import type { ParseResult } from '@dna-codes/dna-input-text'
+import type { Style } from '@dna-codes/dna-output-text'
 
 /**
  * The DNA shape consumed and emitted by this integration. Matches the
- * layer fields `@dna-codes/input-text` returns (minus transport metadata
- * `raw` and `missingLayers`) and the fields `@dna-codes/output-text` reads.
+ * layer fields `@dna-codes/dna-input-text` returns (minus transport metadata
+ * `raw` and `missingLayers`) and the fields `@dna-codes/dna-output-text` reads.
  */
 export type DnaInput = Omit<ParseResult, 'raw' | 'missingLayers'>
 
@@ -90,7 +90,7 @@ export interface ClientOptions {
 }
 
 export interface PullEpicOptions {
-  /** LLM provider — passed through to @dna-codes/input-text. */
+  /** LLM provider — passed through to @dna-codes/dna-input-text. */
   provider: 'openai' | 'openrouter' | 'anthropic'
   apiKey: string
   model?: string

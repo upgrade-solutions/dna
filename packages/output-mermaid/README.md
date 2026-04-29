@@ -1,17 +1,17 @@
-# `@dna-codes/output-mermaid`
+# `@dna-codes/dna-output-mermaid`
 
 Render DNA documents as [Mermaid](https://mermaid.js.org/) diagrams — ERDs from Resources + Relationships, flowcharts from Processes. Zero runtime dependencies.
 
 ## Install
 
 ```bash
-npm install @dna-codes/output-mermaid
+npm install @dna-codes/dna-output-mermaid
 ```
 
 ## Usage
 
 ```ts
-import { render } from '@dna-codes/output-mermaid'
+import { render } from '@dna-codes/dna-output-mermaid'
 import operational from './dna/acme/operational.json'
 
 const mermaid = render({ operational })
@@ -28,7 +28,7 @@ render({ operational }, { diagrams: ['flowchart'], flowchartDirection: 'LR' })
 Wrap blocks in markdown fences (caller's job):
 
 ```ts
-import { render } from '@dna-codes/output-mermaid'
+import { render } from '@dna-codes/dna-output-mermaid'
 const md = '```mermaid\n' + render({ operational }) + '```\n'
 ```
 

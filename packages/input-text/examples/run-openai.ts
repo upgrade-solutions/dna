@@ -1,5 +1,5 @@
 /**
- * Scratch: run @dna-codes/input-text against OpenAI with your own key.
+ * Scratch: run @dna-codes/dna-input-text against OpenAI with your own key.
  *
  *   export OPENAI_API_KEY=sk-...
  *   npx ts-node packages/input-text/examples/run-openai.ts "We run a lending business..."

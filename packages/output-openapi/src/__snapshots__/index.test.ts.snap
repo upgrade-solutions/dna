@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`@dna-codes/output-openapi render() — bookshop fixture emits stable output for the bookshop fixture (snapshot) 1`] = `
+exports[`@dna-codes/dna-output-openapi render() — bookshop fixture emits stable output for the bookshop fixture (snapshot) 1`] = `
 "openapi: 3.1.0
 info:
   title: Bookshop API
@@ -122,5 +122,72 @@ components:
         note:
           type: string
           description: Optional editorial note.
+"
+`;
+
+exports[`@dna-codes/dna-output-openapi render() — nested object Fields emits stable output for the nested-object fixture (snapshot) 1`] = `
+"openapi: 3.1.0
+info:
+  title: Convert API
+  version: 0.1.0
+tags:
+- name: Convert
+paths:
+  "/v1/convert":
+    post:
+      operationId: conversionCreate
+      tags:
+      - Convert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ConvertRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ConvertResponse"
+components:
+  schemas:
+    ConvertRequest:
+      type: object
+      properties:
+        from:
+          type: object
+          properties:
+            format:
+              type: string
+              enum:
+              - text
+              - json
+              - dna
+            input:
+              type: string
+          required:
+          - format
+          - input
+        to:
+          type: object
+          properties:
+            format:
+              type: string
+              enum:
+              - text
+              - json
+              - dna
+          required:
+          - format
+      required:
+      - from
+      - to
+    ConvertResponse:
+      type: object
+      properties:
+        output:
+          type: string
 "
 `;

@@ -51,7 +51,7 @@ const pets = {
         },
     },
 };
-describe('@dna-codes/input-openapi', () => {
+describe('@dna-codes/dna-input-openapi', () => {
     describe('namespace', () => {
         it('derives name from info.title in PascalCase', () => {
             const { productApi } = (0, index_1.parse)(pets);
@@ -142,12 +142,12 @@ describe('@dna-codes/input-openapi', () => {
     });
     /**
      * Drift detection: validate parse() output against the canonical product.api
-     * JSON Schema from @dna-codes/schemas (loaded via @dna-codes/core). If the
+     * JSON Schema from @dna-codes/dna-schemas (loaded via @dna-codes/dna-core). If the
      * schema changes shape, this test fails until the adapter catches up.
      */
     describe('schema conformance', () => {
-        it('emits product.api DNA that validates against @dna-codes/schemas', () => {
-            const { DnaValidator } = require('@dna-codes/core');
+        it('emits product.api DNA that validates against @dna-codes/dna-schemas', () => {
+            const { DnaValidator } = require('@dna-codes/dna-core');
             const { productApi } = (0, index_1.parse)(pets);
             const result = new DnaValidator().validate(productApi, 'https://dna.codes/schemas/product/api');
             if (!result.valid) {

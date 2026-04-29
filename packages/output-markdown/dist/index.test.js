@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("./index");
-const core_1 = require("@dna-codes/core");
-describe('@dna-codes/output-markdown', () => {
+const dna_core_1 = require("@dna-codes/dna-core");
+describe('@dna-codes/dna-output-markdown', () => {
     describe('render() — document scaffolding', () => {
         it('renders every default section', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput);
+            const md = (0, index_1.render)(dna_core_1.bookshopInput);
             expect(md).toContain('# shop.books');
             expect(md).toContain('## Summary');
             expect(md).toContain('## Domain Model');
@@ -14,7 +14,7 @@ describe('@dna-codes/output-markdown', () => {
             expect(md).toContain('## Process Flows');
         });
         it('honors an explicit sections list and drops the rest', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
+            const md = (0, index_1.render)(dna_core_1.bookshopInput, { sections: ['summary'] });
             expect(md).toContain('## Summary');
             expect(md).not.toContain('## Domain Model');
             expect(md).not.toContain('## Operations');
@@ -22,21 +22,21 @@ describe('@dna-codes/output-markdown', () => {
             expect(md).not.toContain('## Process Flows');
         });
         it('supports a custom title override', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, { title: 'Bookshop Handbook' });
+            const md = (0, index_1.render)(dna_core_1.bookshopInput, { title: 'Bookshop Handbook' });
             expect(md).toContain('# Bookshop Handbook');
             expect(md).not.toContain('# shop.books');
         });
         it('falls back to domain.name when path is missing', () => {
             const noPath = {
                 operational: {
-                    ...core_1.bookshopInput.operational,
-                    domain: { ...core_1.bookshopInput.operational.domain, path: undefined },
+                    ...dna_core_1.bookshopInput.operational,
+                    domain: { ...dna_core_1.bookshopInput.operational.domain, path: undefined },
                 },
             };
             expect((0, index_1.render)(noPath)).toContain('# shop');
         });
         it('shifts heading levels with headingLevel: 2', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, {
+            const md = (0, index_1.render)(dna_core_1.bookshopInput, {
                 sections: ['summary'],
                 headingLevel: 2,
             });
@@ -49,7 +49,7 @@ describe('@dna-codes/output-markdown', () => {
     });
     describe('section: summary', () => {
         it('lists primitive counts for populated collections only', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
+            const md = (0, index_1.render)(dna_core_1.bookshopInput, { sections: ['summary'] });
             expect(md).toContain('- Resources: 2');
             expect(md).toContain('- Operations: 3');
             expect(md).toContain('- Rules: 2');
@@ -59,11 +59,11 @@ describe('@dna-codes/output-markdown', () => {
             expect(md).not.toContain('Equations:');
         });
         it('names top-level resources', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
+            const md = (0, index_1.render)(dna_core_1.bookshopInput, { sections: ['summary'] });
             expect(md).toContain('**Top-level resources:** `Book`, `Author`');
         });
         it('honors a rename map for primitive labels', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, {
+            const md = (0, index_1.render)(dna_core_1.bookshopInput, {
                 sections: ['summary'],
                 rename: { Persons: 'Individuals', Roles: 'Positions', Resources: 'Items' },
             });
@@ -77,7 +77,7 @@ describe('@dna-codes/output-markdown', () => {
             expect(md).toContain('**Top-level items:** `Book`, `Author`');
         });
         it('leaves canonical labels untouched when no rename is provided', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['summary'] });
+            const md = (0, index_1.render)(dna_core_1.bookshopInput, { sections: ['summary'] });
             expect(md).toContain('- Persons: 1');
             expect(md).toContain('- Roles: 1');
             expect(md).toContain('**Top-level resources:**');
@@ -85,7 +85,7 @@ describe('@dna-codes/output-markdown', () => {
     });
     describe('section: domain-model', () => {
         it('renders a resource with attribute table, actions, and relationships', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['domain-model'] });
+            const md = (0, index_1.render)(dna_core_1.bookshopInput, { sections: ['domain-model'] });
             expect(md).toContain('### Book');
             expect(md).toContain('| Attribute | Type | Required | Description |');
             expect(md).toContain('| `id` | string | yes |');
@@ -96,7 +96,7 @@ describe('@dna-codes/output-markdown', () => {
     });
     describe('section: operations', () => {
         it('renders triggers, access rules, condition rules, and Operation.changes', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['operations'] });
+            const md = (0, index_1.render)(dna_core_1.bookshopInput, { sections: ['operations'] });
             expect(md).toContain('### Book.Publish');
             expect(md).toContain('**Triggered by:**');
             expect(md).toContain('- user');
@@ -111,7 +111,7 @@ describe('@dna-codes/output-markdown', () => {
     });
     describe('section: sops', () => {
         it('renders numbered steps that resolve task → actor + operation', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['sops'] });
+            const md = (0, index_1.render)(dna_core_1.bookshopInput, { sections: ['sops'] });
             expect(md).toContain('### PublishFlow');
             expect(md).toContain('**Operator:** `Editor`');
             expect(md).toContain('1. **review** — `Editor` does `Book.Publish`');
@@ -122,7 +122,7 @@ describe('@dna-codes/output-markdown', () => {
     });
     describe('section: process-flow', () => {
         it('renders an ASCII outline with condition markers and dep arrows', () => {
-            const md = (0, index_1.render)(core_1.bookshopInput, { sections: ['process-flow'] });
+            const md = (0, index_1.render)(dna_core_1.bookshopInput, { sections: ['process-flow'] });
             expect(md).toContain('### PublishFlow');
             expect(md).toContain('```');
             expect(md).toContain('├── review: review-book');

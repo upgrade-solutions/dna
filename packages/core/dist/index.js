@@ -38,7 +38,7 @@ exports.resolveSchemaFile = resolveSchemaFile;
 exports.allSchemas = allSchemas;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
-exports.SCHEMA_ROOT = path.dirname(require.resolve('@dna-codes/schemas/package.json'));
+exports.SCHEMA_ROOT = path.dirname(require.resolve('@dna-codes/dna-schemas/package.json'));
 function load(rel) {
     const file = path.join(exports.SCHEMA_ROOT, rel);
     return JSON.parse(fs.readFileSync(file, 'utf-8'));

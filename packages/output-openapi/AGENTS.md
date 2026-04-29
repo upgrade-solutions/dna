@@ -1,4 +1,4 @@
-# AGENTS.md — `@dna-codes/output-openapi`
+# AGENTS.md — `@dna-codes/dna-output-openapi`
 
 Guidance for AI agents working on this package.
 
@@ -20,7 +20,7 @@ Guidance for AI agents working on this package.
 
 - **Signature:** `render(productApi: ProductApi, options?: RenderOptions): OpenApiOutput`
 - **Sync and pure.** No I/O, no Promises.
-- **Zero runtime dependencies.** `@dna-codes/core` is a dev-dep for the test fixture only; never imported at runtime.
+- **Zero runtime dependencies.** `@dna-codes/dna-core` is a dev-dep for the test fixture only; never imported at runtime.
 - **YAML stringifier is hand-rolled** in `src/yaml.ts` — *do not* add `js-yaml` (or any other YAML library) to `dependencies`. `js-yaml` is only allowed as a test devDep for round-trip parsing.
 - **Validation happens against `@apidevtools/swagger-parser`** in tests (devDep), never at runtime.
 - **Returns `OpenApiOutput`** (`{ content, format }`) so callers get both the string and the format chosen.
@@ -37,7 +37,7 @@ src/
 
 ## v0.1 scope and the SSE convention
 
-The `Endpoint` shape in `@dna-codes/schemas/product/api/endpoint.json` carries:
+The `Endpoint` shape in `@dna-codes/dna-schemas/product/api/endpoint.json` carries:
 - a single `request` (no content type)
 - a single `response` (no content type, no status-code map)
 
@@ -45,7 +45,7 @@ So this package hardcodes `application/json` for every request and response, and
 
 Convention for v0.1: callers document streaming or status-specific behavior in the endpoint's `description` (prose). The renderer preserves that prose verbatim. See the test `preserves endpoint description verbatim, including SSE-behavior prose (v0.1 convention)` for the supported shape.
 
-A future `redesign-endpoint-responses` change in `@dna-codes/schemas` will promote `response` to a status-code-keyed map with per-status content type. When that lands, this package gains:
+A future `redesign-endpoint-responses` change in `@dna-codes/dna-schemas` will promote `response` to a status-code-keyed map with per-status content type. When that lands, this package gains:
 - proper `responses[<status>].content[<media-type>]` emission
 - `text/event-stream` rendering for SSE endpoints
 - 4xx/5xx response schemas
@@ -64,7 +64,7 @@ The mapping is centralized in `index.ts`. To add a new field:
 
 ## Field type mapping
 
-`mapFieldType()` translates DNA's `Field.type` to JSON Schema. New types from `@dna-codes/schemas/product/core/field.json`'s enum should be added there. The current mapping:
+`mapFieldType()` translates DNA's `Field.type` to JSON Schema. New types from `@dna-codes/dna-schemas/product/core/field.json`'s enum should be added there. The current mapping:
 
 | DNA type     | JSON Schema                              |
 |--------------|------------------------------------------|
@@ -82,11 +82,11 @@ When adding a new type, add a case in `mapFieldType()` and a test asserting the 
 ## Testing
 
 ```bash
-npm run build -w @dna-codes/output-openapi
-npm test     -w @dna-codes/output-openapi
+npm run build -w @dna-codes/dna-output-openapi
+npm test     -w @dna-codes/dna-output-openapi
 ```
 
-The bookshop fixture (`@dna-codes/core` → `bookshopInput.productApi`) is the canonical test input. Cross-adapter consistency requires it stays the source of truth — if you need to extend it, do so in `packages/core/src/fixtures/bookshop.ts` and rebuild core before re-running tests here.
+The bookshop fixture (`@dna-codes/dna-core` → `bookshopInput.productApi`) is the canonical test input. Cross-adapter consistency requires it stays the source of truth — if you need to extend it, do so in `packages/core/src/fixtures/bookshop.ts` and rebuild core before re-running tests here.
 
 ## Snapshots
 

@@ -1,7 +1,7 @@
 /**
  * Loose structural types describing the DNA shapes this renderer reads.
  *
- * These mirror the canonical shapes in @dna-codes/core. Kept local so the
+ * These mirror the canonical shapes in @dna-codes/dna-core. Kept local so the
  * package stays zero-dependency.
  */
 

@@ -1,7 +1,7 @@
 import { render } from './index'
-import { bookshopInput } from '@dna-codes/core'
+import { bookshopInput } from '@dna-codes/dna-core'
 
-describe('@dna-codes/output-mermaid', () => {
+describe('@dna-codes/dna-output-mermaid', () => {
   describe('render() — defaults and options', () => {
     it('emits both default diagrams', () => {
       const out = render(bookshopInput)

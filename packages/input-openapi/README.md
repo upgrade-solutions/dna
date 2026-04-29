@@ -1,17 +1,17 @@
-# `@dna-codes/input-openapi`
+# `@dna-codes/dna-input-openapi`
 
 Parse an OpenAPI 3.x spec (already parsed as a JavaScript object) into DNA Product API shape — namespace, endpoints, and schemas. Zero runtime dependencies.
 
 ## Install
 
 ```bash
-npm install @dna-codes/input-openapi
+npm install @dna-codes/dna-input-openapi
 ```
 
 ## Usage
 
 ```ts
-import { parse } from '@dna-codes/input-openapi'
+import { parse } from '@dna-codes/dna-input-openapi'
 import petstoreSpec from './petstore.openapi.json'
 
 const { productApi } = parse(petstoreSpec)

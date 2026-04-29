@@ -20,7 +20,7 @@ import {
   ExternalListResponse,
 } from './types'
 
-const DEFAULT_USER_AGENT = '@dna-codes/integration-example (template)'
+const DEFAULT_USER_AGENT = '@dna-codes/dna-integration-example (template)'
 
 export function createClient(options: ClientOptions): Client {
   if (!options.baseUrl) throw new Error('integration-example: options.baseUrl is required.')

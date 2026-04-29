@@ -1,4 +1,4 @@
-# `@dna-codes/output-example`
+# `@dna-codes/dna-output-example`
 
 Template for building a DNA output renderer. Fork this to bootstrap a new `output-*` package that renders DNA into a format string (markdown, HTML, Mermaid, PDF bytes, plaintext, JSON-LD, GraphViz, …).
 
@@ -9,13 +9,13 @@ Zero runtime dependencies.
 ## Install
 
 ```bash
-npm install @dna-codes/output-example
+npm install @dna-codes/dna-output-example
 ```
 
 ## Usage
 
 ```ts
-import { render } from '@dna-codes/output-example'
+import { render } from '@dna-codes/dna-output-example'
 
 const markdown = render(dna)
 // Or, opt into specific sections:

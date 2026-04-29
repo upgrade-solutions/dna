@@ -1,5 +1,5 @@
 /**
- * Scratch: run @dna-codes/input-text against a local Ollama server using
+ * Scratch: run @dna-codes/dna-input-text against a local Ollama server using
  * LAYERED construction (the model issues one tool call per primitive, with
  * per-call schema + reference-integrity checks). Slower and more tokens than
  * one-shot mode, but recovers from per-primitive errors and works on smaller

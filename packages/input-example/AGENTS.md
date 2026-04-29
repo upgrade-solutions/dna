@@ -1,4 +1,4 @@
-# AGENTS.md — `@dna-codes/input-example`
+# AGENTS.md — `@dna-codes/dna-input-example`
 
 Guidance for AI agents forking this template into a new `input-*` package.
 
@@ -21,7 +21,7 @@ Guidance for AI agents forking this template into a new `input-*` package.
 
 1. Copy the directory: `cp -R packages/input-example packages/input-<your-format>`
 2. Update `package.json`:
-   - `name` → `@dna-codes/input-<your-format>`
+   - `name` → `@dna-codes/dna-input-<your-format>`
    - `description` — one sentence, declare the source format. If probabilistic, note the API-key requirement.
 3. **Keep one mode, delete the other:**
    - **Deterministic-only:** delete `src/providers.ts`, `src/prompt.ts`, `examples/`, the probabilistic half of `src/index.ts` (everything below the comment divider), the probabilistic types in `src/types.ts`, and the probabilistic tests.
@@ -35,7 +35,7 @@ Guidance for AI agents forking this template into a new `input-*` package.
 ## Hard contract
 
 - **Zero runtime dependencies.** Dev deps for test/build are fine. No SDKs, no parsers unless truly necessary (and if added, keep them small).
-- **Throw, do not return error objects.** Validation of the emitted DNA belongs to `@dna-codes/core`; your job is to fail fast on malformed source.
+- **Throw, do not return error objects.** Validation of the emitted DNA belongs to `@dna-codes/dna-core`; your job is to fail fast on malformed source.
 - **Naming:** Resources are PascalCase singular. Actions are PascalCase. Capability names are always `Resource.Action`.
 - **Return shape:** always a layered object — `{ operational: {...} }`, not `{...}` alone.
 
@@ -54,6 +54,6 @@ After creating the directory, add it to the root `package.json` `workspaces` arr
 ## Testing
 
 ```bash
-npm run build -w @dna-codes/input-<your-format>
-npm test   -w @dna-codes/input-<your-format>
+npm run build -w @dna-codes/dna-input-<your-format>
+npm test   -w @dna-codes/dna-input-<your-format>
 ```

@@ -32,7 +32,7 @@ Produces `product.core.json` from `operational.json` + the references in `produc
 ### Outputs
 
 - **`product.core.json`** at the target domain directory
-- Must validate against `@dna-codes/schemas/product/product.core.json`
+- Must validate against `@dna-codes/dna-schemas/product/product.core.json`
 
 ### When it runs
 
@@ -68,7 +68,7 @@ Produces `product.api.json` from `product.core.json`.
 ### Outputs
 
 - **`product.api.json`** at the target domain directory
-- Must validate against `@dna-codes/schemas/product/product.api.json`
+- Must validate against `@dna-codes/dna-schemas/product/product.api.json`
 - Cross-layer validation: every `endpoint.operation` resolves to a Capability in `product.core.json`
 
 ### Must not touch
@@ -97,12 +97,12 @@ Produces `product.ui.json` from `product.core.json`.
 
 - `product.core.json`
 - Domain-specific prompt describing UI surfaces, layouts, and route structure
-- Layout catalog from `@dna-codes/schemas/product/web/layout.json`
+- Layout catalog from `@dna-codes/dna-schemas/product/web/layout.json`
 
 ### Outputs
 
 - **`product.ui.json`** at the target domain directory (may contain one or more surfaces)
-- Must validate against `@dna-codes/schemas/product/product.ui.json`
+- Must validate against `@dna-codes/dna-schemas/product/product.ui.json`
 
 ### Hand-off
 
@@ -113,3 +113,35 @@ When both `product.api.json` and `product.ui.json` validate, hand off to **`tech
 ## Why three agents, not one?
 
 Each surface has different concerns: core-materializer is deterministic (it's a projection); api-designer makes REST/schema decisions; ui-designer makes layout/component decisions. Splitting them keeps each prompt focused, makes failures diagnosable per agent, and lets core be regenerated cheaply when only operational DNA changes.
+
+---
+
+## Authoring fields
+
+`Field` is the leaf-level primitive in `product/core/field.json`, referenced from `product/api/schema.json` (request/response bodies) and `product/web/block.json` (UI inputs/displays). Fields carry a typed value with one of the leaf types — `string | text | number | boolean | date | datetime | email | phone | url | enum | reference` — or, for structured bodies, the recursive type `object`.
+
+### Nested object fields
+
+A Field with `type: "object"` MUST carry its own `fields[]` array — itself an array of Fields. This is the only place the layer recurses.
+
+```jsonc
+{
+  "name": "from",
+  "label": "From",
+  "type": "object",
+  "required": true,
+  "fields": [
+    { "name": "format", "type": "enum", "values": ["text", "json", "dna"], "required": true },
+    { "name": "input", "type": "string", "required": true }
+  ]
+}
+```
+
+Two constraints the schema enforces:
+
+1. `type: "object"` requires `fields` (with `minItems: 1`). An object field with no nested fields is meaningless.
+2. `type: "object"` forbids `values`. The `values` property belongs to `enum` only — they are mutually exclusive.
+
+`@dna-codes/dna-output-openapi` renders nested object fields as OpenAPI object schemas with recursive `properties` and a `required[]` array populated from sub-fields marked `required: true`. See `packages/output-openapi/README.md` for the full mapping table.
+
+For repeated nested shapes (e.g. `from` and `to` both carrying `{ format, input }`), authors currently declare the shape twice. Schema reuse via `$ref` between Fields is a separate, deferred design question.

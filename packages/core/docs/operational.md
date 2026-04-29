@@ -24,12 +24,12 @@ Owns authoring and evolving a domain's `operational.json`. Available as a Claude
 ### Outputs
 
 - **`operational.json`** at the target domain directory (e.g. `dna/torts/marshall/operational.json`)
-- Must validate against `@dna-codes/schemas/operational/operational.json`
+- Must validate against `@dna-codes/dna-schemas/operational/operational.json`
 - Must pass cross-layer validation (`cba validate`) against any existing product layer
 
 ### Primitives owned
 
-All Operational primitives — see `@dna-codes/schemas/operational/*.json` for the canonical list. Organized in three categories plus the bounded-context wrapper:
+All Operational primitives — see `@dna-codes/dna-schemas/operational/*.json` for the canonical list. Organized in three categories plus the bounded-context wrapper:
 
 - **People**: `Person`, `Role`, `Group`, `Membership`
 - **Structures**: `Resource`, `Attribute`, `Relationship`

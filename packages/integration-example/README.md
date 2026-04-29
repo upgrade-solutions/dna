@@ -1,4 +1,4 @@
-# `@dna-codes/integration-example`
+# `@dna-codes/dna-integration-example`
 
 Template for building a DNA `integration-*` package. An integration connects an external system (Jira, GitHub, Notion, Linear, Salesforce, …) to DNA **bidirectionally** and ships three surfaces:
 
@@ -13,7 +13,7 @@ Zero runtime dependencies. Node 18+ (uses global `fetch` and the built-in `crypt
 ## Install
 
 ```bash
-npm install @dna-codes/integration-example
+npm install @dna-codes/dna-integration-example
 ```
 
 ## Programmatic usage
@@ -21,7 +21,7 @@ npm install @dna-codes/integration-example
 ### Pull DNA from the external system
 
 ```ts
-import { createClient } from '@dna-codes/integration-example'
+import { createClient } from '@dna-codes/dna-integration-example'
 
 const client = createClient({
   baseUrl: 'https://api.example.com',
@@ -40,7 +40,7 @@ await client.pushDna(dna)
 ### Handle inbound webhooks (any framework)
 
 ```ts
-import { parseWebhook } from '@dna-codes/integration-example'
+import { parseWebhook } from '@dna-codes/dna-integration-example'
 
 app.post('/webhooks/example', async (req, res) => {
   try {
@@ -59,7 +59,7 @@ app.post('/webhooks/example', async (req, res) => {
 
 ```ts
 import { createServer } from 'http'
-import { createNodeHandler } from '@dna-codes/integration-example'
+import { createNodeHandler } from '@dna-codes/dna-integration-example'
 
 const handler = createNodeHandler(
   { secret: process.env.EXAMPLE_WEBHOOK_SECRET! },
@@ -110,7 +110,7 @@ src/
   cli.ts         argv parsing + command dispatch
   mapping.ts     pure external ↔ DNA translation
   types.ts       external-system and webhook shapes
-  dna-types.ts   loose DNA subset (don't import from @dna-codes/core)
+  dna-types.ts   loose DNA subset (don't import from @dna-codes/dna-core)
   index.ts       barrel exports
 bin/
   integration-example.js   shim that requires dist/cli.js

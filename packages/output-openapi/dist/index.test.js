@@ -37,11 +37,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const swagger_parser_1 = __importDefault(require("@apidevtools/swagger-parser"));
-const core_1 = require("@dna-codes/core");
+const dna_core_1 = require("@dna-codes/dna-core");
 const YAML = __importStar(require("js-yaml"));
 const index_1 = require("./index");
-const bookshopProductApi = core_1.bookshopInput.productApi;
-describe('@dna-codes/output-openapi', () => {
+const bookshopProductApi = dna_core_1.bookshopInput.productApi;
+describe('@dna-codes/dna-output-openapi', () => {
     describe('render() — bookshop fixture', () => {
         it('round-trips: YAML output parses back to a structurally equivalent doc', () => {
             const { content, format } = (0, index_1.render)(bookshopProductApi);
@@ -142,6 +142,64 @@ describe('@dna-codes/output-openapi', () => {
             const doc = YAML.load(content);
             expect(doc.info.title).toBe('Custom');
             expect(doc.info.version).toBe('1.2.3');
+        });
+    });
+    describe('render() — nested object Fields', () => {
+        const conversionFixture = {
+            namespace: { name: 'Convert', path: '/convert' },
+            endpoints: [
+                {
+                    method: 'POST',
+                    path: '/v1/convert',
+                    operation: 'Conversion.Create',
+                    request: {
+                        name: 'ConvertRequest',
+                        fields: [
+                            {
+                                name: 'from',
+                                label: 'From',
+                                type: 'object',
+                                required: true,
+                                fields: [
+                                    { name: 'format', type: 'enum', values: ['text', 'json', 'dna'], required: true },
+                                    { name: 'input', type: 'string', required: true },
+                                ],
+                            },
+                            {
+                                name: 'to',
+                                label: 'To',
+                                type: 'object',
+                                required: true,
+                                fields: [
+                                    { name: 'format', type: 'enum', values: ['text', 'json', 'dna'], required: true },
+                                ],
+                            },
+                        ],
+                    },
+                    response: {
+                        name: 'ConvertResponse',
+                        fields: [{ name: 'output', type: 'string' }],
+                    },
+                },
+            ],
+        };
+        it('renders an object Field as an OpenAPI object schema with nested properties', () => {
+            const { content } = (0, index_1.render)(conversionFixture);
+            const doc = YAML.load(content);
+            const req = doc.components.schemas.ConvertRequest;
+            expect(req.properties.from.type).toBe('object');
+            expect(req.properties.from.properties).toBeDefined();
+            expect(Object.keys(req.properties.from.properties)).toEqual(['format', 'input']);
+            expect(req.properties.from.required).toEqual(['format', 'input']);
+        });
+        it('passes OpenAPI 3.1 schema validation with nested objects', async () => {
+            const { content } = (0, index_1.render)(conversionFixture);
+            const parsed = YAML.load(content);
+            await expect(swagger_parser_1.default.validate(JSON.parse(JSON.stringify(parsed)))).resolves.toBeDefined();
+        });
+        it('emits stable output for the nested-object fixture (snapshot)', () => {
+            const { content } = (0, index_1.render)(conversionFixture);
+            expect(content).toMatchSnapshot();
         });
     });
     describe('render() — JSON output', () => {

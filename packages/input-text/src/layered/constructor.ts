@@ -1,4 +1,4 @@
-import { DnaValidator, type ValidationResult } from '@dna-codes/core'
+import { DnaValidator, type ValidationResult } from '@dna-codes/dna-core'
 import {
   PRIMITIVE_KINDS,
   buildLayeredTools,

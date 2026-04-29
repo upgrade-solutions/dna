@@ -169,7 +169,7 @@ export interface RenderOptions {
    *
    * Currently a no-op for this adapter (no primitive-count or top-level
    * collection labels are emitted) — present for API parity with
-   * `@dna-codes/output-markdown` and `@dna-codes/output-html`.
+   * `@dna-codes/dna-output-markdown` and `@dna-codes/dna-output-html`.
    *
    * @example { Persons: 'Individuals', Roles: 'Positions' }
    */
@@ -186,7 +186,7 @@ export interface RenderManyOptions {
    *
    * Currently a no-op for this adapter (no primitive-count or top-level
    * collection labels are emitted) — present for API parity with
-   * `@dna-codes/output-markdown` and `@dna-codes/output-html`.
+   * `@dna-codes/dna-output-markdown` and `@dna-codes/dna-output-html`.
    *
    * @example { Persons: 'Individuals', Roles: 'Positions' }
    */

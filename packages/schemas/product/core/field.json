@@ -18,8 +18,8 @@
     },
     "type": {
       "type": "string",
-      "description": "The display/input type of the field. Extends the Operational Attribute types with UI-only semantic variants (email, phone, url) that renderers can lift into typed inputs.",
-      "enum": ["string", "text", "number", "boolean", "date", "datetime", "email", "phone", "url", "enum", "reference"]
+      "description": "The display/input type of the field. Extends the Operational Attribute types with UI-only semantic variants (email, phone, url) that renderers can lift into typed inputs. Use 'object' for nested structured fields with their own `fields[]`.",
+      "enum": ["string", "text", "number", "boolean", "date", "datetime", "email", "phone", "url", "enum", "reference", "object"]
     },
     "description": {
       "type": "string",
@@ -45,13 +45,41 @@
       "type": "string",
       "description": "The Operational Attribute this field maps from.",
       "examples": ["amount", "status", "due_date"]
+    },
+    "fields": {
+      "type": "array",
+      "description": "Nested fields when type is 'object'. Each entry is itself a Field, recursively.",
+      "minItems": 1,
+      "items": { "$ref": "https://dna.codes/schemas/product/core/field" }
     }
   },
-  "if": { "properties": { "type": { "const": "enum" } } },
-  "then": { "required": ["values"] },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "enum" } }, "required": ["type"] },
+      "then": { "required": ["values"] }
+    },
+    {
+      "if": { "properties": { "type": { "const": "object" } }, "required": ["type"] },
+      "then": { "required": ["fields"] }
+    },
+    {
+      "if": { "properties": { "type": { "const": "object" } }, "required": ["type"] },
+      "then": { "not": { "required": ["values"] } }
+    }
+  ],
   "examples": [
     { "name": "amount", "label": "Amount", "type": "number", "required": true, "attribute": "amount" },
     { "name": "status", "label": "Status", "type": "enum", "values": ["pending", "active", "repaid"], "attribute": "status" },
-    { "name": "email", "label": "Email", "type": "email", "required": true }
+    { "name": "email", "label": "Email", "type": "email", "required": true },
+    {
+      "name": "from",
+      "label": "From",
+      "type": "object",
+      "required": true,
+      "fields": [
+        { "name": "format", "type": "enum", "values": ["text", "json", "dna"], "required": true },
+        { "name": "input", "type": "string", "required": true }
+      ]
+    }
   ]
 }

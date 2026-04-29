@@ -5,7 +5,7 @@ exports.inlineSchema = inlineSchema;
 exports.buildPrimitiveTool = buildPrimitiveTool;
 exports.buildLayeredTools = buildLayeredTools;
 exports.injectEnums = injectEnums;
-const core_1 = require("@dna-codes/core");
+const dna_core_1 = require("@dna-codes/dna-core");
 exports.PRIMITIVE_KINDS = [
     'resource',
     'person',
@@ -19,8 +19,8 @@ exports.PRIMITIVE_KINDS = [
     'rule',
 ];
 const SHARED_DEFS = {
-    'https://dna.codes/schemas/operational/attribute': core_1.schemas.operational.attribute,
-    'https://dna.codes/schemas/operational/action': core_1.schemas.operational.action,
+    'https://dna.codes/schemas/operational/attribute': dna_core_1.schemas.operational.attribute,
+    'https://dna.codes/schemas/operational/action': dna_core_1.schemas.operational.action,
 };
 function inlineSchema(schema) {
     return walk(schema);
@@ -43,19 +43,19 @@ function walk(node) {
     return out;
 }
 const PRIMITIVE_SCHEMA = {
-    resource: core_1.schemas.operational.resource,
-    person: core_1.schemas.operational.person,
-    role: core_1.schemas.operational.role,
-    group: core_1.schemas.operational.group,
-    membership: core_1.schemas.operational.membership,
-    operation: core_1.schemas.operational.operation,
-    task: core_1.schemas.operational.task,
-    process: core_1.schemas.operational.process,
-    trigger: core_1.schemas.operational.trigger,
-    rule: core_1.schemas.operational.rule,
+    resource: dna_core_1.schemas.operational.resource,
+    person: dna_core_1.schemas.operational.person,
+    role: dna_core_1.schemas.operational.role,
+    group: dna_core_1.schemas.operational.group,
+    membership: dna_core_1.schemas.operational.membership,
+    operation: dna_core_1.schemas.operational.operation,
+    task: dna_core_1.schemas.operational.task,
+    process: dna_core_1.schemas.operational.process,
+    trigger: dna_core_1.schemas.operational.trigger,
+    rule: dna_core_1.schemas.operational.rule,
 };
 const PRIMITIVE_PURPOSE = {
-    resource: 'Add a Resource (entity the org tracks: Loan, Invoice, Document).',
+    resource: 'Add a Resource (structure the org tracks: Loan, Invoice, Document).',
     person: 'Add a Person template (kind of human: Customer, Employee, Patient).',
     role: 'Add a Role template (position: Underwriter, Doctor, LeadCounsel).',
     group: 'Add a Group template (work-unit / container that scopes Roles: BankDepartment, Case).',

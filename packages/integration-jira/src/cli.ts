@@ -1,5 +1,5 @@
 /**
- * CLI for @dna-codes/integration-jira.
+ * CLI for @dna-codes/dna-integration-jira.
  *
  * Three commands:
  *   pull  --epic ENG-123 --out dna.json       Epic → input-text → DNA JSON
@@ -17,7 +17,7 @@
 
 import { readFileSync, writeFileSync } from 'fs'
 
-import type { Style } from '@dna-codes/output-text'
+import type { Style } from '@dna-codes/dna-output-text'
 
 import { createClient } from './client'
 import { ClientOptions, PullEpicOptions } from './types'

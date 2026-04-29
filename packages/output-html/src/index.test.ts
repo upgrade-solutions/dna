@@ -1,7 +1,7 @@
 import { render } from './index'
-import { bookshopInput } from '@dna-codes/core'
+import { bookshopInput } from '@dna-codes/dna-core'
 
-describe('@dna-codes/output-html', () => {
+describe('@dna-codes/dna-output-html', () => {
   describe('render() — document scaffolding', () => {
     it('renders every default section', () => {
       const html = render(bookshopInput)

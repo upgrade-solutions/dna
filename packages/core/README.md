@@ -1,6 +1,6 @@
-# `@dna-codes/core`
+# `@dna-codes/dna-core`
 
-DNA is a JSON description language for business systems. This package ships typed bindings for the DNA schemas, a cross-layer validator (`DnaValidator`), and layer docs. The raw JSON schemas themselves live in [`@dna-codes/schemas`](../schemas/) and are pulled in as a dependency.
+DNA is a JSON description language for business systems. This package ships typed bindings for the DNA schemas, a cross-layer validator (`DnaValidator`), and layer docs. The raw JSON schemas themselves live in [`@dna-codes/dna-schemas`](../schemas/) and are pulled in as a dependency.
 
 | Layer | What it captures | Analogous to |
 |-------|------------------|--------------|
@@ -18,7 +18,7 @@ DNA is a *contract*, not a runtime. Producers (authoring agents, humans) emit JS
 ## Installation
 
 ```bash
-npm install @dna-codes/core
+npm install @dna-codes/dna-core
 ```
 
 ## API
@@ -28,7 +28,7 @@ npm install @dna-codes/core
 Nested object of every per-primitive JSON schema, keyed by layer:
 
 ```ts
-import { schemas } from '@dna-codes/core'
+import { schemas } from '@dna-codes/dna-core'
 
 schemas.operational.resource       // 15 operational primitives
 schemas.product.core.role          // 5 product-core primitives
@@ -49,7 +49,7 @@ schemas.operational.resource.$id
 Aggregate schemas describing the shape of a full DNA document per layer:
 
 ```ts
-import { documents } from '@dna-codes/core'
+import { documents } from '@dna-codes/dna-core'
 
 documents.operational              // shape of operational.json
 documents.productCore              // shape of product.core.json
@@ -64,7 +64,7 @@ Flat array of every schema (primitives + aggregates). Convenient for bulk-regist
 
 ```ts
 import Ajv from 'ajv'
-import { allSchemas } from '@dna-codes/core'
+import { allSchemas } from '@dna-codes/dna-core'
 
 const ajv = new Ajv({ strict: false, allErrors: true })
 for (const s of allSchemas()) ajv.addSchema(s)
@@ -78,10 +78,10 @@ validate({ name: 'Loan' })         // → true
 Returns the on-disk path of a schema file, or `null` if it doesn't exist. Useful for dev servers or tooling that needs to serve raw schema files:
 
 ```ts
-import { resolveSchemaFile } from '@dna-codes/core'
+import { resolveSchemaFile } from '@dna-codes/dna-core'
 
 resolveSchemaFile('operational', 'resource')
-// → '/abs/.../node_modules/@dna-codes/schemas/operational/resource.json'
+// → '/abs/.../node_modules/@dna-codes/dna-schemas/operational/resource.json'
 
 resolveSchemaFile('product', 'api/endpoint')      // nested path
 // → '/abs/.../schemas/product/api/endpoint.json'
@@ -95,9 +95,9 @@ resolveSchemaFile('operational', 'ghost')         // missing
 Filesystem roots for consumers that walk the tree themselves:
 
 ```ts
-import { SCHEMA_ROOT, layerDirs } from '@dna-codes/core'
+import { SCHEMA_ROOT, layerDirs } from '@dna-codes/dna-core'
 
-SCHEMA_ROOT                        // .../node_modules/@dna-codes/schemas
+SCHEMA_ROOT                        // .../node_modules/@dna-codes/dna-schemas
 layerDirs.operational              // .../schemas/operational
 layerDirs.product                  // .../schemas/product
 layerDirs.technical                // .../schemas/technical
@@ -105,10 +105,10 @@ layerDirs.technical                // .../schemas/technical
 
 ### Raw JSON schemas
 
-To import an individual schema directly, depend on [`@dna-codes/schemas`](../schemas/):
+To import an individual schema directly, depend on [`@dna-codes/dna-schemas`](../schemas/):
 
 ```ts
-import resourceSchema from '@dna-codes/schemas/operational/resource.json'
+import resourceSchema from '@dna-codes/dna-schemas/operational/resource.json'
 ```
 
 ## `DnaValidator`
@@ -116,7 +116,7 @@ import resourceSchema from '@dna-codes/schemas/operational/resource.json'
 AJV-backed validator with per-layer and cross-layer checks. All DNA schemas are pre-registered — no setup needed beyond `new DnaValidator()`.
 
 ```ts
-import { DnaValidator } from '@dna-codes/core'
+import { DnaValidator } from '@dna-codes/dna-core'
 import operational from './dna/lending/operational.json'
 
 const validator = new DnaValidator()
@@ -132,10 +132,10 @@ if (!cross.valid) for (const err of cross.errors) console.error(err)
 
 ## Using schemas from non-JS languages
 
-Install [`@dna-codes/schemas`](../schemas/) directly — it's a zero-dependency package that ships only the JSON files:
+Install [`@dna-codes/dna-schemas`](../schemas/) directly — it's a zero-dependency package that ships only the JSON files:
 
 ```
-node_modules/@dna-codes/schemas/
+node_modules/@dna-codes/dna-schemas/
   operational/*.json              # 15 primitive + 1 aggregate
   product/core/*.json             # 5 primitives
   product/api/*.json              # 4 primitives
@@ -158,7 +158,7 @@ Operational is modeled around the **Actor > Action > Subject** triad. `Resource`
 
 ## What this package does *not* include
 
-- **The raw JSON schemas.** Those live in [`@dna-codes/schemas`](../schemas/) (core depends on it).
+- **The raw JSON schemas.** Those live in [`@dna-codes/dna-schemas`](../schemas/) (core depends on it).
 - **A CLI.** See [`@cell/cba`](../cba) (command: `cba`) for the full authoring lifecycle.
 - **Cell runtimes.** Cells are separate consumers of DNA — see `technical/cells/*`.
 

@@ -1,4 +1,4 @@
-# `@dna-codes/output-text`
+# `@dna-codes/dna-output-text`
 
 Render DNA documents as plain prose. Two shapes:
 
@@ -12,7 +12,7 @@ Zero runtime dependencies. Pure, synchronous, never throws on partial DNA.
 ## Install
 
 ```bash
-npm install @dna-codes/output-text
+npm install @dna-codes/dna-output-text
 ```
 
 ## `styles` map — picks which units to emit and how
@@ -42,7 +42,7 @@ Resource and Process always render as `product-dna` regardless of the style requ
 Returns one markdown-flavored document with one section per unit in the `styles` map.
 
 ```ts
-import { render } from '@dna-codes/output-text'
+import { render } from '@dna-codes/dna-output-text'
 
 const doc = render(dna, {
   title: 'Lending — Spec',
@@ -59,7 +59,7 @@ const doc = render(dna, {
 Returns one document per primitive. Each entry has a stable `id`, a short `title`, and a markdown `body`.
 
 ```ts
-import { renderMany } from '@dna-codes/output-text'
+import { renderMany } from '@dna-codes/dna-output-text'
 
 const docs = renderMany(dna, { styles: { capability: 'gherkin' } })
 // [

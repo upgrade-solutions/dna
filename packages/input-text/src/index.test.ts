@@ -30,7 +30,7 @@ const sampleDna = {
   },
 }
 
-describe('@dna-codes/input-text', () => {
+describe('@dna-codes/dna-input-text', () => {
   describe('dispatch', () => {
     it('sends an OpenAI chat completion request with Bearer auth', async () => {
       const { fetchImpl, calls } = mockFetch(openAiResponse(JSON.stringify(sampleDna)))

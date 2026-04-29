@@ -14,7 +14,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createClient = createClient;
 const mapping_1 = require("./mapping");
-const DEFAULT_USER_AGENT = '@dna-codes/integration-example (template)';
+const DEFAULT_USER_AGENT = '@dna-codes/dna-integration-example (template)';
 function createClient(options) {
     if (!options.baseUrl)
         throw new Error('integration-example: options.baseUrl is required.');

@@ -1,6 +1,6 @@
 "use strict";
 /**
- * CLI for @dna-codes/integration-jira.
+ * CLI for @dna-codes/dna-integration-jira.
  *
  * Three commands:
  *   pull  --epic ENG-123 --out dna.json       Epic → input-text → DNA JSON
