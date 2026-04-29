@@ -1,6 +1,7 @@
 {
   "name": "@dna-codes/dna-input-json",
   "version": "0.4.0",
+  "repository": "github:dna-codes/dna",
   "description": "Infer a DNA operational slice from a plain JSON data sample — scalar fields become Attributes, nested objects become Resources + one-to-one Relationships, arrays of objects become Resources + one-to-many Relationships. Zero runtime dependencies.",
   "keywords": ["dna", "json", "input-json", "schema-inference", "resource"],
   "license": "MIT",

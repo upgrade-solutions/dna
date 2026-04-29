@@ -1,6 +1,7 @@
 {
   "name": "@dna-codes/dna-output-text",
   "version": "0.4.0",
+  "repository": "github:dna-codes/dna",
   "description": "Render DNA documents as plain prose — either one combined document (render) or one document per unit (renderMany) for pushing to issue trackers, docs platforms, or databases. Zero runtime dependencies.",
   "keywords": ["dna", "output-text", "prose", "stories", "generator"],
   "license": "MIT",

@@ -1,6 +1,7 @@
 {
   "name": "@dna-codes/dna-output-html",
   "version": "0.4.0",
+  "repository": "github:dna-codes/dna",
   "description": "Render DNA documents as HTML — opinionated documentation output with configurable sections (summary, domain model, capabilities, SOPs, process flows). Zero runtime dependencies.",
   "keywords": ["dna", "html", "documentation", "output-html", "generator"],
   "license": "MIT",

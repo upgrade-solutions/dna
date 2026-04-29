@@ -1,6 +1,7 @@
 {
   "name": "@dna-codes/dna-output-openapi",
   "version": "0.4.0",
+  "repository": "github:dna-codes/dna",
   "description": "Render a DNA Product API document as an OpenAPI 3.1 specification (YAML or JSON). The contract layer between DNA's product layer and any technical implementation. Zero runtime dependencies.",
   "keywords": ["dna", "openapi", "output-openapi", "contract", "api"],
   "license": "MIT",
