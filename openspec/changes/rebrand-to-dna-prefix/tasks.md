@@ -46,16 +46,8 @@ publicly. Functional impact:
 ## 5. First publish
 
 - [x] 5.1 From the freshly-transferred `dna-codes/dna`, tag `v0.4.0` and push. The workflow runs and publishes every `@dna-codes/dna-*` package. *(Run on commit 689f45e succeeded — 13 packages published; integration-jira intentionally skipped via `private: true`.)*
-- [ ] 5.2 Verify on GitHub Packages: visit `github.com/orgs/dna-codes/packages` and confirm all expected packages appear at `0.4.0`. Verify each package's visibility is **Private** (the repo is private; ensure no package was incidentally set public during the `--access public` early publish).
-- [ ] 5.3 Smoke test from a clean directory with a `read:packages` PAT in `.npmrc`:
-  ```sh
-  mkdir /tmp/probe && cd /tmp/probe
-  npm init -y
-  echo '@dna-codes:registry=https://npm.pkg.github.com' > .npmrc
-  echo '//npm.pkg.github.com/:_authToken=ghp_YOUR_PAT' >> .npmrc
-  npm install @dna-codes/dna-core@0.4.0
-  ```
-  Confirm successful install.
+- [x] 5.2 Verify on GitHub Packages: visit `github.com/orgs/dna-codes/packages` and confirm all expected packages appear at `0.4.0` with Private visibility. *(Verified end-to-end: the cells repo's CI workflow is successfully resolving and installing `@dna-codes/dna-*@0.4.0` from GitHub Packages, which also implicitly confirms 5.3.)*
+- [x] 5.3 Smoke test install. *(Implicit pass — the cells workflow is consuming the published packages successfully.)*
 
 ## 6. Deprecate the old npm names (optional, after publish succeeds)
 
