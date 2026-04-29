@@ -49,14 +49,14 @@ publicly. Functional impact:
 - [x] 5.2 Verify on GitHub Packages: visit `github.com/orgs/dna-codes/packages` and confirm all expected packages appear at `0.4.0` with Private visibility. *(Verified end-to-end: the cells repo's CI workflow is successfully resolving and installing `@dna-codes/dna-*@0.4.0` from GitHub Packages, which also implicitly confirms 5.3.)*
 - [x] 5.3 Smoke test install. *(Implicit pass — the cells workflow is consuming the published packages successfully.)*
 
-## 6. Deprecate the old npm names (optional, after publish succeeds)
+## 6. Deprecate the old npm names
 
-- [ ] 6.1 ~~`npm deprecate` for each unprefixed `@dna-codes/<name>` on npmjs.com.~~ *(Decision shifted: the user plans to remove the actual packages from npmjs.com rather than deprecate. Use `npm unpublish @dna-codes/<name>@<version>` per package within the 72h window where allowed; for older versions, npm support / `npm deprecate` remains the only option. Action owner: user.)*
+- [x] 6.1 `npm deprecate` for each unprefixed `@dna-codes/<name>` on npmjs.com. *(Done. Three names had public versions on npmjs.com: `@dna-codes/core` (0.0.1, 0.1.0, 0.3.0), `@dna-codes/schemas` (0.0.1, 0.1.0, 0.3.0), `@dna-codes/input-text` (0.0.1, 0.2.0, 0.3.1). All deprecated by user. The other 11 names were never public on npmjs.com, so no action needed.)*
 
-## 7. Coordinate sister proposals
+## 7. Coordinate sister proposals — handed off
 
-- [ ] 7.1 Notify the cells repo owner that the `0.4.0` publish is live so the cells sister proposal can pin against it. *(Heads-up: cells will need a `read:packages` PAT in CI and any contributor's local `.npmrc` to install — the registry is no longer anonymous-readable.)*
-- [ ] 7.2 Confirm dna-platform's sister proposal sees `0.4.0` resolving cleanly before tagging cells. *(Same PAT requirement applies.)*
+- [x] 7.1 ~~Notify the cells repo owner~~ *(Out of scope: handled within the cells repo's own `rebrand-to-cells-prefix` proposal. Cells is already consuming `@dna-codes/dna-*@0.4.0` from GitHub Packages.)*
+- [x] 7.2 ~~Confirm dna-platform's sister proposal sees `0.4.0` resolving cleanly~~ *(Out of scope: handled within the dna-platform repo's `consume-from-github-packages` proposal.)*
 
 ## Summary of commits
 
