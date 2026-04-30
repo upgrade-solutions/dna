@@ -13,6 +13,7 @@ DNA is a *contract*, not a runtime. Producers (authoring agents, humans) emit JS
 - [`docs/operational.md`](./docs/operational.md) — authoring contract for operational DNA
 - [`docs/product.md`](./docs/product.md) — authoring contract for product DNA (core + api + ui)
 - [`docs/technical.md`](./docs/technical.md) — authoring contract for technical DNA
+- [`docs/merge.md`](./docs/merge.md) — `merge()` reference for composing DNA from multiple chunks
 - [`AGENTS.md`](./AGENTS.md) — agent contract for working with DNA at large
 
 ## Installation
@@ -129,6 +130,38 @@ if (!result.valid) {
 const cross = validator.validateCrossLayer({ operational, productApi })
 if (!cross.valid) for (const err of cross.errors) console.error(err)
 ```
+
+## `merge()`
+
+Compose multiple Operational DNA chunks into one. Pure, deterministic, no I/O — designed for the multi-source ingest case (`@dna-codes/dna-ingest` calls this as its fan-in step) but usable on its own.
+
+```ts
+import { merge } from '@dna-codes/dna-core'
+
+const result = merge([
+  { dna: chunkA, source: { uri: 'file:///sop.md',  loadedAt: '2025-01-01T00:00:00.000Z' } },
+  { dna: chunkB, source: { uri: 'gdrive://policy', loadedAt: '2025-06-01T00:00:00.000Z' } },
+])
+
+result.dna          // merged OperationalDNA — validates against the operational schema
+result.conflicts    // Conflict[] — scalar disagreements + unresolved-ref warnings
+result.provenance   // dotted-path → contributing sources, e.g. 'resources.Loan' → [...]
+```
+
+Identity is by `name` within each primitive type; same-named entries unify across chunks. List-shaped children (`attributes[]`, `actions[]`, `roles[]`, etc.) union by name with recursive merge. Scalar disagreements emit a `Conflict` with the v1 recommendation policy:
+
+1. value backed by the most distinct sources wins
+2. tie-break by most recent `loadedAt`
+3. tie-break by longest non-empty string representation
+4. final tie-break: stable input order
+
+The recommendation is also written into the merged DNA so the result remains schema-valid; the full list of competing values + sources rides along in `Conflict.values` for review.
+
+Cross-references (`Operation.target`, `Membership.{person,role,group}`, `Trigger.operation`, `Task.{actor,operation}`, `Step.task`, `Rule.operation`) are resolved against the merged noun set. Unresolved references surface as `Conflict` entries with `kind: 'unresolved-reference'` — the referencing primitive is still emitted so a reviewer can fix the source documents.
+
+**Determinism caveat:** the recency tie-break depends on input ordering. Two callers passing the same chunks in different order may pick differently on tied conflicts. Sort by `loadedAt` before merging if strict order-independence matters.
+
+**v1 simplification:** sub-domain hierarchy is not preserved — every input chunk's nouns flatten into the merged top-level domain. If your sources nest by sub-domain, that nesting is dropped (the merged DNA still validates).
 
 ## Using schemas from non-JS languages
 

@@ -149,24 +149,54 @@ A **Cell** is the unit of deployment — it consumes DNA from upper layers and g
 
 ### Pipeline
 
-The pipeline is `[integration] → input-* → DNA → output-* → [integration]`:
+The pipeline is `[integration] → input-* → DNA → output-* → [integration]`. When more than one source contributes to a single DNA, `dna-ingest` fans many `(integration → input-* → partial DNA)` paths into one canonical DNA via `dna-core.merge()`:
 
 ```
-   +-------------+   +----------+   +----------+   +----------+   +-------------+
-   |integration-*|   |          |   |          |   |          |   |integration-*|
--->|  (reader)   |-->| input-*  |-->|   DNA    |-->| output-* |-->|  (writer)   |-->
-   |             |   |          |   |          |   |          |   |             |
-   +-------------+   +----------+   +----------+   +----------+   +-------------+
-        [1]              [2]            [3]             [4]             [5]
+                       +------------------- @dna-codes/dna-ingest -------------------+
+                       |                                                             |
+   gdrive://abc ---> integration-google-drive --> input-text  --\                    |
+                       |                                          \                  |
+   notion://page ---> integration-notion       --> input-text  ----+----> merge() ---+----+
+                       |                                          /      (dna-core)  |    |
+   file:///sop.md --> [built-in fs fetcher]    --> input-text  --/                    |    |
+                       |                                                             |    |
+                       +-------------------------------------------------------------+    |
+                                                                                          |
+                                                                                          v
+                                                       +----------+   +-------------+
+                                                       |          |   |integration-*|
+                                                       |   DNA    |-->|  (writer)   |-->
+                                                       |          |   |             |
+                                                       +----------+   +-------------+
+                                                            [3]             [5]
 
-  [1]  Reads from an external system (Jira, GitHub, Notion). Owns auth, rate limits, webhooks.
+  [1]  Reads from an external system (Jira, Drive, Notion, GitHub). Owns auth, rate limits, webhooks.
   [2]  Parses a format into DNA. Deterministic (JSON, OpenAPI, DDL) or Probabilistic and LLM-backed (prose, transcripts, images).
+  [*]  dna-ingest is a thin orchestrator: URI scheme dispatches to integrations, MIME type dispatches to input adapters,
+       per-source DNA chunks are merged into one via dna-core.merge() with conflict + provenance reporting.
   [3]  Canonical form. Three layers (operational -> product -> technical), validated by @dna-codes/dna-core.
   [4]  Renders DNA into a format. Pure, no I/O (markdown, Mermaid, HTML).
   [5]  Writes to an external system. Field mapping, API writes, change detection.
 
-  The same integration-* package typically fills both [1] and [5] roles for its system.
+  The same integration-* package typically fills both reader and writer roles for its system.
+  Single-source flows (no merge needed) skip dna-ingest and call input-* directly — both shapes are valid.
 ```
+
+#### `Integration` contract for participating in `dna-ingest`
+
+Every reader-side `integration-*` that wants to participate in multi-source ingest implements the `Integration` interface published from `@dna-codes/dna-ingest`:
+
+```ts
+interface Integration {
+  fetch(uri: string): Promise<{
+    contents: string | Buffer
+    mimeType: string
+    source: { uri: string; loadedAt: string /* ISO 8601 */ }
+  }>
+}
+```
+
+PDF/Office text extraction is the integration's responsibility — return already-normalized text or bytes, plus a sensible MIME type. The orchestrator routes by MIME glob into the matching `input-*` adapter. See [`packages/ingest/AGENTS.md`](packages/ingest/AGENTS.md) for the full guidance.
 
 ### Naming convention
 - **`input-*`** — converts a format into DNA. Same input always produces same output (deterministic), unless the package requires an LLM, in which case it is probabilistic. Each probabilistic package documents its dependencies explicitly: required LLM provider, expected API keys, and non-determinism implications.
@@ -245,6 +275,12 @@ Legend: ✅ shipped · 🚧 planned (listed below) · 💡 candidate (natural fi
 | `@dna-codes/dna-output-openapi` | Renders a Product API DNA as an OpenAPI 3.1 spec (YAML or JSON) — the contract layer between DNA and any technical implementation |
 | `@dna-codes/dna-output-text` | Renders DNA as plain prose — one combined document or one per unit (Capability/Resource/Process) for integration writers |
 
+**Orchestrators**
+
+| Package | Purpose |
+|---------|---------|
+| `@dna-codes/dna-ingest` | Multi-source DNA orchestrator. Fans `[source URI] → integration-* → input-* → partial DNA` per source, merges via `dna-core.merge()`, reports conflicts + provenance + non-fatal errors. Imports zero `input-*` or `integration-*` packages — caller injects them. Probabilistic by transitive dep when LLM-backed adapters are wired in. |
+
 **Integrations**
 
 | Package | Purpose |
@@ -252,6 +288,7 @@ Legend: ✅ shipped · 🚧 planned (listed below) · 💡 candidate (natural fi
 | `@dna-codes/dna-integration-jira` | Bidirectional Jira Cloud integration: Epic → `input-text` → DNA → `output-text` → Stories |
 | `@dna-codes/dna-integration-github` | Read/write DNA via GitHub Issues and Projects |
 | `@dna-codes/dna-integration-notion` | Read/write DNA via Notion pages and databases |
+| `@dna-codes/dna-integration-google-drive` | 🚧 Stub. Implements the `Integration` contract; serves an in-memory mock map; throws `NotImplementedError` for real Drive fetches until a follow-up change wires auth + the Drive API. |
 
 **Templates**
 

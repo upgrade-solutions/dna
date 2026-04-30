@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/dna-input-text",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "repository": "github:dna-codes/dna",
   "description": "Turn freeform prose describing a business system into DNA (operational, product, technical) by dispatching to an LLM provider (openai, openrouter, anthropic). Requires an API key. Zero runtime dependencies.",
   "keywords": ["dna", "input-text", "llm", "openai", "openrouter", "anthropic"],
@@ -23,7 +23,7 @@
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
   "dependencies": {
-    "@dna-codes/dna-core": "^0.4.0",
+    "@dna-codes/dna-core": "^0.5.0",
     "@dna-codes/dna-schemas": "^0.4.0"
   },
   "devDependencies": {

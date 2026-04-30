@@ -110,4 +110,16 @@ export function allSchemas(): JsonSchema[] {
 export { DnaValidator } from './validator'
 export type { ValidationResult, CrossLayerResult, CrossLayerError } from './validator'
 
+export { merge } from './merge'
+export type {
+  Conflict,
+  ConflictRecommendation,
+  ConflictValue,
+  MergeChunk,
+  MergeResult,
+  OperationalDNA,
+  Provenance,
+  Source,
+} from './types/merge'
+
 export { bookshopInput } from './fixtures/bookshop'
