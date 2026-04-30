@@ -67,6 +67,6 @@
 
 ## 9. Release
 
-- [ ] 9.1 Bump versions: `dna-core` minor (added `merge`), `dna-ingest` 0.1.0, `dna-integration-google-drive` 0.1.0
-- [ ] 9.2 Tag the release (`vX.Y.0`) and push the tag; verify the existing `publish.yml` workflow publishes all three workspaces to GitHub Packages
-- [ ] 9.3 Smoke-test install from a fresh consumer project: `npm install @dna-codes/dna-ingest @dna-codes/dna-integration-google-drive @dna-codes/dna-core` and run a tiny end-to-end ingest with the stub
+- [x] 9.1 Bump versions: `dna-core` minor (added `merge`), `dna-ingest` 0.1.0, `dna-integration-google-drive` 0.1.0 — plus 8 sibling packages bumped to `0.4.1` with `^0.5.0` dna-core dep so consumers installing dna-core@0.5.0 alongside any input-*/output-* package get a single resolvable version
+- [x] 9.2 Tag the release (`v0.5.0`) and push the tag; the existing `publish.yml` workflow needed a small change to skip already-published versions (E409) cleanly — done in commit a9a816a. v0.5.0 published 11 packages successfully (dna-core 0.5.0 + 8 siblings at 0.4.1 + dna-ingest 0.1.0 + dna-integration-google-drive 0.1.0)
+- [x] 9.3 Smoke-test install from a fresh consumer project: `npm install @dna-codes/dna-ingest @dna-codes/dna-integration-google-drive @dna-codes/dna-core` and run a tiny end-to-end ingest with the stub. ✓ Ran from `$TMPDIR/dna-smoke` against the published packages: install resolved 9 packages cleanly; end-to-end ingest with mock Drive integration produced the expected merged DNA (Loan w/ amount + status, Underwriter role, provenance for both sources, schema validation passed). One ESM consumer-friction issue surfaced (the Drive package's `export default` lands at `pkg.default` from Node ESM consumers, requires a `.default` workaround) — flagged for a 0.1.1 patch.
