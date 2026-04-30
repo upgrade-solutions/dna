@@ -84,10 +84,14 @@ const ctor = new LayeredConstructor({ domain: { name: 'lending', path: 'acme.len
 // Direct, no LLM:
 ctor.handle({ name: 'add_resource', args: { name: 'Loan' } })
 ctor.handle({ name: 'add_person', args: { name: 'Borrower' } })
-const result = ctor.handle({ name: 'finalize', args: {} })
-if (result.ok && 'document' in result) {
-  console.log(result.document) // schema-valid Operational DNA
+const finalize = ctor.handle({ name: 'finalize', args: {} })
+if (finalize.ok && 'document' in finalize) {
+  console.log(finalize.document) // schema-valid Operational DNA
+  console.log(finalize.conflicts) // composed-on-add scalar disagreements (often empty)
 }
+
+// Or pull the running state without finalizing:
+const { document, conflicts } = ctor.result()
 
 // External agent:
 const openaiTools = toOpenAITools(ctor.tools())     // for OpenAI/Ollama
@@ -95,7 +99,9 @@ const anthropicTools = toAnthropicTools(ctor.tools()) // for Anthropic
 // ... feed tools to your agent loop, route tool calls back to ctor.handle({ name, args })
 ```
 
-`ctor.tools()` returns provider-neutral tool definitions; the helpers render them to OpenAI or Anthropic shapes. `ctor.handle()` is synchronous and returns either a success record (`{ ok: true, primitive, name }`) or a structured error (`{ ok: false, error: 'unknown_role', message, available }`). Callers loop until `ctor.handle({ name: 'finalize', args: {} })` returns `{ ok: true, finalized: true, document }`.
+`ctor.tools()` returns provider-neutral tool definitions; the helpers render them to OpenAI or Anthropic shapes. `ctor.handle()` is synchronous and returns either a success record (`{ ok: true, primitive, name }`) or a structured error (`{ ok: false, error: 'unknown_role', message, available }`). Callers loop until `ctor.handle({ name: 'finalize', args: {} })` returns `{ ok: true, finalized: true, document, conflicts }`.
+
+**Behavior change in 0.5.0:** the `duplicate_name` tool-call error code is gone. Same-named tool calls now compose via `@dna-codes/dna-core`'s builder API; conflicting scalars surface in `result().conflicts`. The iteration cap (`maxToolCalls`) backstops any LLM that loops re-declaring the same primitive.
 
 ## Provider defaults
 

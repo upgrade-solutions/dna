@@ -107,7 +107,7 @@ async function parseLayered(text: string, options: ParseOptions): Promise<ParseR
     if (toolResult.ok && 'finalized' in toolResult && toolResult.finalized) break
   }
 
-  const operational = ctor.hasFinalized() ? (ctor.result() as Record<string, unknown>) : undefined
+  const operational = ctor.hasFinalized() ? ctor.result().document : undefined
   const missingLayers: Layer[] = operational ? [] : ['operational']
   if (missingLayers.length) {
     handleMissing(missingLayers, layers, options.onMissingLayers ?? 'warn')
@@ -147,7 +147,7 @@ function stripFences(s: string): string {
 
 export * from './types'
 export { LayeredConstructor } from './layered/constructor'
-export type { ToolCallRequest, ToolCallResult, LayeredConstructorOptions } from './layered/constructor'
+export type { ToolCallRequest, ToolCallResult, LayeredConstructorOptions, LayeredResult } from './layered/constructor'
 export { buildLayeredTools, buildPrimitiveTool, injectEnums, FINALIZE_TOOL, PRIMITIVE_KINDS } from './tools/schema-to-tool'
 export type { ToolDefinition, EnumPools, PrimitiveKind } from './tools/schema-to-tool'
 export { toOpenAITools, toAnthropicTools } from './tools/provider-shapes'

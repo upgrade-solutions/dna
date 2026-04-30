@@ -1,9 +1,14 @@
 import {
-  ParsedAttribute,
-  ParsedResource,
-  ParsedRelationship,
-  ParseResult,
-} from './types'
+  addRelationship,
+  addResource,
+  createOperationalDna,
+  type Attribute,
+  type AttributeType,
+  type OperationalDNA,
+  type Relationship,
+  type RelationshipCardinality,
+} from '@dna-codes/dna-core'
+import { ParsedRelationship, ParsedResource, ParseResult } from './types'
 
 export interface ParseOptions {
   /** Name for the root Resource. Required — input JSON doesn't name itself. */
@@ -14,21 +19,36 @@ export interface ParseOptions {
   resourceNameFromKey?: (key: string) => string
 }
 
+/**
+ * Walk a JSON sample and infer DNA Resources + Relationships from it.
+ *
+ * The walker no longer maintains its own `Map<name, Resource>` or per-attribute
+ * `seen` set — it composes a single OperationalDNA via the `addResource` /
+ * `addRelationship` builders from `@dna-codes/dna-core`. Same-named primitives
+ * compose by name; same-keyed attributes within a Resource union via the
+ * builder's underlying merge rules. The walker's only correctness concern is
+ * deciding whether each JSON key becomes a scalar Attribute, a reference
+ * Attribute + child Resource recursion, or is dropped (arrays of scalars).
+ */
 export function parse(data: unknown, options: ParseOptions): ParseResult {
   if (!isRecord(data) && !Array.isArray(data)) {
     throw new Error('input-json.parse: input must be a JSON object or array of objects.')
   }
 
-  const resources = new Map<string, ParsedResource>()
-  const relationships: ParsedRelationship[] = []
+  const domainName = options.domain ?? options.name.toLowerCase()
+  let dna: OperationalDNA = createOperationalDna({ domain: { name: domainName } })
+
   const rootSample = Array.isArray(data) ? mergeRecords(data) : data
-  walk(rootSample, options.name, resources, relationships, options)
+  dna = walk(rootSample, options.name, dna, options)
+
+  const resources = ((dna.domain.resources ?? []) as ParsedResource[])
+  const relationships = ((dna.relationships ?? []) as ParsedRelationship[])
 
   return {
     operational: {
       domain: {
-        name: options.domain ?? options.name.toLowerCase(),
-        resources: [...resources.values()],
+        name: domainName,
+        resources,
       },
       ...(relationships.length ? { relationships } : {}),
     },
@@ -38,52 +58,60 @@ export function parse(data: unknown, options: ParseOptions): ParseResult {
 function walk(
   data: Record<string, unknown>,
   resourceName: string,
-  resources: Map<string, ParsedResource>,
-  relationships: ParsedRelationship[],
+  dna: OperationalDNA,
   options: ParseOptions,
-): void {
-  const existing = resources.get(resourceName)
-  const attrs: ParsedAttribute[] = existing?.attributes ? [...existing.attributes] : []
-  const seen = new Set(attrs.map((a) => a.name))
-
+): OperationalDNA {
   for (const [key, value] of Object.entries(data)) {
-    if (seen.has(key)) continue
-    seen.add(key)
-
     if (isRecord(value)) {
       const childName = deriveResourceName(key, options)
-      attrs.push({ name: key, type: 'reference', resource: childName })
-      relationships.push(buildRelationship(resourceName, childName, key, 'one-to-one'))
-      walk(value, childName, resources, relationships, options)
-    } else if (Array.isArray(value)) {
+      dna = addResource(dna, {
+        name: resourceName,
+        attributes: [{ name: key, type: 'reference', resource: childName }],
+      }).dna
+      dna = addRelationship(dna, buildRelationship(resourceName, childName, key, 'one-to-one')).dna
+      dna = walk(value, childName, dna, options)
+      continue
+    }
+
+    if (Array.isArray(value)) {
       if (value.length > 0 && isRecord(value[0])) {
         const childName = deriveResourceName(key, options)
-        attrs.push({ name: key, type: 'reference', resource: childName })
-        relationships.push(buildRelationship(resourceName, childName, key, 'one-to-many'))
+        dna = addResource(dna, {
+          name: resourceName,
+          attributes: [{ name: key, type: 'reference', resource: childName }],
+        }).dna
+        dna = addRelationship(dna, buildRelationship(resourceName, childName, key, 'one-to-many')).dna
         const merged = mergeRecords(value)
-        walk(merged, childName, resources, relationships, options)
+        dna = walk(merged, childName, dna, options)
       }
       // Arrays of scalars (e.g. `tags: ["fantasy", "classic"]`) have no faithful
       // representation as a single DNA Attribute — the canonical schema's
       // type enum is string | text | number | boolean | date | datetime | enum
       // | reference. The DNA way to model scalar collections is a child Resource
       // plus a relationship, which requires more context than a JSON sample
-      // provides (the scalar's name, its own attributes, etc.). Rather than
-      // emit invalid DNA, drop these keys. Upgrade them manually if needed.
-    } else {
-      attrs.push({ name: key, type: inferScalarType(value) })
+      // provides. Rather than emit invalid DNA, drop these keys.
+      continue
     }
+
+    const attr: Attribute = { name: key, type: inferScalarType(value) }
+    dna = addResource(dna, { name: resourceName, attributes: [attr] }).dna
   }
 
-  resources.set(resourceName, { name: resourceName, attributes: attrs })
+  // Ensure the resource exists even if it had no recognizable keys.
+  const targetResources = (dna.domain.resources ?? []) as Array<{ name: string }>
+  if (!targetResources.some((r) => r.name === resourceName)) {
+    dna = addResource(dna, { name: resourceName }).dna
+  }
+
+  return dna
 }
 
 function buildRelationship(
   from: string,
   to: string,
   attribute: string,
-  cardinality: 'one-to-one' | 'one-to-many',
-): ParsedRelationship {
+  cardinality: RelationshipCardinality,
+): Relationship {
   return {
     name: `${from}.${attribute}`,
     from,
@@ -114,7 +142,7 @@ function mergeRecords(items: unknown[]): Record<string, unknown> {
   return out
 }
 
-function inferScalarType(value: unknown): string {
+function inferScalarType(value: unknown): AttributeType {
   if (value == null) return 'string'
   if (typeof value === 'boolean') return 'boolean'
   if (typeof value === 'number') return 'number'

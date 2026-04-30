@@ -4,7 +4,13 @@
   "repository": "github:dna-codes/dna",
   "private": true,
   "description": "Bidirectional DNA integration for Jira Cloud. Pulls an Epic's description through @dna-codes/dna-input-text into DNA, then pushes child Stories rendered by @dna-codes/dna-output-text. Basic auth with email + API token.",
-  "keywords": ["dna", "jira", "integration", "epic", "story"],
+  "keywords": [
+    "dna",
+    "jira",
+    "integration",
+    "epic",
+    "story"
+  ],
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -42,6 +48,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["/node_modules/", "/dist/"]
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ]
   }
 }

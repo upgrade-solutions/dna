@@ -1,9 +1,16 @@
 {
   "name": "@dna-codes/dna-input-text",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "repository": "github:dna-codes/dna",
-  "description": "Turn freeform prose describing a business system into DNA (operational, product, technical) by dispatching to an LLM provider (openai, openrouter, anthropic). Requires an API key. Zero runtime dependencies.",
-  "keywords": ["dna", "input-text", "llm", "openai", "openrouter", "anthropic"],
+  "description": "Turn freeform prose describing a business system into DNA (operational, product, technical) by dispatching to an LLM provider (openai, openrouter, anthropic). Requires an API key. Composes via the @dna-codes/dna-core builder API.",
+  "keywords": [
+    "dna",
+    "input-text",
+    "llm",
+    "openai",
+    "openrouter",
+    "anthropic"
+  ],
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +21,10 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
@@ -37,6 +47,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["/node_modules/", "/dist/"]
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ]
   }
 }

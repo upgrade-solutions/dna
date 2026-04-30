@@ -104,7 +104,7 @@ async function parseLayered(text, options) {
         if (toolResult.ok && 'finalized' in toolResult && toolResult.finalized)
             break;
     }
-    const operational = ctor.hasFinalized() ? ctor.result() : undefined;
+    const operational = ctor.hasFinalized() ? ctor.result().document : undefined;
     const missingLayers = operational ? [] : ['operational'];
     if (missingLayers.length) {
         handleMissing(missingLayers, layers, options.onMissingLayers ?? 'warn');

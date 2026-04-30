@@ -91,52 +91,45 @@ describe('LayeredConstructor — no-LLM direct usage', () => {
         if (result.ok)
             throw new Error('expected failure');
         expect(result.error).toBe('schema_violation');
-        const snapshot = ctor.result();
+        const snapshot = ctor.result().document;
         expect(snapshot.domain.resources ?? []).toEqual([]);
     });
-    it('rejects a second add_resource with the same name (even with different args)', () => {
+    it('composes a second add_resource with the same name into the existing one', () => {
+        // Behavior change in 0.5.0: same-named primitives compose via the merge
+        // engine instead of producing a `duplicate_name` error. List-shaped
+        // children union by name; scalar disagreements surface as conflicts.
         const ctor = new constructor_1.LayeredConstructor();
         expect(ctor.handle({
             name: 'add_resource',
             args: { name: 'Claimant', attributes: [{ name: 'email', type: 'string' }] },
         })).toMatchObject({ ok: true });
-        const second = ctor.handle({ name: 'add_resource', args: { name: 'Claimant' } });
-        expect(second.ok).toBe(false);
-        if (second.ok)
-            throw new Error('expected failure');
-        expect(second.error).toBe('duplicate_name');
-        const snapshot = ctor.result();
-        expect(snapshot.domain.resources).toHaveLength(1);
+        const second = ctor.handle({
+            name: 'add_resource',
+            args: { name: 'Claimant', attributes: [{ name: 'phone', type: 'string' }] },
+        });
+        expect(second.ok).toBe(true);
+        const { document, conflicts } = ctor.result();
+        expect(conflicts).toEqual([]);
+        const resources = document.domain.resources;
+        expect(resources).toHaveLength(1);
+        expect(resources[0].attributes.map((a) => a.name).sort()).toEqual(['email', 'phone']);
     });
-    it('rejects a second Operation with the same Target.Action', () => {
+    it('surfaces composed-on-add scalar conflicts in result().conflicts', () => {
         const ctor = new constructor_1.LayeredConstructor();
         ctor.handle({
             name: 'add_resource',
-            args: {
-                name: 'Loan',
-                actions: [
-                    { name: 'Apply', type: 'write' },
-                    { name: 'Approve', type: 'write' },
-                ],
-            },
+            args: { name: 'Loan', description: 'Consumer loan' },
         });
-        expect(ctor.handle({
-            name: 'add_operation',
-            args: { target: 'Loan', action: 'Apply', name: 'Loan.Apply' },
-        })).toMatchObject({ ok: true });
-        // Different call breaks the consecutive-call signature so duplicate_name fires (not duplicate_call).
-        ctor.handle({
-            name: 'add_operation',
-            args: { target: 'Loan', action: 'Approve', name: 'Loan.Approve' },
-        });
+        // Different intermediate call so the consecutive-signature check doesn't fire.
+        ctor.handle({ name: 'add_person', args: { name: 'Borrower' } });
         const second = ctor.handle({
-            name: 'add_operation',
-            args: { target: 'Loan', action: 'Apply', name: 'Loan.Apply' },
+            name: 'add_resource',
+            args: { name: 'Loan', description: 'Mortgage product' },
         });
-        expect(second.ok).toBe(false);
-        if (second.ok)
-            throw new Error('expected failure');
-        expect(second.error).toBe('duplicate_name');
+        expect(second.ok).toBe(true);
+        const { conflicts } = ctor.result();
+        expect(conflicts).toHaveLength(1);
+        expect(conflicts[0].path).toBe('resources.Loan.description');
     });
     it('detects duplicate consecutive calls (same name + same args)', () => {
         const ctor = new constructor_1.LayeredConstructor();
@@ -146,9 +139,9 @@ describe('LayeredConstructor — no-LLM direct usage', () => {
         expect(dup.ok).toBe(false);
         if (dup.ok)
             throw new Error('expected failure');
-        // Either error is correct: duplicate_call (consecutive replay) or duplicate_name (uniqueness).
-        // Both protect the draft from accidental double-adds.
-        expect(['duplicate_call', 'duplicate_name']).toContain(dup.error);
+        // duplicate_call still fires for back-to-back identical tool calls;
+        // duplicate_name was removed in 0.5.0 (same-named primitives now compose).
+        expect(dup.error).toBe('duplicate_call');
     });
     it('throws when the iteration cap is exceeded', () => {
         const ctor = new constructor_1.LayeredConstructor({ maxToolCalls: 2 });

@@ -3,33 +3,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LayeredConstructor = void 0;
 const dna_core_1 = require("@dna-codes/dna-core");
 const schema_to_tool_1 = require("../tools/schema-to-tool");
-const COLLECTION_FOR = {
-    resource: 'domain.resources',
-    person: 'domain.persons',
-    role: 'domain.roles',
-    group: 'domain.groups',
-    membership: 'memberships',
-    operation: 'operations',
-    task: 'tasks',
-    process: 'processes',
-    trigger: 'triggers',
-    rule: 'rules',
+const ADD_BUILDER = {
+    resource: dna_core_1.addResource,
+    person: dna_core_1.addPerson,
+    role: dna_core_1.addRole,
+    group: dna_core_1.addGroup,
+    membership: dna_core_1.addMembership,
+    operation: dna_core_1.addOperation,
+    task: dna_core_1.addTask,
+    process: dna_core_1.addProcess,
+    trigger: dna_core_1.addTrigger,
+    rule: dna_core_1.addRule,
 };
-const NAME_POOL_FOR = {
-    resource: 'resources',
-    person: 'persons',
-    role: 'roles',
-    group: 'groups',
-    task: 'tasks',
-    process: 'processes',
-    rule: 'rules',
-    // membership has names too but they're not in the EnumPools shape — handle separately below
-};
-function capitalize(s) {
-    return s.length === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1);
-}
 class LayeredConstructor {
     constructor(options = {}) {
+        this.accumulatedConflicts = [];
         this.validator = new dna_core_1.DnaValidator();
         this.transcript = [];
         this.callCount = 0;
@@ -37,23 +25,13 @@ class LayeredConstructor {
         this.lastCallSig = null;
         this.finalized = false;
         const domain = options.domain ?? { name: 'domain' };
-        this.draft = {
+        this.dna = (0, dna_core_1.createOperationalDna)({
             domain: {
                 name: domain.name,
                 ...(domain.path ? { path: domain.path } : {}),
                 ...(domain.description ? { description: domain.description } : {}),
-                resources: [],
-                persons: [],
-                roles: [],
-                groups: [],
             },
-            memberships: [],
-            operations: [],
-            triggers: [],
-            rules: [],
-            tasks: [],
-            processes: [],
-        };
+        });
         this.tools_ = (0, schema_to_tool_1.buildLayeredTools)();
         this.maxToolCalls = options.maxToolCalls ?? 50;
         this.maxFinalizeRetries = options.maxFinalizeRetries ?? 3;
@@ -64,22 +42,30 @@ class LayeredConstructor {
     }
     /** Pools of declared primitive names — useful for narrowing tool schemas mid-flight. */
     pools() {
+        const dom = this.dna.domain;
         return {
-            resources: this.draft.domain.resources.map((r) => r.name),
-            persons: this.draft.domain.persons.map((p) => p.name),
-            roles: this.draft.domain.roles.map((r) => r.name),
-            groups: this.draft.domain.groups.map((g) => g.name),
-            operations: this.draft.operations.map((o) => o.name ?? ''),
-            tasks: this.draft.tasks.map((t) => t.name),
-            processes: this.draft.processes.map((p) => p.name),
-            rules: this.draft.rules
-                .map((r) => r.name)
-                .filter((n) => typeof n === 'string'),
+            resources: namesOf(dom.resources),
+            persons: namesOf(dom.persons),
+            roles: namesOf(dom.roles),
+            groups: namesOf(dom.groups),
+            operations: namesOf(this.dna.operations),
+            tasks: namesOf(this.dna.tasks),
+            processes: namesOf(this.dna.processes),
+            rules: namesOf(this.dna.rules),
         };
     }
-    /** The assembled draft. Returns a deep-cloned snapshot. */
+    /**
+     * The assembled document plus any composed-on-add conflicts. The
+     * `document` field matches the shape `cleanDocument()` used to return —
+     * it's the merged DNA stripped of empty collections. The `conflicts`
+     * field accumulates scalar disagreements across all `add_*` tool calls
+     * (an LLM re-emitting the same primitive with conflicting scalars).
+     */
     result() {
-        return cleanDocument(this.draft);
+        return {
+            document: cleanDocument(this.dna),
+            conflicts: [...this.accumulatedConflicts],
+        };
     }
     hasFinalized() {
         return this.finalized;
@@ -149,6 +135,9 @@ class LayeredConstructor {
         if (!args || typeof args !== 'object') {
             return { ok: false, error: 'invalid_args', message: `add_${kind}: args must be an object.` };
         }
+        // Validate up-front so the LLM gets a structured `schema_violation`
+        // response. Builders validate by default too, but they throw on failure
+        // — we want a soft error here, not an exception.
         const validation = this.validatePrimitive(kind, args);
         if (!validation.valid) {
             return {
@@ -158,20 +147,16 @@ class LayeredConstructor {
                 details: validation.errors,
             };
         }
-        const dupName = this.checkNameUniqueness(kind, args);
-        if (dupName)
-            return dupName;
         const refError = this.checkReferences(kind, args);
         if (refError)
             return refError;
-        const target = COLLECTION_FOR[kind];
-        if (target.startsWith('domain.')) {
-            const field = target.slice('domain.'.length);
-            this.draft.domain[field].push(args);
-        }
-        else {
-            ;
-            this.draft[target].push(args);
+        // Compose into the running DNA via the matching builder. We just
+        // validated; pass `validate: false` to skip a redundant pass.
+        const builder = ADD_BUILDER[kind];
+        const composed = builder(this.dna, args, { validate: false });
+        this.dna = composed.dna;
+        if (composed.conflicts.length > 0) {
+            this.accumulatedConflicts.push(...composed.conflicts);
         }
         const name = typeof args.name === 'string' ? args.name : '<unnamed>';
         return {
@@ -179,57 +164,12 @@ class LayeredConstructor {
             primitive: kind,
             name,
             message: `Added ${kind} "${name}".`,
+            ...(composed.conflicts.length > 0 ? { conflicts: composed.conflicts } : {}),
         };
     }
     validatePrimitive(kind, args) {
         const schemaId = `operational/${kind}`;
         return this.validator.validate(args, schemaId);
-    }
-    checkNameUniqueness(kind, args) {
-        // Triggers are inherently anonymous (multiple per Operation are valid).
-        if (kind === 'trigger')
-            return null;
-        const pools = this.pools();
-        if (kind === 'operation') {
-            const name = typeof args.name === 'string' ? args.name : undefined;
-            const target = typeof args.target === 'string' ? args.target : undefined;
-            const action = typeof args.action === 'string' ? args.action : undefined;
-            const composed = name ?? (target && action ? `${target}.${action}` : undefined);
-            if (composed && (pools.operations ?? []).includes(composed)) {
-                return {
-                    ok: false,
-                    error: 'duplicate_name',
-                    message: `Operation "${composed}" has already been added. Each Target.Action pair is unique.`,
-                };
-            }
-            return null;
-        }
-        const name = typeof args.name === 'string' ? args.name : undefined;
-        if (!name)
-            return null;
-        if (kind === 'membership') {
-            const existing = this.draft.memberships.map((m) => m.name).filter(Boolean);
-            if (existing.includes(name)) {
-                return {
-                    ok: false,
-                    error: 'duplicate_name',
-                    message: `Membership "${name}" has already been added.`,
-                };
-            }
-            return null;
-        }
-        const poolKey = NAME_POOL_FOR[kind];
-        if (!poolKey)
-            return null;
-        const existing = (pools[poolKey] ?? []);
-        if (existing.includes(name)) {
-            return {
-                ok: false,
-                error: 'duplicate_name',
-                message: `${capitalize(kind)} "${name}" has already been added.`,
-            };
-        }
-        return null;
     }
     checkReferences(kind, args) {
         const pools = this.pools();
@@ -373,12 +313,12 @@ class LayeredConstructor {
     }
     handleFinalize() {
         this.finalizeAttempts += 1;
-        const document = cleanDocument(this.draft);
+        const document = cleanDocument(this.dna);
         const result = this.validator.validate(document, 'operational');
         const cross = this.validator.validateCrossLayer({ operational: document });
         if (result.valid && cross.valid) {
             this.finalized = true;
-            return { ok: true, finalized: true, document };
+            return { ok: true, finalized: true, document, conflicts: [...this.accumulatedConflicts] };
         }
         if (this.finalizeAttempts >= this.maxFinalizeRetries) {
             return {
@@ -422,19 +362,12 @@ function stableStringify(value) {
     const keys = Object.keys(obj).sort();
     return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(',')}}`;
 }
-function cleanDocument(draft) {
-    const out = { domain: cleanDomain(draft.domain) };
-    const sections = [
-        'memberships',
-        'operations',
-        'triggers',
-        'rules',
-        'tasks',
-        'processes',
-    ];
+function cleanDocument(dna) {
+    const out = { domain: cleanDomain(dna.domain) };
+    const sections = ['memberships', 'operations', 'triggers', 'rules', 'tasks', 'processes'];
     for (const key of sections) {
-        const arr = draft[key];
-        if (arr.length > 0)
+        const arr = dna[key];
+        if (Array.isArray(arr) && arr.length > 0)
             out[key] = arr;
     }
     return out;
@@ -445,14 +378,21 @@ function cleanDomain(d) {
         out.path = d.path;
     if (d.description)
         out.description = d.description;
-    if (d.resources.length)
+    if (Array.isArray(d.resources) && d.resources.length)
         out.resources = d.resources;
-    if (d.persons.length)
+    if (Array.isArray(d.persons) && d.persons.length)
         out.persons = d.persons;
-    if (d.roles.length)
+    if (Array.isArray(d.roles) && d.roles.length)
         out.roles = d.roles;
-    if (d.groups.length)
+    if (Array.isArray(d.groups) && d.groups.length)
         out.groups = d.groups;
     return out;
+}
+function namesOf(items) {
+    if (!Array.isArray(items))
+        return [];
+    return items
+        .map((item) => item.name)
+        .filter((n) => typeof n === 'string');
 }
 //# sourceMappingURL=constructor.js.map

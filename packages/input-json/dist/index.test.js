@@ -111,9 +111,14 @@ describe('@dna-codes/dna-input-json', () => {
             expect(operational.domain.resources.map((r) => r.name).sort()).toEqual(['Address', 'Order']);
         });
         it('honors resourceNameFromKey override', () => {
+            // Override must return PascalCase names — Resource.name pattern in the
+            // schema is `^[A-Z][a-zA-Z0-9]*$`. The pre-builder walker silently
+            // emitted invalid Resources when given a lowercase override; the
+            // builder API validates by default and surfaces the bug.
+            const pascal = (s) => s.charAt(0).toUpperCase() + s.slice(1);
             const { operational } = (0, index_1.parse)(bookSample, {
                 name: 'Book',
-                resourceNameFromKey: (k) => (k === 'author' ? 'Person' : k),
+                resourceNameFromKey: (k) => (k === 'author' ? 'Person' : pascal(k)),
             });
             expect(operational.domain.resources.find((r) => r.name === 'Person')).toBeDefined();
         });

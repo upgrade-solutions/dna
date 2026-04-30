@@ -1,3 +1,4 @@
+import { type Conflict } from '@dna-codes/dna-core';
 import { type EnumPools, type PrimitiveKind, type ToolDefinition } from '../tools/schema-to-tool';
 export interface LayeredConstructorOptions {
     /**
@@ -29,22 +30,30 @@ export type ToolCallResult = {
     primitive?: PrimitiveKind;
     name?: string;
     message?: string;
+    conflicts?: Conflict[];
 } | {
     ok: true;
     finalized: true;
     document: Record<string, unknown>;
+    conflicts: Conflict[];
 } | {
     ok: false;
-    error: 'unknown_tool' | 'duplicate_call' | 'duplicate_name' | 'schema_violation' | 'unknown_resource' | 'unknown_person' | 'unknown_role' | 'unknown_group' | 'unknown_operation' | 'unknown_target' | 'unknown_actor' | 'unknown_operator' | 'unknown_task' | 'unknown_process' | 'unknown_rule' | 'invalid_args' | 'iteration_cap_reached' | 'finalize_failed' | 'finalize_retries_exhausted';
+    error: 'unknown_tool' | 'duplicate_call' | 'schema_violation' | 'unknown_resource' | 'unknown_person' | 'unknown_role' | 'unknown_group' | 'unknown_operation' | 'unknown_target' | 'unknown_actor' | 'unknown_operator' | 'unknown_task' | 'unknown_process' | 'unknown_rule' | 'invalid_args' | 'iteration_cap_reached' | 'finalize_failed' | 'finalize_retries_exhausted';
     message: string;
     details?: unknown;
     available?: string[];
 };
+export interface LayeredResult {
+    document: Record<string, unknown>;
+    /** Composed-on-add conflicts accumulated across all `add_*` tool calls. */
+    conflicts: Conflict[];
+}
 export declare class LayeredConstructor {
     private readonly tools_;
     private readonly maxToolCalls;
     private readonly maxFinalizeRetries;
-    private readonly draft;
+    private dna;
+    private readonly accumulatedConflicts;
     private readonly validator;
     private readonly transcript;
     private callCount;
@@ -56,8 +65,14 @@ export declare class LayeredConstructor {
     tools(): ToolDefinition[];
     /** Pools of declared primitive names — useful for narrowing tool schemas mid-flight. */
     pools(): EnumPools;
-    /** The assembled draft. Returns a deep-cloned snapshot. */
-    result(): Record<string, unknown>;
+    /**
+     * The assembled document plus any composed-on-add conflicts. The
+     * `document` field matches the shape `cleanDocument()` used to return —
+     * it's the merged DNA stripped of empty collections. The `conflicts`
+     * field accumulates scalar disagreements across all `add_*` tool calls
+     * (an LLM re-emitting the same primitive with conflicting scalars).
+     */
+    result(): LayeredResult;
     hasFinalized(): boolean;
     toolCallCount(): number;
     toolCallTranscript(): {
@@ -70,7 +85,6 @@ export declare class LayeredConstructor {
     private recordCall;
     private handleAdd;
     private validatePrimitive;
-    private checkNameUniqueness;
     private checkReferences;
     private handleFinalize;
 }

@@ -110,6 +110,26 @@ export function allSchemas(): JsonSchema[] {
 export { DnaValidator } from './validator'
 export type { ValidationResult, CrossLayerResult, CrossLayerError } from './validator'
 
+export {
+  createOperationalDna,
+  addResource,
+  addPerson,
+  addRole,
+  addGroup,
+  addMembership,
+  addOperation,
+  addTrigger,
+  addRule,
+  addTask,
+  addProcess,
+  addRelationship,
+} from './builders'
+export type {
+  BuilderOptions,
+  BuilderResult,
+  CreateOperationalDnaOptions,
+} from './builders'
+
 export { merge } from './merge'
 export type {
   Conflict,
@@ -121,5 +141,33 @@ export type {
   Provenance,
   Source,
 } from './types/merge'
+
+export type {
+  Action,
+  ActionType,
+  Attribute,
+  AttributeType,
+  Domain,
+  Group,
+  Membership,
+  Operation,
+  OperationChange,
+  Person,
+  Process,
+  ProcessStep,
+  Relationship,
+  RelationshipCardinality,
+  Resource,
+  Role,
+  RoleScope,
+  Rule,
+  RuleAllowEntry,
+  RuleCondition,
+  RuleConditionOperator,
+  RuleType,
+  Task,
+  Trigger,
+  TriggerSource,
+} from './types/operational'
 
 export { bookshopInput } from './fixtures/bookshop'

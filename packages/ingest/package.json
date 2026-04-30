@@ -3,7 +3,13 @@
   "version": "0.1.0",
   "repository": "github:dna-codes/dna",
   "description": "Multi-source DNA orchestrator. Fans many input documents (files, Drive docs, transcripts, ...) into one Operational DNA via dependency-injected integrations and input adapters, with conflict reporting and provenance tracking. Imports zero @dna-codes/dna-input-* or @dna-codes/dna-integration-* packages.",
-  "keywords": ["dna", "ingest", "orchestrator", "merge", "multi-source"],
+  "keywords": [
+    "dna",
+    "ingest",
+    "orchestrator",
+    "merge",
+    "multi-source"
+  ],
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -40,6 +46,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["/node_modules/", "/dist/"]
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ]
   }
 }

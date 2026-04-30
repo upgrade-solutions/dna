@@ -1,9 +1,11 @@
 # `@dna-codes/dna-core`
 
-DNA is a JSON description language for business systems. This package ships typed bindings for the DNA schemas, a cross-layer validator (`DnaValidator`), and layer docs. The raw JSON schemas themselves live in [`@dna-codes/dna-schemas`](../schemas/) and are pulled in as a dependency.
+The TypeScript home for DNA — typed bindings for the JSON schemas, a typed builder API for **constructing** Operational DNA programmatically, a `DnaValidator` for **validating** any DNA against the canonical schemas (with cross-layer checks), and a pure `merge()` utility for composing multiple DNA chunks into one with conflict reporting.
+
+The raw JSON schemas live in [`@dna-codes/dna-schemas`](../schemas/) and are pulled in as a dependency.
 
 | Layer | What it captures | Analogous to |
-|-------|------------------|--------------|
+|---|---|---|
 | **Operational DNA** | What the business does | Domain-Driven Design |
 | **Product DNA** | What gets built | OpenAPI + Atomic Design |
 | **Technical DNA** | How it gets built | Terraform / AWS SAM |
@@ -13,6 +15,7 @@ DNA is a *contract*, not a runtime. Producers (authoring agents, humans) emit JS
 - [`docs/operational.md`](./docs/operational.md) — authoring contract for operational DNA
 - [`docs/product.md`](./docs/product.md) — authoring contract for product DNA (core + api + ui)
 - [`docs/technical.md`](./docs/technical.md) — authoring contract for technical DNA
+- [`docs/builders.md`](./docs/builders.md) — full reference for the builder API
 - [`docs/merge.md`](./docs/merge.md) — `merge()` reference for composing DNA from multiple chunks
 - [`AGENTS.md`](./AGENTS.md) — agent contract for working with DNA at large
 
@@ -22,116 +25,109 @@ DNA is a *contract*, not a runtime. Producers (authoring agents, humans) emit JS
 npm install @dna-codes/dna-core
 ```
 
-## API
+## Quick start — build, then validate
 
-### `schemas`
-
-Nested object of every per-primitive JSON schema, keyed by layer:
+End-to-end: construct a small Operational DNA from scratch via the builders, validate it, get back a green light.
 
 ```ts
-import { schemas } from '@dna-codes/dna-core'
+import {
+  createOperationalDna,
+  addResource,
+  addPerson,
+  addRole,
+  addOperation,
+  addTrigger,
+  addRule,
+  addTask,
+  DnaValidator,
+} from '@dna-codes/dna-core'
 
-schemas.operational.resource       // 15 operational primitives
-schemas.product.core.role          // 5 product-core primitives
-schemas.product.api.endpoint       // 4 product-api primitives
-schemas.product.web.page           // 4 product-web (UI) primitives
-schemas.technical.cell             // 11 technical primitives
-```
+// 1. Start from an empty domain.
+let dna = createOperationalDna({ domain: { name: 'lending', path: 'acme.lending' } })
 
-Each schema is a JSON Schema Draft 2020-12 document with a stable `$id`:
+// 2. Compose primitives via the builders. Each call returns
+//    { dna, conflicts }; same-name composes via the merge engine.
+;({ dna } = addResource(dna, {
+  name: 'Loan',
+  attributes: [
+    { name: 'amount', type: 'number', required: true },
+    { name: 'status', type: 'enum', values: ['pending', 'active', 'repaid'] },
+  ],
+  actions: [
+    { name: 'Apply',   type: 'write' },
+    { name: 'Approve', type: 'write' },
+  ],
+}))
+;({ dna } = addPerson(dna, { name: 'Borrower' }))
+;({ dna } = addRole(dna, { name: 'Underwriter' }))
+;({ dna } = addOperation(dna, { name: 'Loan.Apply',   target: 'Loan', action: 'Apply' }))
+;({ dna } = addOperation(dna, { name: 'Loan.Approve', target: 'Loan', action: 'Approve' }))
+;({ dna } = addTrigger(dna, { operation: 'Loan.Apply', source: 'user' }))
+;({ dna } = addRule(dna, { operation: 'Loan.Approve', type: 'access', allow: [{ role: 'Underwriter' }] }))
+;({ dna } = addTask(dna, { name: 'approve-loan', actor: 'Underwriter', operation: 'Loan.Approve' }))
 
-```ts
-schemas.operational.resource.$id
-// → 'https://dna.codes/schemas/operational/resource'
-```
-
-### `documents`
-
-Aggregate schemas describing the shape of a full DNA document per layer:
-
-```ts
-import { documents } from '@dna-codes/dna-core'
-
-documents.operational              // shape of operational.json
-documents.productCore              // shape of product.core.json
-documents.productApi               // shape of product.api.json
-documents.productUi                // shape of product.ui.json
-documents.technical                // shape of technical.json
-```
-
-### `allSchemas()`
-
-Flat array of every schema (primitives + aggregates). Convenient for bulk-registering with a JSON Schema validator:
-
-```ts
-import Ajv from 'ajv'
-import { allSchemas } from '@dna-codes/dna-core'
-
-const ajv = new Ajv({ strict: false, allErrors: true })
-for (const s of allSchemas()) ajv.addSchema(s)
-
-const validate = ajv.getSchema('https://dna.codes/schemas/operational/resource')
-validate({ name: 'Loan' })         // → true
-```
-
-### `resolveSchemaFile(family, name)`
-
-Returns the on-disk path of a schema file, or `null` if it doesn't exist. Useful for dev servers or tooling that needs to serve raw schema files:
-
-```ts
-import { resolveSchemaFile } from '@dna-codes/dna-core'
-
-resolveSchemaFile('operational', 'resource')
-// → '/abs/.../node_modules/@dna-codes/dna-schemas/operational/resource.json'
-
-resolveSchemaFile('product', 'api/endpoint')      // nested path
-// → '/abs/.../schemas/product/api/endpoint.json'
-
-resolveSchemaFile('operational', 'ghost')         // missing
-// → null
-```
-
-### `SCHEMA_ROOT`, `layerDirs`
-
-Filesystem roots for consumers that walk the tree themselves:
-
-```ts
-import { SCHEMA_ROOT, layerDirs } from '@dna-codes/dna-core'
-
-SCHEMA_ROOT                        // .../node_modules/@dna-codes/dna-schemas
-layerDirs.operational              // .../schemas/operational
-layerDirs.product                  // .../schemas/product
-layerDirs.technical                // .../schemas/technical
-```
-
-### Raw JSON schemas
-
-To import an individual schema directly, depend on [`@dna-codes/dna-schemas`](../schemas/):
-
-```ts
-import resourceSchema from '@dna-codes/dna-schemas/operational/resource.json'
-```
-
-## `DnaValidator`
-
-AJV-backed validator with per-layer and cross-layer checks. All DNA schemas are pre-registered — no setup needed beyond `new DnaValidator()`.
-
-```ts
-import { DnaValidator } from '@dna-codes/dna-core'
-import operational from './dna/lending/operational.json'
-
+// 3. Validate.
 const validator = new DnaValidator()
-const result = validator.validate(operational, 'operational/operational')
-if (!result.valid) {
-  for (const err of result.errors) console.error(err.instancePath, err.message)
-}
+const schemaResult = validator.validate(dna, 'operational')
+const crossResult = validator.validateCrossLayer({ operational: dna })
 
-// Cross-layer: verify Product references valid Operational Resources, etc.
-const cross = validator.validateCrossLayer({ operational, productApi })
-if (!cross.valid) for (const err of cross.errors) console.error(err)
+if (!schemaResult.valid) console.error(schemaResult.errors)
+if (!crossResult.valid)  console.error(crossResult.errors)
+// Both green for the DNA above.
 ```
 
-## `merge()`
+That covers the two responsibilities — builders give you a typed, schema-aware way to construct DNA, and `DnaValidator` confirms the result holds together at the JSON-Schema level *and* across primitive references.
+
+---
+
+## Constructing Operational DNA
+
+### Builders — the canonical way to construct DNA
+
+`createOperationalDna(opts)` returns an empty DNA shell. Eleven `add*` builders compose primitives into it: every Operational primitive (Resource, Person, Role, Group, Membership, Operation, Trigger, Rule, Task, Process) plus `addRelationship`. Every `add*` has the same shape:
+
+```ts
+function addResource(
+  dna: OperationalDNA,
+  resource: Resource,
+  opts?: { validate?: boolean }
+): { dna: OperationalDNA; conflicts: Conflict[] }
+```
+
+**Properties guaranteed by every builder:**
+
+- **Pure & immutable** — never mutates the input DNA. Same input, same output, every time.
+- **Compose-on-duplicate** — same-name composes via the merge engine. List-shaped children union by name; scalar disagreements emit `Conflict` entries. Builders never throw on a duplicate name.
+- **Default-on schema validation** — catches malformations TypeScript can't express (regex patterns like `^[A-Z][a-zA-Z0-9]*$` on `Resource.name`, conditional requirements like `values` when `Attribute.type === 'enum'`, the source-of-truth enum lists). Pass `{ validate: false }` for hot paths where input is already known valid.
+- **Compile-time typed** — input parameters are typed against each primitive's schema. Misuse fails at build time, not just at runtime.
+
+```ts
+// Compile-time error: name must be a string
+addResource(dna, { name: 123 })
+
+// Compile-time error: action is required on Operation
+addOperation(dna, { target: 'Loan' })
+
+// Runtime error: enum requires `values`
+addResource(dna, { name: 'Loan', attributes: [{ name: 'status', type: 'enum' }] })
+// throws: "operational/resource input failed validation: /attributes/0 must have required property 'values'"
+```
+
+**Auditing compose-on-add disagreements:**
+
+```ts
+let r = addResource(dna, { name: 'Loan', description: 'Consumer loan' })
+const r2 = addResource(r.dna, { name: 'Loan', description: 'Mortgage product' })
+// r2.conflicts contains:
+//   { path: 'resources.Loan.description',
+//     values: [{ value: 'Consumer loan', source: ... }, { value: 'Mortgage product', source: ... }],
+//     recommendation: { value: 'Mortgage product', reason: 'stable-order: tied on all heuristics; first-observed wins' },
+//     kind: 'scalar' }
+```
+
+Full reference and patterns: [`docs/builders.md`](./docs/builders.md).
+
+### `merge()` — compose multiple chunks at once
 
 Compose multiple Operational DNA chunks into one. Pure, deterministic, no I/O — designed for the multi-source ingest case (`@dna-codes/dna-ingest` calls this as its fan-in step) but usable on its own.
 
@@ -148,24 +144,306 @@ result.conflicts    // Conflict[] — scalar disagreements + unresolved-ref warn
 result.provenance   // dotted-path → contributing sources, e.g. 'resources.Loan' → [...]
 ```
 
-Identity is by `name` within each primitive type; same-named entries unify across chunks. List-shaped children (`attributes[]`, `actions[]`, `roles[]`, etc.) union by name with recursive merge. Scalar disagreements emit a `Conflict` with the v1 recommendation policy:
+Same-named primitives unify across chunks. List-shaped children union by name. Scalar disagreements use the v1 recommendation policy:
 
-1. value backed by the most distinct sources wins
-2. tie-break by most recent `loadedAt`
-3. tie-break by longest non-empty string representation
-4. final tie-break: stable input order
+1. Value backed by the most distinct sources wins.
+2. Tie-break by most recent `loadedAt`.
+3. Tie-break by longest non-empty string representation.
+4. Final tie-break: stable input order.
 
-The recommendation is also written into the merged DNA so the result remains schema-valid; the full list of competing values + sources rides along in `Conflict.values` for review.
+The recommendation is written into the merged DNA so the result is always schema-valid; the full list of competing values + sources rides along in `Conflict.values` for review. Cross-references (`Operation.target`, `Membership.{person,role,group}`, `Trigger.operation`, `Task.{actor,operation}`, `Step.task`, `Rule.operation`) resolve against the merged noun set; unresolved references surface as `Conflict` entries with `kind: 'unresolved-reference'` (the referencing primitive is still emitted so a reviewer can fix the source documents).
 
-Cross-references (`Operation.target`, `Membership.{person,role,group}`, `Trigger.operation`, `Task.{actor,operation}`, `Step.task`, `Rule.operation`) are resolved against the merged noun set. Unresolved references surface as `Conflict` entries with `kind: 'unresolved-reference'` — the referencing primitive is still emitted so a reviewer can fix the source documents.
+Full reference: [`docs/merge.md`](./docs/merge.md).
 
-**Determinism caveat:** the recency tie-break depends on input ordering. Two callers passing the same chunks in different order may pick differently on tied conflicts. Sort by `loadedAt` before merging if strict order-independence matters.
+### Builders vs. `merge()` — when to reach for which
 
-**v1 simplification:** sub-domain hierarchy is not preserved — every input chunk's nouns flatten into the merged top-level domain. If your sources nest by sub-domain, that nesting is dropped (the merged DNA still validates).
+| Use case | Reach for |
+|---|---|
+| Building DNA from code (fixtures, tests, a custom adapter, programmatic composition) | **Builders** |
+| Composing N chunks produced by separate sources (input adapters, multi-document ingest) | **`merge()`** |
+| Adding one primitive to an existing DNA, audit-able with conflict reporting | **Builders** |
+| Resolving cross-references after composition | Both — `merge()` does it as its final step; builders rely on the same engine |
+
+Both share the same composition engine internally; pick the surface that matches your call shape.
+
+---
+
+## Validating Operational DNA
+
+### `DnaValidator` — the validator
+
+AJV-backed. All DNA schemas (per-primitive + per-layer aggregates) pre-registered. No setup beyond `new DnaValidator()`.
+
+```ts
+import { DnaValidator } from '@dna-codes/dna-core'
+
+const validator = new DnaValidator()
+```
+
+#### Per-document validation
+
+`validate(doc, schemaId)` validates a document against any registered schema, by short or full ID:
+
+```ts
+import operational from './dna/lending/operational.json'
+
+validator.validate(operational, 'operational')                        // full document
+validator.validate(operational.domain.resources[0], 'operational/resource')  // single primitive
+```
+
+The result is `{ valid: boolean; errors: ErrorObject[] }` — AJV's standard error shape. Common interpretation pattern:
+
+```ts
+const result = validator.validate(operational, 'operational')
+if (!result.valid) {
+  for (const err of result.errors) {
+    console.error(`  ${err.instancePath || '/'}  ${err.message}`)
+    if (err.params) console.error(`    params:`, err.params)
+  }
+}
+```
+
+Common error classes you'll see (and why each exists):
+
+| Error | What triggered it |
+|---|---|
+| `must have required property 'X'` | A required field is missing. Check the primitive's schema in `@dna-codes/dna-schemas` for the required list. |
+| `must match pattern "^[A-Z][a-zA-Z0-9]*$"` | A name doesn't match its naming convention. PascalCase for nouns; PascalCase verbs for actions; kebab-case for tasks/processes. |
+| `must be equal to one of the allowed values` | An enum field got an unknown value (e.g. `Attribute.type: 'invalid'` or `Trigger.source: 'manual'`). |
+| `must NOT have additional properties` | An unknown field on a primitive (typo, or a field that belongs on a different primitive). |
+| `must have required property 'values'` (on an Attribute) | `Attribute.type === 'enum'` requires a `values` array — schema's conditional rule. |
+| `must have required property 'schedule'` (on a Trigger) | `Trigger.source === 'schedule'` requires a `schedule` cron expression. |
+
+#### Cross-layer validation
+
+Schema validation alone confirms shape, not consistency. `validateCrossLayer()` walks references *between* primitives and across layers:
+
+```ts
+const result = validator.validateCrossLayer({
+  operational,
+  productCore,   // optional
+  productApi,    // optional
+  productUi,     // optional
+  technical,     // optional
+})
+```
+
+Examples of what cross-layer catches:
+
+- **Operational:** `Operation.target` references a noun that doesn't exist; `Task.actor` references a Role/Person not declared; `Process.steps[].task` references an undeclared Task; `Membership.person` / `.role` / `.group` references a primitive not declared; Role.scope/.parent cycles; Role exclusion pairs whose effective scopes don't intersect; etc.
+- **Operational → Product Core:** every Product Core Resource/Operation must be present in Operational (Product Core never invents).
+- **Product API → upstream:** every API Resource/Operation must trace back to Product Core (preferred) or Operational (fallback).
+- **Product UI → Product API:** every Page Resource and Block Operation must be declared in Product API.
+- **Technical:** every Construct's provider must be declared; every Cell's constructs must be declared.
+
+The result is `{ valid: boolean; errors: { layer, path, message }[] }`. The errors are designed to be human-readable directly:
+
+```
+operational    operations/Loan.Approve/target    Operation "Loan.Approve" target "Loanz" is not a declared
+                                                 Resource, Person, Role, Group, or Process; available
+                                                 targets: "Loan", "Borrower", "Underwriter"
+```
+
+#### `availableSchemas()`
+
+```ts
+validator.availableSchemas()
+// → ['https://dna.codes/schemas/operational/resource', 'operational/resource', ...]
+```
+
+Useful for diagnostics; both the full `$id` and the short form (without the `https://dna.codes/schemas/` prefix) are registered for every schema.
+
+### Validating untrusted input
+
+```ts
+function validateOperationalDna(json: unknown):
+  | { ok: true; dna: OperationalDNA }
+  | { ok: false; errors: { schema?: ErrorObject[]; cross?: CrossLayerError[] } } {
+  const validator = new DnaValidator()
+  const schema = validator.validate(json, 'operational')
+  if (!schema.valid) return { ok: false, errors: { schema: schema.errors } }
+  const cross = validator.validateCrossLayer({ operational: json })
+  if (!cross.valid) return { ok: false, errors: { cross: cross.errors } }
+  return { ok: true, dna: json as OperationalDNA }
+}
+```
+
+Schema validation tells you *the shape is right*. Cross-layer validation tells you *the references hold together*. Both run together when you need full confidence.
+
+---
+
+## Recipes
+
+### Build then validate
+
+Already shown in the quick start. The pattern:
+
+```ts
+let dna = createOperationalDna({ domain: { name: 'd' } })
+;({ dna } = addX(dna, ...))
+const validator = new DnaValidator()
+const r = validator.validate(dna, 'operational')
+```
+
+The builders' default-on schema validation already ensures every individual primitive validates; the post-hoc `DnaValidator.validate(dna, 'operational')` confirms the *aggregate* document is well-formed and `validateCrossLayer({ operational: dna })` confirms references resolve.
+
+### Audit conflicts produced during construction
+
+```ts
+let dna = createOperationalDna({ domain: { name: 'd' } })
+const accumulated: Conflict[] = []
+for (const r of incomingResources) {
+  const result = addResource(dna, r)
+  dna = result.dna
+  accumulated.push(...result.conflicts)
+}
+if (accumulated.length > 0) {
+  console.warn(`composed ${accumulated.length} disagreements:`)
+  for (const c of accumulated) {
+    console.warn(`  ${c.path}: ${c.values.length} values, picked: ${JSON.stringify(c.recommendation.value)} (${c.recommendation.reason})`)
+  }
+}
+```
+
+### Merge multiple sources, then validate
+
+```ts
+import { merge, DnaValidator } from '@dna-codes/dna-core'
+
+const result = merge([
+  { dna: chunkFromDrive,   source: { uri: 'gdrive://abc',     loadedAt: '...' } },
+  { dna: chunkFromSopFile, source: { uri: 'file:///sop.md',   loadedAt: '...' } },
+])
+
+const validator = new DnaValidator()
+const schemaResult = validator.validate(result.dna, 'operational')
+const crossResult  = validator.validateCrossLayer({ operational: result.dna })
+
+if (!schemaResult.valid || !crossResult.valid || result.conflicts.length > 0) {
+  // Decide whether to ship the partial DNA, raise an alert, or fail the run.
+}
+```
+
+### Skip validation in hot paths
+
+Builders default to `validate: true`. For inner loops processing many primitives that are already known to validate (e.g., re-emitting a previously-validated DNA), opt out:
+
+```ts
+;({ dna } = addResource(dna, knownGoodResource, { validate: false }))
+```
+
+`merge()` is also a hot path: it calls into the same composition engine via builders without re-validating per primitive — it's designed for chunks that are already schema-valid by construction.
+
+### Inspect what the validator covers
+
+```ts
+const validator = new DnaValidator()
+console.log(validator.availableSchemas().filter(id => !id.startsWith('https://')))
+// → ['operational/action', 'operational/resource', 'operational',
+//    'product/core/resource', 'product/api/endpoint', ...]
+```
+
+---
+
+## API reference (other exports)
+
+### `schemas` — typed access to every per-primitive JSON Schema
+
+```ts
+import { schemas } from '@dna-codes/dna-core'
+
+schemas.operational.resource       // Resource schema (Draft 2020-12)
+schemas.product.core.role          // Product Core Role schema
+schemas.product.api.endpoint       // Product API Endpoint schema
+schemas.product.web.page           // Product UI Page schema
+schemas.technical.cell             // Technical Cell schema
+
+schemas.operational.resource.$id
+// → 'https://dna.codes/schemas/operational/resource'
+```
+
+### `documents` — per-layer aggregate schemas
+
+```ts
+import { documents } from '@dna-codes/dna-core'
+
+documents.operational              // shape of operational.json
+documents.productCore              // shape of product.core.json
+documents.productApi               // shape of product.api.json
+documents.productUi                // shape of product.ui.json
+documents.technical                // shape of technical.json
+```
+
+### `allSchemas()` — flat array
+
+Convenient for bulk-registering with a JSON Schema validator:
+
+```ts
+import Ajv from 'ajv'
+import { allSchemas } from '@dna-codes/dna-core'
+
+const ajv = new Ajv({ strict: false, allErrors: true })
+for (const s of allSchemas()) ajv.addSchema(s)
+```
+
+### `resolveSchemaFile(family, name)`
+
+Returns the on-disk path of a schema file, or `null` if it doesn't exist:
+
+```ts
+resolveSchemaFile('operational', 'resource')      // → '/abs/.../resource.json'
+resolveSchemaFile('product', 'api/endpoint')      // → '/abs/.../api/endpoint.json'
+resolveSchemaFile('operational', 'ghost')         // → null
+```
+
+### `SCHEMA_ROOT`, `layerDirs`
+
+Filesystem roots for consumers that walk the tree themselves:
+
+```ts
+SCHEMA_ROOT                        // .../node_modules/@dna-codes/dna-schemas
+layerDirs.operational              // .../schemas/operational
+layerDirs.product                  // .../schemas/product
+layerDirs.technical                // .../schemas/technical
+```
+
+### Raw JSON schemas
+
+To import an individual schema directly, depend on [`@dna-codes/dna-schemas`](../schemas/):
+
+```ts
+import resourceSchema from '@dna-codes/dna-schemas/operational/resource.json'
+```
+
+### TypeScript types for every primitive
+
+The package exports per-primitive types alongside the runtime API. Useful for typing function signatures, fixtures, or your own builders:
+
+```ts
+import type {
+  OperationalDNA,
+  Resource, Attribute, Action,
+  Person, Group, Role, RoleScope,
+  Membership,
+  Operation, OperationChange,
+  Trigger, TriggerSource,
+  Rule, RuleAllowEntry, RuleCondition, RuleConditionOperator, RuleType,
+  Task,
+  Process, ProcessStep,
+  Relationship, RelationshipCardinality,
+  Domain,
+  Conflict, ConflictRecommendation, ConflictValue, Source, Provenance,
+  MergeChunk, MergeResult,
+} from '@dna-codes/dna-core'
+```
+
+A contract test in this package re-validates each schema's `examples[]` through the corresponding TypeScript type at build time — if a JSON Schema gains a field the TypeScript type is missing, the build fails.
+
+---
 
 ## Using schemas from non-JS languages
 
-Install [`@dna-codes/dna-schemas`](../schemas/) directly — it's a zero-dependency package that ships only the JSON files:
+Install [`@dna-codes/dna-schemas`](../schemas/) directly — zero dependencies, ships only the JSON files:
 
 ```
 node_modules/@dna-codes/dna-schemas/
@@ -177,23 +455,24 @@ node_modules/@dna-codes/dna-schemas/
   technical/*.json                # 11 primitives + 1 aggregate
 ```
 
-Schemas cross-reference each other by absolute URI (e.g. `https://dna.codes/schemas/operational/attribute`), so your validator must register **all** schemas before validating any one of them. The `allSchemas()` helper does this for you in JS; see the corresponding pattern in your target language's validator.
+Schemas cross-reference each other by absolute URI (e.g. `https://dna.codes/schemas/operational/attribute`), so your validator must register **all** schemas before validating any one of them. The `allSchemas()` helper does this for you in JS; reproduce the same load-everything-then-validate pattern in your target language's validator.
 
 ## Primitive vocabulary
 
 | Layer | Primitives |
-|-------|-----------|
+|---|---|
 | Operational | `Resource`, `Action`, `Operation`, `Attribute`, `Domain`, `Relationship`, `Trigger`, `Rule`, `Person`, `Role`, `Group`, `Membership`, `Task`, `Process` |
 | Product | `Resource`, `Action`, `Operation`, `Layout`, `Page`, `Route`, `Block`, `Field`, `Namespace`, `Endpoint`, `Schema`, `Param` |
 | Technical | `Environment`, `Cell`, `Construct`, `Provider`, `Variable`, `Output`, `Script`, `View`, `Node`, `Connection`, `Zone` |
 
-Operational is modeled around the **Actor > Action > Subject** triad. `Resource` and `Action` appear at both the Operational and Product layers by design — a Product `Resource` is the surface projection of an Operational `Resource`, and likewise for `Action`. The Actor is a `Role` (or `Person`) referenced by `Rule` (access), `Task` (assignment), `Membership` (eligibility), and `Process` (operator), rather than declared on the Operation itself. State mutations live on `Operation.changes`; there is no separate Outcome primitive. See each layer's doc in [`docs/`](./docs/) for full semantics.
+Operational is modeled around the **Actor > Action > Subject** triad. `Resource` and `Action` appear at both the Operational and Product layers by design — a Product `Resource` is the surface projection of an Operational `Resource`, likewise for `Action`. The Actor is a `Role` (or `Person`) referenced by `Rule` (access), `Task` (assignment), `Membership` (eligibility), and `Process` (operator), rather than declared on the Operation itself. State mutations live on `Operation.changes`; there is no separate Outcome primitive. See each layer's doc in [`docs/`](./docs/) for full semantics.
 
 ## What this package does *not* include
 
 - **The raw JSON schemas.** Those live in [`@dna-codes/dna-schemas`](../schemas/) (core depends on it).
 - **A CLI.** See [`@cell/cba`](../cba) (command: `cba`) for the full authoring lifecycle.
 - **Cell runtimes.** Cells are separate consumers of DNA — see `technical/cells/*`.
+- **Multi-source orchestration.** `@dna-codes/dna-ingest` fans many sources into one DNA via the `merge()` from this package.
 
 ## Versioning
 

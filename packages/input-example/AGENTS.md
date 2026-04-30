@@ -34,8 +34,9 @@ Guidance for AI agents forking this template into a new `input-*` package.
 
 ## Hard contract
 
-- **Zero runtime dependencies.** Dev deps for test/build are fine. No SDKs, no parsers unless truly necessary (and if added, keep them small).
-- **Throw, do not return error objects.** Validation of the emitted DNA belongs to `@dna-codes/dna-core`; your job is to fail fast on malformed source.
+- **`@dna-codes/dna-core` is the only `@dna-codes/*` runtime dependency.** It supplies the builders. Dev deps for test/build are fine. No other SDKs or parsers unless truly necessary (and if added, keep them small).
+- **Use the builders to compose your output DNA.** `addResource`, `addPerson`, `addOperation`, etc. handle identity-by-name composition, schema validation, and conflict surfacing. Don't roll your own accumulator — `input-json` and `input-text/layered/constructor` both consume builders today; following the pattern keeps your adapter consistent.
+- **Throw, do not return error objects.** Validation of the emitted DNA belongs to the builders (default-on); your job is to fail fast on malformed source.
 - **Naming:** Resources are PascalCase singular. Actions are PascalCase. Capability names are always `Resource.Action`.
 - **Return shape:** always a layered object — `{ operational: {...} }`, not `{...}` alone.
 

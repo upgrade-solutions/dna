@@ -69,11 +69,13 @@ addResource(dna, { name: 'Loan', attributes: [{ name: 'amount', ... }] })
 
 **Why:** Three places in the codebase already implement their own duplicate-handling — `merge()` does per-primitive identity-by-name composition, `input-json`'s walker maintains a `Map<name, Resource>` plus a per-attribute `seen` set, and the layered constructor pre-checks duplicate names before pushing. Three places, three subtly-different answers. Centralizing the merge-on-add semantics in the builders means each consumer can drop its custom dedup code and trust the builder.
 
-After the retrofit:
+**Architecture:** the builders' `composeInto` helper delegates to `merge()` to do the actual composition. So `merge()` IS the composition engine; builders are the user-facing API on top of it. After the retrofits:
 
-- `merge()` becomes an orchestrator — iterate primitives across chunks, feed each to the matching `add*`, accumulate conflicts and provenance.
+- `merge()` retains its existing N-way merge logic (source-count → recency → string-length → stable order recommendation policy depends on seeing all chunks together; pairwise reduction would lose the source-count semantic). No internal change required from this proposal — `merge()` already shares the engine that builders consume via `composeInto`.
 - `input-json`'s walker drops its `Map` and `seen` set; emits attributes one at a time via `addResource(dna, { name, attributes: [oneAttr] })`.
 - The layered constructor drops its `duplicate_name` pre-check; an LLM re-emitting the same Resource with new attributes silently composes (which is correct), and conflicting scalars surface as conflicts in the constructor's result. Iteration cap (`maxToolCalls`) backstops any LLM that loops forever re-declaring the same primitive.
+
+**An earlier framing of this design said "merge() becomes an orchestrator over the add* builders."** That framing was aspirational — having `merge()` literally call `addX` per primitive in its emit phase would create infinite recursion (`addX` → `composeInto` → `merge()` → `addX` → …) unless we extracted a separate non-merge pairwise composition helper. The recursion-breaking refactor is real work and produces no observable benefit (same tests pass either way); the actual relationship between merge and builders is cleaner expressed as "they share a composition engine via `composeInto`'s delegation." Tasks have been adjusted to reflect this.
 
 **Return shape:** every builder returns `{ dna, conflicts }`. Always. No `*Unsafe` variant — there's no scenario where a caller should silently discard conflicts that were genuinely produced. Callers who don't care about conflicts can destructure `{ dna }` and ignore the rest; conflicts cost nothing to allocate when they're empty (the common case).
 
@@ -139,23 +141,25 @@ Order matters. `merge()` is the most disciplined consumer (well-tested by 18 spe
 
 | Consumer | Before | After |
 |---|---|---|
-| `merge()` | Bespoke per-primitive merge logic in `merge.ts` | Orchestrator: collect primitives across chunks, call `add*`, accumulate conflicts + provenance |
+| `merge()` | Bespoke per-primitive merge logic in `merge.ts` | Unchanged internally — `merge()` is the composition engine builders consume via `composeInto`. Test suite verifies behavior is preserved end-to-end. |
 | `input-json` walker | `Map<name, Resource>` + per-attribute `seen` set | `addResource(dna, { name, attributes: [oneAttr] })` per scalar key — no manual dedup |
 | Layered constructor | Pre-check `duplicate_name` → push to draft array | `draft = addResource(draft, args).dna` — duplicates compose, conflicts surface in `result()` |
 
 **Why:** Builders' value is only realized when consumers use them. If we ship the API and don't retrofit, the abstractions drift again immediately. Coherent unit: builders + retrofits + verification all in one change.
 
-### D7: Versioning & release
+### D7: Versioning & release — patch-only
 
-- `@dna-codes/dna-core` 0.5.x → 0.6.0 (added builders + refactored merge internals; pure addition at the public surface).
-- `@dna-codes/dna-input-json` 0.4.1 → 0.4.2 (internal refactor only; pure patch).
-- `@dna-codes/dna-input-text` 0.4.1 → 0.5.0 (LayeredConstructor result-shape change + dropped `duplicate_name` error code; minor bump).
-- `@dna-codes/dna-integration-jira` (depends on `dna-input-text@^0.4.0`) → bump its dna-input-text dep range to `^0.5.0` and patch-bump itself; alternatively keep on `^0.4.0` if the layered-constructor change doesn't reach jira's call sites (verify before release).
-- All other workspaces depending on `@dna-codes/dna-core`: dep range bumped to `^0.6.0`; their own versions get a patch bump per the release-cascade hygiene `add-dna-ingest` established.
+- `@dna-codes/dna-core` 0.5.0 → **0.5.1** (additive: builders + types). Per-semver-strict an addition justifies minor; we deliberately stay patch within the 0.5.x line so every sibling declaring `^0.5.0` picks it up with zero cascade.
+- `@dna-codes/dna-input-json` 0.4.1 → **0.4.2** (internal refactor; public API unchanged).
+- `@dna-codes/dna-input-text` 0.4.1 → **0.4.2** (LayeredConstructor changes — `duplicate_name` removed, `result()` shape updated). Pre-1.0 patch is defensible because no external consumer uses `LayeredConstructor` directly (jira's `parse()` path is unaffected); changelog documents the constructor-level change.
+- `@dna-codes/dna-integration-jira`: no change. Stays on its existing `^0.4.0` input-text dep range (which accepts 0.4.2) and its existing `0.4.0` version. Verified: jira consumes input-text via `parse()` and `ParseResult` only — none of the LayeredConstructor changes affect those.
+- All other workspaces depending on `@dna-codes/dna-core`: **no change**. Their existing `^0.5.0` dep range accepts `0.5.1`; nothing to bump.
 
-Tag `v0.6.0`.
+Tag `v0.5.1`.
 
-**Why:** Same release-cascade rule as `add-dna-ingest`. Pre-1.0 caret is restrictive; sibling packages need their dep range and a new published version each time a depended-on workspace minor-bumps.
+**Why:** This is the practical answer to the cascade pain. Earlier drafts of D7 mirrored the `add-dna-ingest` release pattern (cascade across every sibling). After explore-mode discussion of consolidation vs v1.0 vs cascade-automation, the user chose the simplest path: keep dna-core within 0.5.x. Pre-1.0 caret semantics are restrictive (`^0.5.0` rejects 0.6.0 but accepts 0.5.1), so staying patch eliminates the cascade. The trade-off — adding new public API (builders) under a patch number — is acceptable pre-1.0 and documented in the changelog.
+
+**Future:** When `dna-core` next has a genuinely breaking change, cut a real minor (0.6.0) and pay the cascade tax that one time, OR cut v1.0.0 and adopt strict semver going forward (so future minor bumps don't cascade). That's a separate decision.
 
 ## Risks / Trade-offs
 

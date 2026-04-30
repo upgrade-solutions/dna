@@ -8,7 +8,7 @@ Three places in the codebase already construct Operational DNA programmatically 
 - **NEW** Builders are pure, immutable functions: each takes a DNA + a primitive spec and returns a new DNA. No mutation of the input. (Fluent / mutable variants are out of scope for v1 — see design.md decision D1.)
 - **NEW** Builders enforce the published JSON Schema at the type level: each builder accepts a TS type derived from `@dna-codes/dna-schemas`, so misuse fails at compile time rather than at runtime validation.
 - **NEW** Builders enforce the schema at runtime when given untyped input (e.g. JSON parsed at the boundary), catching invalid additions before they pollute the DNA.
-- **MODIFIED** `merge()` (in `@dna-codes/dna-core`) is refactored internally to use the builder API. Public behavior unchanged — same inputs produce the same outputs.
+- **MODIFIED** `merge()` (in `@dna-codes/dna-core`) — no internal refactor. `merge()` is the composition engine that the builders' `composeInto` helper consumes; the relationship is "builders share the merge engine," not "merge iterates via builders." Public behavior unchanged. (See design.md D2 for why the literal "merge orchestrates over add*" framing produces infinite recursion and was dropped.)
 - **MODIFIED** `@dna-codes/dna-input-json` is refactored to use the builders for its assembly walker. Public adapter signature unchanged.
 - **MODIFIED** `@dna-codes/dna-input-text`'s layered constructor is refactored to back its `DraftDocument` shape with the builder API. **BREAKING (minor)**: the `duplicate_name` tool-call error code goes away — same-named tool calls now compose via the builder rather than rejecting. The constructor's `result()` gains a `conflicts` field surfacing composed-on-add scalar disagreements. Every other guard rail is preserved.
 - **NEW** Documentation: `packages/core/docs/builders.md` plus a usage section in `packages/core/README.md`. Forking guidance for new `input-*` packages updated to recommend the builders.
@@ -34,9 +34,9 @@ pure-addition change at the requirement level. -->
 
 ## Impact
 
-- **`@dna-codes/dna-core`**: gains the builder module + types. Backwards-compatible — pure addition. Minor version bump (0.5.x → 0.6.0).
-- **`@dna-codes/dna-input-json`**: internal refactor to consume the builders. Backwards-compatible at the public adapter level. Patch version bump.
-- **`@dna-codes/dna-input-text`**: refactor of `layered/constructor.ts` to use the builders. Drops the `duplicate_name` tool-call error code; surfaces composed-on-add conflicts via `result()`. Single-package consumer surface change (LayeredConstructor result shape). Minor version bump (0.4.x → 0.5.0).
+- **`@dna-codes/dna-core`**: gains the builder module + types. Backwards-compatible — pure addition. **Patch** bump (0.5.0 → 0.5.1) — staying within the 0.5.x line so siblings declaring `^0.5.0` accept the new version automatically with no cascade. Per-semver-strict the addition would justify a minor; chosen patch to minimize release churn pre-1.0.
+- **`@dna-codes/dna-input-json`**: internal refactor to consume the builders. Backwards-compatible at the public adapter level. Patch bump (0.4.1 → 0.4.2).
+- **`@dna-codes/dna-input-text`**: refactor of `layered/constructor.ts` to use the builders. Drops the `duplicate_name` tool-call error code; surfaces composed-on-add conflicts via `result()`. Per-semver-strict the LayeredConstructor change would be a minor breaking bump, but no external consumer uses `LayeredConstructor` directly (jira goes through `parse()`, which is unaffected) — patch bump (0.4.1 → 0.4.2) is defensible pre-1.0. The `duplicate_name` removal is documented in the changelog.
 - **`@dna-codes/dna-schemas`**: no schema changes. Builders consume the existing schema types.
 - **Other consumers** (output-*, integration-*, dna-ingest): no required changes. They never construct DNA, only consume it.
 - **Dev/CI**: existing publish workflow handles the version bumps already; no workflow changes.

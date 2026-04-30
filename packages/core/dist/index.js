@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bookshopInput = exports.merge = exports.DnaValidator = exports.layerDirs = exports.documents = exports.schemas = exports.SCHEMA_ROOT = void 0;
+exports.bookshopInput = exports.merge = exports.addRelationship = exports.addProcess = exports.addTask = exports.addRule = exports.addTrigger = exports.addOperation = exports.addMembership = exports.addGroup = exports.addRole = exports.addPerson = exports.addResource = exports.createOperationalDna = exports.DnaValidator = exports.layerDirs = exports.documents = exports.schemas = exports.SCHEMA_ROOT = void 0;
 exports.resolveSchemaFile = resolveSchemaFile;
 exports.allSchemas = allSchemas;
 const fs = __importStar(require("fs"));
@@ -131,6 +131,19 @@ function allSchemas() {
 }
 var validator_1 = require("./validator");
 Object.defineProperty(exports, "DnaValidator", { enumerable: true, get: function () { return validator_1.DnaValidator; } });
+var builders_1 = require("./builders");
+Object.defineProperty(exports, "createOperationalDna", { enumerable: true, get: function () { return builders_1.createOperationalDna; } });
+Object.defineProperty(exports, "addResource", { enumerable: true, get: function () { return builders_1.addResource; } });
+Object.defineProperty(exports, "addPerson", { enumerable: true, get: function () { return builders_1.addPerson; } });
+Object.defineProperty(exports, "addRole", { enumerable: true, get: function () { return builders_1.addRole; } });
+Object.defineProperty(exports, "addGroup", { enumerable: true, get: function () { return builders_1.addGroup; } });
+Object.defineProperty(exports, "addMembership", { enumerable: true, get: function () { return builders_1.addMembership; } });
+Object.defineProperty(exports, "addOperation", { enumerable: true, get: function () { return builders_1.addOperation; } });
+Object.defineProperty(exports, "addTrigger", { enumerable: true, get: function () { return builders_1.addTrigger; } });
+Object.defineProperty(exports, "addRule", { enumerable: true, get: function () { return builders_1.addRule; } });
+Object.defineProperty(exports, "addTask", { enumerable: true, get: function () { return builders_1.addTask; } });
+Object.defineProperty(exports, "addProcess", { enumerable: true, get: function () { return builders_1.addProcess; } });
+Object.defineProperty(exports, "addRelationship", { enumerable: true, get: function () { return builders_1.addRelationship; } });
 var merge_1 = require("./merge");
 Object.defineProperty(exports, "merge", { enumerable: true, get: function () { return merge_1.merge; } });
 var bookshop_1 = require("./fixtures/bookshop");

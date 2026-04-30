@@ -15,59 +15,78 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parse = parse;
+const dna_core_1 = require("@dna-codes/dna-core");
+/**
+ * Walk a JSON sample and infer DNA Resources + Relationships from it.
+ *
+ * The walker no longer maintains its own `Map<name, Resource>` or per-attribute
+ * `seen` set — it composes a single OperationalDNA via the `addResource` /
+ * `addRelationship` builders from `@dna-codes/dna-core`. Same-named primitives
+ * compose by name; same-keyed attributes within a Resource union via the
+ * builder's underlying merge rules. The walker's only correctness concern is
+ * deciding whether each JSON key becomes a scalar Attribute, a reference
+ * Attribute + child Resource recursion, or is dropped (arrays of scalars).
+ */
 function parse(data, options) {
     if (!isRecord(data) && !Array.isArray(data)) {
         throw new Error('input-json.parse: input must be a JSON object or array of objects.');
     }
-    const resources = new Map();
-    const relationships = [];
+    const domainName = options.domain ?? options.name.toLowerCase();
+    let dna = (0, dna_core_1.createOperationalDna)({ domain: { name: domainName } });
     const rootSample = Array.isArray(data) ? mergeRecords(data) : data;
-    walk(rootSample, options.name, resources, relationships, options);
+    dna = walk(rootSample, options.name, dna, options);
+    const resources = (dna.domain.resources ?? []);
+    const relationships = (dna.relationships ?? []);
     return {
         operational: {
             domain: {
-                name: options.domain ?? options.name.toLowerCase(),
-                resources: [...resources.values()],
+                name: domainName,
+                resources,
             },
             ...(relationships.length ? { relationships } : {}),
         },
     };
 }
-function walk(data, resourceName, resources, relationships, options) {
-    const existing = resources.get(resourceName);
-    const attrs = existing?.attributes ? [...existing.attributes] : [];
-    const seen = new Set(attrs.map((a) => a.name));
+function walk(data, resourceName, dna, options) {
     for (const [key, value] of Object.entries(data)) {
-        if (seen.has(key))
-            continue;
-        seen.add(key);
         if (isRecord(value)) {
             const childName = deriveResourceName(key, options);
-            attrs.push({ name: key, type: 'reference', resource: childName });
-            relationships.push(buildRelationship(resourceName, childName, key, 'one-to-one'));
-            walk(value, childName, resources, relationships, options);
+            dna = (0, dna_core_1.addResource)(dna, {
+                name: resourceName,
+                attributes: [{ name: key, type: 'reference', resource: childName }],
+            }).dna;
+            dna = (0, dna_core_1.addRelationship)(dna, buildRelationship(resourceName, childName, key, 'one-to-one')).dna;
+            dna = walk(value, childName, dna, options);
+            continue;
         }
-        else if (Array.isArray(value)) {
+        if (Array.isArray(value)) {
             if (value.length > 0 && isRecord(value[0])) {
                 const childName = deriveResourceName(key, options);
-                attrs.push({ name: key, type: 'reference', resource: childName });
-                relationships.push(buildRelationship(resourceName, childName, key, 'one-to-many'));
+                dna = (0, dna_core_1.addResource)(dna, {
+                    name: resourceName,
+                    attributes: [{ name: key, type: 'reference', resource: childName }],
+                }).dna;
+                dna = (0, dna_core_1.addRelationship)(dna, buildRelationship(resourceName, childName, key, 'one-to-many')).dna;
                 const merged = mergeRecords(value);
-                walk(merged, childName, resources, relationships, options);
+                dna = walk(merged, childName, dna, options);
             }
             // Arrays of scalars (e.g. `tags: ["fantasy", "classic"]`) have no faithful
             // representation as a single DNA Attribute — the canonical schema's
             // type enum is string | text | number | boolean | date | datetime | enum
             // | reference. The DNA way to model scalar collections is a child Resource
             // plus a relationship, which requires more context than a JSON sample
-            // provides (the scalar's name, its own attributes, etc.). Rather than
-            // emit invalid DNA, drop these keys. Upgrade them manually if needed.
+            // provides. Rather than emit invalid DNA, drop these keys.
+            continue;
         }
-        else {
-            attrs.push({ name: key, type: inferScalarType(value) });
-        }
+        const attr = { name: key, type: inferScalarType(value) };
+        dna = (0, dna_core_1.addResource)(dna, { name: resourceName, attributes: [attr] }).dna;
     }
-    resources.set(resourceName, { name: resourceName, attributes: attrs });
+    // Ensure the resource exists even if it had no recognizable keys.
+    const targetResources = (dna.domain.resources ?? []);
+    if (!targetResources.some((r) => r.name === resourceName)) {
+        dna = (0, dna_core_1.addResource)(dna, { name: resourceName }).dna;
+    }
+    return dna;
 }
 function buildRelationship(from, to, attribute, cardinality) {
     return {

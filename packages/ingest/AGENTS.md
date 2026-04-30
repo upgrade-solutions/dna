@@ -57,6 +57,19 @@ type InputAdapter = (
 
 If you're forking `input-example`, the function exported as the default already matches. The orchestrator passes `llm` through verbatim — your adapter is free to extend the second argument with adapter-specific fields, but `llm` must be respected as-is.
 
+**Use the `@dna-codes/dna-core` builders to construct your output DNA.** Don't roll your own `Map<name, Resource>` accumulator — `addResource` / `addPerson` / `addOperation` / etc. handle identity-by-name composition, schema validation, and conflict surfacing for you. The walkers in `input-json` and `input-text/layered/constructor` both consume builders today; following the pattern keeps your adapter consistent and inherits the same schema enforcement.
+
+```ts
+import { createOperationalDna, addResource, addOperation, type OperationalDNA } from '@dna-codes/dna-core'
+
+let dna: OperationalDNA = createOperationalDna({ domain: { name: 'my-domain' } })
+;({ dna } = addResource(dna, { name: 'Foo', attributes: [...] }))
+;({ dna } = addOperation(dna, { name: 'Foo.Do', target: 'Foo', action: 'Do' }))
+return dna
+```
+
+See [`@dna-codes/dna-core`'s `docs/builders.md`](../core/docs/builders.md) for the full API.
+
 ## Common pitfalls
 
 - **Don't return DNA from an integration.** Some authors are tempted to skip the input-`*` step. Don't — it forces every integration to embed an LLM, duplicates extraction logic, and breaks the MIME dispatch story.

@@ -1,4 +1,20 @@
-import { DnaValidator, type ValidationResult } from '@dna-codes/dna-core'
+import {
+  DnaValidator,
+  addGroup,
+  addMembership,
+  addOperation,
+  addPerson,
+  addProcess,
+  addResource,
+  addRole,
+  addRule,
+  addTask,
+  addTrigger,
+  createOperationalDna,
+  type Conflict,
+  type OperationalDNA,
+  type ValidationResult,
+} from '@dna-codes/dna-core'
 import {
   PRIMITIVE_KINDS,
   buildLayeredTools,
@@ -30,14 +46,13 @@ export interface ToolCallRequest {
 }
 
 export type ToolCallResult =
-  | { ok: true; finalized?: false; primitive?: PrimitiveKind; name?: string; message?: string }
-  | { ok: true; finalized: true; document: Record<string, unknown> }
+  | { ok: true; finalized?: false; primitive?: PrimitiveKind; name?: string; message?: string; conflicts?: Conflict[] }
+  | { ok: true; finalized: true; document: Record<string, unknown>; conflicts: Conflict[] }
   | {
       ok: false
       error:
         | 'unknown_tool'
         | 'duplicate_call'
-        | 'duplicate_name'
         | 'schema_violation'
         | 'unknown_resource'
         | 'unknown_person'
@@ -59,59 +74,33 @@ export type ToolCallResult =
       available?: string[]
     }
 
-interface DomainShape {
-  name: string
-  path?: string
-  description?: string
-  resources: unknown[]
-  persons: unknown[]
-  roles: unknown[]
-  groups: unknown[]
+export interface LayeredResult {
+  document: Record<string, unknown>
+  /** Composed-on-add conflicts accumulated across all `add_*` tool calls. */
+  conflicts: Conflict[]
 }
 
-interface DraftDocument {
-  domain: DomainShape
-  memberships: unknown[]
-  operations: unknown[]
-  triggers: unknown[]
-  rules: unknown[]
-  tasks: unknown[]
-  processes: unknown[]
-}
+type AddBuilder = (dna: OperationalDNA, primitive: never, opts?: { validate?: boolean }) => { dna: OperationalDNA; conflicts: Conflict[] }
 
-const COLLECTION_FOR: Record<PrimitiveKind, keyof DraftDocument | 'domain.resources' | 'domain.persons' | 'domain.roles' | 'domain.groups'> = {
-  resource: 'domain.resources',
-  person: 'domain.persons',
-  role: 'domain.roles',
-  group: 'domain.groups',
-  membership: 'memberships',
-  operation: 'operations',
-  task: 'tasks',
-  process: 'processes',
-  trigger: 'triggers',
-  rule: 'rules',
-}
-
-const NAME_POOL_FOR: Partial<Record<PrimitiveKind, keyof EnumPools>> = {
-  resource: 'resources',
-  person: 'persons',
-  role: 'roles',
-  group: 'groups',
-  task: 'tasks',
-  process: 'processes',
-  rule: 'rules',
-  // membership has names too but they're not in the EnumPools shape — handle separately below
-}
-
-function capitalize(s: string): string {
-  return s.length === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)
+const ADD_BUILDER: Record<PrimitiveKind, AddBuilder> = {
+  resource: addResource as AddBuilder,
+  person: addPerson as AddBuilder,
+  role: addRole as AddBuilder,
+  group: addGroup as AddBuilder,
+  membership: addMembership as AddBuilder,
+  operation: addOperation as AddBuilder,
+  task: addTask as AddBuilder,
+  process: addProcess as AddBuilder,
+  trigger: addTrigger as AddBuilder,
+  rule: addRule as AddBuilder,
 }
 
 export class LayeredConstructor {
   private readonly tools_: ToolDefinition[]
   private readonly maxToolCalls: number
   private readonly maxFinalizeRetries: number
-  private readonly draft: DraftDocument
+  private dna: OperationalDNA
+  private readonly accumulatedConflicts: Conflict[] = []
   private readonly validator = new DnaValidator()
   private readonly transcript: { name: string; args: Record<string, unknown>; result: ToolCallResult }[] = []
   private callCount = 0
@@ -121,23 +110,13 @@ export class LayeredConstructor {
 
   constructor(options: LayeredConstructorOptions = {}) {
     const domain = options.domain ?? { name: 'domain' }
-    this.draft = {
+    this.dna = createOperationalDna({
       domain: {
         name: domain.name,
         ...(domain.path ? { path: domain.path } : {}),
         ...(domain.description ? { description: domain.description } : {}),
-        resources: [],
-        persons: [],
-        roles: [],
-        groups: [],
       },
-      memberships: [],
-      operations: [],
-      triggers: [],
-      rules: [],
-      tasks: [],
-      processes: [],
-    }
+    })
     this.tools_ = buildLayeredTools()
     this.maxToolCalls = options.maxToolCalls ?? 50
     this.maxFinalizeRetries = options.maxFinalizeRetries ?? 3
@@ -150,23 +129,31 @@ export class LayeredConstructor {
 
   /** Pools of declared primitive names — useful for narrowing tool schemas mid-flight. */
   pools(): EnumPools {
+    const dom = this.dna.domain
     return {
-      resources: this.draft.domain.resources.map((r) => (r as { name: string }).name),
-      persons: this.draft.domain.persons.map((p) => (p as { name: string }).name),
-      roles: this.draft.domain.roles.map((r) => (r as { name: string }).name),
-      groups: this.draft.domain.groups.map((g) => (g as { name: string }).name),
-      operations: this.draft.operations.map((o) => (o as { name?: string }).name ?? ''),
-      tasks: this.draft.tasks.map((t) => (t as { name: string }).name),
-      processes: this.draft.processes.map((p) => (p as { name: string }).name),
-      rules: this.draft.rules
-        .map((r) => (r as { name?: string }).name)
-        .filter((n): n is string => typeof n === 'string'),
+      resources: namesOf(dom.resources),
+      persons: namesOf(dom.persons),
+      roles: namesOf(dom.roles),
+      groups: namesOf(dom.groups),
+      operations: namesOf(this.dna.operations),
+      tasks: namesOf(this.dna.tasks),
+      processes: namesOf(this.dna.processes),
+      rules: namesOf(this.dna.rules),
     }
   }
 
-  /** The assembled draft. Returns a deep-cloned snapshot. */
-  result(): Record<string, unknown> {
-    return cleanDocument(this.draft)
+  /**
+   * The assembled document plus any composed-on-add conflicts. The
+   * `document` field matches the shape `cleanDocument()` used to return —
+   * it's the merged DNA stripped of empty collections. The `conflicts`
+   * field accumulates scalar disagreements across all `add_*` tool calls
+   * (an LLM re-emitting the same primitive with conflicting scalars).
+   */
+  result(): LayeredResult {
+    return {
+      document: cleanDocument(this.dna),
+      conflicts: [...this.accumulatedConflicts],
+    }
   }
 
   hasFinalized(): boolean {
@@ -242,6 +229,9 @@ export class LayeredConstructor {
       return { ok: false, error: 'invalid_args', message: `add_${kind}: args must be an object.` }
     }
 
+    // Validate up-front so the LLM gets a structured `schema_violation`
+    // response. Builders validate by default too, but they throw on failure
+    // — we want a soft error here, not an exception.
     const validation = this.validatePrimitive(kind, args)
     if (!validation.valid) {
       return {
@@ -252,18 +242,16 @@ export class LayeredConstructor {
       }
     }
 
-    const dupName = this.checkNameUniqueness(kind, args)
-    if (dupName) return dupName
-
     const refError = this.checkReferences(kind, args)
     if (refError) return refError
 
-    const target = COLLECTION_FOR[kind]
-    if (target.startsWith('domain.')) {
-      const field = target.slice('domain.'.length) as 'resources' | 'persons' | 'roles' | 'groups'
-      ;(this.draft.domain[field] as unknown[]).push(args)
-    } else {
-      ;(this.draft[target as keyof DraftDocument] as unknown[]).push(args)
+    // Compose into the running DNA via the matching builder. We just
+    // validated; pass `validate: false` to skip a redundant pass.
+    const builder = ADD_BUILDER[kind]
+    const composed = builder(this.dna, args as never, { validate: false })
+    this.dna = composed.dna
+    if (composed.conflicts.length > 0) {
+      this.accumulatedConflicts.push(...composed.conflicts)
     }
 
     const name = typeof args.name === 'string' ? args.name : '<unnamed>'
@@ -272,56 +260,13 @@ export class LayeredConstructor {
       primitive: kind,
       name,
       message: `Added ${kind} "${name}".`,
+      ...(composed.conflicts.length > 0 ? { conflicts: composed.conflicts } : {}),
     }
   }
 
   private validatePrimitive(kind: PrimitiveKind, args: Record<string, unknown>): ValidationResult {
     const schemaId = `operational/${kind}`
     return this.validator.validate(args, schemaId)
-  }
-
-  private checkNameUniqueness(kind: PrimitiveKind, args: Record<string, unknown>): ToolCallResult | null {
-    // Triggers are inherently anonymous (multiple per Operation are valid).
-    if (kind === 'trigger') return null
-    const pools = this.pools()
-    if (kind === 'operation') {
-      const name = typeof args.name === 'string' ? args.name : undefined
-      const target = typeof args.target === 'string' ? args.target : undefined
-      const action = typeof args.action === 'string' ? args.action : undefined
-      const composed = name ?? (target && action ? `${target}.${action}` : undefined)
-      if (composed && (pools.operations ?? []).includes(composed)) {
-        return {
-          ok: false,
-          error: 'duplicate_name',
-          message: `Operation "${composed}" has already been added. Each Target.Action pair is unique.`,
-        }
-      }
-      return null
-    }
-    const name = typeof args.name === 'string' ? args.name : undefined
-    if (!name) return null
-    if (kind === 'membership') {
-      const existing = this.draft.memberships.map((m) => (m as { name?: string }).name).filter(Boolean) as string[]
-      if (existing.includes(name)) {
-        return {
-          ok: false,
-          error: 'duplicate_name',
-          message: `Membership "${name}" has already been added.`,
-        }
-      }
-      return null
-    }
-    const poolKey = NAME_POOL_FOR[kind]
-    if (!poolKey) return null
-    const existing = (pools[poolKey] ?? []) as string[]
-    if (existing.includes(name)) {
-      return {
-        ok: false,
-        error: 'duplicate_name',
-        message: `${capitalize(kind)} "${name}" has already been added.`,
-      }
-    }
-    return null
   }
 
   private checkReferences(kind: PrimitiveKind, args: Record<string, unknown>): ToolCallResult | null {
@@ -468,12 +413,12 @@ export class LayeredConstructor {
 
   private handleFinalize(): ToolCallResult {
     this.finalizeAttempts += 1
-    const document = cleanDocument(this.draft)
+    const document = cleanDocument(this.dna)
     const result = this.validator.validate(document, 'operational')
     const cross = this.validator.validateCrossLayer({ operational: document })
     if (result.valid && cross.valid) {
       this.finalized = true
-      return { ok: true, finalized: true, document }
+      return { ok: true, finalized: true, document, conflicts: [...this.accumulatedConflicts] }
     }
     if (this.finalizeAttempts >= this.maxFinalizeRetries) {
       return {
@@ -533,30 +478,30 @@ function stableStringify(value: unknown): string {
   return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(',')}}`
 }
 
-function cleanDocument(draft: DraftDocument): Record<string, unknown> {
-  const out: Record<string, unknown> = { domain: cleanDomain(draft.domain) }
-  const sections: (keyof DraftDocument)[] = [
-    'memberships',
-    'operations',
-    'triggers',
-    'rules',
-    'tasks',
-    'processes',
-  ]
+function cleanDocument(dna: OperationalDNA): Record<string, unknown> {
+  const out: Record<string, unknown> = { domain: cleanDomain(dna.domain) }
+  const sections = ['memberships', 'operations', 'triggers', 'rules', 'tasks', 'processes'] as const
   for (const key of sections) {
-    const arr = draft[key] as unknown[]
-    if (arr.length > 0) out[key] = arr
+    const arr = dna[key]
+    if (Array.isArray(arr) && arr.length > 0) out[key] = arr
   }
   return out
 }
 
-function cleanDomain(d: DomainShape): Record<string, unknown> {
+function cleanDomain(d: OperationalDNA['domain']): Record<string, unknown> {
   const out: Record<string, unknown> = { name: d.name }
   if (d.path) out.path = d.path
   if (d.description) out.description = d.description
-  if (d.resources.length) out.resources = d.resources
-  if (d.persons.length) out.persons = d.persons
-  if (d.roles.length) out.roles = d.roles
-  if (d.groups.length) out.groups = d.groups
+  if (Array.isArray(d.resources) && d.resources.length) out.resources = d.resources
+  if (Array.isArray(d.persons) && d.persons.length) out.persons = d.persons
+  if (Array.isArray(d.roles) && d.roles.length) out.roles = d.roles
+  if (Array.isArray(d.groups) && d.groups.length) out.groups = d.groups
   return out
+}
+
+function namesOf(items: unknown): string[] {
+  if (!Array.isArray(items)) return []
+  return items
+    .map((item) => (item as { name?: unknown }).name)
+    .filter((n): n is string => typeof n === 'string')
 }
