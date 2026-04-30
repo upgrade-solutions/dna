@@ -21,6 +21,39 @@ jobs:
           scope: '@dna-codes'
       - run: npm ci
       - run: npm run build --workspaces --if-present
-      - run: npm publish --workspaces
+      - name: Publish workspaces (skip already-published versions)
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          mapfile -t WORKSPACES < <(node -e "const p=require('./package.json'); for (const w of p.workspaces) console.log(w)")
+          OVERALL_EXIT=0
+          for ws in "${WORKSPACES[@]}"; do
+            if [ ! -f "$ws/package.json" ]; then
+              echo "Skipping $ws (no package.json)"
+              continue
+            fi
+            PRIVATE=$(node -e "console.log(!!require('./$ws/package.json').private)")
+            if [ "$PRIVATE" = "true" ]; then
+              echo "Skipping $ws (private:true)"
+              continue
+            fi
+            NAME=$(node -e "console.log(require('./$ws/package.json').name)")
+            VERSION=$(node -e "console.log(require('./$ws/package.json').version)")
+            echo "::group::Publishing $NAME@$VERSION ($ws)"
+            set +e
+            PUBOUT=$(cd "$ws" && npm publish 2>&1)
+            PUBEXIT=$?
+            set -e
+            printf '%s\n' "$PUBOUT"
+            if [ $PUBEXIT -eq 0 ]; then
+              echo "✓ Published $NAME@$VERSION"
+            elif printf '%s' "$PUBOUT" | grep -q "Cannot publish over existing version"; then
+              echo "→ Skipped $NAME@$VERSION (already on registry)"
+            else
+              echo "✗ Failed $NAME@$VERSION (exit $PUBEXIT)"
+              OVERALL_EXIT=$PUBEXIT
+            fi
+            echo "::endgroup::"
+          done
+          exit $OVERALL_EXIT
