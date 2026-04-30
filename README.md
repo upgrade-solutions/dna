@@ -7,6 +7,19 @@ As documented below, it's incredibly flexible with input/output adapters and int
 
 <img width="2700" height="1490" alt="image" src="https://github.com/user-attachments/assets/6e8fbacf-ff04-4bca-be89-8142f021bcf2" />
 
+## Contents
+
+- [The Three Layers](#the-three-layers)
+- [Cross-domain examples](#cross-domain-examples)
+- [Framework comparisons](#framework-comparisons)
+- [Operational Layer](#operational-layer)
+- [Product Layer](#product-layer)
+- [Technical Layer](#technical-layer)
+- [Packages](#packages)
+  - [Pipeline](#pipeline)
+  - [Naming convention](#naming-convention)
+  - [Releasing](#releasing)
+  - [Input coverage by layer](#input-coverage-by-layer)
 
 ## The Three Layers
 
