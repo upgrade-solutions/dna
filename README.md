@@ -166,31 +166,28 @@ A **Cell** is the unit of deployment — it consumes DNA from upper layers and g
 The pipeline is `[integration] → input-* → DNA → output-* → [integration]`. When more than one source contributes to a single DNA, `dna-ingest` fans many `(integration → input-* → partial DNA)` paths into one canonical DNA via `dna-core.merge()`:
 
 ```
-                       +------------------- @dna-codes/dna-ingest -------------------+
-                       |                                                             |
-   gdrive://abc ---> integration-google-drive --> input-text  --\                    |
-                       |                                          \                  |
-   notion://page ---> integration-notion       --> input-text  ----+----> merge() ---+----+
-                       |                                          /      (dna-core)  |    |
-   file:///sop.md --> [built-in fs fetcher]    --> input-text  --/                    |    |
-                       |                                                             |    |
-                       +-------------------------------------------------------------+    |
-                                                                                          |
-                                                                                          v
-                                                       +----------+   +-------------+
-                                                       |          |   |integration-*|
-                                                       |   DNA    |-->|  (writer)   |-->
-                                                       |          |   |             |
-                                                       +----------+   +-------------+
-                                                            [3]             [5]
+                    +------------------ @dna-codes/dna-ingest [*] ------------------+
+                    |                                                                |
+  gdrive://abc   -->|  integration-google-drive  -->  input-text  --\                |
+                    |                                                \               |
+  notion://page  -->|  integration-notion        -->  input-text  ---+--> merge()    |
+                    |                                                /       |       |
+  file:///sop.md -->|  [built-in fs fetcher]     -->  input-text  --/        |       |
+                    |             [1]                      [2]               |       |
+                    +------------------------------------------------------- | ------+
+                                                                             v
+                                                                         +-------+    +-----------+    +-------------------+
+                                                                         |  DNA  | -> | output-*  | -> |  integration-*    |
+                                                                         |  [3]  |    |    [4]    |    |   (writer)  [5]   |
+                                                                         +-------+    +-----------+    +-------------------+
 
   [1]  Reads from an external system (Jira, Drive, Notion, GitHub). Owns auth, rate limits, webhooks.
-  [2]  Parses a format into DNA. Deterministic (JSON, OpenAPI, DDL) or Probabilistic and LLM-backed (prose, transcripts, images).
-  [*]  dna-ingest is a thin orchestrator: URI scheme dispatches to integrations, MIME type dispatches to input adapters,
-       per-source DNA chunks are merged into one via dna-core.merge() with conflict + provenance reporting.
+  [2]  Parses a format into DNA. Deterministic (JSON, OpenAPI, DDL) or probabilistic and LLM-backed (prose, transcripts, images).
   [3]  Canonical form. Three layers (operational -> product -> technical), validated by @dna-codes/dna-core.
   [4]  Renders DNA into a format. Pure, no I/O (markdown, Mermaid, HTML).
   [5]  Writes to an external system. Field mapping, API writes, change detection.
+  [*]  dna-ingest is a thin orchestrator: URI scheme dispatches to integrations, MIME type dispatches to input
+       adapters, per-source DNA chunks are merged into one via dna-core.merge() with conflict + provenance reporting.
 
   The same integration-* package typically fills both reader and writer roles for its system.
   Single-source flows (no merge needed) skip dna-ingest and call input-* directly — both shapes are valid.
