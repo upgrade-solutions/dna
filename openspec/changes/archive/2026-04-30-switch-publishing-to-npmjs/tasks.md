@@ -50,15 +50,15 @@
 
 ## 8. Cut the release
 
-- [ ] 8.1 Commit all the above as a single change (or two — code/CI separate from docs/specs — at the user's preference); confirm with the user before committing
+- [x] 8.1 Commit all the above as a single change (or two — code/CI separate from docs/specs — at the user's preference); confirm with the user before committing
 - [ ] 8.2 Choose the cut-over tag (e.g. `v0.6.0` matching the new `dna-core` minor)
 - [ ] 8.3 `git tag <tag>` and `git push --tags` (with user confirmation — never push without asking)
 - [ ] 8.4 Watch the workflow run on the Actions tab; confirm all non-private packages publish successfully
 
 ## 9. Post-publish verification
 
-- [ ] 9.1 From a clean shell with no `~/.npmrc`, run `npm view @dna-codes/dna-core version`; confirm it returns the new version from npmjs.com
-- [ ] 9.2 Repeat for `@dna-codes/dna-schemas` and one adapter (e.g. `@dna-codes/dna-output-markdown`)
+- [x] 9.1 From a clean shell with no `~/.npmrc`, run `npm view @dna-codes/dna-core version`; confirm it returns the new version from npmjs.com (verified via direct curl: `dna-core@0.6.0` and `dna-schemas@0.5.0` live + public on registry)
+- [ ] 9.2 Repeat for `@dna-codes/dna-schemas` and one adapter (e.g. `@dna-codes/dna-output-markdown`) — schemas verified; adapter pending until full release is cut
 - [ ] 9.3 Optional: run `npm install @dna-codes/dna-core` in a scratch directory to confirm end-to-end install works with no auth setup
 
 ## 10. Archive the change
