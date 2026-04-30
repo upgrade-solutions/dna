@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/dna-integration-google-drive",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": "github:dna-codes/dna",
   "description": "Stub Google Drive integration that satisfies the @dna-codes/dna-ingest Integration contract. Serves contents from an in-memory mock map; throws NotImplementedError for real Drive fetches. Real auth + Drive API ship in a follow-up change.",
   "keywords": ["dna", "integration", "google-drive", "stub"],

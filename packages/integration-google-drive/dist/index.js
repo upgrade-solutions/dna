@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotImplementedError = void 0;
-exports.default = googleDriveIntegration;
+exports.googleDriveIntegration = googleDriveIntegration;
 class NotImplementedError extends Error {
     constructor(message) {
         super(message);
@@ -10,12 +10,17 @@ class NotImplementedError extends Error {
 }
 exports.NotImplementedError = NotImplementedError;
 /**
- * Default factory for `@dna-codes/dna-integration-google-drive`.
+ * Factory for `@dna-codes/dna-integration-google-drive`.
  *
  * **Stub.** Real Google Drive auth + API calls are explicitly out of scope
  * for this package version — see the package README for the migration
  * path. Use the `mock` option to drive integration-shaped flows in tests
  * and downstream development today.
+ *
+ * Available as both a named export and the default export. Prefer the
+ * named export from Node ESM consumers — Node's CJS-interop semantics
+ * make `import googleDriveIntegration from '...'` bind to the wrapping
+ * module object rather than the function itself.
  */
 function googleDriveIntegration(opts = {}) {
     const mock = opts.mock ?? {};
@@ -33,4 +38,5 @@ function googleDriveIntegration(opts = {}) {
         },
     };
 }
+exports.default = googleDriveIntegration;
 //# sourceMappingURL=index.js.map

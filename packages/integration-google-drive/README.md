@@ -17,8 +17,10 @@ npm install @dna-codes/dna-integration-google-drive @dna-codes/dna-ingest
 
 ## Usage
 
+Use the named import — it works cleanly from both Node ESM and CommonJS consumers. (The default export is also available and points at the same factory; from Node ESM, `import googleDriveIntegration from '...'` may bind to the wrapping CJS module object instead of the function due to interop semantics, so the named import is recommended.)
+
 ```ts
-import googleDriveIntegration from '@dna-codes/dna-integration-google-drive'
+import { googleDriveIntegration } from '@dna-codes/dna-integration-google-drive'
 import { ingest } from '@dna-codes/dna-ingest'
 
 const drive = googleDriveIntegration({
@@ -40,7 +42,7 @@ const result = await ingest({
 
 ### `googleDriveIntegration(opts?: DriveIntegrationOptions): Integration`
 
-Default export. Returns an object satisfying `@dna-codes/dna-ingest`'s `Integration` interface.
+Available as both a named export and the default export — they point at the same function. Returns an object satisfying `@dna-codes/dna-ingest`'s `Integration` interface.
 
 ```ts
 interface DriveIntegrationOptions {

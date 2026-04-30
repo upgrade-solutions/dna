@@ -1,10 +1,17 @@
-import googleDriveIntegration, { NotImplementedError } from './index'
+import googleDriveIntegrationDefault, {
+  googleDriveIntegration,
+  NotImplementedError,
+} from './index'
 
 describe('googleDriveIntegration (stub)', () => {
   describe('Integration contract shape', () => {
-    it('the default factory returns an object with an async fetch method', () => {
+    it('the named factory returns an object with an async fetch method', () => {
       const integration = googleDriveIntegration()
       expect(typeof integration.fetch).toBe('function')
+    })
+
+    it('the default export is the same factory as the named export', () => {
+      expect(googleDriveIntegrationDefault).toBe(googleDriveIntegration)
     })
   })
 

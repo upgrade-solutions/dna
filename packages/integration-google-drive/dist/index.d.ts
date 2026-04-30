@@ -16,13 +16,19 @@ export interface DriveIntegrationOptions {
     mock?: Record<string, MockEntry>;
 }
 /**
- * Default factory for `@dna-codes/dna-integration-google-drive`.
+ * Factory for `@dna-codes/dna-integration-google-drive`.
  *
  * **Stub.** Real Google Drive auth + API calls are explicitly out of scope
  * for this package version — see the package README for the migration
  * path. Use the `mock` option to drive integration-shaped flows in tests
  * and downstream development today.
+ *
+ * Available as both a named export and the default export. Prefer the
+ * named export from Node ESM consumers — Node's CJS-interop semantics
+ * make `import googleDriveIntegration from '...'` bind to the wrapping
+ * module object rather than the function itself.
  */
-export default function googleDriveIntegration(opts?: DriveIntegrationOptions): Integration;
+export declare function googleDriveIntegration(opts?: DriveIntegrationOptions): Integration;
+export default googleDriveIntegration;
 export type { FetchResult, Integration };
 //# sourceMappingURL=index.d.ts.map
