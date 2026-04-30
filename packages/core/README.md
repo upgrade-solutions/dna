@@ -19,6 +19,40 @@ DNA is a *contract*, not a runtime. Producers (authoring agents, humans) emit JS
 - [`docs/merge.md`](./docs/merge.md) — `merge()` reference for composing DNA from multiple chunks
 - [`AGENTS.md`](./AGENTS.md) — agent contract for working with DNA at large
 
+## Contents
+
+- [Installation](#installation)
+- [Quick start — build, then validate](#quick-start--build-then-validate)
+- [Constructing Operational DNA](#constructing-operational-dna)
+  - [Builders — the canonical way to construct DNA](#builders--the-canonical-way-to-construct-dna)
+  - [`merge()` — compose multiple chunks at once](#merge--compose-multiple-chunks-at-once)
+  - [Builders vs. `merge()` — when to reach for which](#builders-vs-merge--when-to-reach-for-which)
+- [Validating Operational DNA](#validating-operational-dna)
+  - [`DnaValidator` — the validator](#dnavalidator--the-validator)
+    - [Per-document validation](#per-document-validation)
+    - [Cross-layer validation](#cross-layer-validation)
+    - [`availableSchemas()`](#availableschemas)
+  - [Validating untrusted input](#validating-untrusted-input)
+- [Recipes](#recipes)
+  - [Build then validate](#build-then-validate)
+  - [Audit conflicts produced during construction](#audit-conflicts-produced-during-construction)
+  - [Merge multiple sources, then validate](#merge-multiple-sources-then-validate)
+  - [Skip validation in hot paths](#skip-validation-in-hot-paths)
+  - [Inspect what the validator covers](#inspect-what-the-validator-covers)
+- [API reference (other exports)](#api-reference-other-exports)
+  - [`schemas` — typed access to every per-primitive JSON Schema](#schemas--typed-access-to-every-per-primitive-json-schema)
+  - [`documents` — per-layer aggregate schemas](#documents--per-layer-aggregate-schemas)
+  - [`allSchemas()` — flat array](#allschemas--flat-array)
+  - [`resolveSchemaFile(family, name)`](#resolveschemafilefamily-name)
+  - [`SCHEMA_ROOT`, `layerDirs`](#schema_root-layerdirs)
+  - [Raw JSON schemas](#raw-json-schemas)
+  - [TypeScript types for every primitive](#typescript-types-for-every-primitive)
+- [Using schemas from non-JS languages](#using-schemas-from-non-js-languages)
+- [Primitive vocabulary](#primitive-vocabulary)
+- [What this package does *not* include](#what-this-package-does-not-include)
+- [Versioning](#versioning)
+- [License](#license)
+
 ## Installation
 
 ```bash

@@ -242,53 +242,55 @@ Probabilistic-only layers rely on LLM inference from prose; they're the weakest 
 
 Legend: ✅ shipped · 🚧 planned (listed below) · 💡 candidate (natural fit, not yet committed)
 
+Shipped packages link to their source folders. Planned packages (no link) are listed for the layer-coverage map.
+
 **Core**
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/dna-schemas` | Canonical JSON Schema (Draft 2020-12) definitions for all three layers — language-agnostic, zero deps |
-| `@dna-codes/dna-core` | TypeScript bindings + per-layer and cross-layer validator; wraps `@dna-codes/dna-schemas` |
+| [`@dna-codes/dna-schemas`](./packages/schemas) | Canonical JSON Schema (Draft 2020-12) definitions for all three layers — language-agnostic, zero deps |
+| [`@dna-codes/dna-core`](./packages/core) | TypeScript bindings + per-layer and cross-layer validator; wraps `@dna-codes/dna-schemas` |
 
 **Input — deterministic** (pure functions, no external dependencies)
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/dna-input-json` | Infers Resources, Attributes, and Relationships from a plain JSON data sample |
-| `@dna-codes/dna-input-openapi` | Parses an OpenAPI 3.x spec into a DNA Product API document |
-| `@dna-codes/dna-input-ddl` | Parses SQL DDL into DNA Resources and Attributes |
+| [`@dna-codes/dna-input-json`](./packages/input-json) | Infers Resources, Attributes, and Relationships from a plain JSON data sample |
+| [`@dna-codes/dna-input-openapi`](./packages/input-openapi) | Parses an OpenAPI 3.x spec into a DNA Product API document |
+| `@dna-codes/dna-input-ddl` 🚧 | Parses SQL DDL into DNA Resources and Attributes |
 
 **Input — probabilistic** (requires an LLM provider and API key)
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/dna-input-text` | Converts freeform prose into DNA |
-| `@dna-codes/dna-input-transcript` | Converts a meeting or interview transcript into DNA |
-| `@dna-codes/dna-input-image` | Infers DNA from an image (screenshot, whiteboard, diagram) |
+| [`@dna-codes/dna-input-text`](./packages/input-text) | Converts freeform prose into DNA |
+| `@dna-codes/dna-input-transcript` 💡 | Converts a meeting or interview transcript into DNA |
+| `@dna-codes/dna-input-image` 💡 | Infers DNA from an image (screenshot, whiteboard, diagram) |
 
 **Output**
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/dna-output-markdown` | Renders DNA as structured markdown documentation |
-| `@dna-codes/dna-output-mermaid` | Renders DNA as Mermaid diagrams (ERDs, flowcharts) |
-| `@dna-codes/dna-output-html` | Renders DNA as semantic HTML |
-| `@dna-codes/dna-output-openapi` | Renders a Product API DNA as an OpenAPI 3.1 spec (YAML or JSON) — the contract layer between DNA and any technical implementation |
-| `@dna-codes/dna-output-text` | Renders DNA as plain prose — one combined document or one per unit (Capability/Resource/Process) for integration writers |
+| [`@dna-codes/dna-output-markdown`](./packages/output-markdown) | Renders DNA as structured markdown documentation |
+| [`@dna-codes/dna-output-mermaid`](./packages/output-mermaid) | Renders DNA as Mermaid diagrams (ERDs, flowcharts) |
+| [`@dna-codes/dna-output-html`](./packages/output-html) | Renders DNA as semantic HTML |
+| [`@dna-codes/dna-output-openapi`](./packages/output-openapi) | Renders a Product API DNA as an OpenAPI 3.1 spec (YAML or JSON) — the contract layer between DNA and any technical implementation |
+| [`@dna-codes/dna-output-text`](./packages/output-text) | Renders DNA as plain prose — one combined document or one per unit (Capability/Resource/Process) for integration writers |
 
 **Orchestrators**
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/dna-ingest` | Multi-source DNA orchestrator. Fans `[source URI] → integration-* → input-* → partial DNA` per source, merges via `dna-core.merge()`, reports conflicts + provenance + non-fatal errors. Imports zero `input-*` or `integration-*` packages — caller injects them. Probabilistic by transitive dep when LLM-backed adapters are wired in. |
+| [`@dna-codes/dna-ingest`](./packages/ingest) | Multi-source DNA orchestrator. Fans `[source URI] → integration-* → input-* → partial DNA` per source, merges via `dna-core.merge()`, reports conflicts + provenance + non-fatal errors. Imports zero `input-*` or `integration-*` packages — caller injects them. Probabilistic by transitive dep when LLM-backed adapters are wired in. |
 
 **Integrations**
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/dna-integration-jira` | Bidirectional Jira Cloud integration: Epic → `input-text` → DNA → `output-text` → Stories |
-| `@dna-codes/dna-integration-github` | Read/write DNA via GitHub Issues and Projects |
-| `@dna-codes/dna-integration-notion` | Read/write DNA via Notion pages and databases |
-| `@dna-codes/dna-integration-google-drive` | 🚧 Stub. Implements the `Integration` contract; serves an in-memory mock map; throws `NotImplementedError` for real Drive fetches until a follow-up change wires auth + the Drive API. |
+| [`@dna-codes/dna-integration-jira`](./packages/integration-jira) | Bidirectional Jira Cloud integration: Epic → `input-text` → DNA → `output-text` → Stories |
+| `@dna-codes/dna-integration-github` 💡 | Read/write DNA via GitHub Issues and Projects |
+| `@dna-codes/dna-integration-notion` 💡 | Read/write DNA via Notion pages and databases |
+| [`@dna-codes/dna-integration-google-drive`](./packages/integration-google-drive) | 🚧 Stub. Implements the `Integration` contract; serves an in-memory mock map; throws `NotImplementedError` for real Drive fetches until a follow-up change wires auth + the Drive API. |
 
 **Templates**
 
@@ -296,8 +298,8 @@ Reference implementations for engineers and AI agents. Each ships an `AGENTS.md`
 
 | Package | Purpose |
 |---------|---------|
-| `@dna-codes/dna-input-example` | Template for a new `input-*` — shows deterministic and probabilistic modes side-by-side |
-| `@dna-codes/dna-output-example` | Template for a new `output-*` renderer with a sections pattern |
-| `@dna-codes/dna-integration-example` | Template for a new `integration-*` — outbound API, inbound webhook (HMAC), and a CLI |
+| [`@dna-codes/dna-input-example`](./packages/input-example) | Template for a new `input-*` — shows deterministic and probabilistic modes side-by-side |
+| [`@dna-codes/dna-output-example`](./packages/output-example) | Template for a new `output-*` renderer with a sections pattern |
+| [`@dna-codes/dna-integration-example`](./packages/integration-example) | Template for a new `integration-*` — outbound API, inbound webhook (HMAC), and a CLI |
 
 See the root [`AGENTS.md`](AGENTS.md) for overall repo orientation.
