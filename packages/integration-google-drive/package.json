@@ -1,9 +1,14 @@
 {
   "name": "@dna-codes/dna-integration-google-drive",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "repository": "github:dna-codes/dna",
   "description": "Stub Google Drive integration that satisfies the @dna-codes/dna-ingest Integration contract. Serves contents from an in-memory mock map; throws NotImplementedError for real Drive fetches. Real auth + Drive API ship in a follow-up change.",
-  "keywords": ["dna", "integration", "google-drive", "stub"],
+  "keywords": [
+    "dna",
+    "integration",
+    "google-drive",
+    "stub"
+  ],
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,14 +25,14 @@
     "AGENTS.md"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
   "dependencies": {
-    "@dna-codes/dna-ingest": "^0.1.0"
+    "@dna-codes/dna-ingest": "^0.2.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
@@ -40,6 +45,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["/node_modules/", "/dist/"]
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ]
   }
 }

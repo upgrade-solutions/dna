@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/dna-output-example",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "repository": "github:dna-codes/dna",
   "description": "Template for building a DNA output renderer. Fork this to bootstrap a new output-* package that renders DNA into a format string (markdown, html, mermaid, pdf, plaintext, ...) via pure, side-effect-free functions.",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "AGENTS.md"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",

@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/dna-output-openapi",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "repository": "github:dna-codes/dna",
   "description": "Render a DNA Product API document as an OpenAPI 3.1 specification (YAML or JSON). The contract layer between DNA's product layer and any technical implementation. Zero runtime dependencies.",
   "keywords": [
@@ -25,7 +25,7 @@
     "README.md"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
-    "@dna-codes/dna-core": "^0.5.0",
+    "@dna-codes/dna-core": "^0.6.0",
     "@types/jest": "^29.5.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.0.0",

@@ -18,7 +18,7 @@ As documented below, it's incredibly flexible with input/output adapters and int
 - [Packages](#packages)
   - [Pipeline](#pipeline)
   - [Naming convention](#naming-convention)
-  - [Installing from GitHub Packages](#installing-from-github-packages)
+  - [Installing from npm](#installing-from-npm)
   - [Releasing](#releasing)
   - [Input coverage by layer](#input-coverage-by-layer)
 
@@ -216,37 +216,17 @@ PDF/Office text extraction is the integration's responsibility — return alread
 
 Full API reference and layer-specific authoring DNA contracts live in [`@dna-codes/dna-core/docs/`](packages/core/docs/).
 
-### Installing from GitHub Packages
+### Installing from npm
 
-Packages are published as **private** to [GitHub Packages](https://github.com/orgs/dna-codes/packages) under the `@dna-codes` scope. To install, you need a GitHub Personal Access Token with `read:packages` scope and an `.npmrc` that points at the registry.
-
-Two-line `.npmrc` (in your project root or `~/.npmrc`):
-
-```
-@dna-codes:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-```
-
-Then install as usual:
+Packages are published publicly to [npmjs.com](https://www.npmjs.com/org/dna-codes) under the `@dna-codes` scope. No `.npmrc`, no auth token, no setup:
 
 ```sh
 npm install @dna-codes/dna-core
 ```
 
-The `${GITHUB_TOKEN}` form picks the token up from your shell environment — keep the PAT out of the file. Alternatively, paste the token literally:
+> **Heads up — stale `.npmrc` from the `0.4.x` line:** if you previously installed `@dna-codes/*` from GitHub Packages, your `~/.npmrc` may still contain `@dna-codes:registry=https://npm.pkg.github.com` and a matching `_authToken` line. Remove both — otherwise installs keep resolving against the deprecated GitHub Packages mirror and won't see new versions.
 
-```
-//npm.pkg.github.com/:_authToken=ghp_YOUR_PAT_HERE
-```
-
-**Token requirements:**
-
-- **Classic PAT:** scope `read:packages` (install only) — and `write:packages` if you ever publish from your laptop. Generate at https://github.com/settings/tokens.
-- **Fine-grained PAT:** under "Permissions", set "Packages" → Read-only (or Read/Write). Generate at https://github.com/settings/personal-access-tokens.
-
-The token holder must be a collaborator on `dna-codes/dna` (or a member of an org team with read access). No JSR package is published.
-
-Quick verification once it's in place:
+Quick verification (no `.npmrc` required):
 
 ```sh
 npm view @dna-codes/dna-core version
@@ -257,11 +237,11 @@ npm view @dna-codes/dna-core version
 Releases are tag-driven. From `main`, after bumping versions:
 
 ```sh
-git tag v0.4.0
+git tag v0.6.0
 git push --tags
 ```
 
-The push triggers `.github/workflows/publish.yml`, which builds every workspace and runs `npm publish --workspaces` against GitHub Packages using the auto-injected `GITHUB_TOKEN`. The workflow can also be re-run manually from the Actions tab via `workflow_dispatch`.
+The push triggers `.github/workflows/publish.yml`, which builds every workspace and runs `npm publish` per workspace against `registry.npmjs.org`. Authentication uses the repo secret `NPM_TOKEN` (an npm **automation token** with publish access on the `@dna-codes` scope) — set it once via `gh secret set NPM_TOKEN`. Packages marked `"private": true` (currently `@dna-codes/dna-integration-jira`) are skipped automatically. The workflow can also be re-run manually from the Actions tab via `workflow_dispatch`.
 
 ### Input coverage by layer
 

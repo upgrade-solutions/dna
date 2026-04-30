@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/dna-output-html",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "repository": "github:dna-codes/dna",
   "description": "Render DNA documents as HTML — opinionated documentation output with configurable sections (summary, domain model, capabilities, SOPs, process flows). Zero runtime dependencies.",
   "keywords": [
@@ -25,14 +25,14 @@
     "README.md"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest --passWithNoTests"
   },
   "devDependencies": {
-    "@dna-codes/dna-core": "^0.5.0",
+    "@dna-codes/dna-core": "^0.6.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "jest": "^29.5.0",
