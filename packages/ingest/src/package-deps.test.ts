@@ -26,6 +26,20 @@ describe('package.json dependency invariants', () => {
     }
   })
 
+  it('has no @dna-codes/dna-output-* runtime dependency', () => {
+    for (const group of ['dependencies', 'peerDependencies'] as const) {
+      const offending = declaredFor(group).filter((d) => d.startsWith('@dna-codes/dna-output-'))
+      expect(offending).toEqual([])
+    }
+  })
+
+  it('has no @dna-codes/dna-adapters runtime dependency', () => {
+    for (const group of ['dependencies', 'peerDependencies'] as const) {
+      const offending = declaredFor(group).filter((d) => d === '@dna-codes/dna-adapters')
+      expect(offending).toEqual([])
+    }
+  })
+
   it('declares @dna-codes/dna-core as the only @dna-codes/* runtime dependency', () => {
     const dnaDeps = declaredFor('dependencies').filter((d) => d.startsWith('@dna-codes/'))
     expect(dnaDeps).toEqual(['@dna-codes/dna-core'])

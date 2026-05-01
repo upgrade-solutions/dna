@@ -21,10 +21,10 @@ Then it hands every per-source DNA chunk to `@dna-codes/dna-core`'s `merge()` an
 
 ## Writing a new `integration-*` that participates
 
-Implement the `Integration` interface (re-exported from this package):
+Implement the `Integration` interface (re-exported from this package). `fetch` is required; `write` is optional — read-only integrations leave it undefined.
 
 ```ts
-import type { Integration } from '@dna-codes/dna-ingest'
+import type { Integration, WritePayload, WriteResult } from '@dna-codes/dna-ingest'
 
 export default function myIntegration(opts: MyOpts): Integration {
   return {
@@ -33,16 +33,27 @@ export default function myIntegration(opts: MyOpts): Integration {
       // 2. Normalize PDF / Office / proprietary formats to text or bytes.
       // 3. Return { contents, mimeType, source: { uri, loadedAt: <ISO 8601> } }.
     },
+    // Optional — only for bidirectional integrations.
+    async write(target, payload): Promise<WriteResult> {
+      // target identifies WHERE to write — a parent URI to create-under,
+      // an existing object URI to update, or any integration-specific URI shape.
+      // The returned `target` is the identifier of the resulting remote object
+      // (which MAY differ from the input — e.g. creating a child returns the
+      // new child's URI). Round-tripping bytes from fetch into write must be
+      // a no-op at the byte level — same (contents, mimeType) shape.
+    },
   }
 }
 ```
 
 Notes:
 
+- **Integrations are pure I/O.** Library API takes/returns raw bytes plus MIME types — never DNA documents. Composition with `input-*`/`output-*` adapters lives in caller code or in the integration's own CLI. If you find yourself wanting to call `parse()` or `render()` from inside `fetch`/`write`, stop and put the call in the CLI instead.
 - **PDF/Office text extraction belongs inside the integration.** Don't push that to the orchestrator. Each integration that supports such formats brings its own parser dependency — this scopes the dep correctly.
 - **`mimeType` must be specific enough to route.** `text/markdown` is good; `application/octet-stream` will probably miss every input adapter. If you can sniff a more specific type, do.
 - **`source.loadedAt` is fetch-time.** Not factory-time. Set it inside `fetch()` so retries get a fresh timestamp.
-- **Errors thrown from `fetch()` are caught upstream** and surfaced as `errors[]` entries with `stage: 'fetch'`. Throw a useful Error with a clear message; the orchestrator does not classify error subtypes.
+- **Errors thrown from `fetch()` / `write()` are caught upstream** (when invoked through the orchestrator's read path) and surfaced as `errors[]` entries. For direct callers, throw useful Errors with clear messages.
+- **No `@dna-codes/dna-input-*` or `@dna-codes/dna-output-*` in `dependencies`.** Those packages may appear only in `devDependencies` and only be imported from CLI source files. The library code MUST stay adapter-free.
 
 ## Writing a new `input-*` that participates
 

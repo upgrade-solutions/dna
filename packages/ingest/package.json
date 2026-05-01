@@ -1,6 +1,6 @@
 {
   "name": "@dna-codes/dna-ingest",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "repository": "github:dna-codes/dna",
   "description": "Multi-source DNA orchestrator. Fans many input documents (files, Drive docs, transcripts, ...) into one Operational DNA via dependency-injected integrations and input adapters, with conflict reporting and provenance tracking. Imports zero @dna-codes/dna-input-* or @dna-codes/dna-integration-* packages.",
   "keywords": [
@@ -33,7 +33,7 @@
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
   "dependencies": {
-    "@dna-codes/dna-core": "^0.6.0"
+    "@dna-codes/dna-core": "^0.7.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

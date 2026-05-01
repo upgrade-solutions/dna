@@ -73,7 +73,7 @@ Every Storming chain across the wall produces one of these blocks; multiple chai
    - Yellow stickies → declare `Person` or `Role` (whichever the actor really is — the workshop usually conflates them); set `scope` if a Group context is implied.
    - Purple stickies → declare `Trigger` with `source: "operation"` + `after: <upstream-Operation>` linking the producing Operation to the consuming one.
    - Light-green stickies → defer to the Product layer (UI Pages, API Endpoints).
-4. **Validate with `@dna-codes/core`.** Cross-layer validation catches reference errors (a Trigger pointing at an undeclared Signal, etc.).
+4. **Validate with `@dna-codes/dna-core`.** Cross-layer validation catches reference errors (a Trigger pointing at an undeclared Signal, etc.).
 5. **Iterate.** The first DNA pass usually surfaces gaps in the wall (un-scoped Roles, missing payload fields). Run a short follow-up with the team.
 
 ## Concrete translation example

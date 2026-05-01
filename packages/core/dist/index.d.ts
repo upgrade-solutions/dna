@@ -74,6 +74,8 @@ export { createOperationalDna, addResource, addPerson, addRole, addGroup, addMem
 export type { BuilderOptions, BuilderResult, CreateOperationalDnaOptions, } from './builders';
 export { merge } from './merge';
 export type { Conflict, ConflictRecommendation, ConflictValue, MergeChunk, MergeResult, OperationalDNA, Provenance, Source, } from './types/merge';
+export type { ParseResult, Unit, Style, StyleMap } from './types/adapters';
+export { DEFAULT_STYLES } from './types/adapters';
 export type { Action, ActionType, Attribute, AttributeType, Domain, Group, Membership, Operation, OperationChange, Person, Process, ProcessStep, Relationship, RelationshipCardinality, Resource, Role, RoleScope, Rule, RuleAllowEntry, RuleCondition, RuleConditionOperator, RuleType, Task, Trigger, TriggerSource, } from './types/operational';
 export { bookshopInput } from './fixtures/bookshop';
 //# sourceMappingURL=index.d.ts.map

@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bookshopInput = exports.merge = exports.addRelationship = exports.addProcess = exports.addTask = exports.addRule = exports.addTrigger = exports.addOperation = exports.addMembership = exports.addGroup = exports.addRole = exports.addPerson = exports.addResource = exports.createOperationalDna = exports.DnaValidator = exports.layerDirs = exports.documents = exports.schemas = exports.SCHEMA_ROOT = void 0;
+exports.bookshopInput = exports.DEFAULT_STYLES = exports.merge = exports.addRelationship = exports.addProcess = exports.addTask = exports.addRule = exports.addTrigger = exports.addOperation = exports.addMembership = exports.addGroup = exports.addRole = exports.addPerson = exports.addResource = exports.createOperationalDna = exports.DnaValidator = exports.layerDirs = exports.documents = exports.schemas = exports.SCHEMA_ROOT = void 0;
 exports.resolveSchemaFile = resolveSchemaFile;
 exports.allSchemas = allSchemas;
 const fs = __importStar(require("fs"));
@@ -146,6 +146,8 @@ Object.defineProperty(exports, "addProcess", { enumerable: true, get: function (
 Object.defineProperty(exports, "addRelationship", { enumerable: true, get: function () { return builders_1.addRelationship; } });
 var merge_1 = require("./merge");
 Object.defineProperty(exports, "merge", { enumerable: true, get: function () { return merge_1.merge; } });
+var adapters_1 = require("./types/adapters");
+Object.defineProperty(exports, "DEFAULT_STYLES", { enumerable: true, get: function () { return adapters_1.DEFAULT_STYLES; } });
 var bookshop_1 = require("./fixtures/bookshop");
 Object.defineProperty(exports, "bookshopInput", { enumerable: true, get: function () { return bookshop_1.bookshopInput; } });
 //# sourceMappingURL=index.js.map

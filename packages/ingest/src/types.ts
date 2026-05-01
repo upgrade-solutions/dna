@@ -14,16 +14,57 @@ export interface FetchResult {
 }
 
 /**
- * The contract every reader-side `integration-*` package implements to
- * participate in `dna-ingest`. PDF/Office text extraction is the
- * integration's responsibility — return already-normalized text or bytes.
+ * The payload `Integration.write()` accepts — the dual of `FetchResult`'s
+ * bytes. Round-tripping bytes (`fetch` → `write`) is intentionally a no-op
+ * at the byte level: integrations accept the same `(contents, mimeType)`
+ * shape they returned.
+ */
+export interface WritePayload {
+  contents: string | Buffer
+  mimeType: string
+}
+
+/**
+ * What `Integration.write()` resolves with — the URI of the resulting
+ * remote object (which MAY differ from the input target if `write` created
+ * a new child) plus integration-specific metadata.
+ */
+export interface WriteResult {
+  target: string
+  meta?: Record<string, unknown>
+}
+
+/**
+ * The contract every `integration-*` package implements to participate in
+ * `dna-ingest`. `fetch()` is required (read path); `write()` is OPTIONAL
+ * — read-only integrations leave it undefined and bidirectional
+ * integrations implement it.
  *
- * Errors thrown from `fetch()` are caught by the orchestrator and surfaced
- * as `errors[]` entries with `stage: 'fetch'`. The run continues with the
- * remaining sources.
+ * PDF/Office text extraction is the integration's responsibility — return
+ * already-normalized text or bytes from `fetch`. Errors thrown from
+ * `fetch()` are caught by the orchestrator and surfaced as `errors[]`
+ * entries with `stage: 'fetch'`. The run continues with the remaining
+ * sources.
+ *
+ * Integrations are pure I/O: `fetch`/`write` deal in raw bytes plus a MIME
+ * type. They MUST NOT take or return DNA documents on their library API
+ * (parsing/rendering is the responsibility of `input-*`/`output-*`
+ * adapters, composed by the caller).
  */
 export interface Integration {
   fetch(uri: string): Promise<FetchResult>
+  /**
+   * Write `payload` to the integration's external system.
+   *
+   *   - `target` identifies where to write — a parent URI to create-under,
+   *     an existing object URI to update, or any integration-specific URI
+   *     shape the integration documents in its README.
+   *   - The returned `target` identifies the resulting remote object,
+   *     which MAY differ from the input (e.g. creating a child returns
+   *     the new child's URI).
+   *   - Optional: read-only integrations leave this undefined.
+   */
+  write?(target: string, payload: WritePayload): Promise<WriteResult>
 }
 
 /**

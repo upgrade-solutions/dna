@@ -79,7 +79,7 @@ interface IngestError {
 }
 ```
 
-### `Integration` — the contract every reader-side integration implements
+### `Integration` — the contract every integration implements
 
 ```ts
 interface Integration {
@@ -88,10 +88,18 @@ interface Integration {
     mimeType: string
     source: { uri: string; loadedAt: string /* ISO 8601 */ }
   }>
+  write?(target: string, payload: { contents: string | Buffer; mimeType: string }): Promise<{
+    target: string
+    meta?: Record<string, unknown>
+  }>
 }
 ```
 
+`fetch` is required (read path). `write` is optional — read-only integrations leave it undefined; bidirectional integrations implement it. Round-tripping bytes from `fetch` directly into `write` is a no-op at the byte level: the same `(contents, mimeType)` shape comes back out.
+
 PDF/Office text extraction is **the integration's job**, not the orchestrator's. Integrations return already-normalized text/audio/image bytes alongside a sensible MIME type; the orchestrator routes by MIME type into the matching input adapter.
+
+**Integrations are pure I/O** — no DNA-aware methods on the library API. Composition with `input-*`/`output-*` adapters lives in caller code or in an integration's CLI (see `@dna-codes/dna-integration-jira`'s `src/cli.ts` for the canonical example).
 
 ### `InputAdapter` — the shape every `input-*` exposes
 

@@ -163,39 +163,39 @@ A **Cell** is the unit of deployment — it consumes DNA from upper layers and g
 
 ### Pipeline
 
-The pipeline is `[integration] → input-* → DNA → output-* → [integration]`. When more than one source contributes to a single DNA, `dna-ingest` fans many `(integration → input-* → partial DNA)` paths into one canonical DNA via `dna-core.merge()`:
+The pipeline is `[integration] → input → DNA → output → [integration]`. Adapters live as subpaths under `@dna-codes/dna-adapters` (`@dna-codes/dna-adapters/input/<name>`, `.../output/<name>`, `.../integration/<name>`). When more than one source contributes to a single DNA, `dna-ingest` fans many `(integration → input → partial DNA)` paths into one canonical DNA via `dna-core.merge()`:
 
 ```
                     +------------------ @dna-codes/dna-ingest [*] ------------------+
                     |                                                                |
-  gdrive://abc   -->|  integration-google-drive  -->  input-text  --\                |
-                    |                                                \               |
-  notion://page  -->|  integration-notion        -->  input-text  ---+--> merge()    |
-                    |                                                /       |       |
-  file:///sop.md -->|  [built-in fs fetcher]     -->  input-text  --/        |       |
-                    |             [1]                      [2]               |       |
-                    +------------------------------------------------------- | ------+
-                                                                             v
-                                                                         +-------+    +-----------+    +-------------------+
-                                                                         |  DNA  | -> | output-*  | -> |  integration-*    |
-                                                                         |  [3]  |    |    [4]    |    |   (writer)  [5]   |
-                                                                         +-------+    +-----------+    +-------------------+
+  gdrive://abc   -->|  adapters/integration/google-drive  -->  adapters/input/text -\
+                    |                                                                \
+  notion://page  -->|  adapters/integration/notion        -->  adapters/input/text --+--> merge()
+                    |                                                                /       |
+  file:///sop.md -->|  [built-in fs fetcher]              -->  adapters/input/text -/        |
+                    |                  [1]                              [2]                  |
+                    +-------------------------------------------------------------- | -------+
+                                                                                    v
+                                                                              +-------+    +---------------------+    +-------------------------+
+                                                                              |  DNA  | -> | adapters/output/<x> | -> | adapters/integration/<x> |
+                                                                              |  [3]  |    |        [4]          |    |     (writer)  [5]        |
+                                                                              +-------+    +---------------------+    +-------------------------+
 
-  [1]  Reads from an external system (Jira, Drive, Notion, GitHub). Owns auth, rate limits, webhooks.
+  [1]  Pure I/O reader. integration.fetch(uri) → raw bytes + mimeType. Owns auth, rate limits.
   [2]  Parses a format into DNA. Deterministic (JSON, OpenAPI, DDL) or probabilistic and LLM-backed (prose, transcripts, images).
   [3]  Canonical form. Three layers (operational -> product -> technical), validated by @dna-codes/dna-core.
   [4]  Renders DNA into a format. Pure, no I/O (markdown, Mermaid, HTML).
-  [5]  Writes to an external system. Field mapping, API writes, change detection.
+  [5]  Pure I/O writer. integration.write(target, {contents, mimeType}) — caller composes [4]→[5]. No DNA in the integration.
   [*]  dna-ingest is a thin orchestrator: URI scheme dispatches to integrations, MIME type dispatches to input
        adapters, per-source DNA chunks are merged into one via dna-core.merge() with conflict + provenance reporting.
 
-  The same integration-* package typically fills both reader and writer roles for its system.
-  Single-source flows (no merge needed) skip dna-ingest and call input-* directly — both shapes are valid.
+  Each adapter is a subpath inside @dna-codes/dna-adapters (one published package, one version line).
+  Single-source flows (no merge needed) skip dna-ingest and call the input subpath directly — both shapes are valid.
 ```
 
 #### `Integration` contract for participating in `dna-ingest`
 
-Every reader-side `integration-*` that wants to participate in multi-source ingest implements the `Integration` interface published from `@dna-codes/dna-ingest`:
+Every `integration-*` that wants to participate in multi-source ingest implements the `Integration` interface published from `@dna-codes/dna-ingest`. `fetch` is required (read path); `write` is optional (write path — only bidirectional integrations implement it):
 
 ```ts
 interface Integration {
@@ -204,15 +204,23 @@ interface Integration {
     mimeType: string
     source: { uri: string; loadedAt: string /* ISO 8601 */ }
   }>
+  write?(target: string, payload: { contents: string | Buffer; mimeType: string }): Promise<{
+    target: string
+    meta?: Record<string, unknown>
+  }>
 }
 ```
 
 PDF/Office text extraction is the integration's responsibility — return already-normalized text or bytes, plus a sensible MIME type. The orchestrator routes by MIME glob into the matching `input-*` adapter. See [`packages/ingest/AGENTS.md`](packages/ingest/AGENTS.md) for the full guidance.
 
+**Integrations are pure I/O.** They MUST NOT take or return DNA shapes on their library API. Composition (Epic prose → input-text → DNA → output-text → Stories) lives in caller code or in an integration's CLI — never inside the integration itself. See [`packages/integration-jira/src/cli.ts`](packages/integration-jira/src/cli.ts) for the canonical composition example.
+
 ### Naming convention
-- **`input-*`** — converts a format into DNA. Same input always produces same output (deterministic), unless the package requires an LLM, in which case it is probabilistic. Each probabilistic package documents its dependencies explicitly: required LLM provider, expected API keys, and non-determinism implications.
-- **`output-*`** — renders DNA into a format string. No system knowledge; pure and local.
-- **`integration-*`** — connects to an external system bidirectionally. Owns auth, field mapping, rate limits, and API versioning for that system. May use `input-*` or `output-*` packages internally.
+Pre-1.0, every adapter ships as a subpath inside `@dna-codes/dna-adapters` rather than as a standalone npm package. Each adapter folder under `packages/adapters/src/{input,output,integration}/<name>/` is self-contained and mechanically extractable into its own published package post-1.0.
+
+- **`input/<name>`** — converts a format into DNA. Same input always produces same output (deterministic), unless the package requires an LLM, in which case it is probabilistic. Each probabilistic adapter documents its dependencies explicitly: required LLM provider, expected API keys, and non-determinism implications.
+- **`output/<name>`** — renders DNA into a format string. No system knowledge; pure and local.
+- **`integration/<name>`** — connects to an external system bidirectionally via `Integration.fetch` (read) and optional `Integration.write` (write). Owns auth, rate limits, and API versioning for that system. **Pure I/O** — no DNA-aware methods on the library API; composition with input/output adapters lives in the caller or the integration's CLI.
 
 Full API reference and layer-specific authoring DNA contracts live in [`@dna-codes/dna-core/docs/`](packages/core/docs/).
 
@@ -241,82 +249,66 @@ git tag v0.6.0
 git push --tags
 ```
 
-The push triggers `.github/workflows/publish.yml`, which builds every workspace and runs `npm publish` per workspace against `registry.npmjs.org`. Authentication uses the repo secret `NPM_TOKEN` (an npm **automation token** with publish access on the `@dna-codes` scope) — set it once via `gh secret set NPM_TOKEN`. Packages marked `"private": true` (currently `@dna-codes/dna-integration-jira`) are skipped automatically. The workflow can also be re-run manually from the Actions tab via `workflow_dispatch`.
+The push triggers `.github/workflows/publish.yml`, which builds every workspace and runs `npm publish` per workspace against `registry.npmjs.org`. Authentication uses the repo secret `NPM_TOKEN` (an npm **automation token** with publish access on the `@dna-codes` scope) — set it once via `gh secret set NPM_TOKEN`. The workflow can also be re-run manually from the Actions tab via `workflow_dispatch`.
 
 ### Input coverage by layer
 
-Each `input-*` package has an authoritative scope — OpenAPI honestly knows about APIs, not deployment; a JSON sample knows about structures, not rules. That narrowness is a feature: it keeps deterministic adapters from inventing. `input-text` is the catch-all LLM path that can reach any layer.
+Each input adapter has an authoritative scope — OpenAPI honestly knows about APIs, not deployment; a JSON sample knows about structures, not rules. That narrowness is a feature: it keeps deterministic adapters from inventing. `input/text` is the catch-all LLM path that can reach any layer.
 
 | Layer | Deterministic source(s) | Probabilistic source(s) | Status |
 |---|---|---|---|
-| **Operational** | `input-json` ✅ · `input-ddl` 🚧 | `input-text` ✅ | **Covered** |
-| **Product Core** | `input-prisma` 💡 | `input-text` ✅ | Probabilistic only |
-| **Product API** | `input-openapi` ✅ | `input-text` ✅ | **Covered** |
-| **Product UI** | `input-figma` 💡 · `input-nextjs-routes` 💡 | `input-text` ✅ | Probabilistic only |
-| **Technical** | `input-terraform` 💡 · `input-cdk` 💡 | `input-text` ✅ | Probabilistic only |
+| **Operational** | `input/json` ✅ · `input/ddl` 🚧 | `input/text` ✅ | **Covered** |
+| **Product Core** | `input/prisma` 💡 | `input/text` ✅ | Probabilistic only |
+| **Product API** | `input/openapi` ✅ | `input/text` ✅ | **Covered** |
+| **Product UI** | `input/figma` 💡 · `input/nextjs-routes` 💡 | `input/text` ✅ | Probabilistic only |
+| **Technical** | `input/terraform` 💡 · `input/cdk` 💡 | `input/text` ✅ | Probabilistic only |
 
 Probabilistic-only layers rely on LLM inference from prose; they're the weakest link in the pipeline and the highest-leverage targets for new deterministic adapters.
 
 Legend: ✅ shipped · 🚧 planned (listed below) · 💡 candidate (natural fit, not yet committed)
 
-Shipped packages link to their source folders. Planned packages (no link) are listed for the layer-coverage map.
+### Packages
 
-**Core**
+The repo currently publishes four npm packages:
 
 | Package | Purpose |
-|---------|---------|
+|---|---|
 | [`@dna-codes/dna-schemas`](./packages/schemas) | Canonical JSON Schema (Draft 2020-12) definitions for all three layers — language-agnostic, zero deps |
-| [`@dna-codes/dna-core`](./packages/core) | TypeScript bindings + per-layer and cross-layer validator; wraps `@dna-codes/dna-schemas` |
+| [`@dna-codes/dna-core`](./packages/core) | TypeScript bindings + per-layer and cross-layer validator; wraps `@dna-codes/dna-schemas`. Also home to shared adapter contracts (`ParseResult`, `Style`, `Unit`, `StyleMap`, `DEFAULT_STYLES`) |
+| [`@dna-codes/dna-ingest`](./packages/ingest) | Multi-source DNA orchestrator. Fans `[source URI] → integration → input → partial DNA` per source, merges via `dna-core.merge()`, reports conflicts + provenance + non-fatal errors. Imports zero adapters — caller injects them. Defines the `Integration` and `InputAdapter` ports. |
+| [`@dna-codes/dna-adapters`](./packages/adapters) | Unified adapter package — every input parser, output renderer, and integration client lives as a subpath. One version line, one publish per release. |
 
-**Input — deterministic** (pure functions, no external dependencies)
+#### Adapters (subpaths of `@dna-codes/dna-adapters`)
 
-| Package | Purpose |
-|---------|---------|
-| [`@dna-codes/dna-input-json`](./packages/input-json) | Infers Resources, Attributes, and Relationships from a plain JSON data sample |
-| [`@dna-codes/dna-input-openapi`](./packages/input-openapi) | Parses an OpenAPI 3.x spec into a DNA Product API document |
-| `@dna-codes/dna-input-ddl` 🚧 | Parses SQL DDL into DNA Resources and Attributes |
+```sh
+npm install @dna-codes/dna-adapters
+# Then import the specific subpath:
+import { parse } from '@dna-codes/dna-adapters/input/json'
+import { render } from '@dna-codes/dna-adapters/output/markdown'
+import { createClient } from '@dna-codes/dna-adapters/integration/jira'
+```
 
-**Input — probabilistic** (requires an LLM provider and API key)
+| Subpath | Kind | Purpose |
+|---|---|---|
+| [`input/json`](./packages/adapters/src/input/json) | input · deterministic | Infers Resources, Attributes, and Relationships from a plain JSON data sample |
+| [`input/openapi`](./packages/adapters/src/input/openapi) | input · deterministic | Parses an OpenAPI 3.x spec into a DNA Product API document |
+| `input/ddl` 🚧 | input · deterministic | Parses SQL DDL into DNA Resources and Attributes |
+| [`input/text`](./packages/adapters/src/input/text) | input · probabilistic | Converts freeform prose into DNA via an LLM provider |
+| `input/transcript` 💡 | input · probabilistic | Converts a meeting or interview transcript into DNA |
+| `input/image` 💡 | input · probabilistic | Infers DNA from an image (screenshot, whiteboard, diagram) |
+| [`output/markdown`](./packages/adapters/src/output/markdown) | output | Renders DNA as structured markdown documentation |
+| [`output/mermaid`](./packages/adapters/src/output/mermaid) | output | Renders DNA as Mermaid diagrams (ERDs, flowcharts) |
+| [`output/html`](./packages/adapters/src/output/html) | output | Renders DNA as semantic HTML |
+| [`output/openapi`](./packages/adapters/src/output/openapi) | output | Renders a Product API DNA as an OpenAPI 3.1 spec (YAML or JSON) |
+| [`output/text`](./packages/adapters/src/output/text) | output | Renders DNA as plain prose — one combined document or one per unit |
+| [`integration/jira`](./packages/adapters/src/integration/jira) | integration | Pure-I/O Jira Cloud client. Implements `Integration.fetch` and `Integration.write`. Composition example in [`cli.ts`](./packages/adapters/src/integration/jira/cli.ts). |
+| `integration/github` 💡 | integration | Read/write DNA via GitHub Issues and Projects |
+| `integration/notion` 💡 | integration | Read/write DNA via Notion pages and databases |
+| [`integration/google-drive`](./packages/adapters/src/integration/google-drive) | integration | 🚧 Stub. Implements `Integration` contract; serves an in-memory mock map; throws `NotImplementedError` for real Drive fetches until a follow-up change wires auth + the Drive API. |
+| [`input/example`](./packages/adapters/src/input/example) | template | Template for a new input adapter — shows deterministic and probabilistic modes side-by-side |
+| [`output/example`](./packages/adapters/src/output/example) | template | Template for a new output renderer with a sections pattern |
+| [`integration/example`](./packages/adapters/src/integration/example) | template | Template for a new integration — outbound API, inbound webhook (HMAC), and a CLI |
 
-| Package | Purpose |
-|---------|---------|
-| [`@dna-codes/dna-input-text`](./packages/input-text) | Converts freeform prose into DNA |
-| `@dna-codes/dna-input-transcript` 💡 | Converts a meeting or interview transcript into DNA |
-| `@dna-codes/dna-input-image` 💡 | Infers DNA from an image (screenshot, whiteboard, diagram) |
-
-**Output**
-
-| Package | Purpose |
-|---------|---------|
-| [`@dna-codes/dna-output-markdown`](./packages/output-markdown) | Renders DNA as structured markdown documentation |
-| [`@dna-codes/dna-output-mermaid`](./packages/output-mermaid) | Renders DNA as Mermaid diagrams (ERDs, flowcharts) |
-| [`@dna-codes/dna-output-html`](./packages/output-html) | Renders DNA as semantic HTML |
-| [`@dna-codes/dna-output-openapi`](./packages/output-openapi) | Renders a Product API DNA as an OpenAPI 3.1 spec (YAML or JSON) — the contract layer between DNA and any technical implementation |
-| [`@dna-codes/dna-output-text`](./packages/output-text) | Renders DNA as plain prose — one combined document or one per unit (Capability/Resource/Process) for integration writers |
-
-**Orchestrators**
-
-| Package | Purpose |
-|---------|---------|
-| [`@dna-codes/dna-ingest`](./packages/ingest) | Multi-source DNA orchestrator. Fans `[source URI] → integration-* → input-* → partial DNA` per source, merges via `dna-core.merge()`, reports conflicts + provenance + non-fatal errors. Imports zero `input-*` or `integration-*` packages — caller injects them. Probabilistic by transitive dep when LLM-backed adapters are wired in. |
-
-**Integrations**
-
-| Package | Purpose |
-|---------|---------|
-| [`@dna-codes/dna-integration-jira`](./packages/integration-jira) | Bidirectional Jira Cloud integration: Epic → `input-text` → DNA → `output-text` → Stories |
-| `@dna-codes/dna-integration-github` 💡 | Read/write DNA via GitHub Issues and Projects |
-| `@dna-codes/dna-integration-notion` 💡 | Read/write DNA via Notion pages and databases |
-| [`@dna-codes/dna-integration-google-drive`](./packages/integration-google-drive) | 🚧 Stub. Implements the `Integration` contract; serves an in-memory mock map; throws `NotImplementedError` for real Drive fetches until a follow-up change wires auth + the Drive API. |
-
-**Templates**
-
-Reference implementations for engineers and AI agents. Each ships an `AGENTS.md` with fork instructions.
-
-| Package | Purpose |
-|---------|---------|
-| [`@dna-codes/dna-input-example`](./packages/input-example) | Template for a new `input-*` — shows deterministic and probabilistic modes side-by-side |
-| [`@dna-codes/dna-output-example`](./packages/output-example) | Template for a new `output-*` renderer with a sections pattern |
-| [`@dna-codes/dna-integration-example`](./packages/integration-example) | Template for a new `integration-*` — outbound API, inbound webhook (HMAC), and a CLI |
+Each adapter folder is self-contained and mechanically extractable into its own published package post-1.0 (file moves + a new `package.json`, no source-file edits).
 
 See the root [`AGENTS.md`](AGENTS.md) for overall repo orientation.

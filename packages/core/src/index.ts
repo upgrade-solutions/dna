@@ -142,6 +142,9 @@ export type {
   Source,
 } from './types/merge'
 
+export type { ParseResult, Unit, Style, StyleMap } from './types/adapters'
+export { DEFAULT_STYLES } from './types/adapters'
+
 export type {
   Action,
   ActionType,

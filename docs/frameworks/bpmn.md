@@ -31,7 +31,7 @@ How DNA's operational layer maps to **BPMN 2.0** (Business Process Model and Not
 
 ## Where DNA intentionally differs
 
-1. **DNA is textual, BPMN is graphical.** A DNA document round-trips through git diffs cleanly; a BPMN diagram doesn't. BPMN tools render DNA-style data; DNA tools could render BPMN-style diagrams (see `@dna-codes/output-mermaid` for a flowchart projection).
+1. **DNA is textual, BPMN is graphical.** A DNA document round-trips through git diffs cleanly; a BPMN diagram doesn't. BPMN tools render DNA-style data; DNA tools could render BPMN-style diagrams (see `@dna-codes/dna-adapters/output/mermaid` for a flowchart projection).
 2. **DNA separates orchestration (`Step`) from assignment (`Task`).** BPMN bundles both into a single Task node. DNA's split lets the same `(actor, operation)` binding appear in multiple Steps across multiple Processes — a real reuse pattern that BPMN re-models as call-activities.
 3. **DNA doesn't have a Sub-Process primitive.** It has Processes that trigger other Processes via Operation chaining or Signals. The discipline forces a clean Trigger-driven boundary instead of a "this is just a nested box" shortcut.
 4. **DNA doesn't have boundary events or compensation.** Those are runtime workflow concerns, deferred to the planned workflow-cell.
@@ -58,8 +58,8 @@ A simplified BPMN "Loan Approval" with a Borrower lane, an Underwriter lane, an 
 
 ## Tooling intersections
 
-- **DNA → BPMN-style diagram**: `@dna-codes/output-mermaid` renders a flowchart per Process; the visual is recognizable to BPMN readers without claiming BPMN compliance.
-- **BPMN → DNA**: not currently shipped. A `input-bpmn` adapter would parse BPMN XML into DNA Processes/Steps/Tasks and would surface each unmodeled construct (boundary events, inclusive gateways) as an explicit warning.
+- **DNA → BPMN-style diagram**: `@dna-codes/dna-adapters/output/mermaid` renders a flowchart per Process; the visual is recognizable to BPMN readers without claiming BPMN compliance.
+- **BPMN → DNA**: not currently shipped. An `input/bpmn` adapter would parse BPMN XML into DNA Processes/Steps/Tasks and would surface each unmodeled construct (boundary events, inclusive gateways) as an explicit warning.
 
 ## See also
 

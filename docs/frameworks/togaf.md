@@ -15,12 +15,12 @@ TOGAF's central artifact is the **Architecture Development Method (ADM)** — ei
 | **Preliminary** | Establish that DNA will be the canonical description format for in-flight architectures. Tooling choice, repository conventions. |
 | **A. Architecture Vision** | Out of scope. Vision documents are prose + ArchiMate sketches; DNA isn't designed for high-altitude vision communication. |
 | **B. Business Architecture** | DNA `Operational` documents are the deliverable — Resources, Operations, Roles, Processes. Replaces or complements TOGAF's Business Architecture deliverables (Business Capability Map, Business Process diagrams, Organization/Actor catalog). |
-| **C. Information Systems Architecture — Data** | DNA Operational `Resource` + `Attribute` + `Relationship` cover the Data Architecture's logical model. ER-style diagrams are renderable from this (see `output-mermaid` ERD diagram). |
+| **C. Information Systems Architecture — Data** | DNA Operational `Resource` + `Attribute` + `Relationship` cover the Data Architecture's logical model. ER-style diagrams are renderable from this (see `@dna-codes/dna-adapters/output/mermaid` ERD diagram). |
 | **C. Information Systems Architecture — Application** | DNA `Product` documents (`product.core.json`, `product.api.json`, `product.ui.json`) describe what gets built. Replaces application-component catalogs, application-service-vs-component mappings, and most surface-level interface specs. |
 | **D. Technology Architecture** | DNA `Technical` documents (`technical.json` — Cells, Constructs, Providers, Environments) describe deployment and infrastructure. Replaces platform decomposition diagrams and technology standards catalogs. |
 | **E. Opportunities & Solutions** | Out of scope — gap analysis and solution sequencing are workshop activities, not artifacts DNA captures. |
 | **F. Migration Planning** | Out of scope — change-management and roadmap concerns. |
-| **G. Implementation Governance** | DNA validation (`@dna-codes/core`) provides part of the conformance check — generated code matches the architecture by construction. Doesn't replace governance reviews. |
+| **G. Implementation Governance** | DNA validation (`@dna-codes/dna-core`) provides part of the conformance check — generated code matches the architecture by construction. Doesn't replace governance reviews. |
 | **H. Architecture Change Management** | Out of scope. DNA documents live in git; change management is your release process. |
 
 **The short version**: DNA is what you produce in Phases B, C, and D. The rest of ADM (vision, gap analysis, governance, change) sits around DNA, not inside it.
@@ -66,9 +66,9 @@ TOGAF's **Architecture Content Framework** lists ~30 standard deliverables. The 
 | Business Capability Map | List of `Operation`s grouped by `Resource` (the rough equivalent — DNA Operations are finer-grained than TOGAF Capabilities; see [BPMN doc](./bpmn.md) for why "capability" was renamed) |
 | Organization/Actor Catalog | Resources used as Roles, plus Memberships pinning Users to Groups |
 | Business Service / Function Catalog | `Operation` list, scoped by `Domain` |
-| Business Process Diagrams | `Process` documents; render via `output-mermaid` flowchart |
+| Business Process Diagrams | `Process` documents; render via `@dna-codes/dna-adapters/output/mermaid` flowchart |
 | Data Entity / Data Component Catalog | `Resource` list with `Attribute`s |
-| Logical / Physical Data Model | `Resource` + `Attribute` + `Relationship` (ERD via `output-mermaid`) |
+| Logical / Physical Data Model | `Resource` + `Attribute` + `Relationship` (ERD via `@dna-codes/dna-adapters/output/mermaid`) |
 | Application Communication Diagram | Cross-`Domain` Operation chains via `Trigger` (`source: operation`) |
 | Application & User Location Diagram | Out of scope (Technical layer's `Provider.region` is closest, but DNA doesn't track user geography) |
 | Application/Function Matrix | Implicit from `Operation` × `Resource` pairings |
@@ -94,7 +94,7 @@ TOGAF's **Architecture Content Framework** lists ~30 standard deliverables. The 
 ## Recommended workflow
 
 1. **Run TOGAF as you do.** ADM phases stay the same; deliverable lists stay the same.
-2. **Replace specific Phase B/C/D deliverables with DNA documents.** Business Capability Map → Operation list grouped by Resource; Data Entity Catalog → Resource list; Application Communication Diagram → cross-domain Signals; Technology Portfolio Catalog → Cell list. Render TOGAF-style views from the DNA where stakeholders need them (`output-mermaid` for diagrams, `output-markdown` for catalogs).
+2. **Replace specific Phase B/C/D deliverables with DNA documents.** Business Capability Map → Operation list grouped by Resource; Data Entity Catalog → Resource list; Application Communication Diagram → cross-domain Signals; Technology Portfolio Catalog → Cell list. Render TOGAF-style views from the DNA where stakeholders need them (`@dna-codes/dna-adapters/output/mermaid` for diagrams, `@dna-codes/dna-adapters/output/markdown` for catalogs).
 3. **Keep TOGAF's vision, gap, migration, governance, and change-management practices intact.** DNA doesn't try to replace them.
 4. **Use DNA validation as part of Phase G.** Cross-layer validation catches "the spec doesn't match the implementation" — one less governance review.
 

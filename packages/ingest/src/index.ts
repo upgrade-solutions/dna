@@ -16,4 +16,6 @@ export type {
   OperationalDNA,
   Provenance,
   Source,
+  WritePayload,
+  WriteResult,
 } from './types'
