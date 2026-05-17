@@ -174,3 +174,33 @@ export type {
 } from './types/operational'
 
 export { bookshopInput } from './fixtures/bookshop'
+
+export {
+  getResource,
+  getResources,
+  getPerson,
+  getPersons,
+  getRole,
+  getRoles,
+  getGroup,
+  getGroups,
+  getMembership,
+  getMemberships,
+  getOperation,
+  getOperations,
+  getOperationsForResource,
+  getProcess,
+  getProcesses,
+  getTriggersForProcess,
+  getTask,
+  getTasks,
+  getTasksForOperation,
+  getTriggers,
+  getTriggersForOperation,
+  getRule,
+  getRules,
+  getRulesForOperation,
+  getActorsForOperation,
+  getMembershipsForRole,
+  getMembershipsForPerson,
+} from './queries'

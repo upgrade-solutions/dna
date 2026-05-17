@@ -1,6 +1,6 @@
 # `@dna-codes/dna-core`
 
-The TypeScript home for DNA — typed bindings for the JSON schemas, a typed builder API for **constructing** Operational DNA programmatically, a `DnaValidator` for **validating** any DNA against the canonical schemas (with cross-layer checks), and a pure `merge()` utility for composing multiple DNA chunks into one with conflict reporting.
+The TypeScript home for DNA — typed bindings for the JSON schemas, a typed builder API for **constructing** Operational DNA programmatically, a canonical **query API** for **reading** Operational DNA, a `DnaValidator` for **validating** any DNA against the canonical schemas (with cross-layer checks), and a pure `merge()` utility for composing multiple DNA chunks into one with conflict reporting.
 
 The raw JSON schemas live in [`@dna-codes/dna-schemas`](../schemas/) and are pulled in as a dependency.
 
@@ -16,6 +16,7 @@ DNA is a *contract*, not a runtime. Producers (authoring agents, humans) emit JS
 - [`docs/product.md`](./docs/product.md) — authoring contract for product DNA (core + api + ui)
 - [`docs/technical.md`](./docs/technical.md) — authoring contract for technical DNA
 - [`docs/builders.md`](./docs/builders.md) — full reference for the builder API
+- [`docs/queries.md`](./docs/queries.md) — full reference for the query API
 - [`docs/merge.md`](./docs/merge.md) — `merge()` reference for composing DNA from multiple chunks
 - [`AGENTS.md`](./AGENTS.md) — agent contract for working with DNA at large
 
@@ -27,6 +28,7 @@ DNA is a *contract*, not a runtime. Producers (authoring agents, humans) emit JS
   - [Builders — the canonical way to construct DNA](#builders--the-canonical-way-to-construct-dna)
   - [`merge()` — compose multiple chunks at once](#merge--compose-multiple-chunks-at-once)
   - [Builders vs. `merge()` — when to reach for which](#builders-vs-merge--when-to-reach-for-which)
+- [Querying Operational DNA](#querying-operational-dna)
 - [Validating Operational DNA](#validating-operational-dna)
   - [`DnaValidator` — the validator](#dnavalidator--the-validator)
     - [Per-document validation](#per-document-validation)
@@ -199,6 +201,42 @@ Full reference: [`docs/merge.md`](./docs/merge.md).
 | Resolving cross-references after composition | Both — `merge()` does it as its final step; builders rely on the same engine |
 
 Both share the same composition engine internally; pick the surface that matches your call shape.
+
+---
+
+## Querying Operational DNA
+
+The query API is the canonical read side of `dna-core` — the symmetric counterpart to the builders. Every function is pure, read-only, and accepts an `OperationalDNA` document.
+
+```ts
+import {
+  getOperation, getOperations,
+  getResource,  getResources,
+  getRole,      getRoles,
+  getActorsForOperation,
+  getRulesForOperation,
+  getTasksForOperation,
+  getOperationsForResource,
+  getTriggersForProcess,
+  getMembershipsForRole,
+  // … and more
+} from '@dna-codes/dna-core'
+
+// Single-item getters return T | null
+const op = getOperation(dna, 'Loan.Approve')  // Operation | null
+
+// List getters return T[] (never null)
+const ops = getOperations(dna)                 // Operation[]
+
+// Cross-reference resolvers
+const actors = getActorsForOperation(dna, 'Loan.Approve')
+// → Array<Role | Person> — human and system actors, dangling refs silently omitted
+
+const rules = getRulesForOperation(dna, 'Loan.Approve')
+// → Rule[]  — access + condition rules for this operation
+```
+
+Transport wrappers (`dna-mcp`, `dna-api`, `dna-cli`) should use these functions rather than traversing raw DNA directly. See [`docs/queries.md`](./docs/queries.md) for the full API reference and common patterns.
 
 ---
 

@@ -79,7 +79,26 @@ let dna: OperationalDNA = createOperationalDna({ domain: { name: 'my-domain' } }
 return dna
 ```
 
-See [`@dna-codes/dna-core`'s `docs/builders.md`](../core/docs/builders.md) for the full API.
+See [`@dna-codes/dna-core`'s `docs/builders.md`](../core/docs/builders.md) for the full builder API.
+
+## Reading and traversing DNA in transport packages
+
+Packages that expose DNA through a transport layer (`dna-mcp`, `dna-api`, `dna-cli`) must use the **query API** from `@dna-codes/dna-core` rather than traversing raw `OperationalDNA` directly. Queries are pure, typed, and tested — they are the stable read contract that transport wrappers build on.
+
+```ts
+import {
+  getOperation, getOperations,
+  getActorsForOperation,
+  getRulesForOperation,
+  getOperationsForResource,
+  // … full list in docs/queries.md
+} from '@dna-codes/dna-core'
+
+const op     = getOperation(dna, 'Loan.Approve')       // Operation | null
+const actors = getActorsForOperation(dna, 'Loan.Approve') // Array<Role | Person>
+```
+
+See [`@dna-codes/dna-core`'s `docs/queries.md`](../core/docs/queries.md) for the full query API.
 
 ## Common pitfalls
 
